@@ -1,0 +1,117 @@
+<!--index.wxml-->
+<import src="../../tpl/liorder/liorder.wxml" />
+<import src="../../tpl/notask/notask.wxml" />
+<view class='container'>
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input">
+      <icon type="search" size="14" color="#999" />
+      <text>搜索需要的服务</text>
+    </view>
+  </view>
+
+  <swiper class="section" autoplay='true' indicator-dots="true">
+    <swiper-item wx:for="{{banner}}">
+      <image src="{{item.imageUrl}}" class="slide-image" style='width:100%' mode='widthFix' />
+    </swiper-item>
+  </swiper>
+  <view class='user'>
+    <!-- 19宫导航区 -->
+    <view class='grid-19'>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon1.png'></image>
+        <text>家修急事</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon2.png'></image>
+        <text>闲置二手</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon3.png'></image>
+        <text>家庭陪护</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon4.png'></image>
+        <text>上门美业</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon1.png'></image>
+        <text>宝宝家事</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon2.png'></image>
+        <text>便民服务</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon3.png'></image>
+        <text>家庭保洁</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon4.png'></image>
+        <text>家居养护</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon1.png'></image>
+        <text>保姆月嫂</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon2.png'></image>
+        <text>上门回收</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon3.png'></image>
+        <text>家电维修</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon4.png'></image>
+        <text>家电清洗</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon1.png'></image>
+        <text>衣物洗护</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon2.png'></image>
+        <text>上门安装</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon3.png'></image>
+        <text>整理收纳</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon4.png'></image>
+        <text>养车养护</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon1.png'></image>
+        <text>除螨服务</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon2.png'></image>
+        <text>开荒保洁</text>
+      </navigator>
+      <navigator class='grid-item' url='../classify/classify'>
+        <image src='/img/index/menuicon3.png'></image>
+        <text>上门维修</text>
+      </navigator>
+    </view>
+    <view class='worker-wrap'>
+      <navigator class='worker' wx:for="{{goods}}" wx:key="item" url='../service/service?id={{item.id}}'>
+        <image class='worker-img' src='{{item.remarkC}}'></image>
+        <view class='worker-info'>
+          <text class='worker-name'>{{item.goodsTitle}}</text>
+          <text class='worker-desc text-ellipsis2'>{{item.goodsSub}}</text>
+        </view>
+        <view class="worker-price-action">
+          <text class="worker-price">￥{{item.price}}</text>
+          <view class="worker-btn">立即预约</view>
+        </view>
+      </navigator>
+    </view>
+  </view>
+
+  <view class='modal' wx:if="{{showGetTelModal}}">
+    系统需要获取您的手机号码以方便客户与您联系
+    <button open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">同意获取手机号码 </button>
+  </view>
+</view>
