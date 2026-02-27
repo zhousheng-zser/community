@@ -6,9 +6,41 @@ Page({
   data: {
     noOrderTip: "您还没有订单",
     showGetTelModal: false,
-    userFlag: 0
+    userFlag: 0,
+    navTopPadding: 20,
+    activeTab: "首页",
+    topTabs: [
+      { text: "福卡" },
+      { text: "家推" },
+      { text: "首页" },
+      { text: "家集市" }
+    ],
+    categoryList: [],
+    quickActions: [],
+    knowledgeList: [],
+    hotList: [],
+    hotFilters: [],
+    merchantList: [],
+    workerList: [],
+    marketList: [],
+    pushCategories: [],
+    pushPromoCards: [],
+    pushTags: [],
+    pushGoods: [],
+    fukaLocalList: [],
+    fukaServices: [],
+    fukaTopicCards: [],
+    fukaFilterTabs: [],
+    fukaGoods: [],
+    marketTopCats: [],
+    marketFilters: [],
+    marketShops: []
   },
   onLoad: function (options) {
+    const sysInfo = wx.getSystemInfoSync();
+    const statusBarHeight = sysInfo.statusBarHeight || 20;
+    // 额外下移一档，避免和状态栏重叠
+    this.setData({ navTopPadding: statusBarHeight + 20 });
     console.log(options)
     let parentOpId = "";
     if (options) {
@@ -32,7 +64,9 @@ Page({
       }
     }
     const that = this;
-    app.save(parentOpId, that.init);
+    // 先做一次本地初始化，避免回调异常时首页模块为空
+    that.init();
+    app.save(parentOpId, that.init.bind(that));
   },
   onShareAppMessage: function (res) {
     const openid = app.globalData.user.opId;
@@ -42,9 +76,13 @@ Page({
     this.init()
     wx.stopPullDownRefresh()
   },
+  switchTopTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    this.setData({ activeTab: tab });
+  },
   init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
-    // 假数据填充
+    // 假数据填充，方便本地预览首页布局
     const banner = [
       { imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80' },
       { imageUrl: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800&q=80' }
@@ -81,7 +119,168 @@ Page({
       }
     ];
 
-    this.setData({ banner, goods });
+    const categoryList = [
+      { name: "整理收纳", icon: "/img/index/menuicon1.png" },
+      { name: "家修急事", icon: "/img/index/menuicon2.png" },
+      { name: "家电清洗", icon: "/img/index/menuicon3.png" },
+      { name: "开荒保洁", icon: "/img/index/menuicon4.png" },
+      { name: "除螨服务", icon: "/img/index/menuicon1.png" },
+      { name: "家居养护", icon: "/img/index/menuicon2.png" },
+      { name: "宝宝家事", icon: "/img/index/menuicon3.png" },
+      { name: "房屋修缮", icon: "/img/index/menuicon4.png" },
+      { name: "上门美业", icon: "/img/index/menuicon1.png" },
+      { name: "上门服务商", icon: "/img/index/menuicon2.png" }
+    ];
+    const quickActions = [
+      { name: "直约服务商", icon: "/img/index/ticon1.png" },
+      { name: "直约技工", icon: "/img/index/ticon2.png" },
+      { name: "秒杀", icon: "/img/index/ticon3.png" },
+      { name: "领券", icon: "/img/index/ticon1.png" },
+      { name: "家事积分商城", icon: "/img/index/ticon2.png" }
+    ];
+    const knowledgeList = [
+      { name: "代取", avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=120&q=80" },
+      { name: "接送小孩", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80" },
+      { name: "陪诊", avatar: "https://images.unsplash.com/photo-1542204625-de293a36f5c5?w=120&q=80" },
+      { name: "代扔垃圾", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80" },
+      { name: "宠物喂养", avatar: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=120&q=80" }
+    ];
+    const hotList = [
+      { name: "洗衣机清洗", price: "128", image: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&q=80", rank: "NO.1" },
+      { name: "热水器清洗", price: "150", image: "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=300&q=80", rank: "NO.2" },
+      { name: "油烟机清洗", price: "158", image: "https://images.unsplash.com/photo-1556911220-bda9f7f7597e?w=300&q=80", rank: "NO.3" },
+      { name: "家电清洗(新)", price: "399", image: "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=300&q=80", rank: "上新" }
+    ];
+    const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
+    const merchantList = goods.map((item) => ({
+      id: item.id,
+      name: item.goodsTitle,
+      sub: "服务" + item.id + "单",
+      image: item.remarkC
+    }));
+    const workerList = [
+      { name: "余静", orders: "服务1单", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=220&q=80" },
+      { name: "张乾坤", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=220&q=80" },
+      { name: "张谕晗", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=220&q=80" }
+    ];
+    const marketList = [
+      { name: "映萃美活研奇肌霜", price: "469", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&q=80" },
+      { name: "映萃美活肤洁颜粉", price: "235", image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&q=80" },
+      { name: "当地特产一键速达", price: "99", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80" },
+      { name: "初开荒 60平以内", price: "480", image: "https://images.unsplash.com/photo-1527515545081-5db817172677?w=400&q=80" }
+    ];
+    const pushCategories = [
+      { name: "母婴", icon: "/img/index/menuicon1.png" },
+      { name: "水果", icon: "/img/index/menuicon2.png" },
+      { name: "粮油", icon: "/img/index/menuicon3.png" },
+      { name: "零食", icon: "/img/index/menuicon4.png" },
+      { name: "日百", icon: "/img/index/menuicon1.png" }
+    ];
+    const pushPromoCards = [
+      { title: "爆品上新", sub: "品牌好货直降", image: "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=400&q=80" },
+      { title: "邻区TOP榜", sub: "本周口碑推荐", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80" }
+    ];
+    const pushTags = ["满39包邮", "小区团购", "限时秒杀", "新人专享"];
+    const pushGoods = [
+      { name: "正宗东北木耳", price: "39.90", unit: "/袋", image: "https://images.unsplash.com/photo-1505575967455-40e256f73376?w=300&q=80" },
+      { name: "高原蜂蜜", price: "69.95", unit: "/瓶", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300&q=80" },
+      { name: "山核桃仁", price: "35.90", unit: "/袋", image: "https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=300&q=80" },
+      { name: "牛肉丸", price: "49.90", unit: "/盒", image: "https://images.unsplash.com/photo-1604908176997-4318f804bafa?w=300&q=80" }
+    ];
+    const fukaLocalList = [
+      { name: "天天买菜", icon: "/img/index/menuicon1.png" },
+      { name: "外卖", icon: "/img/index/menuicon2.png" },
+      { name: "鲜花", icon: "/img/index/menuicon3.png" },
+      { name: "生活缴费", icon: "/img/index/menuicon4.png" },
+      { name: "电影", icon: "/img/index/menuicon1.png" },
+      { name: "话费充值", icon: "/img/index/menuicon2.png" },
+      { name: "出行", icon: "/img/index/menuicon3.png" },
+      { name: "加油", icon: "/img/index/menuicon4.png" },
+      { name: "优惠领券", icon: "/img/index/menuicon1.png" },
+      { name: "全部", icon: "/img/index/menuicon2.png" }
+    ];
+    const fukaServices = [
+      { name: "话费充值", icon: "/img/index/ticon1.png" },
+      { name: "生活缴费", icon: "/img/index/ticon2.png" },
+      { name: "优惠加油", icon: "/img/index/ticon3.png" },
+      { name: "电影票", icon: "/img/index/ticon1.png" },
+      { name: "京东优标", icon: "/img/index/ticon2.png" },
+      { name: "爆品会玩", icon: "/img/index/ticon3.png" }
+    ];
+    const fukaTopicCards = [
+      { title: "低价福利专区", price: "19.9专区", image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80" },
+      { title: "精选生活好物", price: "9.9专区", image: "https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400&q=80" }
+    ];
+    const fukaFilterTabs = ["精选", "拼多多", "淘宝", "京东"];
+    const fukaGoods = [
+      { name: "正宗大凉山核桃", price: "36.8", image: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=300&q=80" },
+      { name: "近视眼镜", price: "79.9", image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300&q=80" },
+      { name: "冻干草莓", price: "39.9", image: "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=300&q=80" },
+      { name: "黄冰糖", price: "29.9", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?w=300&q=80" }
+    ];
+    const marketTopCats = [
+      { name: "母婴生活馆", icon: "/img/index/menuicon1.png" },
+      { name: "家庭服务", icon: "/img/index/menuicon2.png" },
+      { name: "超市便利", icon: "/img/index/menuicon3.png" }
+    ];
+    const marketFilters = ["综合排序", "邻工秒送", "商家自送", "重置筛选"];
+    const marketShops = [
+      {
+        name: "明辉香黍",
+        badge: "邻工秒送",
+        delivery: "起送￥0  免配送费",
+        sold: "已售1",
+        goods: [
+          { name: "明辉紫薯", price: "5", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=180&q=80" },
+          { name: "明辉香黍", price: "4", image: "https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=180&q=80" }
+        ]
+      },
+      {
+        name: "成都尚辰空间装饰",
+        badge: "邻工秒送",
+        delivery: "起送￥0  免配送费",
+        sold: "已售3",
+        goods: [
+          { name: "卫生间翻新", price: "1", image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=180&q=80" },
+          { name: "旧房改装", price: "19800", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=180&q=80" }
+        ]
+      },
+      {
+        name: "四川洁而诺保洁有限公司",
+        badge: "商家自送",
+        delivery: "起送￥0  免配送费",
+        sold: "已售1",
+        goods: [
+          { name: "日常保洁", price: "45", image: "https://images.unsplash.com/photo-1527515545081-5db817172677?w=180&q=80" },
+          { name: "清洗油烟机", price: "160", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=180&q=80" }
+        ]
+      }
+    ];
+
+    this.setData({
+      banner,
+      goods,
+      categoryList,
+      quickActions,
+      knowledgeList,
+      hotList,
+      hotFilters,
+      merchantList,
+      workerList,
+      marketList,
+      pushCategories,
+      pushPromoCards,
+      pushTags,
+      pushGoods,
+      fukaLocalList,
+      fukaServices,
+      fukaTopicCards,
+      fukaFilterTabs,
+      fukaGoods,
+      marketTopCats,
+      marketFilters,
+      marketShops
+    });
 
     /* 原接口请求暂且注释
     util.get("api/wx/index").then((data) => {
