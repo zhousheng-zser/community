@@ -1,0 +1,27 @@
+# 微信开发者工具相关的私有配置（不应当提交到代码仓库）
+project.private.config.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器配置
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Node Modules (如果有用到 npm 构建)
+node_modules/
+miniprogram_npm/
+.npm/
+
+# 日志
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,82 @@
+<!--pages/community/community.wxml-->
+<view class="container flex-col">
+  <!-- 顶部背景与用户信息（类似朋友圈封面） -->
+  <view class="header-cover">
+    <image class="cover-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" mode="aspectFill"></image>
+    <view class="user-info">
+      <text class="user-name">张大山 (幸福社区)</text>
+      <image class="user-avatar" src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&q=80"></image>
+    </view>
+  </view>
+
+  <!-- 动态列表 -->
+  <view class="post-list">
+    <!-- 单条动态 -->
+    <view class="post-item" wx:for="{{posts}}" wx:key="id">
+      <!-- 左侧头像 -->
+      <image class="post-avatar" src="{{item.avatar}}"></image>
+      <!-- 右侧内容区 -->
+      <view class="post-content-area">
+        <text class="post-name">{{item.name}}</text>
+        <text class="post-text">{{item.content}}</text>
+        
+        <!-- 九宫格图片区 -->
+        <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
+          <image class="post-img {{item.images.length === 1 ? 'single-img' : ''}}" 
+                 wx:for="{{item.images}}" 
+                 wx:for-item="img" 
+                 wx:key="*this" 
+                 src="{{img}}" 
+                 mode="aspectFill"
+                 catchtap="previewImage" 
+                 data-url="{{img}}" 
+                 data-urls="{{item.images}}">
+          </image>
+        </view>
+
+        <!-- 底部时间与操作图标 -->
+        <view class="post-footer">
+          <text class="post-time">{{item.time}}</text>
+          <!-- 模拟微信朋友圈右侧的两个点操作按钮 -->
+          <view class="action-btn" catchtap="toggleActionMenu" data-index="{{index}}">
+            <image src="/img/action-icon.png" class="action-icon"></image>
+            <view class="action-icon-dots">··</view>
+          </view>
+          
+          <!-- 隐藏的点赞/评论菜单 -->
+          <view class="action-menu {{item.showMenu ? 'show' : ''}}">
+            <view class="menu-item" catchtap="likePost" data-index="{{index}}">
+              <text>♡ {{item.isLiked ? '取消' : '赞'}}</text>
+            </view>
+            <view class="menu-divider"></view>
+            <view class="menu-item" catchtap="commentPost" data-index="{{index}}">
+              <text>💬 评论</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 点赞与评论展示区 -->
+        <view class="interaction-area" wx:if="{{item.likes.length > 0 || item.comments.length > 0}}">
+          <!-- 点赞列表 -->
+          <view class="likes-list" wx:if="{{item.likes.length > 0}}">
+            <text class="like-heart">♡</text>
+            <text class="like-name" wx:for="{{item.likes}}" wx:for-item="liker" wx:key="*this">{{liker}}{{index < item.likes.length - 1 ? ', ' : ''}}</text>
+          </view>
+          <!-- 评论列表 -->
+          <view class="comments-list" wx:if="{{item.comments.length > 0}}">
+            <view class="comment-item" wx:for="{{item.comments}}" wx:for-item="comment" wx:key="id">
+              <text class="comment-name">{{comment.name}}：</text>
+              <text class="comment-text">{{comment.text}}</text>
+            </view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+  </view>
+
+  <!-- 悬浮的发布按钮 -->
+  <view class="publish-btn-float" catchtap="goPublish">
+    <image src="/img/camera-icon.png"></image>
+  </view>
+</view>
