@@ -1,0 +1,288 @@
+<!--index.wxml-->
+<import src="../../tpl/liorder/liorder.wxml" />
+<import src="../../tpl/notask/notask.wxml" />
+<view class="home-page">
+  <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
+    <view class="top-tabs">
+      <view class="top-tab {{activeTab === item.text ? 'active' : ''}}" wx:for="{{topTabs}}" wx:key="text" bindtap="switchTopTab" data-tab="{{item.text}}">{{item.text}}</view>
+    </view>
+    <view class="search-row">
+      <view class="location-pill">
+        <text class="dot-black"></text>
+        <text>果壳里的城</text>
+      </view>
+      <view class="search-input">
+        <icon type="search" size="13" color="#999" />
+        <text>{{activeTab === '家集市' ? '搜索商家、商品' : activeTab === '福卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}</text>
+      </view>
+      <view class="search-btn">搜索</view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeTab === '家推'}}">
+    <view class="card push-hero">
+      <image src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1200&q=80" mode="aspectFill"></image>
+      <view class="mask">
+        <text class="title">九州好物 年货来了</text>
+        <text class="sub">优选好货 年度优惠专场</text>
+      </view>
+    </view>
+
+    <view class="card push-cate">
+      <view class="push-cate-item" wx:for="{{pushCategories}}" wx:key="name">
+        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+
+    <view class="card push-promo-grid">
+      <view class="push-promo-item" wx:for="{{pushPromoCards}}" wx:key="title">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <view class="info">
+          <text class="name">{{item.title}}</text>
+          <text class="desc">{{item.sub}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card section-card">
+      <view class="section-head">
+        <text class="title">特惠频道</text>
+        <text class="more">查看更多 ></text>
+      </view>
+      <view class="hot-filter-row">
+        <view class="hot-filter" wx:for="{{pushTags}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="card section-card push-list">
+      <navigator class="push-good" wx:for="{{pushGoods}}" wx:key="name" url="../service/service">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <view class="right">
+          <text class="name">{{item.name}}</text>
+          <view class="bottom">
+            <text class="price">￥{{item.price}}{{item.unit}}</text>
+            <text class="buy-btn">去抢购</text>
+          </view>
+        </view>
+      </navigator>
+    </view>
+  </view>
+
+  <view wx:elif="{{activeTab === '福卡'}}">
+    <view class="card fuka-banner">
+      <image src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1200&q=80" mode="aspectFill"></image>
+      <view class="mask">
+        <text class="title">家事生活 购物消费</text>
+      </view>
+    </view>
+
+    <view class="card section-card">
+      <view class="section-head">
+        <text class="title">本地生活</text>
+      </view>
+      <view class="fuka-local-grid">
+        <view class="fuka-local-item" wx:for="{{fukaLocalList}}" wx:key="name">
+          <image src="{{item.icon}}" mode="aspectFill"></image>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card fuka-open-card">
+      <view class="left">
+        <text class="title">立即开通福卡</text>
+        <text class="sub">购物立减 省钱专区</text>
+      </view>
+      <text class="go">GO ></text>
+    </view>
+
+    <view class="card fuka-service-grid">
+      <view class="fuka-service-item" wx:for="{{fukaServices}}" wx:key="name">
+        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+
+    <view class="card fuka-topic-grid">
+      <view class="fuka-topic-item" wx:for="{{fukaTopicCards}}" wx:key="title">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <view class="mask">
+          <text class="title">{{item.title}}</text>
+          <text class="price">{{item.price}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card fuka-filter-tabs">
+      <text class="tab {{index === 0 ? 'active' : ''}}" wx:for="{{fukaFilterTabs}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="card section-card">
+      <view class="fuka-goods-grid">
+        <navigator class="fuka-goods-item" wx:for="{{fukaGoods}}" wx:key="name" url="../service/service">
+          <image src="{{item.image}}" mode="aspectFill"></image>
+          <text class="name">{{item.name}}</text>
+          <text class="price">￥{{item.price}}</text>
+        </navigator>
+      </view>
+    </view>
+  </view>
+
+  <view wx:elif="{{activeTab === '家集市'}}">
+    <view class="card market-top-cats">
+      <view class="market-top-item" wx:for="{{marketTopCats}}" wx:key="name">
+        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+
+    <view class="card market-banner">
+      <image src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80" mode="aspectFill"></image>
+      <text class="cta">立即预约</text>
+    </view>
+
+    <view class="market-title-row">
+      <text class="near">附近商家</text>
+      <text class="shop">家超市</text>
+    </view>
+
+    <view class="card market-filter-row">
+      <text class="market-filter" wx:for="{{marketFilters}}" wx:key="*this">{{item}}</text>
+    </view>
+
+    <view class="market-shop-list">
+      <view class="card market-shop-card" wx:for="{{marketShops}}" wx:key="name">
+        <view class="shop-head">
+          <text class="name">{{item.name}}</text>
+          <text class="badge">{{item.badge}}</text>
+        </view>
+        <view class="shop-meta">
+          <text>{{item.delivery}}</text>
+          <text class="sold">{{item.sold}}</text>
+        </view>
+        <scroll-view class="shop-goods-scroll" scroll-x="{{true}}">
+          <view class="shop-goods-row">
+            <view class="shop-goods-item" wx:for="{{item.goods}}" wx:key="name">
+              <image src="{{item.image}}" mode="aspectFill"></image>
+              <text class="g-name">{{item.name}}</text>
+              <text class="g-price">￥{{item.price}}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else>
+  <view class="card panel-grid">
+    <view class="service-grid">
+      <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="../classify/classify">
+        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </navigator>
+    </view>
+    <view class="quick-nav">
+      <navigator class="quick-item" wx:for="{{quickActions}}" wx:key="name" url="../classify/classify">
+        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </navigator>
+    </view>
+  </view>
+
+  <swiper class="promo-swiper card" autoplay="{{true}}" indicator-dots="{{true}}" circular="{{true}}">
+    <swiper-item wx:for="{{banner}}" wx:key="imageUrl">
+      <image src="{{item.imageUrl}}" class="slide-image" mode="aspectFill" />
+    </swiper-item>
+  </swiper>
+
+  <view class="card section-card">
+    <view class="section-head neighborhood-head">
+      <view class="title-wrap">
+        <text class="title">邻里帮帮</text>
+        <text class="assist-tag">解决身边琐事小烦恼</text>
+      </view>
+      <text class="more">查看更多 ></text>
+    </view>
+    <view class="knowledge-row neighborhood-services">
+      <navigator class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="name" url="../service/service">
+        <image src="{{item.avatar}}" mode="aspectFill"></image>
+        <text>{{item.name}}</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="card section-card">
+    <view class="section-head hot">
+      <text class="title">小区热卖榜</text>
+      <text class="more">查看更多 ></text>
+    </view>
+    <scroll-view class="hot-scroll" scroll-x="{{true}}">
+      <view class="hot-wrap">
+        <navigator class="hot-item" wx:for="{{hotList}}" wx:key="name" url="../service/service">
+          <image src="{{item.image}}" mode="aspectFill"></image>
+          <text class="hot-rank">{{item.rank}}</text>
+          <text class="hot-name">{{item.name}}</text>
+          <text class="hot-price">￥{{item.price}}/次</text>
+        </navigator>
+      </view>
+    </scroll-view>
+    <view class="hot-filter-row">
+      <view class="hot-filter" wx:for="{{hotFilters}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="card section-card">
+    <view class="section-head">
+      <text class="title">直约服务商</text>
+      <text class="more">查看全部 ></text>
+    </view>
+    <view class="merchant-list">
+      <navigator class="merchant-item" wx:for="{{merchantList}}" wx:key="id" url="../service/service?id={{item.id}}">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <view class="merchant-text">
+          <text class="name">{{item.name}}</text>
+          <text class="sub">{{item.sub}}</text>
+        </view>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="card section-card">
+    <view class="section-head">
+      <text class="title">直约技工</text>
+      <text class="more">查看全部 ></text>
+    </view>
+    <scroll-view class="worker-scroll" scroll-x="{{true}}">
+      <view class="worker-row">
+        <view class="worker-item" wx:for="{{workerList}}" wx:key="name">
+          <image src="{{item.avatar}}" mode="aspectFill"></image>
+          <text class="name">{{item.name}}</text>
+          <text class="sub">{{item.orders}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="card section-card">
+    <view class="section-head">
+      <text class="title">管家精选</text>
+    </view>
+    <view class="market-grid">
+      <navigator class="market-item" wx:for="{{marketList}}" wx:key="name" url="../service/service">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <text class="name">{{item.name}}</text>
+        <text class="price">￥{{item.price}}/瓶</text>
+      </navigator>
+    </view>
+  </view>
+  </view>
+
+  <view class="fake-tabbar-space"></view>
+  <view class="publish-btn">一键发布</view>
+
+  <view class="modal" wx:if="{{showGetTelModal}}">
+    系统需要获取您的手机号码以方便客户与您联系
+    <button open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">同意获取手机号码 </button>
+  </view>
+</view>
