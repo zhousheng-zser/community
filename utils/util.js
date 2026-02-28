@@ -17,20 +17,22 @@ const get = (url, query) => {
   const contentType = query ? "application/x-www-form-urlencoded" : "application/json",
     data = query || {};
   return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token');
     wx.request({
-      url: "https://www.toyourfamily.com/" + url,
+      url: "http://localhost:3000/api/v1/" + url,
       data,
       header: {
-        'content-type': contentType
+        'content-type': contentType,
+        'Authorization': token ? 'Bearer ' + token : ''
       },
       success: (res) => {
         const data = res.data;
-        if (data.errno == 0) {
-          resolve(data.data)
+        if (data.errno == 0 || res.statusCode === 200 || res.statusCode === 201) {
+          resolve(data.data || data)
         } else {
           reject({
-            errno: data.errno,
-            errmsg: data.errmsg
+            errno: data.errno || res.statusCode,
+            errmsg: data.errmsg || data.error
           })
         }
       },
@@ -45,18 +47,23 @@ const get = (url, query) => {
 }
 const post = (url, data) => {
   return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token');
     wx.request({
-      url: "https://www.toyourfamily.com/" + url,
+      url: "http://localhost:3000/api/v1/" + url,
       method: "POST",
       data,
+      header: {
+        'content-type': 'application/json',
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
       success: (res) => {
         const data = res.data;
-        if (data.errno == 0) {
-          resolve(data.data)
+        if (data.errno == 0 || res.statusCode === 200 || res.statusCode === 201) {
+          resolve(data.data || data)
         } else {
           reject({
-            errno: data.errno,
-            errmsg: data.errmsg
+            errno: data.errno || res.statusCode,
+            errmsg: data.errmsg || data.error
           })
         }
       },
@@ -157,7 +164,7 @@ const goodsStateTabel = (state) => {
         desc: "",
         btn: ""
       }
-      break; 
+      break;
     default:
       result = {
         name: "已完成",

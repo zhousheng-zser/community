@@ -1,4 +1,4 @@
-﻿@import "../../tpl/notask/notask.wxss";
+@import "../../tpl/notask/notask.wxss";
 @import "../../tpl/liorder/liorder.wxss";
 
 .home-page {
@@ -865,7 +865,3 @@
   color: #f44336;
   font-size: 20rpx;
 }
-
-
-
-
