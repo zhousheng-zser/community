@@ -1,31 +1,56 @@
-<!--pages/service/service.wxml-->
-<view class='container'>
-  <image class='topimg' src='{{service.imageUrl}}' mode='widthFix'></image>
-  <view class='baseinfo'>
-    <text class='name'>{{service.goodsTitle}}</text>
-    <text class='desc'>{{service.goodsSub}}</text>
-    <view class='price' wx:if="{{service.goodsPrice}}">
-      <text class='text-red'>{{service.goodsPrice}}</text>
-      <text wx:if="{{service.remarkA}}">{{service.remarkA}}</text>
+<view class="service-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text class="title">产品详情</text>
+    <text>•••</text>
+  </view>
+
+  <image class="banner" src="{{service.banner}}" mode="aspectFill"></image>
+
+  <view class="title-card">
+    <text class="name">{{service.title}}</text>
+    <view class="option-card">
+      <text class="option-name">{{service.subTitle}}</text>
+      <text class="option-price">{{service.price}}</text>
     </view>
   </view>
-  <!-- <view class='howlong'>
-    <text class='text'>选择服务时长（小时）</text>
-    <view class='btns'>
-      <button class='active' size='mini'>2</button>
-      <button size='mini'>3</button>
-      <button size='mini'>4</button>
-      <button size='mini'>5</button>
-      <button size='mini'>6</button>
-    </view>
-  </view> -->
-  <view class='section'>
-    <text class='title'>服务介绍：</text>
-    <rich-text nodes="{{service.goodsDesc}}"></rich-text>
-    <!-- <view class='content'>{{service.goodsDesc}}</view> -->
+
+  <view class="guarantee">
+    <text class="label">保障</text>
+    <text wx:for="{{service.tags}}" wx:key="*this">✔ {{item}}</text>
   </view>
-  <view class='redbtn-fixed'>
-  <button wx:if="{{tel}}" bindtap='orderConfrim'>立即下单</button>
-  <button wx:else open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">立即下单</button>
+
+  <view class="spec-card">
+    <view class="head">
+      <text>服务规格</text>
+      <text>查看全部 〉</text>
+    </view>
+    <view class="spec-list">
+      <text wx:for="{{specs}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="desc-card">
+    <text class="section-title">服务内容</text>
+    <text class="desc">{{descText}}</text>
+    <image wx:for="{{detailImages}}" wx:key="*this" src="{{item}}" mode="widthFix"></image>
+  </view>
+
+  <view class="notice-card">
+    <text class="section-title">订购须知</text>
+    <text>1、请提前预约；2、超时服务可能产生额外费用；3、特殊情况可协商取消。</text>
+  </view>
+
+  <view class="comment-card">
+    <view class="head">
+      <text>用户评论</text>
+      <text>0条评论 〉</text>
+    </view>
+    <text class="empty">暂无评论</text>
+  </view>
+
+  <view class="bottom-bar">
+    <text class="consult">在线咨询</text>
+    <view class="buy-btn" bindtap="orderConfrim">立即购买</view>
   </view>
 </view>

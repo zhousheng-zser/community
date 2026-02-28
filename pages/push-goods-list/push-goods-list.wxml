@@ -1,0 +1,20 @@
+<view class="push-list-page {{theme}}">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text class="title">九州好物</text>
+    <text>•••</text>
+  </view>
+
+  <view class="tabs">
+    <text wx:for="{{tabs}}" wx:key="*this" class="{{index===0?'active':''}}">{{item}}</text>
+  </view>
+
+  <view class="grid">
+    <navigator class="item" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
+      <image src="{{item.image}}" mode="aspectFill"></image>
+      <text class="name">{{item.name}}</text>
+      <text class="rebate">分享赚/购买返￥3.82</text>
+      <text class="price">￥{{item.price}}</text>
+    </navigator>
+  </view>
+</view>

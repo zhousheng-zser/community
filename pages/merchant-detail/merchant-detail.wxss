@@ -1,0 +1,107 @@
+page {
+  background: #efefef;
+}
+
+.merchant-page {
+  padding: 18rpx;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  font-size: 26rpx;
+  margin-bottom: 18rpx;
+  padding-bottom: 8rpx;
+}
+
+.merchant-card,
+.notice-card,
+.empty-card {
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 16rpx;
+}
+
+.merchant-card {
+  display: flex;
+  align-items: center;
+}
+
+.merchant-card image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 10rpx;
+  margin-right: 14rpx;
+}
+
+.merchant-card .info {
+  flex: 1;
+}
+
+.merchant-card .name {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.merchant-card .time {
+  display: block;
+  margin-top: 12rpx;
+  color: #888;
+}
+
+.arrow {
+  color: #444;
+}
+
+.notice-card {
+  margin-top: 16rpx;
+  display: flex;
+  justify-content: space-between;
+}
+
+.section-title {
+  margin: 24rpx 0 16rpx;
+  font-size: 42rpx;
+}
+
+.empty-card {
+  height: 680rpx;
+  text-align: center;
+}
+
+.empty {
+  margin-top: 220rpx;
+  display: inline-block;
+  color: #b6bcc6;
+  font-size: 50rpx;
+}
+
+.sub-tabs {
+  position: fixed;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 12rpx;
+  background: #fff;
+  border-radius: 14rpx;
+  display: flex;
+  justify-content: space-around;
+  padding: 18rpx 0;
+  color: #8a8a8a;
+}
+
+.sub-tabs .active {
+  color: #a12a2a;
+  position: relative;
+}
+
+.sub-tabs .active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8rpx;
+  height: 5rpx;
+  border-radius: 5rpx;
+  background: #b53030;
+}

@@ -1,0 +1,111 @@
+page {
+  background: #f2f2f2;
+}
+
+.live-page {
+  min-height: 100vh;
+  padding-bottom: 120rpx;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  padding: 10rpx 18rpx 12rpx;
+  font-size: 28rpx;
+  background: linear-gradient(180deg, #ff8f93 0%, #ff7a8d 100%);
+}
+
+.top-nav .title {
+  font-size: 34rpx;
+}
+
+.header {
+  background: linear-gradient(180deg, #ff8f93 0%, #ff7a8d 100%);
+  padding: 20rpx;
+  display: flex;
+  color: #fff;
+}
+
+.logo {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50rpx;
+  margin-right: 14rpx;
+}
+
+.right .name {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.right .rate {
+  display: inline-block;
+  margin-top: 8rpx;
+  background: #fff;
+  color: #ff5f5f;
+  border-radius: 8rpx;
+  padding: 4rpx 8rpx;
+}
+
+.right .count {
+  display: block;
+  margin-top: 8rpx;
+}
+
+.card {
+  margin: 14rpx;
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 18rpx;
+}
+
+.card-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+
+.card text {
+  display: block;
+  margin-top: 8rpx;
+  color: #3b3b3b;
+}
+
+.card image {
+  margin-top: 14rpx;
+  width: 100%;
+  height: 240rpx;
+  border-radius: 10rpx;
+}
+
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  padding: 12rpx;
+  display: flex;
+  gap: 12rpx;
+}
+
+.bottom-bar text {
+  flex: 1;
+  text-align: center;
+  line-height: 80rpx;
+  border-radius: 40rpx;
+}
+
+.bottom-bar .light {
+  background: #fff0ef;
+  color: #f08776;
+}
+
+.bottom-bar .main {
+  background: #ff5a43;
+  color: #fff;
+}

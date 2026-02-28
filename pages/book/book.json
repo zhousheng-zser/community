@@ -1,1 +1,4 @@
-{"navigationBarTitleText": "零工服务预约"}
+{
+  "navigationStyle": "custom",
+  "backgroundTextStyle": "dark"
+}

@@ -1,83 +1,58 @@
-// pages/classify/classify.js
-const app = getApp()
-const util = require('../../utils/util.js');
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-    // menus:[],
-    // items:[],
-    activeIndex: 0
+    navTopPadding: 20,
+    skills: ["积分兑换", "爱心公益", "上门私厨", "人力综合服务", "养生按摩"],
+    workers: [
+      {
+        id: 1,
+        name: "何志",
+        region: "四川巴中",
+        gender: "♂",
+        serviceCount: 0,
+        exp: 4,
+        desc: "主要从事建筑回收，全品类建材可回收",
+        tags: ["组长", "上门回收"],
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=240&q=80"
+      },
+      {
+        id: 2,
+        name: "余静",
+        region: "四川",
+        gender: "♀",
+        serviceCount: 1,
+        exp: 20,
+        desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
+        tags: ["组长", "宠物喂养", "衣柜收纳", "陪护作业"],
+        avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=240&q=80"
+      },
+      {
+        id: 3,
+        name: "邓长超",
+        region: "四川",
+        gender: "♂",
+        serviceCount: 0,
+        exp: 0,
+        desc: "可接送小孩、家政保洁、简单维修等上门服务。",
+        tags: ["组长", "宠物喂养", "宠物搭遛", "衣柜干洗"],
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240&q=80"
+      }
+    ]
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    // 假数据：分类左侧菜单
-    const menus = [
-      { id: 1, clfcName: '日常保洁' },
-      { id: 2, clfcName: '家电清洗' },
-      { id: 3, clfcName: '维修服务' },
-      { id: 4, clfcName: '月嫂育儿' }
-    ];
-    // 假数据：全部商品/服务池
-    const allItems = {
-      1: [
-        { id: 11, goodsTitle: '金牌日常保洁(2小时)', goodsSub: '专业团队，包含客厅、卧室等表面清洁', goodsPrice: '99.00', imageUrl: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80' },
-        { id: 12, goodsTitle: '深度开荒保洁(100平)', goodsSub: '适合新房装修后，全方位不留死角', goodsPrice: '499.00', imageUrl: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=200&q=80' }
-      ],
-      2: [
-        { id: 21, goodsTitle: '挂壁式空调清洗', goodsSub: '高温蒸汽杀菌，除异味', goodsPrice: '89.00', imageUrl: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=200&q=80' }
-      ],
-      3: [
-        { id: 31, goodsTitle: '下水管道疏通', goodsSub: '专业设备，不通不收费', goodsPrice: '120.00', imageUrl: 'https://images.unsplash.com/photo-1585421514738-01798e348b17?w=200&q=80' },
-        { id: 32, goodsTitle: '灯具卫浴安装', goodsSub: '专业师傅上门，安全可靠', goodsPrice: '60.00', imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=80' }
-      ],
-      4: [] // 模拟空数据
-    };
-
-    // 存入 data 供后续点击切换使用
-    this.setData({
-      menus: menus,
-      allItems: allItems,
-      items: allItems[1] // 默认展示第一个分类
-    });
-
-    /* 原接口请求
-    util.get('api/wx/allkind').then((data)=>{
-      this.setData({menus: data })
-      util.get('/api/wx/pro/' + data[0].id).then((data) => {
-        this.setData({ items: data })
-      })
-    })
-    */
+  onLoad() {
+    const sys = wx.getSystemInfoSync();
+    this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
   },
-  onShareAppMessage: function (res) {
-    const openid = app.globalData.user.opId;
-    return app.onShare(openid, res);
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack({ delta: 1 });
+      return;
+    }
+    wx.switchTab({ url: "/pages/index/index" });
   },
-  goService(e) {
-    const id = e.currentTarget.dataset.id;
+  goWorkerDetail(e) {
     wx.navigateTo({
-      url: '../service/service?id=' + id
-    })
-  },
-  setCurrentActive(e) {
-    const activeIndex = e.currentTarget.dataset.index,
-      id = this.data.menus[activeIndex].id;
-
-    // 直接从本地假数据读取
-    const items = this.data.allItems[id] || [];
-    this.setData({ items: items, activeIndex: activeIndex });
-
-    /* 原接口请求
-    util.get('/api/wx/pro/' + id).then((data) => {
-      console.log(data)
-      this.setData({ items: data, activeIndex })
-    })
-    */
+      url: "../worker-detail/worker-detail?id=" + e.currentTarget.dataset.id
+    });
   }
-})
+});

@@ -1,0 +1,44 @@
+<view class="worker-detail-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text class="title">直约{{worker.name}}</text>
+    <text>•••</text>
+  </view>
+
+  <view class="profile-card">
+    <image class="avatar" src="{{worker.avatar}}" mode="aspectFill"></image>
+    <view class="info">
+      <view class="name-row">
+        <text class="name">{{worker.name}}</text>
+        <text class="gender">{{worker.gender}}</text>
+      </view>
+      <text class="region">{{worker.region}}</text>
+      <text class="meta">服务{{worker.serviceCount}}单  工作经验{{worker.exp}}年</text>
+      <text class="desc">技工简介：{{worker.desc}}</text>
+      <view class="tags">
+        <text wx:for="{{worker.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="expand">展开</text>
+    </view>
+  </view>
+
+  <view class="comment-card">
+    <view class="head">
+      <text>大家对TA的评价 (0)</text>
+      <text>〉</text>
+    </view>
+    <text class="empty">数据为空</text>
+  </view>
+
+  <view class="goods-card">
+    <view class="goods-item" wx:for="{{goods}}" wx:key="name">
+      <image src="{{item.image}}" mode="aspectFill"></image>
+      <view class="right">
+        <text class="name">{{item.name}}</text>
+        <text class="price">￥{{item.price}}</text>
+        <text class="sold">已售出0 好评率100%</text>
+      </view>
+      <view class="buy-btn" bindtap="goBuy">立即购买</view>
+    </view>
+  </view>
+</view>

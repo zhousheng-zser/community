@@ -1,0 +1,36 @@
+<view class="pp-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <view class="icons">
+      <text>🛒</text>
+      <text>🔍</text>
+      <text>💬</text>
+    </view>
+    <text>•••</text>
+  </view>
+
+  <image class="cover" src="{{product.image}}" mode="aspectFill"></image>
+
+  <view class="info-card">
+    <text class="price">￥{{product.price}}</text>
+    <view class="calc">
+      <text>到手价 ￥{{product.price}}</text>
+      <text>支付价 ￥{{product.pay}}</text>
+      <text>预计每单返 ￥{{product.rebate}}</text>
+    </view>
+    <text class="name">{{product.name}}</text>
+    <view class="shop-row">
+      <text>{{product.shop}}</text>
+      <text class="btn" bindtap="goShopAll">店铺全部商品</text>
+    </view>
+  </view>
+
+  <view class="section-title">商品详情</view>
+  <image class="detail-img" src="https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=1000&q=80" mode="widthFix"></image>
+
+  <view class="bottom-bar">
+    <text class="home">首页</text>
+    <text class="share">￥{{product.rebate}} 分享每单赚</text>
+    <text class="buy">￥{{product.rebate}} 购买每单返</text>
+  </view>
+</view>

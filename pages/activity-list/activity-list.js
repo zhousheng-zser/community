@@ -1,79 +1,38 @@
-// pages/activity-list/activity-list.js
-const app = getApp();
-const util = require('../../utils/util.js');
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    navTopPadding: 20,
+    tabs: ["热门服务", "孩子接送", "陪读辅导", "起居照顾", "育儿嫂"],
+    activeTab: "热门服务",
+    services: [
+      { name: "代照看小孩", price: "50元/小时", sold: "已售1 好评率100%", image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=300&q=80" },
+      { name: "代接送小孩", price: "30元/次", sold: "已售0 好评率100%", image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&q=80" },
+      { name: "陪读辅导作业", price: "20元/小时", sold: "已售1 好评率100%", image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=300&q=80" }
+    ]
   },
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-    util.get("api/wx/index").then((data) => {
-      let { banner, goods, contnets } = data;
-      contnets.forEach((v, i) => {
-        contnets[i].time = util.formatTime(new Date(v.createTime));
-      })
-      this.setData({ banner, goods, contnets });
-    })
+  onLoad(options) {
+    const sys = wx.getSystemInfoSync();
+    this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+    if (options.tab) {
+      const tabMap = {
+        take: "热门服务",
+        child: "孩子接送",
+        escort: "陪读辅导",
+        study: "陪读辅导",
+        trash: "起居照顾",
+        pet: "育儿嫂"
+      };
+      this.setData({ activeTab: tabMap[options.tab] || "热门服务" });
+    }
   },
-  goActivity(e) {
-    const id = e.currentTarget.dataset.id;
-    wx.navigateTo({
-      url: '../activity/activity?id=' + id,
-    })
+  switchTab(e) {
+    this.setData({ activeTab: e.currentTarget.dataset.tab });
   },
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-
-  },
-
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack({ delta: 1 });
+      return;
+    }
+    wx.switchTab({ url: "/pages/index/index" });
   }
-})
+});

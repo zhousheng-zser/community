@@ -1,11 +1,25 @@
+<view class="service-list-page">
+  <view class="top" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text>•••</text>
+  </view>
 
-<view class='notice-wrap'>
-      <view class='notice' wx:for="{{contnets}}" wx:key="item" bindtap='goActivity' data-id='{{item.id}}'>
-        <view class='title'>
-          <text>{{item.conTitle}}</text>
-        </view>
-        <view class='time'>
-          <text>{{item.time}}</text>
-        </view>
+  <scroll-view class="tabs" scroll-x="{{true}}">
+    <view class="tabs-inner">
+      <view class="tab {{activeTab===item?'active':''}}" wx:for="{{tabs}}" wx:key="*this" data-tab="{{item}}" bindtap="switchTab">
+        {{item}}
       </view>
     </view>
+  </scroll-view>
+
+  <view class="card" wx:for="{{services}}" wx:key="name">
+    <image src="{{item.image}}" mode="aspectFill"></image>
+    <view class="content">
+      <text class="name">{{item.name}}</text>
+      <text class="price">{{item.price}}</text>
+      <text class="sold">{{item.sold}}</text>
+    </view>
+  </view>
+
+  <text class="nomore">没有更多了</text>
+</view>

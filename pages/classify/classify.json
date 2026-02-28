@@ -1,1 +1,4 @@
-{"navigationBarTitleText": "服务分类"}
+{
+  "navigationStyle": "custom",
+  "backgroundTextStyle": "dark"
+}
