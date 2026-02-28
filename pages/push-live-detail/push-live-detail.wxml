@@ -1,0 +1,30 @@
+<view class="live-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text class="title">直播详情</text>
+    <text>•••</text>
+  </view>
+
+  <view class="header">
+    <image class="logo" src="https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=180&q=80" mode="aspectFill"></image>
+    <view class="right">
+      <text class="name">三只松鼠 ThreeSquirrels</text>
+      <text>暂无</text>
+      <text class="rate">最高返 10%</text>
+      <text class="count">15968人推广</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">推广教程</text>
+    <text>1 点击《去直播间》</text>
+    <text>2 直播间点击右下角，选择转发给朋友或分享到朋友圈</text>
+    <text>3 好友下单，您可拿到对应商品佣金</text>
+    <image src="https://images.unsplash.com/photo-1536240478700-b869070f9279?w=1000&q=80" mode="aspectFill"></image>
+  </view>
+
+  <view class="bottom-bar">
+    <text class="light">分享海报</text>
+    <text class="main">进入直播间</text>
+  </view>
+</view>

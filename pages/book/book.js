@@ -1,75 +1,36 @@
-// pages/book/book.js
-const app = getApp()
-const util = require('../../utils/util.js');
 Page({
   data: {
-    workers: [{ name: '室内外保洁', active: true }, { name: '家电窗帘清洗', active: false }, { name: '管道疏通', active: false }, { name: '水电安装维修', active: false }, { name: '砸墙', active: false }, { name: '钻孔', active: false }, { name: '批涂墙', active: false }, { name: '地砖墙砖', active: false }, { name: '吊顶隔断', active: false }, { name: '防水施工', active: false }, { name: '钟点工', active: false }, { name: '其他', active: false }]
+    navTopPadding: 20,
+    activeTab: "陪诊",
+    tabs: ["代取", "接送小孩", "陪诊", "陪读"],
+    perks: [
+      { title: "单单立省", icon: "🐷" },
+      { title: "优先派单", icon: "📄" },
+      { title: "客服特权", icon: "👤" }
+    ]
   },
-  onLoad: function (options) {
-
-  },
-  changeWorkerType(e) {
-    const { index } = e.currentTarget.dataset;
-    let workers = this.data.workers;
-    workers[index].active = !workers[index].active
-    this.setData({
-      workers
-    })
-  },
-  saveBook(e) {
-    if (!this.data.address) {
-      wx.showToast({ title: '请选择服务地址', icon: 'none' })
-      return
+  onLoad(options) {
+    const sys = wx.getSystemInfoSync();
+    this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+    if (options.tab) {
+      const tabMap = {
+        take: "代取",
+        child: "接送小孩",
+        escort: "陪诊",
+        study: "陪读"
+      };
+      this.setData({ activeTab: tabMap[options.tab] || "陪诊" });
     }
-    wx.showLoading();
-    const { id: userId } = app.globalData.user;
-    const { textarea: reDesc } = e.detail.value;
-    const { name: reName, tel: remarkA, detail: reAddress } = this.data.address;
-    let service = [];//预约的服务
-    this.data.workers.forEach((v, i) => {
-      if (v.active) {
-        service.push(v.name)
-      }
-    })
-    const remarkB = service.join(",");
-    const formId = e.detail.formId;
-    util.post("api/wx/reserve/save", {
-      userId,
-      reDesc,
-      reName,
-      reAddress,
-      remarkA,
-      formId,
-      remarkB
-    }).then((data) => {
-      wx.hideLoading();
-      wx.showToast({
-        title: '提交成功',
-        icon: 'none'
-      })
-      setTimeout(() => {
-        wx.switchTab({
-          url: '../index/index'
-        })
-      }, 1000)
-    })
   },
-  onShareAppMessage: function () {
-
+  switchTab(e) {
+    this.setData({ activeTab: e.currentTarget.dataset.tab });
   },
-  chooseAddress() {
-    const that = this;
-    wx.chooseAddress({
-      success: function (res) {
-        const detail = res.provinceName + res.cityName + res.countyName + res.detailInfo;
-        that.setData({
-          address: {
-            name: res.userName,
-            tel: res.telNumber,
-            detail
-          }
-        })
-      }
-    })
-  },
-})
+  goBack() {
+    const pages = getCurrentPages();
+    if (pages.length > 1) {
+      wx.navigateBack({ delta: 1 });
+      return;
+    }
+    wx.switchTab({ url: "/pages/index/index" });
+  }
+});

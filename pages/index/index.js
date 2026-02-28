@@ -80,6 +80,14 @@ Page({
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
   },
+  goMarketShop(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.navigateTo({ url: "../market-shop/market-shop?id=" + id });
+  },
+  goMarketGoods(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id });
+  },
   init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
     // 假数据填充，方便本地预览首页布局
@@ -139,11 +147,11 @@ Page({
       { name: "家事积分商城", icon: "/img/index/ticon2.png" }
     ];
     const knowledgeList = [
-      { name: "代取", avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=120&q=80" },
-      { name: "接送小孩", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80" },
-      { name: "陪诊", avatar: "https://images.unsplash.com/photo-1542204625-de293a36f5c5?w=120&q=80" },
-      { name: "代扔垃圾", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80" },
-      { name: "宠物喂养", avatar: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=120&q=80" }
+      { name: "代取", avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?w=120&q=80", url: "../recomm/recomm?type=take" },
+      { name: "接送小孩", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&q=80", url: "../recomm/recomm?type=child" },
+      { name: "陪诊", avatar: "https://images.unsplash.com/photo-1542204625-de293a36f5c5?w=120&q=80", url: "../recomm/recomm?type=escort" },
+      { name: "代扔垃圾", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&q=80", url: "../recomm/recomm?type=trash" },
+      { name: "宠物喂养", avatar: "https://images.unsplash.com/photo-1517849845537-4d257902454a?w=120&q=80", url: "../recomm/recomm?type=pet" }
     ];
     const hotList = [
       { name: "洗衣机清洗", price: "128", image: "https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=300&q=80", rank: "NO.1" },
@@ -156,12 +164,13 @@ Page({
       id: item.id,
       name: item.goodsTitle,
       sub: "服务" + item.id + "单",
-      image: item.remarkC
+      image: item.remarkC,
+      url: "../merchant-detail/merchant-detail?id=" + item.id
     }));
     const workerList = [
-      { name: "余静", orders: "服务1单", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=220&q=80" },
-      { name: "张乾坤", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=220&q=80" },
-      { name: "张谕晗", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=220&q=80" }
+      { id: 1, name: "余静", orders: "服务1单", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=220&q=80" },
+      { id: 2, name: "张乾坤", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=220&q=80" },
+      { id: 3, name: "张谕晗", orders: "服务0单", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=220&q=80" }
     ];
     const marketList = [
       { name: "映萃美活研奇肌霜", price: "469", image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?w=400&q=80" },
@@ -170,22 +179,27 @@ Page({
       { name: "初开荒 60平以内", price: "480", image: "https://images.unsplash.com/photo-1527515545081-5db817172677?w=400&q=80" }
     ];
     const pushCategories = [
-      { name: "母婴", icon: "/img/index/menuicon1.png" },
-      { name: "水果", icon: "/img/index/menuicon2.png" },
-      { name: "粮油", icon: "/img/index/menuicon3.png" },
-      { name: "零食", icon: "/img/index/menuicon4.png" },
-      { name: "日百", icon: "/img/index/menuicon1.png" }
+      { name: "母婴", icon: "/img/index/menuicon1.png", url: "../push-goods-list/push-goods-list?theme=pink" },
+      { name: "水果", icon: "/img/index/menuicon2.png", url: "../push-goods-list/push-goods-list?theme=brown" },
+      { name: "粮油", icon: "/img/index/menuicon3.png", url: "../push-goods-list/push-goods-list?theme=red" },
+      { name: "零食", icon: "/img/index/menuicon4.png", url: "../push-goods-list/push-goods-list?theme=brown" },
+      { name: "日百", icon: "/img/index/menuicon1.png", url: "../push-goods-list/push-goods-list?theme=pink" }
     ];
     const pushPromoCards = [
-      { title: "爆品上新", sub: "品牌好货直降", image: "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=400&q=80" },
-      { title: "邻区TOP榜", sub: "本周口碑推荐", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80" }
+      { title: "爆品上新", sub: "品牌好货直降", image: "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=400&q=80", url: "../push-channel/push-channel" },
+      { title: "邻区TOP榜", sub: "本周口碑推荐", image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80", url: "../push-goods-list/push-goods-list?theme=brown" }
     ];
-    const pushTags = ["满39包邮", "小区团购", "限时秒杀", "新人专享"];
+    const pushTags = [
+      { name: "满39包邮", url: "../push-goods-list/push-goods-list?theme=red" },
+      { name: "小区团购", url: "../push-goods-list/push-goods-list?theme=brown" },
+      { name: "限时秒杀", url: "../push-goods-list/push-goods-list?theme=pink" },
+      { name: "新人专享", url: "../push-goods-list/push-goods-list?theme=red" }
+    ];
     const pushGoods = [
-      { name: "正宗东北木耳", price: "39.90", unit: "/袋", image: "https://images.unsplash.com/photo-1505575967455-40e256f73376?w=300&q=80" },
-      { name: "高原蜂蜜", price: "69.95", unit: "/瓶", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300&q=80" },
-      { name: "山核桃仁", price: "35.90", unit: "/袋", image: "https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=300&q=80" },
-      { name: "牛肉丸", price: "49.90", unit: "/盒", image: "https://images.unsplash.com/photo-1604908176997-4318f804bafa?w=300&q=80" }
+      { id: 1, name: "正宗东北木耳", price: "39.90", unit: "/袋", image: "https://images.unsplash.com/photo-1505575967455-40e256f73376?w=300&q=80", url: "../push-product-detail/push-product-detail?id=1" },
+      { id: 2, name: "高原蜂蜜", price: "69.95", unit: "/瓶", image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300&q=80", url: "../push-product-detail/push-product-detail?id=2" },
+      { id: 3, name: "山核桃仁", price: "35.90", unit: "/袋", image: "https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=300&q=80", url: "../push-product-detail/push-product-detail?id=3" },
+      { id: 4, name: "牛肉丸", price: "49.90", unit: "/盒", image: "https://images.unsplash.com/photo-1604908176997-4318f804bafa?w=300&q=80", url: "../push-product-detail/push-product-detail?id=4" }
     ];
     const fukaLocalList = [
       { name: "天天买菜", icon: "/img/index/menuicon1.png" },
@@ -219,40 +233,43 @@ Page({
       { name: "黄冰糖", price: "29.9", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?w=300&q=80" }
     ];
     const marketTopCats = [
-      { name: "母婴生活馆", icon: "/img/index/menuicon1.png" },
-      { name: "家庭服务", icon: "/img/index/menuicon2.png" },
-      { name: "超市便利", icon: "/img/index/menuicon3.png" }
+      { name: "母婴生活馆", icon: "/img/index/menuicon1.png", url: "../market-banner/market-banner?title=母婴生活馆" },
+      { name: "家庭服务", icon: "/img/index/menuicon2.png", url: "../market-banner/market-banner?title=家庭服务" },
+      { name: "超市便利", icon: "/img/index/menuicon3.png", url: "../market-banner/market-banner?title=超市便利" }
     ];
     const marketFilters = ["综合排序", "邻工秒送", "商家自送", "重置筛选"];
     const marketShops = [
       {
+        id: 1,
         name: "明辉香黍",
         badge: "邻工秒送",
         delivery: "起送￥0  免配送费",
         sold: "已售1",
         goods: [
-          { name: "明辉紫薯", price: "5", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=180&q=80" },
-          { name: "明辉香黍", price: "4", image: "https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=180&q=80" }
+          { id: 101, name: "明辉紫薯", price: "5", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=180&q=80" },
+          { id: 102, name: "明辉香黍", price: "4", image: "https://images.unsplash.com/photo-1603048297172-c92544798d5a?w=180&q=80" }
         ]
       },
       {
+        id: 2,
         name: "成都尚辰空间装饰",
         badge: "邻工秒送",
         delivery: "起送￥0  免配送费",
         sold: "已售3",
         goods: [
-          { name: "卫生间翻新", price: "1", image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=180&q=80" },
-          { name: "旧房改装", price: "19800", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=180&q=80" }
+          { id: 201, name: "卫生间翻新", price: "1", image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=180&q=80" },
+          { id: 202, name: "旧房改装", price: "19800", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=180&q=80" }
         ]
       },
       {
+        id: 3,
         name: "四川洁而诺保洁有限公司",
         badge: "商家自送",
         delivery: "起送￥0  免配送费",
         sold: "已售1",
         goods: [
-          { name: "日常保洁", price: "45", image: "https://images.unsplash.com/photo-1527515545081-5db817172677?w=180&q=80" },
-          { name: "清洗油烟机", price: "160", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=180&q=80" }
+          { id: 301, name: "日常保洁", price: "45", image: "https://images.unsplash.com/photo-1527515545081-5db817172677?w=180&q=80" },
+          { id: 302, name: "清洗油烟机", price: "160", image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=180&q=80" }
         ]
       }
     ];

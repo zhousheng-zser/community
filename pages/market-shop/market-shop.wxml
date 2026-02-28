@@ -1,0 +1,54 @@
+<view class="ms-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <view class="icons">
+      <text>🛒</text>
+      <text>🔍</text>
+      <text>💬</text>
+    </view>
+    <text>•••</text>
+  </view>
+
+  <image class="cover" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=80" mode="aspectFill"></image>
+
+  <view class="shop-card">
+    <image src="/img/聚收藏.png" mode="aspectFill"></image>
+    <view class="info">
+      <text class="name">明辉香薰</text>
+      <text class="meta">评分5  已售1  配送：邻工配送</text>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <text class="active">商品</text>
+    <text>评价</text>
+    <text>关于店铺</text>
+  </view>
+
+  <view class="content">
+    <view class="left">
+      <text wx:for="{{categories}}" wx:key="*this">{{item}}</text>
+    </view>
+    <view class="right">
+      <view class="item" wx:for="{{goods}}" wx:key="id">
+        <image src="{{item.image}}" mode="aspectFill"></image>
+        <view class="info">
+          <text class="name">{{item.name}}</text>
+          <text class="sold">{{item.sold}}</text>
+          <text class="price">￥{{item.price}} <text class="old">￥{{item.oldPrice}}</text></text>
+        </view>
+        <text class="add" bindtap="goProduct">＋</text>
+      </view>
+      <text class="nomore">没有更多了</text>
+    </view>
+  </view>
+
+  <view class="bottom-bar">
+    <text class="cart">🛒</text>
+    <view class="total">
+      <text class="money">合计￥0.00</text>
+      <text class="desc">另需配送费￥0</text>
+    </view>
+    <text class="settle">去结算</text>
+  </view>
+</view>

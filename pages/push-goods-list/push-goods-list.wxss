@@ -1,0 +1,96 @@
+page {
+  background: #c1844e;
+}
+
+.push-list-page {
+  min-height: 100vh;
+}
+
+.push-list-page.pink {
+  background: #ff6a96;
+}
+
+.push-list-page.red {
+  background: #ef2323;
+}
+
+.push-list-page.brown {
+  background: #b98045;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  padding: 10rpx 18rpx 12rpx;
+  font-size: 28rpx;
+}
+
+.top-nav .title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.tabs {
+  margin: 8rpx 16rpx 0;
+  display: flex;
+  gap: 14rpx;
+}
+
+.tabs text {
+  flex: 1;
+  background: #fff;
+  border-radius: 16rpx;
+  text-align: center;
+  padding: 14rpx 0;
+  color: #7d7d7d;
+}
+
+.tabs .active {
+  background: #ef2d2d;
+  color: #fff;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10rpx;
+}
+
+.item {
+  width: 50%;
+  box-sizing: border-box;
+  padding: 8rpx;
+}
+
+.item image {
+  width: 100%;
+  height: 260rpx;
+  border-radius: 18rpx 18rpx 0 0;
+}
+
+.item .name,
+.item .rebate,
+.item .price {
+  display: block;
+  background: #fff;
+  padding: 8rpx 12rpx;
+}
+
+.item .name {
+  min-height: 68rpx;
+  font-size: 24rpx;
+}
+
+.item .rebate {
+  color: #d67272;
+  font-size: 20rpx;
+}
+
+.item .price {
+  color: #e3633f;
+  font-size: 44rpx;
+  padding-bottom: 14rpx;
+  border-radius: 0 0 18rpx 18rpx;
+}

@@ -1,35 +1,39 @@
-<!--pages/classify/classify.wxml-->
-<import src="../../tpl/notask/notask.wxml" />
-<view class='container'>
-  <view class='menu-wrap'>
-    <view class="menu {{index===activeIndex?'active':''}}" wx:for="{{menus}}" wx:key="item" bindtap='setCurrentActive' data-id='{{item.id}}' data-index="{{index}}">
-      <text>{{item.clfcName}}</text>
-    </view>
+<view class="worker-page">
+  <view class="top-bar" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈 果壳里的城</text>
+    <view class="search">名称搜索</view>
+    <text>•••</text>
   </view>
-  <view class='content'>
-    <scroll-view class='scroll-view' scroll-y="true">
-      <!-- <image class='section-image' mode="widthFix" src='{{menus[activeIndex].picturreUrl}}'></image> -->
-      <!-- <text class='title'>{{menus[activeIndex].clfcName}}</text> -->
-      <view wx:if="{{items.length===0}}" class='notask-wrap'>
-        <template is="notask" data="{{text:'该分类暂无服务'}}" />
-      </view>
-      <view wx:else class='list'>
-        <view class='item' bindtap='goService' wx:for="{{items}}" wx:key="item" data-id='{{item.id}}'>
-          <image class='img' src='{{item.imageUrl}}' mode='scaleToFill'></image>
-          <view class='info'>
-            <text class='name'>{{item.goodsTitle}}</text>
-            <text class='desc'>{{item.goodsSub}}</text>
-            <view class='price-wrap' wx:if="{{item.goodsPrice}}">
-              <view class="price">
-                <text class='text-red'>￥{{item.goodsPrice}}</text>
-                <text wx:if="{{item.remarkA}}">{{item.remarkA}}</text>
-              </view>
-              <view class="cart-btn">+</view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
 
+  <scroll-view class="skill-row" scroll-x="{{true}}">
+    <view class="inner">
+      <view class="skill-item" wx:for="{{skills}}" wx:key="*this">
+        <view class="icon"></view>
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="filter-row">
+    <text>综合排序</text>
+    <text>全部分类</text>
+    <text>全部技工</text>
+  </view>
+
+  <view class="worker-card" wx:for="{{workers}}" wx:key="id" bindtap="goWorkerDetail" data-id="{{item.id}}">
+    <image class="avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+    <view class="body">
+      <view class="name-line">
+        <text class="name">{{item.name}}</text>
+        <text class="gender">{{item.gender}}</text>
+      </view>
+      <text class="region">{{item.region}}</text>
+      <text class="meta">服务{{item.serviceCount}}单  工作经验{{item.exp}}年</text>
+      <text class="desc">技工简介：{{item.desc}}</text>
+      <view class="tags">
+        <text wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+      </view>
+      <text class="more">展开</text>
+    </view>
   </view>
 </view>

@@ -1,0 +1,8 @@
+<view class="mb-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text bindtap="goBack">〈</text>
+    <text class="title">{{title}}</text>
+    <text>•••</text>
+  </view>
+  <image class="banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80" mode="aspectFill"></image>
+</view>

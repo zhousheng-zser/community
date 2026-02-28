@@ -1,18 +1,83 @@
-/* pages/activity-list/activity-list.wxss */
-.notice-wrap {
-  background-color: #fff;
+page {
+  background: #f3f3f3;
 }
 
-.notice {
-  padding: 20rpx;
-  border-bottom: 1px solid #eee;
+.service-list-page {
+  padding: 18rpx;
 }
 
-.notice .title {
+.top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 30rpx;
+  margin-bottom: 16rpx;
+  padding-bottom: 8rpx;
+}
+
+.tabs {
+  white-space: nowrap;
+}
+
+.tabs-inner {
+  display: flex;
+}
+
+.tab {
+  margin-right: 14rpx;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  font-size: 36rpx;
+  color: #2f2f2f;
+}
+
+.tab.active {
+  border-color: #f0d8a0;
+  color: #d6b064;
+}
+
+.card {
+  margin-top: 16rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 18rpx;
+  display: flex;
+}
+
+.card image {
+  width: 190rpx;
+  height: 130rpx;
+  border-radius: 10rpx;
+}
+
+.content {
+  margin-left: 16rpx;
+}
+
+.name {
+  font-size: 52rpx;
+  font-weight: 700;
+}
+
+.price {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 52rpx;
+  color: #d39a2f;
+  font-weight: 700;
+}
+
+.sold {
+  display: block;
+  margin-top: 8rpx;
   font-size: 34rpx;
+  color: #999;
 }
 
-.notice .time {
-  text-align: right;
-  color: #a9a9a9;
+.nomore {
+  display: block;
+  margin: 24rpx 0;
+  text-align: center;
+  color: #8d8d8d;
 }
