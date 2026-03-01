@@ -4,8 +4,8 @@
   <view class="header-cover">
     <image class="cover-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" mode="aspectFill"></image>
     <view class="user-info">
-      <text class="user-name">张大山 (幸福社区)</text>
-      <image class="user-avatar" src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&q=80"></image>
+      <text class="user-name">{{userInfo.userName || '微信用户'}}</text>
+      <image class="user-avatar" src="{{userInfo.userPhoto || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}"></image>
     </view>
   </view>
 
@@ -39,7 +39,7 @@
           <text class="post-time">{{item.time}}</text>
           <!-- 模拟微信朋友圈右侧的两个点操作按钮 -->
           <view class="action-btn" catchtap="toggleActionMenu" data-index="{{index}}">
-            <image src="/img/action-icon.png" class="action-icon"></image>
+            <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTk5OTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDExLjVMMTMuNSA1TDEyIDYuNUwxOCA4SDNWMTBIMThMMTIgMTEuNUwxMy41IDEzTDIxIDExLjVaIi8+PC9zdmc+" class="action-icon"></image>
             <view class="action-icon-dots">··</view>
           </view>
           
@@ -77,6 +77,6 @@
 
   <!-- 悬浮的发布按钮 -->
   <view class="publish-btn-float" catchtap="goPublish">
-    <image src="/img/camera-icon.png"></image>
+    <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMyAxOWEyaCAyIDBtMC0yYTIgMiAwIDAgMS0yLTJIM2EyIDIgMCAwIDEtMi0yVjhhMiAyIDAgMCAxIDItMmg0bDIuNS0zaDMuNWwyLjUgM2g0YTIgMiAwIDAgMSAyIDJ2OXoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI0Ij48L2NpcmNsZT48L3N2Zz4="></image>
   </view>
 </view>

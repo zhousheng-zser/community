@@ -53,9 +53,11 @@ exports.createPost = async (req, res) => {
         const userId = req.user.id;
         const { content, location } = req.body;
 
-        // 解析通过 multer 上传的图片路径
+        // 解析通过 multer 上传的图片路径，或者直接使用前端传过来的已上传的图片URL数组
         let imagePaths = [];
-        if (req.files && req.files.length > 0) {
+        if (req.body.images && Array.isArray(req.body.images)) {
+            imagePaths = req.body.images;
+        } else if (req.files && req.files.length > 0) {
             imagePaths = req.files.map(file => `/uploads/${file.filename}`);
         }
 

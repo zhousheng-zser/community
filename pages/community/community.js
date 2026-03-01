@@ -1,47 +1,135 @@
-// pages/community/community.js
+const app = getApp();
+const util = require('../../utils/util.js');
+
 Page({
     data: {
-        // 模拟朋友圈帖子数据
-        posts: [
-            {
-                id: 'p1',
-                name: '王大妈',
-                avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80',
-                content: '今天王阿姨家修了个水管，小伙子手脚很麻利，没要多加钱。给社区服务点个赞！👍',
-                images: [
-                    'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
-                    'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80'
-                ],
-                time: '1小时前',
-                likes: ['李大爷', '张大山'],
-                comments: [
-                    { id: 'c1', name: '李大爷', text: '下次我家也要修' }
-                ],
-                isLiked: true,
-                showMenu: false
-            },
-            {
-                id: 'p2',
-                name: '修理工老赵',
-                avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=80',
-                content: '刚修完幸福小区 4 栋的空调，这种老旧机型清洗起来确实费劲，不过洗完冷风呼呼的。天气热了，大家记得提前洗空调啊~',
-                images: [
-                    'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80'
-                ],
-                time: '3小时前',
-                likes: [],
-                comments: [
-                    { id: 'c2', name: '幸福小赵', text: '师傅辛苦了' },
-                    { id: 'c3', name: '修理工老赵', text: '回复 幸福小赵：应该的' }
-                ],
-                isLiked: false,
-                showMenu: false
-            }
-        ]
+        userInfo: {},
+        // 动态帖子数据
+        posts: [],
+        page: 1,
+        hasMore: true,
+        isLoading: false
     },
 
     onLoad: function (options) {
-        // 页面初始化
+        this.loadPosts(true);
+    },
+
+    onShow: function () {
+        // 同步最新的个人信息
+        if (app.globalData.user) {
+            this.setData({
+                userInfo: app.globalData.user
+            });
+        }
+    },
+
+    // 下拉刷新
+    onPullDownRefresh: function () {
+        this.loadPosts(true).then(() => {
+            wx.stopPullDownRefresh();
+        });
+    },
+
+    // 触底加载更多
+    onReachBottom: function () {
+        if (this.data.hasMore) {
+            this.loadPosts(false);
+        }
+    },
+
+    // 时间格式化辅助函数：把 ISO 字符串转为 "xx小时前" 等更友好的显示
+    formatTimeAgoToNow: function (dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diff = (now - date) / 1000; // 秒
+
+        if (diff < 60) return '刚刚';
+        if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+        if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+        if (diff < 2592000) return Math.floor(diff / 86400) + '天前';
+        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    },
+
+    // 加载帖子列表
+    loadPosts: function (isRefresh = false) {
+        if (this.data.isLoading) return Promise.resolve();
+        this.setData({ isLoading: true });
+
+        const page = isRefresh ? 1 : this.data.page;
+        return util.get(`posts?page=${page}&limit=10`).then(res => {
+            const currentUserId = app.globalData.user ? app.globalData.user.id : null;
+
+            // 极度防御：确保我们拿到的是数组
+            let postsList = [];
+            if (Array.isArray(res)) {
+                postsList = res;
+            } else if (res && Array.isArray(res.data)) {
+                postsList = res.data;
+            } else if (res && res.data && Array.isArray(res.data.data)) {
+                postsList = res.data.data;
+            }
+
+            const formattedPosts = postsList.map(post => {
+                // 处理图片链接 (加上 host)
+                let images = [];
+                if (post.images) {
+                    try {
+                        let parsed = typeof post.images === 'string' ? JSON.parse(post.images) : post.images;
+                        if (Array.isArray(parsed)) {
+                            images = parsed.map(img => img.startsWith('http') ? img : `http://localhost:3000${img}`);
+                        }
+                    } catch (e) {
+                        console.error('解析图片报错', e);
+                    }
+                }
+
+                // 处理点赞数据
+                const likes = Array.isArray(post.likes) ? post.likes.map(like => like.user && like.user.nickname ? like.user.nickname : '匿名') : [];
+                const isLiked = Array.isArray(post.likes) ? post.likes.some(like => like.user_id === currentUserId) : false;
+
+                // 处理评论数据
+                const comments = Array.isArray(post.comments) ? post.comments.map(c => ({
+                    id: c.id,
+                    name: c.author ? c.author.nickname : '未知用户',
+                    text: c.content
+                })) : [];
+
+                return {
+                    id: post.id,
+                    name: post.author ? post.author.nickname : '匿名用户',
+                    avatar: post.author ? post.author.avatar_url : 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
+                    content: post.content,
+                    images: images,
+                    time: this.formatTimeAgoToNow(post.createdAt),
+                    likes: likes,
+                    comments: comments,
+                    isLiked: isLiked,
+                    showMenu: false
+                };
+            });
+
+            this.setData({
+                posts: isRefresh ? formattedPosts : [...this.data.posts, ...formattedPosts],
+                page: page + 1,
+                hasMore: formattedPosts.length === 10,
+                isLoading: false
+            });
+        }).catch(err => {
+            console.error('获取帖子失败:', err);
+            this.setData({ isLoading: false });
+            wx.showToast({ title: '加载失败', icon: 'none' });
+        });
+    },
+
+    onShow: function () {
+        // 每次显示页面时，同步最新的个人信息
+        if (app.globalData.user) {
+            this.setData({
+                userInfo: app.globalData.user
+            });
+        }
     },
 
     // 预览图片
@@ -69,32 +157,46 @@ Page({
 
     // 点赞逻辑
     likePost: function (e) {
+        if (!app.globalData.user) {
+            return wx.showToast({ title: '请先前往我的页面登录', icon: 'none' });
+        }
+
         const index = e.currentTarget.dataset.index;
         let posts = this.data.posts;
         let post = posts[index];
+        const postId = post.id;
 
-        if (post.isLiked) {
-            // 取消点赞
-            post.likes = post.likes.filter(name => name !== '我');
-            post.isLiked = false;
-        } else {
-            // 增加点赞
-            post.likes.push('我');
-            post.isLiked = true;
-        }
-        post.showMenu = false; // 操作完关闭菜单
+        // 乐观更新 UI
+        post.showMenu = false;
 
-        this.setData({ posts });
-        wx.showToast({
-            title: post.isLiked ? '点赞成功' : '取消点赞',
-            icon: 'none'
+        util.post(`posts/${postId}/like`, {}).then(res => {
+            // 后端返回成功后，如果是点赞，往数组里加自己的名字；如果是取消点赞，去掉
+            const myName = app.globalData.user.userName || '未知用户';
+            if (res.status === 'liked') {
+                post.likes.push(myName);
+                post.isLiked = true;
+            } else {
+                post.likes = post.likes.filter(name => name !== myName);
+                post.isLiked = false;
+            }
+            this.setData({ posts });
+            wx.showToast({ title: res.message, icon: 'none' });
+        }).catch(err => {
+            wx.showToast({ title: '操作失败', icon: 'none' });
+            console.error('点赞失败', err);
         });
     },
 
-    // 评论逻辑 (模拟弹窗)
+    // 评论逻辑
     commentPost: function (e) {
+        if (!app.globalData.user) {
+            return wx.showToast({ title: '请先前往我的页面登录', icon: 'none' });
+        }
+
         const index = e.currentTarget.dataset.index;
         let posts = this.data.posts;
+        const postId = posts[index].id;
+
         posts[index].showMenu = false;
         this.setData({ posts });
 
@@ -105,30 +207,37 @@ Page({
             placeholderText: '说点什么...',
             success(res) {
                 if (res.confirm && res.content) {
-                    let currentPosts = that.data.posts; // 重新获取可能已被修改的数据
-                    currentPosts[index].comments.push({
-                        id: 'c' + Date.now(),
-                        name: '我',
-                        text: res.content
+                    wx.showLoading({ title: '发送中' });
+                    util.post(`posts/${postId}/comment`, {
+                        content: res.content
+                    }).then(data => {
+                        wx.hideLoading();
+                        let currentPosts = that.data.posts;
+                        currentPosts[index].comments.push({
+                            id: data.id || Date.now(),
+                            name: app.globalData.user.userName || '未知用户',
+                            text: res.content
+                        });
+                        that.setData({ posts: currentPosts });
+                        wx.showToast({ title: '评论成功', icon: 'success' });
+                    }).catch(err => {
+                        wx.hideLoading();
+                        wx.showToast({ title: '评论失败', icon: 'none' });
+                        console.error('发送评论失败', err);
                     });
-                    that.setData({ posts: currentPosts });
-                    wx.showToast({ title: '评论成功', icon: 'success' });
                 }
             }
         })
     },
 
-    // 模拟发布界面
+    // 真实发布界面
     goPublish: function () {
-        wx.showActionSheet({
-            itemList: ['拍摄', '从手机相册选择'],
-            success(res) {
-                wx.showToast({
-                    title: '前端模拟暂无接口',
-                    icon: 'none'
-                })
-            }
-        })
+        if (!app.globalData.user) {
+            return wx.showToast({ title: '请先前往我的页面登录', icon: 'none' });
+        }
+        wx.navigateTo({
+            url: '/pages/community-publish/community-publish'
+        });
     },
 
     // 点击空白处关闭所有的操作菜单

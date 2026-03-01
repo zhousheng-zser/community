@@ -1,0 +1,23 @@
+<view class="container">
+  <form bindsubmit="submitPost">
+    <view class="input-area">
+      <textarea name="content" placeholder="记录这一刻，分享给社区..." maxlength="500" class="content-input"></textarea>
+    </view>
+    
+    <view class="image-area">
+      <view class="img-item" wx:for="{{tempImagePaths}}" wx:key="*this">
+        <image src="{{item}}" mode="aspectFill"></image>
+        <icon type="clear" size="20" class="delete-icon" catchtap="deleteImage" data-index="{{index}}" color="#ccc" />
+      </view>
+      <view class="add-img-btn" catchtap="chooseImages" wx:if="{{tempImagePaths.length < 9}}">
+        <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTk5OTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDVWMTlNNSAxMkgxOSIvPjwvc3ZnPg==" class="add-icon"></image>
+      </view>
+    </view>
+
+    <view class="location-area">
+      <input name="location" placeholder="添加位置 (可选)" class="location-input" />
+    </view>
+
+    <button class="submit-btn" form-type="submit" disabled="{{isSubmitting}}">发布</button>
+  </form>
+</view>

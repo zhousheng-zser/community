@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/community/community",
+    "pages/community-publish/community-publish",
     "pages/classify/classify",
     "pages/goods-cart/goods-cart",
     "pages/user/user",

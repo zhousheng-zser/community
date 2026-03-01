@@ -1,6 +1,9 @@
 # 微信开发者工具相关的私有配置（不应当提交到代码仓库）
 project.private.config.json
 project.config.json
+backend/.env
+
+
 # 系统文件
 .DS_Store
 Thumbs.db

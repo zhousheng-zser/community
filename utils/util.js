@@ -76,6 +76,35 @@ const post = (url, data) => {
     })
   })
 }
+const uploadFile = (url, filePath, name = 'file', formData = {}) => {
+  return new Promise((resolve, reject) => {
+    const token = wx.getStorageSync('token');
+    wx.uploadFile({
+      url: "http://localhost:3000/api/v1/" + url,
+      filePath: filePath,
+      name: name,
+      formData: formData,
+      header: {
+        'Authorization': token ? 'Bearer ' + token : ''
+      },
+      success: (res) => {
+        const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        if (res.statusCode === 200 || res.statusCode === 201) {
+          resolve(data.data || data)
+        } else {
+          reject(data)
+        }
+      },
+      fail: (res) => {
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none'
+        })
+        reject(res)
+      }
+    })
+  })
+}
 const booksStateTabel = (state) => {
   var result = [];
   switch (state) {
@@ -315,6 +344,7 @@ module.exports = {
   formatTime,
   get,
   post,
+  uploadFile,
   goodsStateTabel,
   booksStateTabel,
   stateTabel
