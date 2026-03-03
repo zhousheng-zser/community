@@ -7,13 +7,19 @@
       <view class="top-tab {{activeTab === item.text ? 'active' : ''}}" wx:for="{{topTabs}}" wx:key="text" bindtap="switchTopTab" data-tab="{{item.text}}">{{item.text}}</view>
     </view>
     <view class="search-row">
-      <view class="location-pill">
+      <view class="location-pill" bindtap="handleLocationTap">
         <text class="dot-black"></text>
-        <text>果壳里的城</text>
+        <text>📍</text>
       </view>
       <view class="search-input">
         <icon type="search" size="13" color="#999" />
-        <text>{{activeTab === '家集市' ? '搜索商家、商品' : activeTab === '福卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}</text>
+        <input
+          class="search-field"
+          placeholder="{{activeTab === '家集市' ? '搜索商家、商品' : activeTab === '福卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}"
+          value="{{homeSearchKeyword}}"
+          bindinput="onHomeSearchInput"
+          confirm-type="search"
+        />
       </view>
       <view class="search-btn">搜索</view>
     </view>
@@ -177,7 +183,7 @@
   <view wx:else>
   <view class="card panel-grid">
     <view class="service-grid">
-      <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="../classify/classify">
+      <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="{{item.url}}">
         <image src="{{item.icon}}" mode="aspectFill"></image>
         <text>{{item.name}}</text>
       </navigator>
@@ -235,7 +241,7 @@
   <view class="card section-card">
     <view class="section-head">
       <text class="title">直约服务商</text>
-      <text class="more">查看全部 ></text>
+      <navigator class="more" url="../merchant-detail/merchant-detail">查看全部 ></navigator>
     </view>
     <view class="merchant-list">
       <navigator class="merchant-item" wx:for="{{merchantList}}" wx:key="id" url="{{item.url}}">
@@ -251,7 +257,7 @@
   <view class="card section-card">
     <view class="section-head">
       <text class="title">直约技工</text>
-      <text class="more">查看全部 ></text>
+      <navigator class="more" url="../classify/classify">查看全部 ></navigator>
     </view>
     <scroll-view class="worker-scroll" scroll-x="{{true}}">
       <view class="worker-row">

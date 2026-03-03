@@ -9,9 +9,107 @@ page {
 .top-nav {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 26rpx;
   margin-bottom: 18rpx;
   padding-bottom: 8rpx;
+}
+
+.search-box {
+  flex: 1;
+  margin: 0 16rpx;
+  background: #f0f0f0;
+  border-radius: 28rpx;
+  padding: 12rpx 20rpx;
+  color: #a9a9a9;
+}
+
+.category-wrap {
+  background: #fff;
+  border-radius: 14rpx;
+  padding: 16rpx;
+}
+
+.category-grid {
+  display: flex;
+  align-items: flex-start;
+}
+
+.cate-list {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 118rpx;
+  overflow: hidden;
+}
+
+.category-wrap.expanded .cate-list {
+  max-height: 1200rpx;
+}
+
+.cate-item {
+  width: 20%;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.cate-item .icon {
+  width: 66rpx;
+  height: 66rpx;
+  border-radius: 33rpx;
+  margin: 0 auto 8rpx;
+  background: linear-gradient(180deg, #ff9ab0 0%, #86c2ff 100%);
+}
+
+.cate-item text {
+  font-size: 20rpx;
+}
+
+.expand-btn {
+  width: 52rpx;
+  height: 52rpx;
+  margin-left: 8rpx;
+  border-radius: 50%;
+  background: #f5f6f8;
+  color: #666;
+  font-size: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.filter-row {
+  margin-top: 14rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-row .active {
+  width: 170rpx;
+  text-align: center;
+  height: 64rpx;
+  line-height: 64rpx;
+  background: #d90e16;
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 38rpx;
+}
+
+.drop-btn {
+  width: 100rpx;
+  text-align: center;
+  height: 64rpx;
+  line-height: 64rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  color: #555;
+  font-size: 34rpx;
+}
+
+.merchant-list {
+  margin-top: 12rpx;
 }
 
 .merchant-card,
@@ -24,7 +122,8 @@ page {
 
 .merchant-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
 }
 
 .merchant-card image {
@@ -46,8 +145,33 @@ page {
 
 .merchant-card .time {
   display: block;
-  margin-top: 12rpx;
+  margin-top: 8rpx;
   color: #888;
+}
+
+.merchant-card .desc {
+  display: block;
+  margin-top: 8rpx;
+}
+
+.merchant-card .tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+
+.merchant-card .tags text {
+  margin-right: 8rpx;
+  margin-bottom: 8rpx;
+  background: #f4f4f4;
+  border-radius: 8rpx;
+  padding: 2rpx 10rpx;
+  font-size: 20rpx;
+  color: #777;
+}
+
+.merchant-card .role {
+  color: #333;
 }
 
 .arrow {
@@ -71,10 +195,11 @@ page {
 }
 
 .empty {
-  margin-top: 220rpx;
-  display: inline-block;
+  display: block;
+  text-align: center;
+  margin-top: 20rpx;
   color: #b6bcc6;
-  font-size: 50rpx;
+  font-size: 60rpx;
 }
 
 .sub-tabs {

@@ -1,32 +1,42 @@
 <view class="merchant-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈 果壳里的城</text>
+    <text bindtap="goBack">〈 📍</text>
+    <view class="search-box">名称搜索</view>
     <text>•••</text>
   </view>
 
-  <view class="merchant-card">
-    <image src="{{merchant.avatar}}" mode="aspectFill"></image>
-    <view class="info">
-      <text class="name">{{merchant.name}}</text>
-      <text class="time">服务时间：{{merchant.time}}</text>
+  <view class="category-wrap {{categoryExpanded ? 'expanded' : ''}}">
+    <view class="category-grid">
+      <view class="cate-list">
+        <view class="cate-item" wx:for="{{categories}}" wx:key="*this">
+          <view class="icon"></view>
+          <text>{{item}}</text>
+        </view>
+      </view>
+      <view class="expand-btn" bindtap="toggleCategory">
+        <text>{{categoryExpanded ? '∧' : '∨'}}</text>
+      </view>
     </view>
-    <text class="arrow">〉</text>
   </view>
 
-  <view class="notice-card">
-    <text>🔊</text>
-    <text class="arrow">〉</text>
+  <view class="filter-row">
+    <text class="active">全部</text>
+    <view class="drop-btn">⌄</view>
   </view>
 
-  <view class="section-title">精选服务</view>
-  <view class="empty-card">
-    <text class="empty">列表为空</text>
+  <view class="merchant-list">
+    <view class="merchant-card" wx:for="{{merchants}}" wx:key="id">
+      <image src="{{item.avatar}}" mode="aspectFill"></image>
+      <view class="info">
+        <text class="name">{{item.name}}</text>
+        <text class="time">{{item.orders}}</text>
+        <text class="desc">{{item.desc}}</text>
+        <view class="tags">
+          <text wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+        </view>
+        <text class="role">🧰 {{item.role}}</text>
+      </view>
+    </view>
   </view>
-
-  <view class="sub-tabs">
-    <text class="active">首页</text>
-    <text>产品</text>
-    <text>分类</text>
-    <text>客服</text>
-  </view>
+  <view class="empty">没有更多了</view>
 </view>

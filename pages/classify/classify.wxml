@@ -1,18 +1,23 @@
 <view class="worker-page">
   <view class="top-bar" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈 果壳里的城</text>
+    <text bindtap="goBack">〈 📍</text>
     <view class="search">名称搜索</view>
     <text>•••</text>
   </view>
 
-  <scroll-view class="skill-row" scroll-x="{{true}}">
-    <view class="inner">
-      <view class="skill-item" wx:for="{{skills}}" wx:key="*this">
-        <view class="icon"></view>
-        <text>{{item}}</text>
+  <view class="category-wrap {{categoryExpanded ? 'expanded' : ''}}">
+    <view class="category-grid">
+      <view class="skill-list">
+        <view class="skill-item" wx:for="{{categories}}" wx:key="*this">
+          <view class="icon"></view>
+          <text>{{item}}</text>
+        </view>
+      </view>
+      <view class="expand-btn" bindtap="toggleCategory">
+        <text>{{categoryExpanded ? '∧' : '∨'}}</text>
       </view>
     </view>
-  </scroll-view>
+  </view>
 
   <view class="filter-row">
     <text>综合排序</text>

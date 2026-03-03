@@ -88,6 +88,13 @@
   padding: 0 16rpx;
 }
 
+.search-field {
+  flex: 1;
+  margin-left: 10rpx;
+  font-size: 22rpx;
+  color: #333;
+}
+
 .search-btn {
   width: 92rpx;
   height: 56rpx;

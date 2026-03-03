@@ -1,82 +1,63 @@
-<!--pages/community/community.wxml-->
-<view class="container flex-col">
-  <!-- 顶部背景与用户信息（类似朋友圈封面） -->
-  <view class="header-cover">
-    <image class="cover-img" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80" mode="aspectFill"></image>
-    <view class="user-info">
-      <text class="user-name">{{userInfo.userName || '微信用户'}}</text>
-      <image class="user-avatar" src="{{userInfo.userPhoto || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0'}}"></image>
+﻿<!--pages/community/community.wxml-->
+<view class="community-page">
+  <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
+    <view class="top-row">
+      <view class="left" bindtap="handleLocationTap">
+        <text class="pin">鈼?/text>
+        <text class="location">馃搷</text>
+        <text class="circle">閭婚噷鐢熸椿鍦?/text>
+      </view>
     </view>
-  </view>
 
-  <!-- 动态列表 -->
-  <view class="post-list">
-    <!-- 单条动态 -->
-    <view class="post-item" wx:for="{{posts}}" wx:key="id">
-      <!-- 左侧头像 -->
-      <image class="post-avatar" src="{{item.avatar}}"></image>
-      <!-- 右侧内容区 -->
-      <view class="post-content-area">
-        <text class="post-name">{{item.name}}</text>
-        <text class="post-text">{{item.content}}</text>
-        
-        <!-- 九宫格图片区 -->
-        <view class="post-images" wx:if="{{item.images && item.images.length > 0}}">
-          <image class="post-img {{item.images.length === 1 ? 'single-img' : ''}}" 
-                 wx:for="{{item.images}}" 
-                 wx:for-item="img" 
-                 wx:key="*this" 
-                 src="{{img}}" 
-                 mode="aspectFill"
-                 catchtap="previewImage" 
-                 data-url="{{img}}" 
-                 data-urls="{{item.images}}">
-          </image>
-        </view>
+    <view class="search-row">
+      <view class="search-box">
+        <text class="search-icon">鈱?/text>
+        <input
+          class="search-field"
+          placeholder="璇疯緭鍏?
+          value="{{communitySearchKeyword}}"
+          bindinput="onCommunitySearchInput"
+          confirm-type="search"
+        />
+      </view>
+      <text class="func-icon">鈼?/text>
+      <text class="func-icon">鈯?/text>
+    </view>
 
-        <!-- 底部时间与操作图标 -->
-        <view class="post-footer">
-          <text class="post-time">{{item.time}}</text>
-          <!-- 模拟微信朋友圈右侧的两个点操作按钮 -->
-          <view class="action-btn" catchtap="toggleActionMenu" data-index="{{index}}">
-            <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTk5OTk5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDExLjVMMTMuNSA1TDEyIDYuNUwxOCA4SDNWMTBIMThMMTIgMTEuNUwxMy41IDEzTDIxIDExLjVaIi8+PC9zdmc+" class="action-icon"></image>
-            <view class="action-icon-dots">··</view>
-          </view>
-          
-          <!-- 隐藏的点赞/评论菜单 -->
-          <view class="action-menu {{item.showMenu ? 'show' : ''}}">
-            <view class="menu-item" catchtap="likePost" data-index="{{index}}">
-              <text>♡ {{item.isLiked ? '取消' : '赞'}}</text>
-            </view>
-            <view class="menu-divider"></view>
-            <view class="menu-item" catchtap="commentPost" data-index="{{index}}">
-              <text>💬 评论</text>
-            </view>
-          </view>
-        </view>
-
-        <!-- 点赞与评论展示区 -->
-        <view class="interaction-area" wx:if="{{item.likes.length > 0 || item.comments.length > 0}}">
-          <!-- 点赞列表 -->
-          <view class="likes-list" wx:if="{{item.likes.length > 0}}">
-            <text class="like-heart">♡</text>
-            <text class="like-name" wx:for="{{item.likes}}" wx:for-item="liker" wx:key="*this">{{liker}}{{index < item.likes.length - 1 ? ', ' : ''}}</text>
-          </view>
-          <!-- 评论列表 -->
-          <view class="comments-list" wx:if="{{item.comments.length > 0}}">
-            <view class="comment-item" wx:for="{{item.comments}}" wx:for-item="comment" wx:key="id">
-              <text class="comment-name">{{comment.name}}：</text>
-              <text class="comment-text">{{comment.text}}</text>
-            </view>
-          </view>
-        </view>
-
+    <view class="tab-row">
+      <view class="tab {{activeTab === item ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">
+        {{item}}
       </view>
     </view>
   </view>
 
-  <!-- 悬浮的发布按钮 -->
-  <view class="publish-btn-float" catchtap="goPublish">
-    <image src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMyAxOWEyaCAyIDBtMC0yYTIgMiAwIDAgMS0yLTJIM2EyIDIgMCAwIDEtMi0yVjhhMiAyIDAgMCAxIDItMmg0bDIuNS0zaDMuNWwyLjUgM2g0YTIgMiAwIDAgMSAyIDJ2OXoiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjEzIiByPSI0Ij48L2NpcmNsZT48L3N2Zz4="></image>
+  <view class="content-wrap" wx:if="{{activeTab !== '閭婚噷浜掑姩'}}">
+    <view class="empty-board">
+      <view class="empty-note"></view>
+    </view>
+  </view>
+
+  <view class="post-list" wx:else>
+    <view class="post-card" wx:for="{{posts}}" wx:key="id">
+      <view class="user-row">
+        <view class="left">
+          <view class="avatar"></view>
+          <text class="name">{{item.name}}</text>
+        </view>
+        <text class="time">{{item.time}}</text>
+      </view>
+
+      <text class="title">{{item.title}}</text>
+      <image wx:if="{{item.image}}" class="post-image" src="{{item.image}}" mode="aspectFill"></image>
+      <text class="desc">{{item.desc}}</text>
+
+      <view class="meta-row">
+        <text class="read">闃呰 {{item.read}}</text>
+        <view class="right">
+          <text class="meta">馃挰 {{item.comment}}</text>
+          <text class="meta">鈾?{{item.like}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 </view>

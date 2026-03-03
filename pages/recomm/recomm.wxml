@@ -1,6 +1,6 @@
 <view class="neighbor-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text class="left" bindtap="goBack">〈 果壳里的城</text>
+    <text class="left" bindtap="goBack">〈 📍</text>
     <text class="title">邻里帮帮</text>
     <text class="right">•••</text>
   </view>

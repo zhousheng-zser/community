@@ -1,106 +1,110 @@
 <!--pages/user/user.wxml-->
-<view class='container'>
-  <view class='user'>
-    <navigator url="../user-edit/user-edit">
-      <image class='userimg' src='{{user.userPhoto}}'></image>
-    </navigator>
-    <view class='userinfo'>
-      <text class='username'>{{user.userName}}</text>
-      <text class='tel'>{{user.tel}}</text>
-      <view>
-        <text class='cell'>{{vipFlagMap[user.vipFlag]}}</text>
-        <text class='cell' wx:if="{{user.userFlag==1}}" bindtap='showActionSheet'>{{stateList[currentState]}}</text>
+<view class="mine-page">
+  <view class="mine-top-bg"></view>
+
+  <view class="profile-card">
+    <view class="profile-main">
+      <navigator url="../user-edit/user-edit">
+        <image class="avatar" src="{{user.userPhoto || '/img/head.jpg'}}" mode="aspectFill"></image>
+      </navigator>
+      <view class="base-info">
+        <text class="name">{{user.userName || '微信用户'}}</text>
+        <text class="mobile">{{user.tel || ''}}</text>
       </view>
-      
-    </view>
-    <navigator class='code' url='../user-code/user-code'>
-      <image src='/img/user/user-code.png'></image>
-    </navigator>
-  </view>
-  <view class='account'>
-    <navigator class='item' url='../account/account'>
-      <text class='text'>余额</text>
-      <text class='num'>{{account.totalAcount}}<text>元</text></text>
-    </navigator>
-    <navigator class='item' url='../coupons-my/coupons-my'>
-      <text class='text'>优惠券</text>
-      <text class='num'>{{couponCount}} <text>个</text> </text>
-    </navigator>
-  </view>
-  <view class='order'>
-    <navigator class='item' url='../book-my/book-my'>
-      <image class='icon' src='/img/user/user-book.png'></image>
-      <text class='text'>我发布的预约</text>
-    </navigator>
-    <navigator class='item' url='../goods-cart/goods-cart'>
-      <image class='icon' src='/img/user/user-cart.png'></image>
-      <text class='text'>我的购物车</text>
-    </navigator>
-  </view>
-  <view class='list'>
-    <view class='section'>
-      <navigator class='row' url='../user-edit/user-edit'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-1-1.png'></image>
-          <text class='text'>我的资料</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
-      </navigator>
-      <navigator class='row' url='../recomm/recomm?flag=0'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-1-2.png'></image>
-          <text class='text'>我的用户</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
-      </navigator>
-      <navigator class='row' url='../recomm/recomm?flag=1'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-1-2.png'></image>
-          <text class='text'>我的工友</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
-      </navigator>
-      <navigator class='row' url='../audit/audit'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-1-3.png'></image>
-          <text class='text'>我的申请</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
+      <navigator class="code-btn" url="../user-code/user-code">
+        <image src="/img/user/user-code.png"></image>
       </navigator>
     </view>
-    <view class='section'>
-      <navigator class='row' url='../coupons-all/coupons-all'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-2-1.png'></image>
-          <text class='text'>领券中心</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
-      </navigator>
-      <navigator class='row' url='../order/order?orderReceiving=1' wx:if="{{user.userFlag==1}}">
-        <view class='left'>
-          <image class='icon' src='/img/user/user-2-2.png'></image>
-          <text class='text'>接单中心</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
-      </navigator>
-      <view wx:if="{{user.vipFlag==5}}" class='row' bindtap='goDispatch'>
-        <view class='left'>
-          <image class='icon' src='/img/user/user-2-3.png'></image>
-          <text class='text'>派单中心</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
+
+    <view class="profile-stats">
+      <view class="stat-item">
+        <text class="num">{{points}}</text>
+        <text class="label">家事积分</text>
       </view>
+      <navigator class="stat-item" url="../coupons-my/coupons-my">
+        <text class="num">{{couponCount}}</text>
+        <text class="label">新服务优惠券</text>
+      </navigator>
+      <navigator class="stat-item" url="../coupons-my/coupons-my">
+        <text class="num">{{couponCount}}</text>
+        <text class="label">新零售优惠券</text>
+      </navigator>
     </view>
-    <view class='section'>
-      <view class='row'>
-    <button open-type="share"></button>
-      
-        <view class='left'>
-          <image class='icon' src='/img/user/user-3-1.png'></image>
-          <text class='text'>分享给朋友</text>
-        </view>
-        <image class='arrow' src='/img/arrow-right.png'></image>
+  </view>
+
+  <navigator class="income-card" url="../account/account">
+    <view class="income-left">
+      <view class="income-icon-wrap">
+        <image class="income-icon" src="/img/user/user-2-1.png"></image>
       </view>
+      <text>我的收益</text>
+    </view>
+    <view class="income-right">
+      <text class="money">￥{{account.totalAcount || 0}}</text>
+      <text class="sub">可提取 ></text>
+    </view>
+  </navigator>
+
+  <view class="card">
+    <text class="card-title">我的订单</text>
+    <view class="menu-grid">
+      <block wx:for="{{orderMenus}}" wx:key="name">
+        <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
+          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+        </navigator>
+        <view wx:else class="menu-item">
+          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">我的社区</text>
+    <view class="menu-grid">
+      <block wx:for="{{communityMenus}}" wx:key="name">
+        <view class="menu-item">
+          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">加入家事速配</text>
+    <view class="join-grid">
+      <block wx:for="{{joinMenus}}" wx:key="name">
+        <view class="join-item">
+          <view class="menu-icon-wrap join-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+          <text class="join-sub">{{item.sub}}</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">其他服务</text>
+    <view class="menu-grid">
+      <block wx:for="{{serviceMenus}}" wx:key="name">
+        <view class="menu-item">
+          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+        </view>
+      </block>
     </view>
   </view>
 </view>

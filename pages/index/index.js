@@ -7,6 +7,7 @@ Page({
     noOrderTip: "您还没有订单",
     showGetTelModal: false,
     userFlag: 0,
+    homeSearchKeyword: "",
     navTopPadding: 20,
     activeTab: "首页",
     topTabs: [
@@ -80,6 +81,25 @@ Page({
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
   },
+  onHomeSearchInput(e) {
+    this.setData({ homeSearchKeyword: e.detail.value });
+  },
+  handleLocationTap() {
+    wx.chooseLocation({
+      success: (res) => {
+        wx.showToast({
+          title: res.name ? "已定位到" + res.name : "定位已更新",
+          icon: "none"
+        });
+      },
+      fail: () => {
+        wx.showToast({
+          title: "未获取到定位",
+          icon: "none"
+        });
+      }
+    });
+  },
   goMarketShop(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: "../market-shop/market-shop?id=" + id });
@@ -128,16 +148,15 @@ Page({
     ];
 
     const categoryList = [
-      { name: "整理收纳", icon: "/img/index/menuicon1.png" },
-      { name: "家修急事", icon: "/img/index/menuicon2.png" },
-      { name: "家电清洗", icon: "/img/index/menuicon3.png" },
-      { name: "开荒保洁", icon: "/img/index/menuicon4.png" },
-      { name: "除螨服务", icon: "/img/index/menuicon1.png" },
-      { name: "家居养护", icon: "/img/index/menuicon2.png" },
-      { name: "宝宝家事", icon: "/img/index/menuicon3.png" },
-      { name: "房屋修缮", icon: "/img/index/menuicon4.png" },
-      { name: "上门美业", icon: "/img/index/menuicon1.png" },
-      { name: "上门服务商", icon: "/img/index/menuicon2.png" }
+      { name: "整理收纳", icon: "/img/index/menuicon1.png", url: "../tidy-service/tidy-service?key=tidy" },
+      { name: "家修急事", icon: "/img/index/menuicon2.png", url: "../tidy-service/tidy-service?key=urgent_fix" },
+      { name: "家电清洗", icon: "/img/index/menuicon3.png", url: "../tidy-service/tidy-service?key=appliance_clean" },
+      { name: "开荒保洁", icon: "/img/index/menuicon4.png", url: "../tidy-service/tidy-service?key=pioneer_clean" },
+      { name: "除螨服务", icon: "/img/index/menuicon1.png", url: "../tidy-service/tidy-service?key=mite_remove" },
+      { name: "家具养护", icon: "/img/index/menuicon2.png", url: "../tidy-service/tidy-service?key=furniture_care" },
+      { name: "宝宝家事", icon: "/img/index/menuicon3.png", url: "../tidy-service/tidy-service?key=baby_home" },
+      { name: "房屋修缮", icon: "/img/index/menuicon4.png", url: "../tidy-service/tidy-service?key=house_repair" },
+      { name: "上门美业", icon: "/img/index/menuicon1.png", url: "../tidy-service/tidy-service?key=beauty_home" }
     ];
     const quickActions = [
       { name: "直约服务商", icon: "/img/index/ticon1.png" },

@@ -1,6 +1,6 @@
 <view class="month-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈 果壳里的城</text>
+    <text bindtap="goBack">〈 📍</text>
     <text class="title">开通月卡套餐</text>
     <text>⤴</text>
   </view>

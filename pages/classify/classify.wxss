@@ -24,21 +24,38 @@ page {
   color: #a9a9a9;
 }
 
-.skill-row {
-  white-space: nowrap;
+.category-wrap {
   background: #fff;
   border-radius: 14rpx;
-  padding: 18rpx;
+  padding: 16rpx;
+  transition: all 0.25s;
 }
 
-.skill-row .inner {
+.category-wrap.expanded {
+  max-height: 1250rpx;
+}
+
+.category-grid {
   display: flex;
+  align-items: flex-start;
+}
+
+.skill-list {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  max-height: 118rpx;
+  overflow: hidden;
+}
+
+.category-wrap.expanded .skill-list {
+  max-height: 1200rpx;
 }
 
 .skill-item {
-  width: 130rpx;
+  width: 20%;
   text-align: center;
-  margin-right: 16rpx;
+  margin-bottom: 20rpx;
 }
 
 .skill-item .icon {
@@ -51,6 +68,20 @@ page {
 
 .skill-item text {
   font-size: 20rpx;
+}
+
+.expand-btn {
+  width: 52rpx;
+  height: 52rpx;
+  margin-left: 8rpx;
+  border-radius: 50%;
+  background: #f5f6f8;
+  color: #666;
+  font-size: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .filter-row {

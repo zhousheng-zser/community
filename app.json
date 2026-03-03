@@ -30,6 +30,7 @@
     "pages/recomm/recomm",
     "pages/activity/activity",
     "pages/goods-classify/goods-classify",
+    "pages/tidy-service/tidy-service",
     "pages/goods-detail/goods-detail",
     "pages/coupons-my/coupons-my",
     "pages/activity-list/activity-list",
@@ -66,7 +67,7 @@
         "iconPath": "/img/order-0.png",
         "selectedIconPath": "/img/order-1.png",
         "pagePath": "pages/goods-cart/goods-cart",
-        "text": "购物车"
+        "text": "消息"
       },
       {
         "iconPath": "/img/user-0.png",
