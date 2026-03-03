@@ -3,39 +3,39 @@
   <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
     <view class="top-row">
       <view class="left" bindtap="handleLocationTap">
-        <text class="pin">鈼?/text>
-        <text class="location">馃搷</text>
-        <text class="circle">閭婚噷鐢熸椿鍦?/text>
+        <text class="pin">◎</text>
+        <text class="location">📍</text>
+        <text class="circle">邻里生活圈</text>
       </view>
     </view>
 
     <view class="search-row">
       <view class="search-box">
-        <text class="search-icon">鈱?/text>
+        <text class="search-icon">⌕</text>
         <input
           class="search-field"
-          placeholder="璇疯緭鍏?
+          placeholder="请输入"
           value="{{communitySearchKeyword}}"
           bindinput="onCommunitySearchInput"
           confirm-type="search"
         />
-      </view>
-      <text class="func-icon">鈼?/text>
-      <text class="func-icon">鈯?/text>
-    </view>
-
+        </view>
+      <text class="func-icon">◔</text>
+      <text class="func-icon">⊕</text>
+          </view>
+          
     <view class="tab-row">
       <view class="tab {{activeTab === item ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">
         {{item}}
-      </view>
-    </view>
-  </view>
+            </view>
+          </view>
+        </view>
 
-  <view class="content-wrap" wx:if="{{activeTab !== '閭婚噷浜掑姩'}}">
+  <view class="content-wrap" wx:if="{{activeTab !== '邻里互动'}}">
     <view class="empty-board">
       <view class="empty-note"></view>
-    </view>
-  </view>
+            </view>
+          </view>
 
   <view class="post-list" wx:else>
     <view class="post-card" wx:for="{{posts}}" wx:key="id">
@@ -52,10 +52,10 @@
       <text class="desc">{{item.desc}}</text>
 
       <view class="meta-row">
-        <text class="read">闃呰 {{item.read}}</text>
+        <text class="read">阅读 {{item.read}}</text>
         <view class="right">
-          <text class="meta">馃挰 {{item.comment}}</text>
-          <text class="meta">鈾?{{item.like}}</text>
+          <text class="meta">💬 {{item.comment}}</text>
+          <text class="meta">♡ {{item.like}}</text>
         </view>
       </view>
     </view>
