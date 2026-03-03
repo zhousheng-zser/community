@@ -1,0 +1,27 @@
+<view class="tidy-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <text class="back" bindtap="goBack">〈</text>
+    <text class="title">{{pageTitle}}</text>
+    <text>•••</text>
+  </view>
+
+  <view class="cate-row">
+    <view class="cate-item {{activeCategory===item.key?'active':''}}" wx:for="{{categories}}" wx:key="key" bindtap="switchCategory" data-key="{{item.key}}">
+      <text class="icon">{{item.icon}}</text>
+      <text class="name">{{item.name}}</text>
+    </view>
+  </view>
+
+  <view class="service-list">
+    <navigator class="service-card" wx:for="{{filteredServices}}" wx:key="id" url="../service/service?id={{item.id}}">
+      <image src="{{item.image}}" mode="aspectFill"></image>
+      <view class="info">
+        <text class="title">{{item.title}}</text>
+        <text class="price">{{item.price}}</text>
+        <text class="meta">{{item.sold}}</text>
+      </view>
+    </navigator>
+  </view>
+
+  <text class="nomore">没有更多了</text>
+</view>

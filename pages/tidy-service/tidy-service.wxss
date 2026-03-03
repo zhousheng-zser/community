@@ -1,0 +1,110 @@
+page {
+  background: #f3f3f3;
+}
+
+.tidy-page {
+  padding: 14rpx;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8rpx 8rpx 10rpx;
+  font-size: 30rpx;
+}
+
+.back {
+  font-size: 42rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.cate-row {
+  display: flex;
+  gap: 10rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 8rpx;
+}
+
+.cate-item {
+  flex: 0 0 130rpx;
+  background: #fff;
+  border: 1rpx solid #e8e8e8;
+  border-radius: 10rpx;
+  height: 108rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #444;
+}
+
+.cate-item.active {
+  border-color: #efe2bf;
+  color: #c9b37a;
+}
+
+.cate-item .icon {
+  font-size: 28rpx;
+}
+
+.cate-item .name {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+}
+
+.service-list {
+  margin-top: 14rpx;
+}
+
+.service-card {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 16rpx;
+  margin-bottom: 14rpx;
+}
+
+.service-card image {
+  width: 130rpx;
+  height: 98rpx;
+  border-radius: 8rpx;
+}
+
+.service-card .info {
+  margin-left: 14rpx;
+  flex: 1;
+}
+
+.service-card .title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.service-card .price {
+  display: block;
+  margin-top: 8rpx;
+  color: #d39a2f;
+  font-size: 46rpx;
+  font-weight: 700;
+}
+
+.service-card .meta {
+  display: block;
+  margin-top: 8rpx;
+  color: #999;
+  font-size: 30rpx;
+}
+
+.nomore {
+  display: block;
+  text-align: center;
+  color: #8f8f8f;
+  margin: 22rpx 0 10rpx;
+}
