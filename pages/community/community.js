@@ -1,4 +1,4 @@
-﻿// pages/community/community.js
+// pages/community/community.js
 Page({
   data: {
     navTopPadding: 20,

@@ -1,4 +1,4 @@
-﻿<!--pages/community/community.wxml-->
+<!--pages/community/community.wxml-->
 <view class="community-page">
   <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
     <view class="top-row">
