@@ -61,7 +61,7 @@ App({
     }
     return {
       title: '家政服务小程序',
-      imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800&q=80',
+      imageUrl: '/img/placeholders/home_cleaning.png',
       path: '/pages/index/index?openid=' + openid
     }
   }

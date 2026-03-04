@@ -9,7 +9,7 @@
     <text>•••</text>
   </view>
 
-  <image class="cover" src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200&q=80" mode="aspectFill"></image>
+  <image class="cover" src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
 
   <view class="shop-card">
     <image src="/img/聚收藏.png" mode="aspectFill"></image>

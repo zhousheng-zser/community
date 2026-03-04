@@ -180,8 +180,8 @@ Page({
       ...item,
       sold: "已售0 好评率100%",
       image: idx % 2 === 0
-        ? "https://images.unsplash.com/photo-1582582621959-48d27397dc69?w=300&q=80"
-        : "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=300&q=80"
+        ? "/img/placeholders/home_cleaning.png"
+        : "/img/placeholders/home_cleaning.png"
     }));
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,

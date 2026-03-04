@@ -38,6 +38,15 @@ app.use('/api/v1/posts', postRoutes);
 app.use('/api/v1/core', coreDataRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/user', userRoutes);
+app.use('/api/v1/messages', require('./routes/messageRoutes'));
+
+// ===================
+// User Profile Mock Routes
+// 为了匹配前端直接写死的接口名而临时添加
+// ===================
+const userController = require('./controllers/userController');
+app.get('/api/v1/acount/info', userController.getAccountInfo);
+app.get('/api/v1/wx/user/coupon/:id', userController.getUserCoupons);
 
 // 通用单文件上传接口
 const upload = require('./utils/upload');

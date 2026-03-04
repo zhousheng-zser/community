@@ -54,3 +54,17 @@ exports.updateProfile = async (req, res) => {
         res.status(500).json({ error: '服务器内部错误' });
     }
 };
+
+// Mock Account Info
+exports.getAccountInfo = async (req, res) => {
+    // 暂时返回假数据让前端渲染通过
+    res.json({
+        totalAcount: 0
+    });
+};
+
+// Mock User Coupons
+exports.getUserCoupons = async (req, res) => {
+    // 暂时返回空数组代表 0 张优惠券
+    res.json([]);
+};

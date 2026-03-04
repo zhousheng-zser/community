@@ -6,7 +6,7 @@ Page({
       price: "9.90",
       pay: "9.90",
       rebate: "1.58",
-      image: "https://images.unsplash.com/photo-1612198529147-6f7f38f4f9f5?w=800&q=80",
+      image: "/img/placeholders/home_cleaning.png",
       shop: "腹说营养旗舰店"
     }
   },

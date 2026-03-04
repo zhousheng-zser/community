@@ -7,7 +7,13 @@ exports.getPosts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
+        const whereClause = {};
+        if (req.query.category) {
+            whereClause.category = req.query.category;
+        }
+
         const posts = await Post.findAndCountAll({
+            where: whereClause,
             offset: offset,
             limit: limit,
             order: [['createdAt', 'DESC']],
@@ -43,6 +49,112 @@ exports.getPosts = async (req, res) => {
     } catch (error) {
         console.error('获取帖子失败:', error);
         res.status(500).json({ error: '获取帖子失败' });
+    }
+};
+
+// 1.1 获取我发布的帖子
+exports.getMyPublishedPosts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const posts = await Post.findAndCountAll({
+            where: { user_id: userId },
+            offset: offset,
+            limit: limit,
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, as: 'author', attributes: ['id', 'nickname', 'avatar_url', 'bg_image'] },
+                { model: Comment, as: 'comments', include: [{ model: User, as: 'author', attributes: ['id', 'nickname'] }] },
+                { model: Like, as: 'likes', include: [{ model: User, as: 'user', attributes: ['id', 'nickname'] }] }
+            ]
+        });
+
+        res.json({ message: '获取成功', total: posts.count, page: page, limit: limit, data: posts.rows });
+    } catch (error) {
+        console.error('获取我的发布失败:', error);
+        res.status(500).json({ error: '获取我的发布失败' });
+    }
+};
+
+// 1.2 获取我点赞过的帖子
+exports.getMyLikedPosts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        // Find likes by this user
+        const likes = await Like.findAll({
+            where: { user_id: userId },
+            attributes: ['post_id']
+        });
+        const postIds = likes.map(like => like.post_id);
+
+        const posts = await Post.findAndCountAll({
+            where: { id: postIds },
+            offset: offset,
+            limit: limit,
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, as: 'author', attributes: ['id', 'nickname', 'avatar_url', 'bg_image'] },
+                { model: Comment, as: 'comments', include: [{ model: User, as: 'author', attributes: ['id', 'nickname'] }] },
+                { model: Like, as: 'likes', include: [{ model: User, as: 'user', attributes: ['id', 'nickname'] }] }
+            ]
+        });
+
+        res.json({ message: '获取成功', total: posts.count, page: page, limit: limit, data: posts.rows });
+    } catch (error) {
+        console.error('获取我的点赞失败:', error);
+        res.status(500).json({ error: '获取我的点赞失败' });
+    }
+};
+
+// 1.3 获取我参与的话题/活动 (发过或者评论过的某分类的帖子)
+exports.getMyParticipatedPosts = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const category = req.query.category; // "热门话题" or "热门活动"
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        if (!category) return res.status(400).json({ error: '缺少分类参数' });
+
+        // 先找我评论过的帖子ID
+        const myComments = await Comment.findAll({
+            where: { user_id: userId },
+            attributes: ['post_id']
+        });
+        const commentedPostIds = myComments.map(c => c.post_id);
+
+        const { Op } = require('sequelize');
+
+        const posts = await Post.findAndCountAll({
+            where: {
+                category: category,
+                [Op.or]: [
+                    { user_id: userId },        // 我发的
+                    { id: commentedPostIds }    // 我评论的
+                ]
+            },
+            offset: offset,
+            limit: limit,
+            order: [['createdAt', 'DESC']],
+            include: [
+                { model: User, as: 'author', attributes: ['id', 'nickname', 'avatar_url', 'bg_image'] },
+                { model: Comment, as: 'comments', include: [{ model: User, as: 'author', attributes: ['id', 'nickname'] }] },
+                { model: Like, as: 'likes', include: [{ model: User, as: 'user', attributes: ['id', 'nickname'] }] }
+            ]
+        });
+
+        res.json({ message: '获取成功', total: posts.count, page: page, limit: limit, data: posts.rows });
+    } catch (error) {
+        console.error('获取参与数据失败:', error);
+        res.status(500).json({ error: '获取参与数据失败' });
     }
 };
 

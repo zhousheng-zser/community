@@ -4,5 +4,5 @@
     <text class="title">{{title}}</text>
     <text>•••</text>
   </view>
-  <image class="banner" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80" mode="aspectFill"></image>
+  <image class="banner" src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
 </view>

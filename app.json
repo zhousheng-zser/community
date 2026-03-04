@@ -2,6 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/community/community",
+    "pages/message/message",
+    "pages/chat/chat",
     "pages/community-publish/community-publish",
     "pages/classify/classify",
     "pages/goods-cart/goods-cart",
@@ -38,7 +40,8 @@
     "pages/book-my/book-my",
     "pages/order-center/order-center",
     "pages/goods-confrim/goods-confrim",
-    "pages/book-detail/book-detail"
+    "pages/book-detail/book-detail",
+    "pages/my-posts/my-posts"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -66,7 +69,7 @@
       {
         "iconPath": "/img/order-0.png",
         "selectedIconPath": "/img/order-1.png",
-        "pagePath": "pages/goods-cart/goods-cart",
+        "pagePath": "pages/message/message",
         "text": "消息"
       },
       {

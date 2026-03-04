@@ -1,37 +1,7 @@
-<!--pages/community/community.wxml-->
-<wxs src="./utils.wxs" module="utilWxs" />
-<view class="community-page">
-  <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
-    <view class="top-row">
-      <view class="left" bindtap="handleLocationTap">
-        <text class="pin">◎</text>
-        <text class="location">📍</text>
-        <text class="circle">邻里生活圈</text>
-      </view>
-    </view>
+<!--pages/my-posts/my-posts.wxml-->
+<wxs src="../community/utils.wxs" module="utilWxs" />
 
-    <view class="search-row">
-      <view class="search-box">
-        <text class="search-icon">⌕</text>
-        <input
-          class="search-field"
-          placeholder="请输入"
-          value="{{communitySearchKeyword}}"
-          bindinput="onCommunitySearchInput"
-          confirm-type="search"
-        />
-        </view>
-      <text class="func-icon">◔</text>
-      <text class="func-icon">⊕</text>
-          </view>
-          
-    <view class="tab-row">
-      <view class="tab {{activeTab === item ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">
-        {{item}}
-            </view>
-          </view>
-        </view>
-
+<view class="my-posts-page" style="padding-top: {{navTopPadding - 20}}px;">
   <view class="post-list" wx:if="{{posts.length > 0}}">
     <view class="post-card" wx:for="{{posts}}" wx:key="id">
       <view class="user-row">
@@ -64,7 +34,8 @@
       </view>
     </view>
   </view>
+  
   <view class="empty-board" wx:else>
-      <text class="empty-note">暂无动态，快来发一条吧~</text>
+      <text class="empty-note">暂无记录~</text>
   </view>
 </view>

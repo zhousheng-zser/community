@@ -21,7 +21,7 @@ Page({
         exp: 4,
         desc: "主要从事建筑回收，全品类建材可回收",
         tags: ["组长", "上门回收"],
-        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=240&q=80"
+        avatar: "/img/placeholders/home_cleaning.png"
       },
       {
         id: 2,
@@ -32,7 +32,7 @@ Page({
         exp: 20,
         desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
         tags: ["组长", "宠物喂养", "衣柜收纳", "陪护作业"],
-        avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=240&q=80"
+        avatar: "/img/placeholders/home_cleaning.png"
       },
       {
         id: 3,
@@ -43,7 +43,7 @@ Page({
         exp: 0,
         desc: "可接送小孩、家政保洁、简单维修等上门服务。",
         tags: ["组长", "宠物喂养", "宠物搭遛", "衣柜干洗"],
-        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=240&q=80"
+        avatar: "/img/placeholders/home_cleaning.png"
       }
     ]
   },

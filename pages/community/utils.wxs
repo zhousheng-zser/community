@@ -1,0 +1,22 @@
+// utils.wxs
+var parseJSON = function(str) {
+  if (!str) return {};
+  try {
+    // 微信小程序 WXS 环境中不支持 JSON.parse，所以我们用基础的正则简单截取。
+    // 因为这只是暂时的 workaround，真正线上后端应该是 Object
+    // format: {"title":"xxx","desc":"yyy"}
+    var titleMatch = getRegExp('"title"\s*:\s*"([^"]+)"').exec(str);
+    var descMatch = getRegExp('"desc"\s*:\s*"([^"]+)"').exec(str);
+    
+    return {
+      title: titleMatch ? titleMatch[1] : "",
+      desc: descMatch ? descMatch[1] : ""
+    };
+  } catch (e) {
+    return { title: str, desc: '' };
+  }
+}
+
+module.exports = {
+  parseJSON: parseJSON
+};

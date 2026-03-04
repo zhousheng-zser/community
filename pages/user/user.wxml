@@ -69,7 +69,13 @@
     <text class="card-title">我的社区</text>
     <view class="menu-grid">
       <block wx:for="{{communityMenus}}" wx:key="name">
-        <view class="menu-item">
+        <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
+          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="menu-icon" src="{{item.icon}}"></image>
+          </view>
+          <text class="menu-name">{{item.name}}</text>
+        </navigator>
+        <view wx:else class="menu-item" bindtap="showToastWait">
           <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
             <image class="menu-icon" src="{{item.icon}}"></image>
           </view>

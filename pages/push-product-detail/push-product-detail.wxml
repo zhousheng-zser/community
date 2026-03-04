@@ -26,7 +26,7 @@
   </view>
 
   <view class="section-title">商品详情</view>
-  <image class="detail-img" src="https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=1000&q=80" mode="widthFix"></image>
+  <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
 
   <view class="bottom-bar">
     <text class="home">首页</text>

@@ -1,0 +1,107 @@
+/* pages/my-posts/my-posts.wxss */
+page {
+  background: #e9e9f1;
+}
+
+.my-posts-page {
+  min-height: 100vh;
+}
+
+.empty-board {
+  padding-top: 120rpx;
+  display: flex;
+  justify-content: center;
+}
+
+.empty-note {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.post-list {
+  background: #e9e9f1;
+  padding-bottom: 150rpx;
+}
+
+.post-card {
+  margin: 12rpx 18rpx;
+  border-radius: 12rpx;
+  background: #fff;
+  overflow: hidden;
+}
+
+.user-row {
+  padding: 16rpx 18rpx 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-row .left {
+  display: flex;
+  align-items: center;
+}
+
+.avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #d8d8d8;
+  margin-right: 12rpx;
+}
+
+.name {
+  font-size: 34rpx;
+  color: #1f1f1f;
+}
+
+.time {
+  font-size: 24rpx;
+  color: #9a9a9a;
+}
+
+.title {
+  display: block;
+  margin: 12rpx 18rpx 0;
+  font-size: 40rpx;
+  color: #1f1f1f;
+  font-weight: 700;
+}
+
+.post-image {
+  width: 190rpx;
+  height: 190rpx;
+  margin: 12rpx 18rpx 0;
+  border-radius: 8rpx;
+}
+
+.desc {
+  display: block;
+  margin: 12rpx 18rpx 14rpx;
+  font-size: 34rpx;
+  color: #2a2a2a;
+}
+
+.meta-row {
+  border-top: 1rpx solid #eee;
+  padding: 12rpx 18rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.read {
+  font-size: 28rpx;
+  color: #8f8f95;
+}
+
+.meta-row .right {
+  display: flex;
+  align-items: center;
+}
+
+.meta {
+  margin-left: 20rpx;
+  font-size: 26rpx;
+  color: #8f8f95;
+}

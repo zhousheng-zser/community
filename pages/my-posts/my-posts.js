@@ -1,0 +1,99 @@
+// pages/my-posts/my-posts.js
+const util = require('../../utils/util.js');
+
+Page({
+    data: {
+        navTopPadding: 20,
+        posts: [],
+        pageType: '',
+        category: ''
+    },
+
+    onLoad(options) {
+        const sys = wx.getSystemInfoSync();
+        this.setData({
+            navTopPadding: (sys.statusBarHeight || 20) + 8,
+            pageType: options.type || 'myposts',
+            category: options.category || ''
+        });
+
+        if (options.title) {
+            wx.setNavigationBarTitle({ title: options.title });
+        }
+
+        this.fetchData();
+    },
+
+    fetchData() {
+        let url = '';
+        const query = {};
+
+        if (this.data.pageType === 'myposts') {
+            url = 'posts/my/published';
+        } else if (this.data.pageType === 'mylikes') {
+            url = 'posts/my/liked';
+        } else if (this.data.pageType === 'participated') {
+            url = 'posts/my/participated';
+            query.category = this.data.category;
+        }
+
+        if (!url) return;
+
+        util.get(url, query)
+            .then(res => {
+                // Handle array returned by backend util wrapper appropriately
+                this.setData({ posts: Array.isArray(res) ? res : (res.data || []) });
+            })
+            .catch(err => {
+                console.error('加载列表失败', err);
+                wx.showToast({ title: '加载失败', icon: 'none' });
+            });
+    },
+
+    handleLike(e) {
+        const { id, index } = e.currentTarget.dataset;
+        util.post(`posts/${id}/like`)
+            .then(res => {
+                // Optimistic UI Update
+                const posts = this.data.posts;
+                if (!posts[index].likes) posts[index].likes = [];
+
+                if (res.status === 'liked') {
+                    posts[index].likes.push({ id: wx.getStorageSync('userId') || 'mock' });
+                } else {
+                    posts[index].likes.pop(); // Simplest optimistic pop
+                }
+
+                this.setData({ [`posts[${index}].likes`]: posts[index].likes });
+            })
+            .catch(err => {
+                wx.showToast({ title: '操作失败', icon: 'none' });
+            });
+    },
+
+    handleComment(e) {
+        const { id, index } = e.currentTarget.dataset;
+        wx.showModal({
+            title: '发表评论',
+            editable: true,
+            placeholderText: '说点什么吧...',
+            success: (res) => {
+                if (res.confirm && res.content) {
+                    util.post(`posts/${id}/comment`, { content: res.content })
+                        .then(data => {
+                            wx.showToast({ title: '评论成功', icon: 'success' });
+
+                            const posts = this.data.posts;
+                            if (!posts[index].comments) posts[index].comments = [];
+                            posts[index].comments.push(data); // Append returned comment
+
+                            this.setData({ [`posts[${index}].comments`]: posts[index].comments });
+                        })
+                        .catch(err => {
+                            wx.showToast({ title: '评论失败', icon: 'none' });
+                        });
+                }
+            }
+        });
+    }
+});

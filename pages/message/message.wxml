@@ -1,0 +1,44 @@
+<view class="container">
+  
+  <view class="empty-list" wx:if="{{conversations.length === 0}}">
+    消息列表为空
+  </view>
+
+  <scroll-view class="msg-list" scroll-y="true" wx:else>
+    
+    <view class="msg-item {{item.isTouchMove ? 'touch-move-active' : ''}}" 
+          data-index="{{index}}" 
+          bindtouchstart="touchstart" 
+          bindtouchmove="touchmove" 
+          wx:for="{{conversations}}" 
+          wx:key="conversation_id">
+          
+      <view class="content" data-item="{{item}}" bindtap="goToChat">
+        <!-- 头像区 -->
+        <view class="avatar-box">
+          <!-- TODO: Handle system bot vs real user picture -->
+          <image class="avatar" src="{{item.peerUser ? item.peerUser.avatar_url : '/img/placeholders/home_cleaning.png'}}"></image>
+          <!-- 未读红点 -->
+          <view class="unread-badge" wx:if="{{item.unread_count > 0}}">{{item.unread_count > 99 ? '99+' : item.unread_count}}</view>
+        </view>
+
+        <!-- 文本区 -->
+        <view class="info-box">
+          <view class="top-row">
+            <text class="name">{{item.peerUser ? item.peerUser.nickname : (item.peer_id == 0 ? '系统消息助手' : '未知')}}</text>
+            <!-- 时间, WXS 真实开发时可做格式化, 这里暂时粗略切前10 -->
+            <text class="time">{{item.conversation.updated_at}}</text>
+          </view>
+          <view class="bottom-row">
+            <text class="preview">{{item.conversation.last_message_preview}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 隐藏的删除按钮 -->
+      <view class="delete-btn" catchtap="deleteConv" data-index="{{index}}">删除</view>
+      
+    </view>
+  </scroll-view>
+
+</view>

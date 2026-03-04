@@ -1,0 +1,39 @@
+<view class="container">
+  
+  <scroll-view class="chat-area" scroll-y="true" scroll-into-view="{{scrollIntoView}}" scroll-with-animation>
+    <view class="msg-wrapper" wx:for="{{history}}" wx:key="id" id="msg_{{item.id}}">
+      
+      <!-- 一条中心时间戳 (简略) -->
+      <view class="time-stamp" wx:if="{{index % 5 === 0}}">{{item.created_at}}</view>
+
+      <!-- 对方发的消息 (左边) -->
+      <view class="chat-row left" wx:if="{{item.sender_id != myUserId}}">
+        <image class="avatar" src="{{item.sender ? item.sender.avatar_url : '/img/placeholders/home_cleaning.png'}}"></image>
+        <view class="bubble left-bubble">
+          <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
+          <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
+        </view>
+      </view>
+
+      <!-- 我发的消息 (右边) -->
+      <view class="chat-row right" wx:else>
+        <view class="bubble right-bubble">
+          <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
+          <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
+        </view>
+        <image class="avatar" src="/img/placeholders/avatar_worker.png"></image>
+        <!-- 实际项目中获取自己的真实头像，这里用固定占位 -->
+      </view>
+
+    </view>
+    <!-- 垫底空白防止被输入框遮挡 -->
+    <view style="height: 120rpx;"></view>
+  </scroll-view>
+
+  <view class="input-area">
+    <image class="icon plus" src="https://img.icons8.com/ios-glyphs/60/999999/plus-math.png" bindtap="sendImage" mode="aspectFit"></image>
+    <input class="input-box" value="{{inputText}}" bindinput="onInput" placeholder="发消息..." confirm-type="send" bindconfirm="sendText" />
+    <view class="send-btn" bindtap="sendText">发送</view>
+  </view>
+
+</view>

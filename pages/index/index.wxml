@@ -27,7 +27,7 @@
 
   <view wx:if="{{activeTab === '家推'}}">
     <navigator class="card push-hero" url="../push-channel/push-channel">
-      <image src="https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1200&q=80" mode="aspectFill"></image>
+      <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
       <view class="mask">
         <text class="title">九州好物 年货来了</text>
         <text class="sub">优选好货 年度优惠专场</text>
@@ -77,7 +77,7 @@
 
   <view wx:elif="{{activeTab === '福卡'}}">
     <view class="card fuka-banner">
-      <image src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1200&q=80" mode="aspectFill"></image>
+      <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
       <view class="mask">
         <text class="title">家事生活 购物消费</text>
       </view>
@@ -144,7 +144,7 @@
     </view>
 
     <navigator class="card market-banner" url="../market-banner/market-banner?title=母婴生活馆">
-      <image src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80" mode="aspectFill"></image>
+      <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
       <text class="cta">立即预约</text>
     </navigator>
 

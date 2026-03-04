@@ -19,7 +19,8 @@ module.exports = (sequelize, DataTypes) => {
     user_id: DataTypes.INTEGER,
     content: DataTypes.TEXT,
     images: DataTypes.JSON,
-    location: DataTypes.STRING
+    location: DataTypes.STRING,
+    category: DataTypes.STRING // "热门话题" | "热门活动" | "邻里互动"
   }, {
     sequelize,
     modelName: 'Post',
