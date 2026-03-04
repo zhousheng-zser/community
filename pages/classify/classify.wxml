@@ -9,9 +9,9 @@
     <view class="category-grid">
       <view class="skill-list">
         <view class="skill-item" wx:for="{{categories}}" wx:key="*this">
-          <view class="icon"></view>
-          <text>{{item}}</text>
-        </view>
+        <view class="icon"></view>
+        <text>{{item}}</text>
+      </view>
       </view>
       <view class="expand-btn" bindtap="toggleCategory">
         <text>{{categoryExpanded ? '∧' : '∨'}}</text>

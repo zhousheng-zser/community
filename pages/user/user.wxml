@@ -4,9 +4,9 @@
 
   <view class="profile-card">
     <view class="profile-main">
-      <navigator url="../user-edit/user-edit">
+    <navigator url="../user-edit/user-edit">
         <image class="avatar" src="{{user.userPhoto || '/img/head.jpg'}}" mode="aspectFill"></image>
-      </navigator>
+    </navigator>
       <view class="base-info">
         <text class="name">{{user.userName || '微信用户'}}</text>
         <text class="mobile">{{user.tel || ''}}</text>
@@ -20,16 +20,16 @@
       <view class="stat-item">
         <text class="num">{{points}}</text>
         <text class="label">家事积分</text>
-      </view>
+  </view>
       <navigator class="stat-item" url="../coupons-my/coupons-my">
         <text class="num">{{couponCount}}</text>
         <text class="label">新服务优惠券</text>
-      </navigator>
+    </navigator>
       <navigator class="stat-item" url="../coupons-my/coupons-my">
         <text class="num">{{couponCount}}</text>
         <text class="label">新零售优惠券</text>
-      </navigator>
-    </view>
+    </navigator>
+  </view>
   </view>
 
   <navigator class="income-card" url="../account/account">
@@ -42,8 +42,8 @@
     <view class="income-right">
       <text class="money">￥{{account.totalAcount || 0}}</text>
       <text class="sub">可提取 ></text>
-    </view>
-  </navigator>
+        </view>
+      </navigator>
 
   <view class="card">
     <text class="card-title">我的订单</text>
@@ -52,9 +52,9 @@
         <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
           <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
             <image class="menu-icon" src="{{item.icon}}"></image>
-          </view>
+        </view>
           <text class="menu-name">{{item.name}}</text>
-        </navigator>
+      </navigator>
         <view wx:else class="menu-item">
           <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
             <image class="menu-icon" src="{{item.icon}}"></image>
@@ -83,7 +83,7 @@
         </view>
       </block>
     </view>
-  </view>
+        </view>
 
   <view class="card">
     <text class="card-title">加入家事速配</text>
@@ -92,7 +92,7 @@
         <view class="join-item">
           <view class="menu-icon-wrap join-icon-wrap" style="background: {{item.iconBg}};">
             <image class="menu-icon" src="{{item.icon}}"></image>
-          </view>
+        </view>
           <text class="menu-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </view>
