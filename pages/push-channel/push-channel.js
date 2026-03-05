@@ -1,6 +1,7 @@
 Page({
   data: {
     navTopPadding: 20,
+    pageTitle: "特卖专区",
     goods: [
       { id: 1, name: "五黑风吹饼", price: "9.90", image: "/img/placeholders/home_cleaning.png" },
       { id: 2, name: "10提悬挂式抽纸", price: "6.90", image: "/img/placeholders/home_cleaning.png" },
@@ -8,9 +9,14 @@ Page({
       { id: 4, name: "情侣保暖内衣", price: "125.90", image: "/img/placeholders/home_cleaning.png" }
     ]
   },
-  onLoad() {
+  onLoad(options) {
     const sys = wx.getSystemInfoSync();
-    this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+    const passedTitle = options && options.title ? options.title : "特卖专区";
+
+    this.setData({
+      navTopPadding: (sys.statusBarHeight || 20) + 6,
+      pageTitle: passedTitle
+    });
   },
   goBack() {
     const pages = getCurrentPages();

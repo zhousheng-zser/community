@@ -1,0 +1,56 @@
+<view class="category-page">
+  <!-- 暗黑风格自定义导航栏 -->
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <view class="nav-content">
+      <view bindtap="goBack" class="back-btn">〈</view>
+      <text class="title">课程分类 - 家推课堂</text>
+      <view class="back-btn" style="visibility: hidden">〈</view>
+    </view>
+  </view>
+
+  <!-- 顶部横向 Tabs (深灰色底色, 激活橙色游标) -->
+  <view class="tabs-wrap" style="top: {{navTopPadding + 44}}px;">
+    <scroll-view class="tabs-scroll" scroll-x="true" scroll-with-animation="true" show-scrollbar="false">
+      <view class="tabs-row">
+        <view 
+          wx:for="{{tabs}}" 
+          wx:key="*this" 
+          class="tab-item {{currentTab === item ? 'active' : ''}}" 
+          data-tab="{{item}}" 
+          bindtap="onTabClick"
+        >
+          <text>{{item}}</text>
+          <view wx:if="{{currentTab === item}}" class="tab-line"></view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 下方留白防挡 -->
+  <view style="height: {{navTopPadding + 44 + 46}}px;"></view>
+
+  <!-- 视频列表区域 (左图右文结构，带有播放按钮装饰) -->
+  <scroll-view class="video-list" scroll-y="true">
+    <view class="list-item" wx:for="{{videos}}" wx:key="id" bindtap="playVideo">
+      <!-- 左侧封面 -->
+      <view class="cover-wrap">
+        <image src="{{item.image}}" class="cover-img" mode="aspectFill"></image>
+        <view class="play-icon-overlay">
+          <!-- 这里使用一个圆圈和三角形模拟原生播放按钮体验 -->
+          <view class="play-circle">
+            <view class="play-triangle"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 右侧信息 -->
+      <view class="info-wrap">
+        <text class="v-title">{{item.title}}</text>
+        <view class="v-stats">
+          <text class="s-icon">❞</text>
+          <text class="s-text">{{item.viewers}}人已学习</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

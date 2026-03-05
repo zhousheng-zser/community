@@ -1,7 +1,7 @@
 <view class="push-channel-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
     <text bindtap="goBack">〈</text>
-    <text class="title">爆款专区</text>
+    <text class="title">{{pageTitle}}</text>
     <text>•••</text>
   </view>
 

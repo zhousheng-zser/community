@@ -41,7 +41,9 @@
     "pages/order-center/order-center",
     "pages/goods-confrim/goods-confrim",
     "pages/book-detail/book-detail",
-    "pages/my-posts/my-posts"
+    "pages/my-posts/my-posts",
+    "pages/push-video-list/push-video-list",
+    "pages/push-video-category/push-video-category"
   ],
   "window": {
     "backgroundTextStyle": "light",

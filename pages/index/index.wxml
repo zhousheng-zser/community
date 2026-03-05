@@ -25,53 +25,244 @@
     </view>
   </view>
 
-  <view wx:if="{{activeTab === '家推'}}">
-    <navigator class="card push-hero" url="../push-channel/push-channel">
-      <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
-      <view class="mask">
-        <text class="title">九州好物 年货来了</text>
-        <text class="sub">优选好货 年度优惠专场</text>
-      </view>
-    </navigator>
+  <view wx:if="{{activeTab === '家推'}}" class="jiatui-wrapper">
+    <!-- 模块一：顶级海报轮播区 -->
+    <view class="jt-hero">
+      <swiper class="jt-hero-swiper" autoplay="true" indicator-dots="true" indicator-active-color="#fff" circular="true">
+        <swiper-item wx:for="{{pushHeroBanners}}" wx:key="id">
+          <view class="slide-wrap">
+            <image src="{{item.image}}" mode="aspectFill" class="fs-hero-img"></image>
+            <view class="slide-content">
+              <image class="jt-hero-icon" src="/img/index/menuicon1.png" mode="aspectFit"></image>
+              <text class="jt-hero-title">品牌好物</text>
+              <text class="jt-hero-sub">严选之品，生活之味</text>
+            </view>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
 
-    <view class="card push-cate">
-      <navigator class="push-cate-item" wx:for="{{pushCategories}}" wx:key="name" url="{{item.url}}">
-        <image src="{{item.icon}}" mode="aspectFill"></image>
+    <!-- 模块二：五大金刚区 -->
+    <view class="jt-categories">
+      <navigator class="jt-cate-item" wx:for="{{pushCategories}}" wx:key="name" url="{{item.url}}">
+        <view class="icon-wrap">
+          <image src="{{item.icon}}" mode="aspectFill"></image>
+        </view>
         <text>{{item.name}}</text>
       </navigator>
     </view>
 
-    <view class="card push-promo-grid">
-      <navigator class="push-promo-item" wx:for="{{pushPromoCards}}" wx:key="title" url="{{item.url}}">
-        <image src="{{item.image}}" mode="aspectFill"></image>
-        <view class="info">
-          <text class="name">{{item.title}}</text>
-          <text class="desc">{{item.sub}}</text>
-        </view>
+    <!-- 模块三：三花聚顶导购窗 -->
+    <view class="jt-promo-grid">
+      <navigator class="jt-promo-left" url="../push-channel/push-channel?title=品牌好货">
+        <image src="{{pushPromoCards.left.image}}" mode="aspectFill"></image>
+        <text class="tag">{{pushPromoCards.left.title}}</text>
+      </navigator>
+      <navigator class="jt-promo-mid" url="../push-channel/push-channel?title=寻找九州好物">
+        <text class="title">寻找九州好物</text>
+        <text class="sub">溯源地道，严选品质</text>
+      </navigator>
+      <navigator class="jt-promo-right" url="../push-channel/push-channel?title=秋冬好物">
+        <image src="{{pushPromoCards.right.image}}" mode="aspectFill"></image>
+        <text class="tag">{{pushPromoCards.right.title}}</text>
       </navigator>
     </view>
 
-    <view class="card section-card">
-      <view class="section-head">
-        <text class="title">特惠频道</text>
-        <navigator class="more" url="../push-channel/push-channel">查看更多 ></navigator>
+    <!-- 模块四：上新与热卖榜 -->
+    <view class="jt-sales-row">
+      <!-- 每日上新 -->
+      <view class="jt-daily-news">
+        <view class="head">
+          <text class="title">每日上新</text>
+          <image class="head-icon" src="/img/index/ticon1.png"></image>
+        </view>
+        <view class="grid">
+          <navigator class="news-item" wx:for="{{pushDailyNews}}" wx:key="id" url="{{item.url}}">
+            <image src="{{item.image}}" mode="aspectFill"></image>
+            <view class="rebate-tag">返佣金￥{{item.comm}}</view>
+            <view class="price-row">
+              <text class="yen">￥</text>
+              <text class="num">{{item.price}}</text>
+            </view>
+          </navigator>
+        </view>
       </view>
-      <view class="hot-filter-row">
-        <navigator class="hot-filter" wx:for="{{pushTags}}" wx:key="name" url="{{item.url}}">{{item.name}}</navigator>
-      </view>
-    </view>
 
-    <view class="card section-card push-list">
-      <navigator class="push-good" wx:for="{{pushGoods}}" wx:key="id" url="{{item.url}}">
-        <image src="{{item.image}}" mode="aspectFill"></image>
-        <view class="right">
-          <text class="name">{{item.name}}</text>
-          <view class="bottom">
-            <text class="price">￥{{item.price}}{{item.unit}}</text>
-            <text class="buy-btn">去抢购</text>
+      <!-- 热卖TOP榜 -->
+      <view class="jt-top-sales">
+        <view class="head">
+          <text class="title">热卖TOP榜</text>
+          <image class="head-icon" src="/img/index/ticon2.png"></image>
+        </view>
+        <view class="list">
+          <view class="top-item" wx:for="{{pushTopSales}}" wx:key="rank">
+            <view class="rank-badge">
+              <text class="top">TOP</text>
+              <text class="num">{{item.rank}}</text>
+            </view>
+            <image src="{{item.image}}" mode="aspectFill"></image>
+            <view class="info">
+              <text class="name">{{item.name}}</text>
+              <view class="rebate-tag">
+                <text class="yen">￥</text>返￥{{item.comm}}
+              </view>
+            </view>
           </view>
         </view>
-      </navigator>
+      </view>
+    </view>
+
+    <!-- 模块五：两级直播推介窗 -->
+    <view class="jt-live-section">
+      <view class="section-head">
+        <text class="title">热推<text class="red">直播间</text></text>
+        <text class="sub">品牌特卖·正品保障</text>
+        <text class="more">查看全部 ></text>
+      </view>
+      <view class="live-card" wx:for="{{pushHotLiveStreams}}" wx:key="id">
+        <view class="logo-wrap">
+          <image src="{{item.brandLogo}}" mode="aspectFill"></image>
+          <view class="live-badge">直播中</view>
+        </view>
+        <view class="info">
+          <text class="brand">{{item.brand}}</text>
+          <text class="sub">{{item.subBrand}}</text>
+          <view class="bottom">
+            <view class="rebate">最高返 <text>{{item.rebate}}</text></view>
+            <view class="promoters">
+              <!-- 头像占位 -->
+              <text>{{item.promoters}}人推广</text>
+            </view>
+          </view>
+        </view>
+        <button class="push-btn">去推广</button>
+      </view>
+    </view>
+
+    <view class="jt-live-section local-pavilion">
+      <view class="section-head">
+        <text class="title">当地特产直播间</text>
+        <text class="more">查看全部特产直播间 ></text>
+      </view>
+      
+      <scroll-view class="pavilion-scroll" scroll-x="{{true}}">
+        <view class="pavilion-grid">
+          <!-- 这里做了个简单的换行矩阵，真实情况应当依靠 CSS grid 或两行排布 -->
+          <view class="p-row">
+            <navigator class="p-item {{item.isHot ? 'active' : ''}}" wx:for="{{pushLocalPavilions}}" wx:key="name" wx:if="{{index < 5}}">
+              <image src="{{item.image}}" mode="aspectFill"></image>
+              <text>{{item.name}}</text>
+            </navigator>
+          </view>
+          <view class="p-row">
+            <navigator class="p-item {{item.isHot ? 'active' : ''}}" wx:for="{{pushLocalPavilions}}" wx:key="name" wx:if="{{index >= 5}}">
+              <image src="{{item.image}}" mode="aspectFill"></image>
+              <text>{{item.name}}</text>
+            </navigator>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="live-card" wx:for="{{pushLocalLiveStreams}}" wx:key="id">
+        <view class="logo-wrap closed">
+          <view class="circle-sign">
+            <text class="city">遵义汇川区</text>
+          </view>
+          <view class="live-badge grey">关闭直播</view>
+        </view>
+        <view class="info">
+          <text class="brand">{{item.brand}}</text>
+          <text class="sub">{{item.subBrand}}</text>
+          <view class="bottom">
+            <view class="rebate">最高返 <text>{{item.rebate}}</text></view>
+            <view class="promoters">
+               <text>{{item.promoters}}人推广</text>
+            </view>
+          </view>
+        </view>
+        <button class="push-btn">去推广</button>
+      </view>
+    </view>
+
+    <!-- 模块六：热门带货视频 -->
+    <view class="jt-video-section">
+      <view class="section-head">
+        <text class="title">热门带货视频</text>
+        <text class="more">查看全部 ></text>
+      </view>
+      <scroll-view class="video-scroll" scroll-x="{{true}}">
+        <view class="video-row">
+          <view class="video-card" wx:for="{{pushHotVideos}}" wx:key="id">
+            <view class="cover-wrap">
+              <image src="{{item.image}}" mode="aspectFill"></image>
+              <view class="play-btn">▷</view>
+              <view class="bottom-info">
+                <text class="author">{{item.author}}</text>
+                <text class="likes">♡ {{item.likes}}</text>
+              </view>
+            </view>
+            <view class="v-details">
+              <text class="title">{{item.title}}</text>
+              <text class="price">￥{{item.price}}</text>
+              <view class="share">分享赚 ￥{{item.comm}}</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 模块八：周期性主推与热卖排行 (Periodic Rankings) -->
+    <view class="jt-feed-section">
+      <view class="feed-tabs">
+        <text class="tab {{index === 0 ? 'active' : ''}}" wx:for="{{pushPeriodicTabs}}" wx:key="*this">{{item}}</text>
+      </view>
+      
+      <!-- 模块八短列表：基于 periodic items -->
+      <view class="feed-goods-list">
+        <view class="f-card" wx:for="{{pushPeriodicGoods}}" wx:key="id">
+          <image src="{{item.image}}" mode="aspectFill"></image>
+          <view class="f-info">
+            <text class="f-title">{{item.title}}</text>
+            <view class="f-price">
+              <text class="yen">￥</text>{{item.price}}
+              <text wx:if="{{item.tag}}" class="tag">{{item.tag}}</text>
+            </view>
+            <view class="f-action">
+              <text class="share">分享赚/购买返￥{{item.comm}}</text>
+              <view class="btn">去购买</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <view class="feed-more">查看更多 ></view>
+      
+      <!-- 模块九：长效分类商品流瀑布 -->
+      <scroll-view class="sub-tabs-scroll" scroll-x="{{true}}">
+        <view class="sub-tabs">
+          <text class="active">高佣推荐</text>
+          <text>健康食品</text>
+          <text>美妆个护</text>
+          <text>日用百货</text>
+        </view>
+      </scroll-view>
+
+      <view class="feed-goods-list">
+        <view class="f-card" wx:for="{{pushFeedGoods}}" wx:key="id">
+          <image src="{{item.image}}" mode="aspectFill"></image>
+          <view class="f-info">
+            <text class="f-title">{{item.title}}</text>
+            <view class="f-price">
+              <text class="yen">￥</text>{{item.price}}
+              <text wx:if="{{item.tag}}" class="tag">{{item.tag}}</text>
+            </view>
+            <view class="f-action">
+              <text class="share">分享赚/购买返￥{{item.comm}}</text>
+              <view class="btn">去购买</view>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 

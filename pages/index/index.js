@@ -24,10 +24,18 @@ Page({
     merchantList: [],
     workerList: [],
     marketList: [],
+    pushHeroBanners: [],
     pushCategories: [],
-    pushPromoCards: [],
-    pushTags: [],
-    pushGoods: [],
+    pushPromoCards: {},
+    pushDailyNews: [],
+    pushTopSales: [],
+    pushHotLiveStreams: [],
+    pushLocalLiveStreams: [],
+    pushLocalPavilions: [],
+    pushHotVideos: [],
+    pushPeriodicTabs: [],
+    pushPeriodicGoods: [],
+    pushFeedGoods: [],
     fukaLocalList: [],
     fukaServices: [],
     fukaTopicCards: [],
@@ -194,31 +202,114 @@ Page({
     const marketList = [
       { name: "映萃美活研奇肌霜", price: "469", image: "/img/placeholders/home_cleaning.png" },
       { name: "映萃美活肤洁颜粉", price: "235", image: "/img/placeholders/home_cleaning.png" },
-      { name: "当地特产一键速达", price: "99", image: "/img/placeholders/home_cleaning.png" },
-      { name: "初开荒 60平以内", price: "480", image: "/img/placeholders/home_cleaning.png" }
+      { name: "当地特产一键速达", price: "99", image: "/img/placeholders/home_cleaning.png" }
     ];
+    // ======================================
+    // 家推 (JiaTui) 真实图片源 Mock 数据注入
+    // ======================================
+
+    // 模块一：顶级海报轮播图
+    const pushHeroBanners = [
+      { id: 1, image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80" }, // Sale/Retail bg
+      { id: 2, image: "https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=800&q=80" }  // Lifestyle
+    ];
+
+    // 模块二：分类金刚
     const pushCategories = [
-      { name: "母婴", icon: "/img/index/menuicon1.png", url: "../push-goods-list/push-goods-list?theme=pink" },
-      { name: "水果", icon: "/img/index/menuicon2.png", url: "../push-goods-list/push-goods-list?theme=brown" },
-      { name: "粮油", icon: "/img/index/menuicon3.png", url: "../push-goods-list/push-goods-list?theme=red" },
-      { name: "零食", icon: "/img/index/menuicon4.png", url: "../push-goods-list/push-goods-list?theme=brown" },
-      { name: "日百", icon: "/img/index/menuicon1.png", url: "../push-goods-list/push-goods-list?theme=pink" }
+      { name: "爆款专区", icon: "/img/index/menuicon1.png", url: "/pages/push-goods-list/push-goods-list?id=1" },
+      { name: "礼物专区", icon: "/img/index/menuicon2.png", url: "/pages/push-goods-list/push-goods-list?id=2" },
+      { name: "家推甄选", icon: "/img/index/menuicon3.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "高佣专区", icon: "/img/index/menuicon4.png", url: "/pages/push-goods-list/push-goods-list?id=4" },
+      { name: "推客学堂", icon: "/img/index/menuicon1.png", url: "/pages/push-video-list/push-video-list" }
     ];
-    const pushPromoCards = [
-      { title: "爆品上新", sub: "品牌好货直降", image: "/img/placeholders/home_cleaning.png", url: "../push-channel/push-channel" },
-      { title: "邻区TOP榜", sub: "本周口碑推荐", image: "/img/placeholders/home_cleaning.png", url: "../push-goods-list/push-goods-list?theme=brown" }
+
+    // 模块三：导购窗
+    const pushPromoCards = {
+      left: { title: "品牌好货", image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=400&q=80" }, // Cosmetics
+      right: { title: "秋冬好物", image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80" } // Fashion
+    };
+
+    // 模块四：上新与热卖
+    const pushDailyNews = [
+      { id: 1, name: "正宗东北黑木耳", price: "19.00", comm: "2.43", image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&q=80" },
+      { id: 2, name: "大果新鲜蓝莓", price: "39.90", comm: "13.53", image: "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400&q=80", isHot: true },
+      { id: 3, name: "深层洁净洗衣液", price: "15.90", comm: "2.04", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" },
+      { id: 4, name: "特级婴儿柔护纸巾", price: "99.00", comm: "22.18", image: "https://images.unsplash.com/photo-1584824486516-0555a07fc511?w=400&q=80" }
     ];
-    const pushTags = [
-      { name: "满39包邮", url: "../push-goods-list/push-goods-list?theme=red" },
-      { name: "小区团购", url: "../push-goods-list/push-goods-list?theme=brown" },
-      { name: "限时秒杀", url: "../push-goods-list/push-goods-list?theme=pink" },
-      { name: "新人专享", url: "../push-goods-list/push-goods-list?theme=red" }
+
+    const pushTopSales = [
+      { rank: "01", name: "浓缩纯牛奶整箱", comm: "3.83", image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&q=80" },
+      { rank: "02", name: "早餐手撕面包", comm: "2.52", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" },
+      { rank: "03", name: "除菌持久洗衣凝珠", comm: "4.78", image: "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=400&q=80" }
     ];
-    const pushGoods = [
-      { id: 1, name: "正宗东北木耳", price: "39.90", unit: "/袋", image: "/img/placeholders/home_cleaning.png", url: "../push-product-detail/push-product-detail?id=1" },
-      { id: 2, name: "高原蜂蜜", price: "69.95", unit: "/瓶", image: "/img/placeholders/home_cleaning.png", url: "../push-product-detail/push-product-detail?id=2" },
-      { id: 3, name: "山核桃仁", price: "35.90", unit: "/袋", image: "/img/placeholders/home_cleaning.png", url: "../push-product-detail/push-product-detail?id=3" },
-      { id: 4, name: "牛肉丸", price: "49.90", unit: "/盒", image: "/img/placeholders/home_cleaning.png", url: "../push-product-detail/push-product-detail?id=4" }
+
+    // 模块五：大厂热推直播间
+    const pushHotLiveStreams = [
+      {
+        id: 1, brand: "牛肉生鲜旗舰店", subBrand: "官方补贴 现场切块",
+        brandLogo: "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?w=200&q=80",
+        rebate: "10%", promoters: "128"
+      },
+      {
+        id: 2, brand: "蒙牛营养官方", subBrand: "学生奶营养加倍",
+        brandLogo: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200&q=80",
+        rebate: "10%", promoters: "136"
+      }
+    ];
+
+    // 模块六：地方馆地球矩阵 + 地方直播间
+    const pushLocalPavilions = [
+      { name: "贵州馆", image: "https://plus.unsplash.com/premium_photo-1661914240950-b2f25cc2dc91?w=200&q=80", isHot: true },
+      { name: "四川馆", image: "https://images.unsplash.com/photo-1540206351-d7308a0ae02e?w=200&q=80" },
+      { name: "河南馆", image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=200&q=80" },
+      { name: "福建馆", image: "https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=200&q=80" },
+      { name: "云南馆", image: "https://images.unsplash.com/photo-1529982412356-0ea0d3a5ce3f?w=200&q=80" },
+      { name: "江苏馆", image: "https://images.unsplash.com/photo-1545424436-11f81ce5b2a3?w=200&q=80" },
+      { name: "湖北馆", image: "https://images.unsplash.com/photo-1577416412292-6453712fb1a6?w=200&q=80" },
+      { name: "浙江馆", image: "https://images.unsplash.com/photo-1493060505187-8d0ce782e44d?w=200&q=80" },
+      { name: "重庆馆", image: "https://images.unsplash.com/photo-1551041777-ed277b8dd348?w=200&q=80" },
+      { name: "宁夏馆", image: "https://images.unsplash.com/photo-1529141029281-b5e19736c3ee?w=200&q=80" }
+    ];
+
+    const pushLocalLiveStreams = [
+      {
+        id: 3, brand: "遵义市汇川区土特产店", subBrand: "哀牢山冰糖橙-收官之夜",
+        brandLogo: "https://images.unsplash.com/photo-1611080661266-930a6c0e6ea8?w=200&q=80",
+        rebate: "10%", promoters: "1109", closed: true
+      },
+      {
+        id: 4, brand: "毕节特有生态黑毛猪", subBrand: "暂无",
+        brandLogo: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200&q=80",
+        rebate: "10%", promoters: "159", closed: true
+      },
+      {
+        id: 5, brand: "大凉山高山苹果直邮", subBrand: "新鲜采摘 拒绝打蜡",
+        brandLogo: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=200&q=80",
+        rebate: "15%", promoters: "342", closed: false
+      }
+    ];
+
+    // 模块七：横排带货视频录播
+    const pushHotVideos = [
+      { id: 101, title: "老榆木板原木桌面实木切割测试", price: "300.00", comm: "15.00", likes: 2, author: "榆园家具", image: "https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=500&q=80" },
+      { id: 102, title: "日常保养，补钙还是喝奶更好？", price: "97.80", comm: "14.67", likes: 0, author: "养生说", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
+      { id: 103, title: "新西兰厚切牛排，买二送一！", price: "129.9", comm: "8.80", likes: 5, author: "生鲜直供", image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&q=80" }
+    ];
+
+    // 模块八：排期榜单 (周期主推)
+    const pushPeriodicTabs = ["今日主推", "本周热卖", "本月排行"];
+    const pushPeriodicGoods = [
+      { id: 201, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" },
+      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" }
+    ];
+
+    // 模块九：无尽商品流
+    const pushFeedGoods = [
+      { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90", comm: "0.45", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" },
+      { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: "https://images.unsplash.com/photo-1520113412646-fa41cbbedb09?w=400&q=80" },
+      { id: 203, title: "舒缓膏清凉薄荷驱蚊止痒婴幼童适用", price: "19.00", comm: "2.43", tag: "定向高佣", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80" },
+      { id: 204, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" },
+      { id: 205, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" }
     ];
     const fukaLocalList = [
       { name: "天天买菜", icon: "/img/index/menuicon1.png" },
@@ -304,10 +395,20 @@ Page({
       merchantList,
       workerList,
       marketList,
+
+      pushHeroBanners,
       pushCategories,
       pushPromoCards,
-      pushTags,
-      pushGoods,
+      pushDailyNews,
+      pushTopSales,
+      pushHotLiveStreams,
+      pushLocalLiveStreams,
+      pushLocalPavilions,
+      pushHotVideos,
+      pushPeriodicTabs,
+      pushPeriodicGoods,
+      pushFeedGoods,
+
       fukaLocalList,
       fukaServices,
       fukaTopicCards,
@@ -383,5 +484,13 @@ Page({
       this.setData({ showGetTelModal: false });
       app.save();//更新globalData中存储的个人信息
     })
+  },
+  handleCateNav(e) {
+    const url = e.currentTarget.dataset.url;
+    if (url) {
+      wx.navigateTo({
+        url: url
+      });
+    }
   }
 })
