@@ -1,0 +1,273 @@
+page {
+  background: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: 120rpx; /* 留出底部吸底按钮高度 */
+}
+
+/* 顶部红色海报区域 */
+.hero-top {
+  position: relative;
+  background: linear-gradient(135deg, #ff7e70 0%, #ff4d3d 100%);
+  height: 420rpx;
+  overflow: hidden;
+  padding: 10rpx 30rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  z-index: 10;
+  font-size: 40rpx;
+  font-weight: 300;
+  color: #fff;
+}
+
+.header-title {
+  text-align: center;
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 500;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  z-index: 5;
+}
+
+.right-icon {
+  position: absolute;
+  right: 30rpx;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 4rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: #fff;
+}
+
+/* 摄影机底纹装饰 */
+.camera-watermark {
+  position: absolute;
+  right: -20rpx;
+  bottom: 40rpx;
+  width: 240rpx;
+  height: 240rpx;
+  opacity: 0.15;
+  transform: rotate(-10deg);
+  pointer-events: none;
+}
+
+/* 商家头部信息区 */
+.brand-panel {
+  display: flex;
+  margin-top: 100rpx;
+  position: relative;
+  z-index: 10;
+}
+
+.logo-box {
+  position: relative;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 70rpx;
+  border: 4rpx solid rgba(255,255,255,0.8);
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.logo-box image {
+  width: 100%;
+  height: 100%;
+  border-radius: 70rpx;
+}
+
+.status-badge {
+  position: absolute;
+  bottom: -4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18rpx;
+  padding: 2rpx 14rpx;
+  border-radius: 20rpx;
+  color: #fff;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.st-booking { background: #fd8232; }
+.st-live { background: linear-gradient(90deg, #ff4c88, #fd3d28); }
+.st-closed { background: #bbb; }
+
+.info-box {
+  flex: 1;
+  margin-left: 24rpx;
+  color: #fff;
+}
+
+.name {
+  font-size: 34rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.sub {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-bottom: 12rpx;
+}
+
+.promo-info {
+  display: flex;
+  align-items: center;
+}
+
+.rebate-tag {
+  background: #ff4d3d;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+  margin-right: 16rpx;
+  border: 1rpx solid #fff;
+}
+
+.rebate-tag .perc {
+  font-weight: bold;
+}
+
+/* 头像组伪类 */
+.avatar-group {
+  display: inline-block;
+  width: 60rpx;
+  height: 24rpx;
+  margin-right: 8rpx;
+  vertical-align: middle;
+  background: url("https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&q=80") no-repeat;
+  background-size: cover;
+  border-radius: 20rpx; 
+}
+
+.promoters text {
+  font-size: 20rpx;
+  color: rgba(255,255,255,0.9);
+  vertical-align: middle;
+}
+
+/* 中间：推广教程面板 */
+.tutorial-card {
+  margin: -40rpx 20rpx 0;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.t-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 24rpx;
+}
+
+.t-steps {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+}
+
+.t-steps .step {
+  margin-bottom: 16rpx;
+}
+
+.t-steps .desc {
+  color: #666;
+  font-size: 24rpx;
+  margin-top: 24rpx;
+  background: #f9f9f9;
+  padding: 16rpx;
+  border-radius: 12rpx;
+}
+
+.demo-img-box {
+  margin-top: 30rpx;
+  position: relative;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: #f5f5f5;
+  border: 2rpx solid #eee;
+  padding-bottom: 40rpx; /* 留给图里红圈 */
+}
+
+.demo-pic {
+  width: 100%;
+}
+
+.click-hint {
+  position: absolute;
+  bottom: 20rpx;
+  right: 40rpx;
+  background: rgba(255, 255, 255, 0.95);
+  color: #ff4d3d;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 6rpx 20rpx;
+  border-radius: 30rpx;
+  box-shadow: 0 4rpx 10rpx rgba(255, 77, 61, 0.2);
+  border: 2rpx solid #ff4d3d;
+  z-index: 2;
+}
+
+/* 吸底操作区 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120rpx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+  box-shadow: 0 -4rpx 12rpx rgba(0,0,0,0.03);
+  z-index: 99;
+}
+
+.btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  font-weight: 500;
+}
+
+.share-btn {
+  background: #fff0ed;
+  color: #ff4d3d;
+  margin-right: 20rpx;
+}
+
+.action-btn {
+  color: #fff;
+}
+
+.btn-live {
+  background: linear-gradient(90deg, #ff7e70, #ff4d3d);
+}
+
+.btn-booking {
+  background: linear-gradient(90deg, #ffd87a, #f5b03e);
+  color: #8c5700;
+}
+
+.btn-closed {
+  background: #e0e0e0;
+  color: #fff;
+}

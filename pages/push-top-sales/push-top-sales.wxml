@@ -1,0 +1,50 @@
+<view class="top-sales-page">
+  <!-- 顶部渐变背景和返回 -->
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <view class="back-btn" bindtap="goBack">
+      <text class="arrow">〈</text>
+    </view>
+    <view class="right-icon">•••</view>
+  </view>
+  
+  <view class="header-logo">
+    <view class="logo-box">
+      <view class="main-title">
+        <text class="wheat-l">🌾</text>
+        <text class="text">热卖TOP榜</text>
+        <text class="wheat-r">🌾</text>
+      </view>
+      <view class="sub-badge">根据商品的销量情况排序</view>
+    </view>
+  </view>
+
+  <!-- 单列商品流 -->
+  <view class="goods-list">
+    <navigator class="good-card" wx:for="{{topList}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
+      <!-- 左侧主图 -->
+      <view class="img-box">
+        <!-- 排行榜角标: 第1页特殊金底，后续深底 -->
+        <view class="rank-tag {{index === 0 ? 'rank-first' : 'rank-other'}}">
+          <text class="lbl">TOP</text>
+          <text class="num">{{item.rank}}</text>
+        </view>
+        <image src="{{item.image}}" class="cover" mode="aspectFill"></image>
+        <view wx:if="{{item.tag}}" class="tag-label-btm">{{item.tag}}</view>
+      </view>
+      
+      <!-- 右侧信息区 -->
+      <view class="info-box">
+        <view class="title-row">
+          <text class="jd-icon">jd</text>
+          <text class="name">{{item.name}}</text>
+        </view>
+        <view class="share-tag">分享赚/购买返￥{{item.comm}}</view>
+        
+        <view class="bottom-row">
+          <text class="price">￥{{item.price}}</text>
+          <view class="buy-btn">去购买</view>
+        </view>
+      </view>
+    </navigator>
+  </view>
+</view>

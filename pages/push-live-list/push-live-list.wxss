@@ -1,0 +1,271 @@
+page {
+  background: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.live-list-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 顶部伪装区域: 返回 + Hero */
+.hero-header {
+  position: relative;
+  background: linear-gradient(135deg, #d8d0ff 0%, #ecdcf9 100%);
+  height: 400rpx;
+  overflow: hidden;
+  padding: 10rpx 30rpx 20rpx;
+}
+
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  z-index: 10;
+  font-size: 40rpx;
+  font-weight: 300;
+  color: #333;
+}
+
+.right-icon {
+  position: absolute;
+  right: 30rpx;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 4rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: #333;
+}
+
+.hero-content {
+  margin-top: 100rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-size: 52rpx;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 4rpx 10rpx rgba(162, 110, 240, 0.5);
+  -webkit-text-stroke: 1px #a482d8;
+  letter-spacing: 4rpx;
+  display: block;
+}
+
+.hero-desc {
+  margin-top: 16rpx;
+  display: inline-block;
+  background: rgba(142, 115, 219, 0.8);
+  color: #fff;
+  font-size: 24rpx;
+  padding: 8rpx 30rpx;
+  border-radius: 30rpx;
+}
+
+/* 主面板从底部升起，盖住一部分 Hero 图 */
+.main-panel {
+  background: #f7f8fa;
+  border-radius: 30rpx 30rpx 0 0;
+  margin-top: -60rpx;
+  position: relative;
+  padding: 30rpx 24rpx 60rpx;
+  z-index: 5;
+  min-height: 60vh;
+}
+
+/* 搜索栏 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.input-box {
+  flex: 1;
+  background: #fff;
+  height: 72rpx;
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.03);
+}
+
+.input-box input {
+  flex: 1;
+  margin-left: 12rpx;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.ph-cls {
+  color: #999;
+}
+
+.search-btn {
+  background: linear-gradient(90deg, #ff6655, #fe4736);
+  color: #fff;
+  height: 72rpx;
+  line-height: 72rpx;
+  padding: 0 40rpx;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  margin-left: 20rpx;
+  box-shadow: 0 6rpx 12rpx rgba(254, 71, 54, 0.3);
+}
+
+/* Tab 切换栏 */
+.tabs {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 30rpx;
+}
+
+.tabs .tab-item {
+  background: #fff;
+  color: #555;
+  font-size: 26rpx;
+  padding: 10rpx 36rpx;
+  border-radius: 30rpx;
+  transition: all 0.3s ease;
+}
+
+.tabs .tab-item.on {
+  color: #fe4736;
+  border: 1rpx solid #fe4736;
+  font-weight: 500;
+  background: rgba(254, 71, 54, 0.05); /* 极淡的红色边框感 */
+}
+
+/* 列表主体 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.list-item {
+  display: flex;
+  background: #fff;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.02);
+}
+
+.logo-box {
+  position: relative;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 70rpx;
+  border: 2rpx solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.logo-box image {
+  width: 100%;
+  height: 100%;
+  border-radius: 70rpx;
+}
+
+/* 状态角标 */
+.status-badge {
+  position: absolute;
+  bottom: -4rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 18rpx;
+  padding: 2rpx 14rpx;
+  border-radius: 20rpx;
+  color: #fff;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.st-booking { background: #fd8232; }
+.st-live { background: linear-gradient(90deg, #ff4c88, #fd3d28); }
+.st-closed { background: #bbb; }
+
+.info-box {
+  flex: 1;
+  margin-left: 24rpx;
+  margin-right: 16rpx;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.info-box .sub {
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 12rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.promo-info {
+  display: flex;
+  align-items: center;
+}
+
+.rebate-tag {
+  background: rgba(254, 71, 54, 0.1);
+  color: #fe4736;
+  font-size: 20rpx;
+  padding: 2rpx 8rpx;
+  border-radius: 4rpx;
+  margin-right: 16rpx;
+  border: 1rpx solid #ffbcba;
+}
+
+.rebate-tag .perc {
+  font-weight: bold;
+}
+
+/* 头像组伪类 */
+.avatar-group {
+  display: inline-block;
+  width: 60rpx; /* 控制大小 */
+  height: 24rpx;
+  margin-right: 8rpx;
+  vertical-align: middle;
+  background: url("https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&q=80") no-repeat;
+  background-size: cover;
+  border-radius: 20rpx; /* 让它看起来像缩小的头像 */
+}
+
+.promoters text {
+  font-size: 20rpx;
+  color: #666;
+  vertical-align: middle;
+}
+
+/* 去推广按钮 */
+.push-btn {
+  background: #fe4736;
+  color: #fff;
+  font-size: 26rpx;
+  padding: 12rpx 30rpx;
+  border-radius: 30rpx;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 10rpx rgba(254, 71, 54, 0.3);
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  font-size: 26rpx;
+  margin-top: 100rpx;
+}

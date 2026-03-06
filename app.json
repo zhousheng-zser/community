@@ -43,7 +43,14 @@
     "pages/book-detail/book-detail",
     "pages/my-posts/my-posts",
     "pages/push-video-list/push-video-list",
-    "pages/push-video-category/push-video-category"
+    "pages/push-video-category/push-video-category",
+    "pages/push-daily-news/push-daily-news",
+    "pages/push-top-sales/push-top-sales",
+    "pages/push-live-list/push-live-list",
+    "pages/push-live-promo/push-live-promo",
+    "pages/push-local-live-list/push-local-live-list",
+    "pages/push-hot-video-list/push-hot-video-list",
+    "pages/push-periodic-list/push-periodic-list"
   ],
   "window": {
     "backgroundTextStyle": "light",

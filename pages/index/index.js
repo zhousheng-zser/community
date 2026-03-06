@@ -7,9 +7,14 @@ Page({
     noOrderTip: "您还没有订单",
     showGetTelModal: false,
     userFlag: 0,
+    videoScrollRatio: 0,
     homeSearchKeyword: "",
     navTopPadding: 20,
     activeTab: "首页",
+    activePeriodicTabIndex: 0,
+    activeFeedTab: "高佣推荐",
+    isLoadingMore: false,
+    pageIndex: 1,
     topTabs: [
       { text: "福卡" },
       { text: "家推" },
@@ -258,34 +263,39 @@ Page({
     ];
 
     // 模块六：地方馆地球矩阵 + 地方直播间
+    // 将一维数组改造为二维数组 (每页10项) 以供 <swiper> 遍历
     const pushLocalPavilions = [
-      { name: "贵州馆", image: "https://plus.unsplash.com/premium_photo-1661914240950-b2f25cc2dc91?w=200&q=80", isHot: true },
-      { name: "四川馆", image: "https://images.unsplash.com/photo-1540206351-d7308a0ae02e?w=200&q=80" },
-      { name: "河南馆", image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=200&q=80" },
-      { name: "福建馆", image: "https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=200&q=80" },
-      { name: "云南馆", image: "https://images.unsplash.com/photo-1529982412356-0ea0d3a5ce3f?w=200&q=80" },
-      { name: "江苏馆", image: "https://images.unsplash.com/photo-1545424436-11f81ce5b2a3?w=200&q=80" },
-      { name: "湖北馆", image: "https://images.unsplash.com/photo-1577416412292-6453712fb1a6?w=200&q=80" },
-      { name: "浙江馆", image: "https://images.unsplash.com/photo-1493060505187-8d0ce782e44d?w=200&q=80" },
-      { name: "重庆馆", image: "https://images.unsplash.com/photo-1551041777-ed277b8dd348?w=200&q=80" },
-      { name: "宁夏馆", image: "https://images.unsplash.com/photo-1529141029281-b5e19736c3ee?w=200&q=80" }
+      [
+        { name: "贵州馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "上海馆", image: "/img/placeholders/home_repair.png" },
+        { name: "江西馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "山西馆", image: "/img/placeholders/home_repair.png" },
+        { name: "重庆馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "河南馆", image: "/img/placeholders/home_repair.png" },
+        { name: "福建馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "云南馆", image: "/img/placeholders/home_repair.png" },
+        { name: "江苏馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "湖北馆", image: "/img/placeholders/home_repair.png" }
+      ],
+      [
+        { name: "浙江馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "四川馆", image: "/img/placeholders/home_repair.png" },
+        { name: "宁夏馆", image: "/img/placeholders/home_cleaning.png" },
+        { name: "甘肃馆", image: "/img/placeholders/home_repair.png" },
+        { name: "湖南馆", image: "/img/placeholders/home_cleaning.png" }
+      ]
     ];
 
     const pushLocalLiveStreams = [
       {
-        id: 3, brand: "遵义市汇川区土特产店", subBrand: "哀牢山冰糖橙-收官之夜",
-        brandLogo: "https://images.unsplash.com/photo-1611080661266-930a6c0e6ea8?w=200&q=80",
-        rebate: "10%", promoters: "1109", closed: true
+        id: 3, brand: "家事速配-遵义市汇川区土特产店", subBrand: "云南哀牢山冰糖橙-收官之夜",
+        brandLogo: "/img/placeholders/home_cleaning.png",
+        rebate: "10%", promoters: "1109", status: 'closed'
       },
       {
-        id: 4, brand: "毕节特有生态黑毛猪", subBrand: "暂无",
-        brandLogo: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=200&q=80",
-        rebate: "10%", promoters: "159", closed: true
-      },
-      {
-        id: 5, brand: "大凉山高山苹果直邮", subBrand: "新鲜采摘 拒绝打蜡",
-        brandLogo: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=200&q=80",
-        rebate: "15%", promoters: "342", closed: false
+        id: 4, brand: "家事速配-毕节特产店", subBrand: "暂无",
+        brandLogo: "/img/placeholders/home_repair.png",
+        rebate: "10%", promoters: "159", status: 'closed'
       }
     ];
 
@@ -293,24 +303,47 @@ Page({
     const pushHotVideos = [
       { id: 101, title: "老榆木板原木桌面实木切割测试", price: "300.00", comm: "15.00", likes: 2, author: "榆园家具", image: "https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=500&q=80" },
       { id: 102, title: "日常保养，补钙还是喝奶更好？", price: "97.80", comm: "14.67", likes: 0, author: "养生说", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
-      { id: 103, title: "新西兰厚切牛排，买二送一！", price: "129.9", comm: "8.80", likes: 5, author: "生鲜直供", image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&q=80" }
+      { id: 103, title: "新西兰厚切牛排，买二送一！", price: "129.9", comm: "8.80", likes: 5, author: "生鲜直供", image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&q=80" },
+      { id: 104, title: "大师香氛玫瑰洗衣液护色洁净柔顺", price: "99.90", comm: "24.97", likes: 13, author: "立白精品", image: "https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=500&q=80" },
+      { id: 105, title: "立白大师格拉斯玫瑰香氛洗衣液深层...", price: "69.0", comm: "10.00", likes: 8, author: "立白精品", image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&q=80" },
+      { id: 106, title: "立白小白白衣物去油王250g精化...", price: "35.50", comm: "5.00", likes: 11, author: "立白精品", image: "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=500&q=80" }
     ];
 
-    // 模块八：排期榜单 (周期主推)
+    // 模块八：排期榜单 (周期主推) - 提供不同的三组带货数据假刷新效果
     const pushPeriodicTabs = ["今日主推", "本周热卖", "本月排行"];
-    const pushPeriodicGoods = [
+    const pushPeriodicBaseGoods = [
       { id: 201, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" },
-      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" }
+      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" },
+      { id: 203, title: "[品质升级！ 三合一快充线]三合一数据线快充...", price: "4.99", comm: "0.22", image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80" },
+      { id: 204, title: "[年年宏]桑葚坚果糕红枣枸杞核桃软糕美味手...", price: "39.90", comm: "6.38", image: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=400&q=80" }
     ];
+    // 默认展示两项
+    const pushPeriodicGoods = [pushPeriodicBaseGoods[0], pushPeriodicBaseGoods[1]];
 
-    // 模块九：无尽商品流
-    const pushFeedGoods = [
-      { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90", comm: "0.45", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" },
-      { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: "https://images.unsplash.com/photo-1520113412646-fa41cbbedb09?w=400&q=80" },
-      { id: 203, title: "舒缓膏清凉薄荷驱蚊止痒婴幼童适用", price: "19.00", comm: "2.43", tag: "定向高佣", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80" },
-      { id: 204, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" },
-      { id: 205, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" }
-    ];
+    // 模块九长效分类导航数据与缓存字典
+    const pushFeedTabs = ["高佣推荐", "健康食品", "美妆个护", "日用百货"];
+    const pushFeedGoodsDict = {
+      "高佣推荐": [
+        { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90", comm: "0.45", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" },
+        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: "https://images.unsplash.com/photo-1520113412646-fa41cbbedb09?w=400&q=80" },
+        { id: 203, title: "舒缓膏清凉薄荷驱蚊止痒婴幼童适用", price: "19.00", comm: "2.43", tag: "定向高佣", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80" },
+        { id: 204, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=400&q=80" },
+        { id: 205, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" }
+      ],
+      "健康食品": [
+        { id: 601, title: "燕麦麸皮轻食代餐冲饮 500g 饱腹减脂", price: "28.50", comm: "3.10", image: "https://images.unsplash.com/photo-1517686469429-8bdb88b9f907?w=400&q=80" },
+        { id: 602, title: "纯黑芝麻核桃黑豆粉营养早餐免煮即食", price: "35.00", comm: "4.50", image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=400&q=80" }
+      ],
+      "美妆个护": [
+        { id: 701, title: "氨基酸洗面奶深层清洁温和控油学生男女", price: "15.90", comm: "1.20", image: "https://images.unsplash.com/photo-1556228578-8d89f6aca8d0?w=400&q=80" }
+      ],
+      "日用百货": [
+        { id: 801, title: "天然竹浆抽纸本色纸巾家用整箱实惠装", price: "12.90", comm: "0.80", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" }
+      ]
+    };
+
+    // 初始化默认页签商品
+    const pushFeedGoods = [...pushFeedGoodsDict["高佣推荐"]];
     const fukaLocalList = [
       { name: "天天买菜", icon: "/img/index/menuicon1.png" },
       { name: "外卖", icon: "/img/index/menuicon2.png" },
@@ -407,6 +440,10 @@ Page({
       pushHotVideos,
       pushPeriodicTabs,
       pushPeriodicGoods,
+      pushPeriodicBaseGoods,
+
+      pushFeedTabs,
+      pushFeedGoodsDict,
       pushFeedGoods,
 
       fukaLocalList,
@@ -452,6 +489,50 @@ Page({
       })
     }
   },
+
+  // ---- 模块九：长效分类切换处理 ----
+  switchFeedTab(e) {
+    const tabName = e.currentTarget.dataset.name;
+    if (tabName === this.data.activeFeedTab) return;
+
+    this.setData({
+      activeFeedTab: tabName,
+      pageIndex: 1, // 切换重置页码
+      pushFeedGoods: [...this.data.pushFeedGoodsDict[tabName] || []],
+      isLoadingMore: false
+    });
+  },
+
+  // ---- 小程序级：触底加载更多 ----
+  onReachBottom() {
+    // 只有在家推这个模块（页面实际长列表所在区）才开启触底加载
+    if (this.data.activeTab !== '家推') return;
+    if (this.data.isLoadingMore) return;
+
+    this.setData({ isLoadingMore: true });
+
+    // 使用假延迟模拟网络请求去服务器索要当前 activeFeedTab 分类下第二页的数据
+    wx.showLoading({ title: '加载中...', mask: true });
+    setTimeout(() => {
+      const { pushFeedGoods, activeFeedTab, pageIndex } = this.data;
+      const newPage = pageIndex + 1;
+
+      // 生成几条以假乱真的分页数据
+      const mockMoreGoods = [
+        { id: 900 + newPage * 10, title: `[第${newPage}页加载] ${activeFeedTab} 热卖好物`, price: (Math.random() * 50).toFixed(2), comm: "0.88", image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&q=80" },
+        { id: 901 + newPage * 10, title: `网销爆款 ${activeFeedTab} 超值特购包邮`, price: (Math.random() * 80).toFixed(2), comm: "1.10", image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80" },
+        { id: 902 + newPage * 10, title: `品质严选 ${activeFeedTab} 家用装`, price: (Math.random() * 30).toFixed(2), comm: "1.50", image: "https://images.unsplash.com/photo-1584820927498-cafe4c23db07?w=400&q=80" }
+      ];
+
+      this.setData({
+        pushFeedGoods: pushFeedGoods.concat(mockMoreGoods), // 追加数据到原数组尾部
+        pageIndex: newPage,
+        isLoadingMore: false
+      });
+      wx.hideLoading();
+    }, 800);
+  },
+
   chooseAdd() {
     wx.chooseAddress({
       success: function (res) {
@@ -472,6 +553,56 @@ Page({
       url: '../activity/activity?id=' + id,
     })
   },
+
+  // 周期推荐榜单切换处理
+  switchPeriodicTab(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const { pushPeriodicBaseGoods } = this.data;
+
+    // 我们用不同的假组合来模拟数据变化
+    let newList = [];
+    if (idx === 0) {
+      newList = [pushPeriodicBaseGoods[0], pushPeriodicBaseGoods[1]];
+    } else if (idx === 1) {
+      newList = [pushPeriodicBaseGoods[3], pushPeriodicBaseGoods[2]];
+    } else {
+      newList = [pushPeriodicBaseGoods[1], pushPeriodicBaseGoods[3]];
+    }
+
+    this.setData({
+      activePeriodicTabIndex: idx,
+      pushPeriodicGoods: newList
+    });
+  },
+
+  handleVideoScroll(e) {
+    // scrollLeft是当前滑动的距离，scrollWidth是总可滑动宽度
+    const { scrollLeft, scrollWidth } = e.detail;
+    // 使用系统的框架宽度近似计算 (视口宽度)
+    const sys = wx.getSystemInfoSync();
+    const windowWidth = sys.windowWidth;
+
+    // 最大可滑动距离
+    const maxScroll = scrollWidth - windowWidth;
+    if (maxScroll <= 0) return;
+
+    // 计算比例 (0-1)
+    let ratio = scrollLeft / maxScroll;
+    if (ratio < 0) ratio = 0;
+    if (ratio > 1) ratio = 1;
+
+    this.setData({
+      videoScrollRatio: ratio
+    });
+  },
+
+  openFakeVideoChannel() {
+    wx.showToast({
+      title: '即将打开微信视频号...',
+      icon: 'none'
+    });
+  },
+
   getPhoneNumber(e) {
     const { iv, encryptedData: decryptData } = e.detail;
     const { id, sessionKey } = app.globalData.user;

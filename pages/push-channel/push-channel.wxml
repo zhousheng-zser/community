@@ -1,33 +1,39 @@
 <view class="push-channel-page">
+  <!-- 顶部标题栏保留返回键，中间放艺术字样式的九州好物 -->
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈</text>
-    <text class="title">{{pageTitle}}</text>
-    <text>•••</text>
+    <text class="back-btn" bindtap="goBack">〈</text>
+    <view class="title-logo">
+      <view class="title-box">
+        <text class="decor">c </text>
+        <text class="text">九州好物</text>
+        <text class="decor"> x</text>
+      </view>
+    </view>
+    <view class="right-icon">•••</view>
   </view>
 
-  <image class="hero" src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
-
-  <view class="search-row">
-    <text class="ph">请输入关键词</text>
-    <text class="btn">搜索</text>
+  <!-- 分类选项卡 -->
+  <view class="tabs">
+    <view 
+      class="tab-item {{currentTab === index ? 'active' : ''}}" 
+      wx:for="{{categories}}" 
+      wx:key="*this"
+      data-index="{{index}}"
+      bindtap="switchTab"
+    >
+      {{item}}
+    </view>
   </view>
 
+  <!-- 瀑布流商品列表 -->
   <view class="goods-grid">
     <navigator class="good" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-      <image src="{{item.image}}" mode="aspectFill"></image>
-      <text class="name">{{item.name}}</text>
-      <text class="price">￥{{item.price}}</text>
-    </navigator>
-  </view>
-
-  <view class="live-card">
-    <view class="head">
-      <text>热推直播间</text>
-      <navigator url="../push-live-detail/push-live-detail">查看全部 ></navigator>
-    </view>
-    <navigator class="item" url="../push-live-detail/push-live-detail">
-      <text class="name">三只松鼠 ThreeSquirrels</text>
-      <text class="btn">去推广</text>
+      <image class="cover" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="info-box">
+        <text class="name">{{item.name}}</text>
+        <text class="share-tag">{{item.shareTag}}</text>
+        <text class="price">￥{{item.price}}</text>
+      </view>
     </navigator>
   </view>
 </view>

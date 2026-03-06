@@ -19,7 +19,7 @@ const get = (url, query) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: "http://localhost:3000/api/v1/" + url,
+      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
       data,
       header: {
         'content-type': contentType,
@@ -49,7 +49,7 @@ const post = (url, data) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: "http://localhost:3000/api/v1/" + url,
+      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
       method: "POST",
       data,
       header: {
@@ -80,7 +80,7 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.uploadFile({
-      url: "http://localhost:3000/api/v1/" + url,
+      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
       filePath: filePath,
       name: name,
       formData: formData,

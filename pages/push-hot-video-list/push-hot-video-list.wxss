@@ -1,0 +1,283 @@
+page {
+  background: #f7f8fa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.hot-video-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 顶部伪装区域: 返回 + Hero */
+.hero-header {
+  position: relative;
+  background: linear-gradient(135deg, #ffc5b9 0%, #ffdfd4 100%);
+  overflow: hidden;
+  padding: 10rpx 30rpx;
+  height: 500rpx; 
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40rpx;
+}
+
+.back-btn {
+  font-size: 40rpx;
+  font-weight: 300;
+  color: #333;
+}
+
+.right-icon {
+  background: rgba(255, 255, 255, 0.5);
+  padding: 4rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: #333;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 5;
+}
+
+.hero-title {
+  font-size: 54rpx;
+  font-weight: 900;
+  color: #111;
+  text-shadow: 2rpx 2rpx 0 #fff;
+  margin-bottom: 30rpx;
+  letter-spacing: 2rpx;
+}
+
+/* 垂直步骤说明栏 */
+.steps-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  margin: 6rpx 0;
+}
+
+.s-num {
+  font-size: 28rpx;
+  color: #ff4d3d;
+  font-weight: bold;
+  margin-right: 12rpx;
+}
+
+.s-text {
+  font-size: 24rpx;
+  color: #aa6b5d;
+}
+
+.s-line {
+  height: 12rpx;
+  border-left: 2rpx dashed #ff9d8c;
+  margin-left: 16rpx;
+}
+
+/* 右上方带光影的 3D 摄影板装饰 */
+.hero-dec {
+  position: absolute;
+  right: -20rpx;
+  top: 140rpx;
+  width: 280rpx;
+  height: 280rpx;
+  z-index: 2;
+  opacity: 0.8;
+  transform: rotate(10deg);
+}
+
+/* 主面板从底部升起，盖住一部分 Hero 图 */
+.main-panel {
+  background: #f7f8fa;
+  border-radius: 30rpx 30rpx 0 0;
+  margin-top: -60rpx;
+  position: relative;
+  padding: 30rpx 24rpx 60rpx;
+  z-index: 10;
+  min-height: 60vh;
+}
+
+/* 搜索栏悬浮，卡在交界处 */
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  top: -40rpx;
+  left: 24rpx;
+  right: 24rpx;
+  z-index: 20;
+}
+
+.input-box {
+  flex: 1;
+  background: #fff;
+  height: 80rpx;
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.input-box input {
+  flex: 1;
+  margin-left: 14rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.ph-cls {
+  color: #999;
+}
+
+.search-btn {
+  background: #fe4736;
+  color: #fff;
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 44rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  margin-left: 20rpx;
+  box-shadow: 0 6rpx 12rpx rgba(254, 71, 54, 0.3);
+}
+
+/* 双列网格视频瀑布流 */
+.video-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 60rpx; /* 为突破上的搜索条让出空间 */
+}
+
+.v-item {
+  width: calc(50% - 12rpx);
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.03);
+}
+
+.cover-box {
+  position: relative;
+  width: 100%;
+  height: 480rpx; /* 偏向短视频风格长比例 */
+  background: #000;
+}
+
+.cover-img {
+  width: 100%;
+  height: 100%;
+  opacity: 0.9;
+}
+
+/* 居中透明加白边的播放键 */
+.play-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100rpx;
+  height: 100rpx;
+  border: 4rpx solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.play-arrow {
+  width: 0;
+  height: 0;
+  border-top: 16rpx solid transparent;
+  border-bottom: 16rpx solid transparent;
+  border-left: 26rpx solid #fff;
+  margin-left: 10rpx; /* 微调箭头居中 */
+}
+
+/* 底部作者与红心区 */
+.author-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 30rpx 16rpx 16rpx;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+  box-sizing: border-box;
+}
+
+.a-logo {
+  color: #ff8c00;
+  font-weight: 800;
+  font-size: 26rpx;
+  margin-right: 8rpx;
+}
+
+.a-name {
+  color: #fff;
+  font-size: 24rpx;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.a-likes {
+  color: #fff;
+  font-size: 22rpx;
+  padding-left: 10rpx;
+}
+
+/* 卡片文字介绍区 */
+.v-info {
+  padding: 16rpx;
+}
+
+.v-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #222;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.v-price {
+  font-size: 36rpx;
+  color: #111;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.v-comm {
+  background: #fff0ed;
+  display: inline-block;
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+}
+
+.v-comm .c-label {
+  color: #ff4d3d;
+}
+
+.v-comm .c-val {
+  color: #ff4d3d;
+}

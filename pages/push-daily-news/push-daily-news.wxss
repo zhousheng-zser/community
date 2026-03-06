@@ -1,0 +1,180 @@
+page {
+  background: #FFF0F2; /* 浅淡的粉色底 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.daily-news-page {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #FFD4C4 0%, #FFF0F2 30%, #FFF0F2 100%);
+  padding-bottom: 40rpx;
+  position: relative;
+}
+
+/* 顶部导航与返回 */
+.top-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* right-icon alignment */
+  color: #333;
+  padding: 10rpx 30rpx 20rpx;
+  z-index: 10;
+}
+
+.back-btn {
+  position: absolute;
+  left: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40rpx;
+  font-weight: 300;
+  padding: 10rpx 20rpx;
+  color: #FFF;
+}
+
+.right-icon {
+  background: rgba(255, 255, 255, 0.4);
+  padding: 4rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  letter-spacing: 2rpx;
+  color: #333;
+}
+
+/* 大标题区域 */
+.header-title {
+  padding: 20rpx 40rpx;
+  position: relative;
+  margin-bottom: 20rpx;
+}
+
+.header-title .main {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #222;
+  display: block;
+}
+
+.header-title .sub {
+  font-size: 26rpx;
+  color: #666;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 背景艺术水印字 (New) */
+.watermark {
+  position: absolute;
+  right: -20rpx;
+  top: -40rpx;
+  font-size: 160rpx;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 列表容器 */
+.goods-list {
+  padding: 0 24rpx;
+  position: relative;
+  z-index: 2;
+}
+
+/* 横向单列商品卡片 */
+.good-card {
+  display: flex;
+  background: #FFF;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255, 180, 180, 0.15);
+}
+
+.img-box {
+  position: relative;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #f8f8f8;
+}
+
+.img-box .cover {
+  width: 100%;
+  height: 100%;
+}
+
+.tag-label {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  background: rgba(255, 255, 255, 0.9);
+  color: #FF5A5A;
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: bold;
+}
+
+/* 右侧文本域 */
+.info-box {
+  flex: 1;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.title-row {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+.jd-icon {
+  display: inline-block;
+  background: #FF4142;
+  color: #FFF;
+  font-size: 20rpx;
+  padding: 0 8rpx;
+  border-radius: 4rpx;
+  margin-right: 8rpx;
+  vertical-align: middle;
+}
+
+.name {
+  vertical-align: middle;
+}
+
+.share-tag {
+  color: #FF5A5A;
+  font-size: 24rpx;
+}
+
+.bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bottom-row .price {
+  color: #FF5A5A;
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.bottom-row .buy-btn {
+  background: linear-gradient(90deg, #FF6F5B, #FF4542);
+  color: #FFF;
+  font-size: 26rpx;
+  padding: 10rpx 30rpx;
+  border-radius: 30rpx;
+}

@@ -666,6 +666,8 @@
 
 .jt-top-sales {
   background: #fffcf2;
+  display: flex;
+  flex-direction: column;
 }
 
 .jt-sales-row .head {
@@ -703,7 +705,7 @@
 
 .jt-daily-news .news-item image {
   width: 100%;
-  height: 140rpx;
+  height: 180rpx;
 }
 
 .rebate-tag {
@@ -728,15 +730,19 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
+  flex: 1;
 }
 
 .jt-top-sales .top-item {
   display: flex;
   background: #fff;
   border-radius: 12rpx;
-  padding: 10rpx;
+  padding: 16rpx 10rpx;
   align-items: center;
   position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
 }
 
 .rank-badge {
@@ -755,10 +761,11 @@
 .rank-badge .num { font-size: 20rpx; font-weight: bold; }
 
 .jt-top-sales .top-item image {
-  width: 80rpx;
-  height: 80rpx;
+  width: 100rpx;
+  height: 100rpx;
   border-radius: 8rpx;
   margin-right: 12rpx;
+  flex-shrink: 0;
 }
 
 .jt-top-sales .info {
@@ -775,12 +782,13 @@
 }
 
 .jt-top-sales .info .rebate-tag {
-  position: static;
   display: inline-block;
-  background: rgba(255, 77, 61, 0.1);
+  background: #ffeeec;
   color: #ff4d3d;
-  margin-top: 6rpx;
+  margin-top: 10rpx;
   border-radius: 4rpx;
+  padding: 4rpx 8rpx;
+  font-size: 18rpx;
 }
 
 /* 模块五：两级直播推介窗 */
@@ -929,26 +937,27 @@
   background: linear-gradient(180deg, #fff2f2 0%, #fff 20%);
 }
 
-.pavilion-scroll {
-  white-space: nowrap;
+.pavilion-swiper {
+  height: 380rpx;
   margin-bottom: 20rpx;
 }
 
 .pavilion-grid {
-  display: inline-block;
-}
-
-.p-row {
   display: flex;
-  margin-bottom: 12rpx;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 0 10rpx;
 }
 
 .p-item {
+  width: 20%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 28rpx;
+  margin-bottom: 30rpx;
 }
+
+
 
 .p-item image {
   width: 90rpx;
@@ -996,15 +1005,46 @@
 
 .video-scroll {
   white-space: nowrap;
+  padding-bottom: 20rpx; /* 留出底部滚动条空间 */
+}
+
+/* 自定义胶囊滚动条 */
+.custom-scrollbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.scrollbar-track {
+  width: 80rpx; /* 轨道总长变长，更易感知滑动 */
+  height: 8rpx;
+  background: #eee;
+  border-radius: 4rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40rpx; /* 胶囊长度，可滑动范围就是 track宽 - thumb宽 = 40rpx左右 */
+  height: 8rpx;
+  background: #ff4d3d;
+  border-radius: 4rpx;
 }
 
 .video-row {
-  display: flex;
+  white-space: nowrap;
 }
 
 .video-card {
-  width: 260rpx;
-  margin-right: 16rpx;
+  width: 320rpx;
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 20rpx;
+  white-space: normal;
   border-radius: 12rpx;
   overflow: hidden;
   border: 1rpx solid #eee;
@@ -1012,8 +1052,8 @@
 
 .video-card .cover-wrap {
   position: relative;
-  width: 260rpx;
-  height: 300rpx;
+  width: 100%;
+  height: 400rpx;
 }
 
 .video-card .cover-wrap image {
@@ -1077,11 +1117,11 @@
 .video-card .v-details .share {
   background: rgba(255, 77, 61, 0.1);
   color: #ff4d3d;
-  font-size: 18rpx;
+  font-size: 20rpx;
   display: inline-block;
-  padding: 4rpx 10rpx;
-  border-radius: 4rpx;
-  margin-top: 6rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 6rpx;
+  margin-top: 10rpx;
 }
 
 /* 模块七：长效商品流瀑布 */
@@ -1209,9 +1249,10 @@
   padding: 8rpx 24rpx;
 }
 
-.feed-more {
+.view-more-line {
+  display: block;
   text-align: center;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #999;
   padding: 30rpx 0;
 }
@@ -1223,19 +1264,23 @@
 
 .sub-tabs {
   display: flex;
+  justify-content: space-around;
+  width: 100%;
 }
 
-.sub-tabs text {
+.sub-tabs .tab-item {
+  flex: 1;
+  text-align: center;
   font-size: 26rpx;
   color: #222;
-  margin-right: 40rpx;
   position: relative;
+  padding: 10rpx 0;
 }
 
-.sub-tabs text.active {
+.sub-tabs .tab-item.active {
   font-weight: 700;
 }
-.sub-tabs text.active::after {
+.sub-tabs .tab-item.active::after {
   content: '';
   position: absolute;
   bottom: -4rpx;
