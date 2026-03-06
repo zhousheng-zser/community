@@ -1,53 +1,117 @@
 <view class="ms-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈</text>
-    <view class="icons">
-      <text>🛒</text>
-      <text>🔍</text>
-      <text>💬</text>
+    <text class="back" bindtap="goBack">〈</text>
+    <view class="top-actions">
+      <text class="icon">🛒</text>
+      <text class="icon">🔍</text>
+      <text class="icon">💬</text>
     </view>
-    <text>•••</text>
+    <view class="capsule">•••</view>
   </view>
 
-  <image class="cover" src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
+  <image class="cover" src="{{shop.cover}}" mode="aspectFill"></image>
 
   <view class="shop-card">
-    <image src="/img/聚收藏.png" mode="aspectFill"></image>
-    <view class="info">
-      <text class="name">明辉香薰</text>
-      <text class="meta">评分5  已售1  配送：邻工配送</text>
+    <image class="shop-logo" src="{{shop.logo}}" mode="aspectFill"></image>
+    <view class="shop-info">
+      <text class="shop-name">{{shop.name}}</text>
+      <view class="shop-meta-grid">
+        <view class="meta-item">
+          <text class="meta-label">评分</text>
+          <text class="meta-value">{{shop.scoreText}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">已售</text>
+          <text class="meta-value">{{shop.soldCount}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">配送</text>
+          <text class="meta-value">{{shop.deliveryType}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-label">营业时间：</text>
+          <text class="meta-value">{{shop.businessHours}}</text>
+        </view>
+      </view>
     </view>
   </view>
 
-  <view class="tabs">
-    <text class="active">商品</text>
-    <text>评价</text>
-    <text>关于店铺</text>
+  <view class="main-tabs">
+    <text class="tab {{activeTab === 'goods' ? 'active' : ''}}" data-tab="goods" bindtap="switchMainTab">商品</text>
+    <text class="tab {{activeTab === 'comment' ? 'active' : ''}}" data-tab="comment" bindtap="switchMainTab">评价</text>
+    <text class="tab {{activeTab === 'about' ? 'active' : ''}}" data-tab="about" bindtap="switchMainTab">关于店铺</text>
   </view>
 
-  <view class="content">
-    <view class="left">
-      <text wx:for="{{categories}}" wx:key="*this">{{item}}</text>
-    </view>
-    <view class="right">
-      <view class="item" wx:for="{{goods}}" wx:key="id">
+  <view wx:if="{{activeTab === 'goods'}}" class="goods-panel">
+    <scroll-view class="left-cats" scroll-y="{{true}}">
+      <view
+        class="cat-item {{activeCategoryKey === item.key ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        bindtap="switchCategory"
+      >
+        {{item.name}}
+      </view>
+    </scroll-view>
+
+    <scroll-view class="goods-list" scroll-y="{{true}}">
+      <view class="goods-item" wx:for="{{filteredGoods}}" wx:key="id" data-id="{{item.id}}" bindtap="goProductDetail">
         <image src="{{item.image}}" mode="aspectFill"></image>
-        <view class="info">
+        <view class="goods-main">
           <text class="name">{{item.name}}</text>
           <text class="sold">{{item.sold}}</text>
-          <text class="price">￥{{item.price}} <text class="old">￥{{item.oldPrice}}</text></text>
+          <view class="price-row">
+            <text class="price">￥{{item.price}}</text>
+            <text class="old">￥{{item.oldPrice}}</text>
+          </view>
         </view>
-        <text class="add" bindtap="goProduct">＋</text>
+        <text class="add" data-price="{{item.price}}" catchtap="addGoods">+</text>
       </view>
-      <text class="nomore">没有更多了</text>
+    </scroll-view>
+  </view>
+
+  <view wx:elif="{{activeTab === 'comment'}}" class="comment-panel">
+    <view class="notice-card">
+      <text class="comment-title">用户评价</text>
+      <text class="comment-empty">暂时还没有用户评价</text>
     </view>
+  </view>
+
+  <view wx:else class="about-panel">
+    <view class="notice-card">
+      <text class="notice-title">公告：</text>
+      <text class="notice-content">暂无公告</text>
+    </view>
+    <view class="table-card">
+      <view class="table-row"><text>手机号</text><text class="value">{{shop.phone}}</text></view>
+      <view class="table-row"><text>联系人</text><text class="value">{{shop.contact}}</text></view>
+      <view class="table-row"><text>店铺名称</text><text class="value">{{shop.name}}</text></view>
+      <view class="table-row"><text>店铺类目</text><text class="value">{{shop.categoryName}}</text></view>
+      <view class="table-row"><text>起送费</text><text class="value">0元</text></view>
+      <view class="table-row"><text>配送费</text><text class="value">0元</text></view>
+      <view class="table-row"><text>店铺地址</text><text class="value">{{shop.shopAddress}}</text></view>
+    </view>
+    <view class="gallery-title-row">
+      <text>店铺招牌</text>
+      <text>门店内景</text>
+    </view>
+    <view class="gallery-row">
+      <image src="{{shop.facadeImage}}" mode="aspectFill"></image>
+      <image src="{{shop.interiorImage}}" mode="aspectFill"></image>
+    </view>
+    <text class="license-title">营业执照</text>
+    <image class="license" src="{{shop.licenseImage}}" mode="aspectFill"></image>
   </view>
 
   <view class="bottom-bar">
-    <text class="cart">🛒</text>
+    <view class="cart-box">
+      <text class="cart-icon">🛒</text>
+      <text class="dot">{{cartCount}}</text>
+    </view>
     <view class="total">
-      <text class="money">合计￥0.00</text>
-      <text class="desc">另需配送费￥0</text>
+      <text class="money">合计￥{{totalAmount}}</text>
+      <text class="desc">另需配送费￥0 打包费￥0.00起送费￥0</text>
     </view>
     <text class="settle">去结算</text>
   </view>
