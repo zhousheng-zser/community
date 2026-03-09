@@ -2,18 +2,24 @@
 
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.addColumn('Users', 'address', {
-            type: Sequelize.STRING,
-            allowNull: true
-        });
-        await queryInterface.addColumn('Users', 'bank_num', {
-            type: Sequelize.STRING,
-            allowNull: true
-        });
-        await queryInterface.addColumn('Users', 'wx_id', {
-            type: Sequelize.STRING,
-            allowNull: true
-        });
+        try {
+            await queryInterface.addColumn('Users', 'address', {
+                type: Sequelize.STRING,
+                allowNull: true
+            });
+        } catch (e) { console.log('address exist'); }
+        try {
+            await queryInterface.addColumn('Users', 'bank_num', {
+                type: Sequelize.STRING,
+                allowNull: true
+            });
+        } catch (e) { console.log('bank_num exist'); }
+        try {
+            await queryInterface.addColumn('Users', 'wx_id', {
+                type: Sequelize.STRING,
+                allowNull: true
+            });
+        } catch (e) { console.log('wx_id exist'); }
     },
 
     async down(queryInterface, Sequelize) {
