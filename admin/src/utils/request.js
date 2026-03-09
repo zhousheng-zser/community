@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 假设我们后期的 Node.js 跑在本机的 3000 端口
 const request = axios.create({
-    baseURL: 'http://127.0.0.1:3000/api',
+    baseURL: 'http://6b6b1bb4.r3.cpolar.cn/api',
     timeout: 5000
 })
 

@@ -1,3 +1,5 @@
+const config = require('./config.js');
+
 const formatTime = date => {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
@@ -19,7 +21,7 @@ const get = (url, query) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
+      url: config.baseUrl + url,
       data,
       header: {
         'content-type': contentType,
@@ -49,7 +51,7 @@ const post = (url, data) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
+      url: config.baseUrl + url,
       method: "POST",
       data,
       header: {
@@ -80,7 +82,7 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.uploadFile({
-      url: "https://6f567ef2.r3.cpolar.cn/api/v1/" + url,
+      url: config.baseUrl + url,
       filePath: filePath,
       name: name,
       formData: formData,
