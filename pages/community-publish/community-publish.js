@@ -79,8 +79,7 @@ Page({
                 const pages = getCurrentPages();
                 const prevPage = pages[pages.length - 2];
                 if (prevPage && prevPage.route === 'pages/community/community') {
-                    prevPage.setData({ posts: [], page: 1, hasMore: true });
-                    prevPage.loadPosts(true);
+                    prevPage.fetchPosts();
                 }
 
                 setTimeout(() => {

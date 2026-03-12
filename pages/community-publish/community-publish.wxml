@@ -15,9 +15,10 @@
     </view>
 
     <view class="location-area">
+      <text class="location-icon">📍</text>
       <input name="location" placeholder="添加位置 (可选)" class="location-input" />
     </view>
 
-    <button class="submit-btn" form-type="submit" disabled="{{isSubmitting}}">发布</button>
+    <button class="submit-btn" form-type="submit" disabled="{{isSubmitting}}">立即发布</button>
   </form>
 </view>

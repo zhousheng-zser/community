@@ -42,9 +42,8 @@
         <text class="time">{{item.createdAt}}</text>
       </view>
 
-      <view wx:if="{{item.content}}">
-        <text class="title">{{utilWxs.parseJSON(item.content).title}}</text>
-        <text class="desc" wx:if="{{utilWxs.parseJSON(item.content).desc}}">{{utilWxs.parseJSON(item.content).desc}}</text>
+      <view class="post-content" wx:if="{{item.content}}">
+        <text class="content-text">{{item.content}}</text>
       </view>
 
       <view class="image-gallery" wx:if="{{item.images && item.images.length > 0}}">
@@ -55,10 +54,12 @@
         <text class="read">阅读 {{item.id * 7 + 12}}</text>
         <view class="right">
           <view class="meta" bindtap="handleComment" data-id="{{item.id}}" data-index="{{index}}">
-            💬 {{item.comments ? item.comments.length : 0}}
+            <text class="meta-icon">💬</text>
+            <text>{{item.comments ? item.comments.length : 0}}</text>
           </view>
           <view class="meta" bindtap="handleLike" data-id="{{item.id}}" data-index="{{index}}">
-            ♡ {{item.likes ? item.likes.length : 0}}
+            <text class="meta-icon">{{item.isLiked ? '❤️' : '♡'}}</text>
+            <text>{{item.likes ? item.likes.length : 0}}</text>
           </view>
         </view>
       </view>

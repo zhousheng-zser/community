@@ -1,7 +1,7 @@
 <!--index.wxml-->
 <import src="../../tpl/liorder/liorder.wxml" />
 <import src="../../tpl/notask/notask.wxml" />
-<view class="home-page">
+<view class="home-page" style="--sticky-top: {{navTopPadding + 46}}px;">
   <view class="top-wrap" style="padding-top: {{navTopPadding}}px;">
     <view class="top-tabs">
       <view class="top-tab {{activeTab === item.text ? 'active' : ''}}" wx:for="{{topTabs}}" wx:key="text" bindtap="switchTopTab" data-tab="{{item.text}}">{{item.text}}</view>
@@ -216,34 +216,39 @@
 
     <!-- 模块八：周期性主推与热卖排行 (Periodic Rankings) -->
     <view class="jt-feed-section">
-      <view class="feed-tabs">
-        <text class="tab {{index === activePeriodicTabIndex ? 'active' : ''}}" bindtap="switchPeriodicTab" data-idx="{{index}}" wx:for="{{pushPeriodicTabs}}" wx:key="*this">{{item}}</text>
-      </view>
-      
-      <!-- 模块八短列表：基于 periodic items -->
-      <view class="feed-goods-list">
-        <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="f-card" wx:for="{{pushPeriodicGoods}}" wx:key="id">
-          <image src="{{item.image}}" mode="aspectFill"></image>
-          <view class="f-info">
-            <text class="f-title">{{item.title}}</text>
-            <view class="f-price">
-              <text class="yen">￥</text>{{item.price}}
-              <text wx:if="{{item.tag}}" class="tag">{{item.tag}}</text>
+      <!-- 独立的周期性榜单容器 -->
+      <view class="jt-periodic-module">
+        <view class="feed-tabs">
+          <text class="tab {{index === activePeriodicTabIndex ? 'active' : ''}}" bindtap="switchPeriodicTab" data-idx="{{index}}" wx:for="{{pushPeriodicTabs}}" wx:key="*this">{{item}}</text>
+        </view>
+        
+        <!-- 模块八短列表：基于 periodic items -->
+        <view class="feed-goods-list">
+          <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="f-card" wx:for="{{pushPeriodicGoods}}" wx:key="id">
+            <image src="{{item.image}}" mode="aspectFill"></image>
+            <view class="f-info">
+              <text class="f-title">{{item.title}}</text>
+              <view class="f-price">
+                <text class="yen">￥</text>{{item.price}}
+                <text wx:if="{{item.tag}}" class="tag">{{item.tag}}</text>
+              </view>
+              <view class="f-action">
+                <text class="share">分享赚/购买返￥{{item.comm}}</text>
+                <view class="btn">去购买</view>
+              </view>
             </view>
-            <view class="f-action">
-              <text class="share">分享赚/购买返￥{{item.comm}}</text>
-              <view class="btn">去购买</view>
-            </view>
-          </view>
+          </navigator>
+        </view>
+        
+        <!-- 模块八：查看更多按钮 -->
+        <navigator url="/pages/push-periodic-list/push-periodic-list?type={{pushPeriodicTabs[activePeriodicTabIndex]}}" class="view-more-line">
+          查看更多 >
         </navigator>
       </view>
       
-      <!-- 模块八：查看更多按钮 -->
-      <navigator url="/pages/push-periodic-list/push-periodic-list?type={{pushPeriodicTabs[activePeriodicTabIndex]}}" class="view-more-line">
-        查看更多 >
-      </navigator>
-      
-      <scroll-view class="sub-tabs-scroll" scroll-x="{{true}}">
+      <!-- 独立的底部分类 Feed 模块 -->
+      <view class="jt-subfeed-module">
+        <scroll-view class="sub-tabs-scroll" scroll-x="{{true}}">
         <view class="sub-tabs">
           <view wx:for="{{pushFeedTabs}}" wx:key="*this"
                 class="tab-item {{item === activeFeedTab ? 'active' : ''}}"
@@ -268,9 +273,9 @@
         </navigator>
       </view>
 
-      <!-- 模块九：触底加载提示文本 -->
-      <view class="feed-more" wx:if="{{isLoadingMore}}">
-        正在加载更多宝贝...
+        <view class="feed-more" wx:if="{{isLoadingMore}}">
+          正在加载更多宝贝...
+        </view>
       </view>
     </view>
   </view>

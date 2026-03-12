@@ -18,10 +18,20 @@ const formatNumber = n => {
 const get = (url, query) => {
   const contentType = query ? "application/x-www-form-urlencoded" : "application/json",
     data = query || {};
+  
+  // 智能拼接 URL，防止出现 v1auth 或 v1//posts
+  let finalUrl = config.baseUrl;
+  if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
+    finalUrl += '/';
+  } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
+    finalUrl = finalUrl.slice(0, -1);
+  }
+  finalUrl += url;
+
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: config.baseUrl + url,
+      url: finalUrl,
       data,
       header: {
         'content-type': contentType,
@@ -48,10 +58,19 @@ const get = (url, query) => {
   })
 }
 const post = (url, data) => {
+  // 智能拼接 URL
+  let finalUrl = config.baseUrl;
+  if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
+    finalUrl += '/';
+  } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
+    finalUrl = finalUrl.slice(0, -1);
+  }
+  finalUrl += url;
+
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
-      url: config.baseUrl + url,
+      url: finalUrl,
       method: "POST",
       data,
       header: {
@@ -79,10 +98,19 @@ const post = (url, data) => {
   })
 }
 const uploadFile = (url, filePath, name = 'file', formData = {}) => {
+  // 智能拼接 URL
+  let finalUrl = config.baseUrl;
+  if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
+    finalUrl += '/';
+  } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
+    finalUrl = finalUrl.slice(0, -1);
+  }
+  finalUrl += url;
+
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.uploadFile({
-      url: config.baseUrl + url,
+      url: finalUrl,
       filePath: filePath,
       name: name,
       formData: formData,

@@ -18,10 +18,47 @@ Page({
     this.fetchPosts(); // Handle returning from details/publish views
   },
   fetchPosts() {
-    util.get("posts", { category: this.data.activeTab })
+    const category = this.data.activeTab;
+    console.log(`[社区] 正在拉取分类 [${category}] 的帖子...`);
+    
+    // 使用相对路径，斜杠由 util 处理
+    util.get("/posts", { 
+      category: category,
+      page: 1,
+      limit: 20
+    })
       .then(res => {
-        // util.get 内部已经做了 resolve(data.data || data)，因此 res 直接是文章数组
-        this.setData({ posts: Array.isArray(res) ? res : (res.data || []) });
+        const list = res.list || res;
+        const userId = wx.getStorageSync('userId');
+        const apiOrigin = 'http://114.55.167.14:3000'; // 补全图片所需的域名
+        
+        const processedPosts = (Array.isArray(list) ? list : []).map(post => {
+            // 自动补全图片路径
+            let images = post.images || [];
+            if (typeof images === 'string') {
+              try { images = JSON.parse(images); } catch(e) { images = []; }
+            }
+            images = images.map(src => src.startsWith('/') ? apiOrigin + src : src);
+
+            // 处理作者信息
+            const author = post.author || post.User || {};
+            let avatar = author.avatar_url || author.avatar || '/img/placeholders/avatar_worker.png';
+            if (avatar.startsWith('/uploads')) avatar = apiOrigin + avatar;
+
+            return {
+                ...post,
+                author: {
+                    nickname: author.nickname || '社区邻居',
+                    avatar_url: avatar
+                },
+                images: images,
+                isLiked: post.likes ? post.likes.some(l => l.user_id === userId) : false,
+                createdAt: util.formatTime(new Date(post.createdAt))
+            };
+        });
+
+        console.log(`[社区] 成功加载 ${processedPosts.length} 条动态`);
+        this.setData({ posts: processedPosts });
       })
       .catch(err => {
         console.error("加载社区失败", err);
@@ -60,19 +97,22 @@ Page({
     const { id, index } = e.currentTarget.dataset;
     util.post(`posts/${id}/like`)
       .then(res => {
-        // Optimistic UI Update
+        // 乐观更新 UI
         const posts = this.data.posts;
-        if (!posts[index].likes) posts[index].likes = [];
-
-        if (res.status === 'liked') {
-          posts[index].likes.push({ id: wx.getStorageSync('userId') || 'mock' });
+        const post = posts[index];
+        
+        if (res.status === 'liked' || res.action === 'liked') {
+          post.isLiked = true;
+          post.likes_count = (post.likes_count || 0) + 1;
         } else {
-          posts[index].likes.pop(); // Simplest optimistic pop
+          post.isLiked = false;
+          post.likes_count = Math.max(0, (post.likes_count || 1) - 1);
         }
 
-        this.setData({ [`posts[${index}].likes`]: posts[index].likes });
+        this.setData({ [`posts[${index}]`]: post });
       })
       .catch(err => {
+        console.error("点赞失败", err);
         wx.showToast({ title: '操作失败', icon: 'none' });
       });
   },
@@ -82,20 +122,27 @@ Page({
     wx.showModal({
       title: '发表评论',
       editable: true,
-      placeholderText: '说点什么吧...',
+      placeholderText: '文明上网，理性发言...',
       success: (res) => {
         if (res.confirm && res.content) {
           util.post(`posts/${id}/comment`, { content: res.content })
-            .then(data => {
+            .then(commentData => {
               wx.showToast({ title: '评论成功', icon: 'success' });
 
               const posts = this.data.posts;
-              if (!posts[index].comments) posts[index].comments = [];
-              posts[index].comments.push(data); // Append returned comment
+              const post = posts[index];
+              if (!post.comments) post.comments = [];
+              
+              // 统一渲染格式
+              post.comments.push({
+                  ...commentData,
+                  createdAt: '刚刚'
+              });
 
-              this.setData({ [`posts[${index}].comments`]: posts[index].comments });
+              this.setData({ [`posts[${index}]`]: post });
             })
             .catch(err => {
+              console.error("评论失败", err);
               wx.showToast({ title: '评论失败', icon: 'none' });
             });
         }
