@@ -1,0 +1,21 @@
+<view class="act-page">
+  <view class="act-tab-bar">
+    <view class="act-tab {{activeTab===item?'active':''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">{{item}}</view>
+  </view>
+  <view class="act-content">
+    <view wx:if="{{list.length > 0}}" class="act-list">
+      <view class="act-item" wx:for="{{list}}" wx:key="id">
+        <image class="act-img" src="{{item.cover}}" mode="aspectFill"></image>
+        <view class="act-info">
+          <text class="act-title">{{item.title}}</text>
+          <text class="act-time">{{item.time}}</text>
+          <view class="act-status {{item.status==='待参加'?'pending':''}}">{{item.status}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="act-empty">
+      <text class="act-empty-icon">📋</text>
+      <text class="act-empty-text">列表为空</text>
+    </view>
+  </view>
+</view>

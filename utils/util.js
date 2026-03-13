@@ -1,4 +1,20 @@
 const config = require('./config.js');
+const images = require('./images.js');
+
+/**
+ * 将路径转成完整服务器图片 URL
+ * - 已是 http 开头 → 原样返回
+ * - 本地占位图路径 → 映射到服务器已上传文件
+ * - 其他相对路径 → 拼接 imageBaseUrl
+ */
+const imgUrl = (path, fallback) => {
+  if (!path) return fallback || images.homeCleaning;
+  if (path.startsWith('http')) return path;
+  const resolved = images.resolve(path);
+  if (resolved !== path) return resolved;
+  const base = config.imageBaseUrl.replace(/\/$/, '');
+  return base + (path.startsWith('/') ? path : '/' + path);
+};
 
 const formatTime = date => {
   const year = date.getFullYear()
@@ -377,5 +393,6 @@ module.exports = {
   uploadFile,
   goodsStateTabel,
   booksStateTabel,
-  stateTabel
+  stateTabel,
+  imgUrl
 }

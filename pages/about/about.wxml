@@ -1,0 +1,88 @@
+<!--pages/about/about.wxml-->
+<view class="about-page">
+
+  <!-- 顶部 Logo 区 -->
+  <view class="hero">
+    <view class="logo-wrap">
+      <image class="logo" src="/img/home-1.png" mode="aspectFit"></image>
+    </view>
+    <text class="app-name">家事速配</text>
+    <text class="app-slogan">连接邻里，温暖生活</text>
+    <text class="app-version">版本 v1.0.0</text>
+  </view>
+
+  <!-- 产品介绍 -->
+  <view class="card">
+    <view class="card-title-row">
+      <text class="card-icon">🏠</text>
+      <text class="card-title">关于家事速配</text>
+    </view>
+    <text class="card-text">家事速配是一款专注于社区生活服务的综合平台，致力于打通居民与周边服务商、技工、商家之间的连接渠道，让家门口的服务触手可及。</text>
+    <text class="card-text mt">无论是家政清洁、水电维修、社区集市，还是邻里互动与活动参与，我们都希望以科技之力，让每个家庭的日常生活更加便利、温暖、有温度。</text>
+  </view>
+
+  <!-- 核心功能 -->
+  <view class="card">
+    <view class="card-title-row">
+      <text class="card-icon">⚡</text>
+      <text class="card-title">核心功能</text>
+    </view>
+    <view class="feature-list">
+      <view class="feature-item" wx:for="{{features}}" wx:key="name">
+        <view class="feature-icon-bg" style="background: {{item.bg}};">
+          <text class="feature-emoji">{{item.emoji}}</text>
+        </view>
+        <view class="feature-text">
+          <text class="feature-name">{{item.name}}</text>
+          <text class="feature-desc">{{item.desc}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="card">
+    <view class="card-title-row">
+      <text class="card-icon">📞</text>
+      <text class="card-title">联系我们</text>
+    </view>
+    <view class="contact-list">
+      <view class="contact-item" wx:for="{{contacts}}" wx:key="label" bindtap="handleContact" data-type="{{item.type}}" data-value="{{item.value}}">
+        <text class="contact-label">{{item.label}}</text>
+        <view class="contact-right">
+          <text class="contact-value">{{item.value}}</text>
+          <text class="contact-arrow" wx:if="{{item.type !== 'text'}}">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 法律条款 -->
+  <view class="card">
+    <view class="card-title-row">
+      <text class="card-icon">📄</text>
+      <text class="card-title">法律与隐私</text>
+    </view>
+    <view class="link-list">
+      <view class="link-item" bindtap="goPrivacy">
+        <text class="link-name">隐私政策</text>
+        <text class="link-arrow">›</text>
+      </view>
+      <view class="link-item" bindtap="goTerms">
+        <text class="link-name">用户服务协议</text>
+        <text class="link-arrow">›</text>
+      </view>
+      <view class="link-item last" bindtap="goLicense">
+        <text class="link-name">第三方 SDK 说明</text>
+        <text class="link-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部版权 -->
+  <view class="footer">
+    <text class="footer-company">© 2024 家事速配科技有限公司</text>
+    <text class="footer-icp">增值电信业务经营许可证 备案号：待填写</text>
+  </view>
+
+</view>

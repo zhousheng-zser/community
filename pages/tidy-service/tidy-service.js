@@ -1,17 +1,23 @@
+const { baseUrl } = require('../../utils/config.js');
+
 Page({
   data: {
     navTopPadding: 20,
     pageTitle: "整理收纳",
+    loading: true,
     categories: [],
     activeCategory: "hot",
     services: [],
     filteredServices: []
   },
+
+  // 本地兜底数据（API 失败时使用）
   getPageConfig(key) {
     const allConfigs = {
       tidy: {
         title: "整理收纳",
         categories: ["热门服务", "厨房收纳", "搬家整理", "全屋收纳", "衣橱收纳"],
+        priceUnit: "份",
         services: [
           { id: 1, category: "衣橱收纳", title: "衣橱整理收纳【2小时】", price: "196元/份" },
           { id: 2, category: "厨房收纳", title: "厨房整理收纳【2小时】", price: "196元/份" },
@@ -22,19 +28,8 @@ Page({
       },
       urgent_fix: {
         title: "家修急事",
-        categories: [
-          "热门服务",
-          "净水器维修",
-          "灯具维修",
-          "柜子维修",
-          "管道疏通",
-          "手机维修",
-          "电路维修",
-          "水路维修",
-          "马桶维修",
-          "厨房烟道串味",
-          "零星打胶家修杂事"
-        ],
+        categories: ["热门服务", "净水器维修", "灯具维修", "柜子维修", "管道疏通", "手机维修", "电路维修", "水路维修", "马桶维修", "厨房烟道串味", "零星打胶家修杂事"],
+        priceUnit: "次",
         services: [
           { id: 11, category: "净水器维修", title: "净水器故障维修【1小时】", price: "128元/次" },
           { id: 12, category: "灯具维修", title: "灯具线路与灯体维修【1小时】", price: "98元/次" },
@@ -50,19 +45,8 @@ Page({
       },
       appliance_clean: {
         title: "家电清洗",
-        categories: [
-          "热门服务",
-          "漏水检测",
-          "瓷砖空鼓",
-          "地暖检测",
-          "地暖清洗",
-          "灯具清洗",
-          "空调清洗",
-          "油烟机清洗",
-          "洗衣机清洗",
-          "冰箱清洗",
-          "热水器清洗"
-        ],
+        categories: ["热门服务", "漏水检测", "瓷砖空鼓", "地暖检测", "地暖清洗", "灯具清洗", "空调清洗", "油烟机清洗", "洗衣机清洗", "冰箱清洗", "热水器清洗"],
+        priceUnit: "次",
         services: [
           { id: 21, category: "漏水检测", title: "全屋漏水点检测【1小时】", price: "129元/次" },
           { id: 22, category: "瓷砖空鼓", title: "瓷砖空鼓排查检测【1小时】", price: "109元/次" },
@@ -79,6 +63,7 @@ Page({
       pioneer_clean: {
         title: "开荒保洁",
         categories: ["热门服务", "开荒保洁"],
+        priceUnit: "份",
         services: [
           { id: 31, category: "开荒保洁", title: "新房开荒保洁【3小时】", price: "399元/份" },
           { id: 32, category: "开荒保洁", title: "全屋深度开荒【4小时】", price: "499元/份" }
@@ -87,6 +72,7 @@ Page({
       mite_remove: {
         title: "除螨服务",
         categories: ["热门服务", "全床除螨", "居室除螨"],
+        priceUnit: "次",
         services: [
           { id: 41, category: "全床除螨", title: "全床深度除螨【1小时】", price: "139元/次" },
           { id: 42, category: "居室除螨", title: "居室除螨净化【2小时】", price: "239元/次" }
@@ -94,33 +80,24 @@ Page({
       },
       furniture_care: {
         title: "家具养护",
-        categories: [
-          "热门服务",
-          "地板翻新",
-          "地暖检测",
-          "地暖清洁",
-          "床垫清洗",
-          "沙发清洗",
-          "窗帘清晰",
-          "地毯清洗",
-          "地板打哪",
-          "大理石抛光"
-        ],
+        categories: ["热门服务", "地板翻新", "地暖检测", "地暖清洁", "床垫清洗", "沙发清洗", "窗帘清洁", "地毯清洗", "地板打蜡", "大理石抛光"],
+        priceUnit: "次",
         services: [
           { id: 51, category: "地板翻新", title: "木地板翻新养护【2小时】", price: "299元/次" },
           { id: 52, category: "地暖检测", title: "地暖系统检测【1小时】", price: "139元/次" },
           { id: 53, category: "地暖清洁", title: "地暖系统清洁【2小时】", price: "269元/次" },
           { id: 54, category: "床垫清洗", title: "床垫深度清洗除菌【1小时】", price: "169元/次" },
           { id: 55, category: "沙发清洗", title: "布艺/皮质沙发清洗【1小时】", price: "179元/次" },
-          { id: 56, category: "窗帘清晰", title: "窗帘清晰养护【1小时】", price: "129元/次" },
+          { id: 56, category: "窗帘清洁", title: "窗帘清洁养护【1小时】", price: "129元/次" },
           { id: 57, category: "地毯清洗", title: "地毯深度清洗【1小时】", price: "159元/次" },
-          { id: 58, category: "地板打哪", title: "地板打哪养护【1小时】", price: "149元/次" },
+          { id: 58, category: "地板打蜡", title: "地板打蜡养护【1小时】", price: "149元/次" },
           { id: 59, category: "大理石抛光", title: "大理石抛光养护【2小时】", price: "229元/次" }
         ]
       },
       baby_home: {
         title: "宝宝家事",
         categories: ["热门服务", "孩子接送", "陪读辅导", "起居照顾", "育儿嫂"],
+        priceUnit: "次",
         services: [
           { id: 61, category: "孩子接送", title: "校区接送小孩【1小时】", price: "39元/次" },
           { id: 62, category: "陪读辅导", title: "课后陪读辅导【2小时】", price: "89元/次" },
@@ -130,31 +107,23 @@ Page({
       },
       house_repair: {
         title: "房屋修缮",
-        categories: [
-          "热门服务",
-          "岩板修复",
-          "瓷砖修复",
-          "瓷砖辅贴",
-          "壁纸铺贴",
-          "漏水防水",
-          "地板铺贴",
-          "墙面刷新",
-          "墙面修补刷新"
-        ],
+        categories: ["热门服务", "岩板修复", "瓷砖修复", "瓷砖铺贴", "壁纸铺贴", "漏水防水", "地板铺贴", "墙面刷新", "墙面修补"],
+        priceUnit: "次",
         services: [
           { id: 71, category: "岩板修复", title: "岩板破损修复【1小时】", price: "199元/次" },
           { id: 72, category: "瓷砖修复", title: "瓷砖裂纹修复【1小时】", price: "159元/次" },
-          { id: 73, category: "瓷砖辅贴", title: "局部瓷砖辅贴【2小时】", price: "229元/次" },
+          { id: 73, category: "瓷砖铺贴", title: "局部瓷砖铺贴【2小时】", price: "229元/次" },
           { id: 74, category: "壁纸铺贴", title: "壁纸铺贴施工【2小时】", price: "239元/次" },
           { id: 75, category: "漏水防水", title: "厨卫漏水防水修缮【2小时】", price: "299元/次" },
           { id: 76, category: "地板铺贴", title: "地板铺贴修缮【2小时】", price: "279元/次" },
           { id: 77, category: "墙面刷新", title: "墙面刷新施工【2小时】", price: "259元/次" },
-          { id: 78, category: "墙面修补刷新", title: "墙面修补刷新【2小时】", price: "269元/次" }
+          { id: 78, category: "墙面修补", title: "墙面修补刷新【2小时】", price: "269元/次" }
         ]
       },
       beauty_home: {
         title: "上门美业",
         categories: ["热门服务", "上门纹绣", "上门美容", "化妆造型", "上门美甲", "上门美瞳", "上门美发"],
+        priceUnit: "次",
         services: [
           { id: 81, category: "上门纹绣", title: "上门纹绣咨询与设计【1小时】", price: "299元/次" },
           { id: 82, category: "上门美容", title: "上门面部护理美容【1小时】", price: "169元/次" },
@@ -167,30 +136,73 @@ Page({
     };
     return allConfigs[key] || allConfigs.tidy;
   },
+
   onLoad() {
     const sys = wx.getSystemInfoSync();
     const options = this.options || {};
-    const config = this.getPageConfig(options.key || "tidy");
+    const key = options.key || "tidy";
+    const config = this.getPageConfig(key);
+
+    const icons = [
+      '/img/index/menuicon1.png',
+      '/img/index/menuicon2.png',
+      '/img/index/menuicon3.png',
+      '/img/index/menuicon4.png'
+    ];
+
+    // 立即用本地数据渲染（无需等待网络）
     const categories = config.categories.map((name, idx) => ({
       key: idx === 0 ? "hot" : name,
       name,
-      icon: idx === 0 ? "▦" : "▣"
+      icon: icons[idx % icons.length]
     }));
-    const services = config.services.map((item, idx) => ({
+    const services = config.services.map((item) => ({
       ...item,
       sold: "已售0 好评率100%",
-      image: idx % 2 === 0
-        ? "/img/placeholders/home_cleaning.png"
-        : "/img/placeholders/home_cleaning.png"
+      image: "/img/placeholders/home_cleaning.png"
     }));
+
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
       pageTitle: config.title,
       categories,
-      services
+      services,
+      loading: true
     });
     this.filterServices("hot");
+
+    // 尝试从后端拉取真实数据（含图片）
+    wx.request({
+      url: `${baseUrl}/core/service-groups/${key}`,
+      success: (res) => {
+        if (res.statusCode !== 200 || !res.data || !res.data.data) return;
+        const { categories: apiCats, services: apiSvcs } = res.data.data;
+        if (!apiCats || !apiCats.length || !apiSvcs || !apiSvcs.length) return;
+
+        const priceUnit = config.priceUnit || '次';
+        const newCategories = apiCats.map((cat, idx) => ({
+          key: idx === 0 ? "hot" : cat.name,
+          name: cat.name,
+          icon: cat.icon_url || icons[idx % icons.length]
+        }));
+        const newServices = apiSvcs.map(item => ({
+          id: item.id,
+          category: item.category ? item.category.name : '',
+          title: item.title,
+          price: `${Math.round(item.price)}元/${priceUnit}`,
+          image: item.cover_image || "/img/placeholders/home_cleaning.png",
+          sold: `已售${item.sales_count || 0} 好评率100%`
+        }));
+
+        this.setData({ categories: newCategories, services: newServices, loading: false });
+        this.filterServices(this.data.activeCategory);
+      },
+      complete: () => {
+        this.setData({ loading: false });
+      }
+    });
   },
+
   goBack() {
     const pages = getCurrentPages();
     if (pages.length > 1) {
@@ -199,19 +211,22 @@ Page({
     }
     wx.switchTab({ url: "/pages/index/index" });
   },
+
   switchCategory(e) {
     const key = e.currentTarget.dataset.key;
     this.setData({ activeCategory: key });
     this.filterServices(key);
   },
+
   filterServices(key) {
     const services = this.data.services;
     if (key === "hot") {
       this.setData({ filteredServices: services });
       return;
     }
-    this.setData({ filteredServices: services.filter((item) => item.category === key) });
+    this.setData({ filteredServices: services.filter(item => item.category === key) });
   },
+
   goServiceDetail(e) {
     wx.navigateTo({
       url: "../service/service?id=" + e.currentTarget.dataset.id

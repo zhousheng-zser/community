@@ -36,8 +36,9 @@ App({
               userAddress: data.user.address || '',
               userBankNum: data.user.bank_num || '',
               userWxId: data.user.wx_id || '',
+              role: data.user.role || 'user',
               userState: 0,
-              remark2: 2, // 默认审核通过，方便测试
+              remark2: 2,
               vipFlag: 0
             };
 

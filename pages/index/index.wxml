@@ -8,8 +8,8 @@
     </view>
     <view class="search-row">
       <view class="location-pill" bindtap="handleLocationTap">
-        <text class="dot-black"></text>
-        <text>📍</text>
+        <text class="loc-icon">📍</text>
+        <text class="loc-text">{{currentCity}}</text>
       </view>
       <view class="search-input">
         <icon type="search" size="13" color="#999" />
@@ -45,8 +45,8 @@
     <!-- 模块二：五大金刚区 -->
     <view class="jt-categories">
       <navigator class="jt-cate-item" wx:for="{{pushCategories}}" wx:key="name" url="{{item.url}}">
-        <view class="icon-wrap">
-          <image src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="jt-cate-emoji-wrap" style="background:{{item.bgColor}}">
+          <text class="jt-cate-emoji">{{item.emoji}}</text>
         </view>
         <text>{{item.name}}</text>
       </navigator>
@@ -294,7 +294,9 @@
       </view>
       <view class="fuka-local-grid">
         <view class="fuka-local-item" wx:for="{{fukaLocalList}}" wx:key="name">
-          <image src="{{item.icon}}" mode="aspectFill"></image>
+          <view class="fuka-emoji-wrap" style="background:{{item.bgColor}}">
+            <text class="fuka-emoji">{{item.emoji}}</text>
+          </view>
           <text>{{item.name}}</text>
         </view>
       </view>
@@ -310,7 +312,9 @@
 
     <view class="card fuka-service-grid">
       <view class="fuka-service-item" wx:for="{{fukaServices}}" wx:key="name">
-        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="fuka-emoji-wrap" style="background:{{item.bgColor}}">
+          <text class="fuka-emoji">{{item.emoji}}</text>
+        </view>
         <text>{{item.name}}</text>
       </view>
     </view>
@@ -343,7 +347,9 @@
   <view wx:elif="{{activeTab === '家集市'}}">
     <view class="card market-top-cats">
       <navigator class="market-top-item" wx:for="{{marketTopCats}}" wx:key="name" url="{{item.url}}">
-        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="market-emoji-wrap" style="background:{{item.bgColor}}">
+          <text class="market-emoji">{{item.emoji}}</text>
+        </view>
         <text>{{item.name}}</text>
       </navigator>
     </view>
@@ -389,13 +395,17 @@
   <view class="card panel-grid">
     <view class="service-grid">
       <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="{{item.url}}">
-        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="svc-icon-wrap" style="background:{{item.bgColor}}">
+          <text class="svc-emoji">{{item.emoji}}</text>
+        </view>
         <text>{{item.name}}</text>
       </navigator>
     </view>
     <view class="quick-nav">
       <navigator class="quick-item" wx:for="{{quickActions}}" wx:key="name" url="../classify/classify">
-        <image src="{{item.icon}}" mode="aspectFill"></image>
+        <view class="quick-icon-wrap" style="background:{{item.bgColor}}">
+          <text class="quick-emoji">{{item.emoji}}</text>
+        </view>
         <text>{{item.name}}</text>
       </navigator>
     </view>
@@ -417,7 +427,9 @@
     </view>
     <view class="knowledge-row neighborhood-services">
       <navigator class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="name" url="{{item.url}}">
-        <image src="{{item.avatar}}" mode="aspectFill"></image>
+        <view class="know-icon-wrap" style="background:{{item.bgColor}}">
+          <text class="know-emoji">{{item.emoji}}</text>
+        </view>
         <text>{{item.name}}</text>
       </navigator>
     </view>
@@ -490,7 +502,7 @@
   </view>
 
   <view class="fake-tabbar-space"></view>
-  <view class="publish-btn">一键发布</view>
+  <view class="publish-btn" bindtap="goPublish">一键发布</view>
 
   <view class="modal" wx:if="{{showGetTelModal}}">
     系统需要获取您的手机号码以方便客户与您联系

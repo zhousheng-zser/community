@@ -1,0 +1,35 @@
+<view class="follows-page">
+  <view class="tab-bar">
+    <view class="tab {{activeTab===0?'active':''}}" bindtap="switchTab" data-idx="0">用户</view>
+    <view class="tab {{activeTab===1?'active':''}}" bindtap="switchTab" data-idx="1">帖子</view>
+  </view>
+  <view class="tab-content">
+    <view wx:if="{{activeTab===0}}">
+      <view wx:if="{{userList.length > 0}}" class="user-list">
+        <view class="user-item" wx:for="{{userList}}" wx:key="id">
+          <image class="user-avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view class="user-info">
+            <text class="user-name">{{item.name}}</text>
+            <text class="user-sub">{{item.sub}}</text>
+          </view>
+          <view class="unfollow-btn">已关注</view>
+        </view>
+      </view>
+      <view wx:else class="empty-wrap">
+        <text class="empty-icon">📋</text>
+        <text class="empty-text">暂无关注的用户</text>
+      </view>
+    </view>
+    <view wx:elif="{{activeTab===1}}">
+      <view wx:if="{{postList.length > 0}}" class="post-list">
+        <view class="post-item" wx:for="{{postList}}" wx:key="id">
+          <text class="post-title">{{item.title}}</text>
+        </view>
+      </view>
+      <view wx:else class="empty-wrap">
+        <text class="empty-icon">📋</text>
+        <text class="empty-text">暂无关注的帖子</text>
+      </view>
+    </view>
+  </view>
+</view>

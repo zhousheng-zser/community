@@ -1,116 +1,162 @@
 <!--pages/user/user.wxml-->
 <view class="mine-page">
-  <view class="mine-top-bg"></view>
 
-  <view class="profile-card">
-    <view class="profile-main">
-    <navigator url="../user-edit/user-edit">
+  <!-- 顶部渐变头部 -->
+  <view class="mine-header" style="padding-top: {{navTop}}px;">
+    <view class="header-row">
+      <navigator url="../user-edit/user-edit" class="avatar-wrap">
         <image class="avatar" src="{{user.userPhoto || '/img/head.jpg'}}" mode="aspectFill"></image>
-    </navigator>
-      <view class="base-info">
-        <text class="name">{{user.userName || '微信用户'}}</text>
-        <text class="mobile">{{user.tel || ''}}</text>
+        <view class="avatar-edit">编辑</view>
+      </navigator>
+      <view class="header-info">
+        <text class="header-name">{{user.userName || '微信用户'}}</text>
+        <text class="header-mobile">{{user.tel || '点击完善信息'}}</text>
+        <view class="role-badge">{{roleLabel}}</view>
       </view>
-      <navigator class="code-btn" url="../user-code/user-code">
-        <image src="/img/user/user-code.png"></image>
+      <navigator class="qr-btn" url="../user-code/user-code">
+        <text class="qr-icon">📷</text>
+        <text class="qr-text">邀请码</text>
       </navigator>
     </view>
 
-    <view class="profile-stats">
-      <view class="stat-item">
-        <text class="num">{{points}}</text>
-        <text class="label">家事积分</text>
-  </view>
-      <navigator class="stat-item" url="../coupons-my/coupons-my">
-        <text class="num">{{couponCount}}</text>
-        <text class="label">新服务优惠券</text>
-    </navigator>
-      <navigator class="stat-item" url="../coupons-my/coupons-my">
-        <text class="num">{{couponCount}}</text>
-        <text class="label">新零售优惠券</text>
-    </navigator>
-  </view>
-  </view>
-
-  <navigator class="income-card" url="../account/account">
-    <view class="income-left">
-      <view class="income-icon-wrap">
-        <image class="income-icon" src="/img/user/user-2-1.png"></image>
+    <view class="header-stats">
+      <view class="hstat">
+        <text class="hstat-num">{{points}}</text>
+        <text class="hstat-label">积分</text>
       </view>
-      <text>我的收益</text>
-    </view>
-    <view class="income-right">
-      <text class="money">￥{{account.totalAcount || 0}}</text>
-      <text class="sub">可提取 ></text>
-        </view>
+      <view class="hstat-divider"></view>
+      <navigator class="hstat" url="../coupons-my/coupons-my">
+        <text class="hstat-num">{{couponCount}}</text>
+        <text class="hstat-label">优惠券</text>
       </navigator>
+      <view class="hstat-divider"></view>
+      <view class="hstat">
+        <text class="hstat-num">0</text>
+        <text class="hstat-label">收藏</text>
+      </view>
+      <view class="hstat-divider"></view>
+      <view class="hstat">
+        <text class="hstat-num">0</text>
+        <text class="hstat-label">足迹</text>
+      </view>
+    </view>
+  </view>
 
+  <!-- 收益/钱包卡片 -->
+  <navigator class="wallet-card" url="../account/account">
+    <view class="wallet-left">
+      <view class="wallet-icon-bg">
+        <text class="wallet-icon-emoji">💰</text>
+      </view>
+      <view class="wallet-text">
+        <text class="wallet-label">可提现余额</text>
+        <text class="wallet-sub">推客收益 · 实时结算</text>
+      </view>
+    </view>
+    <view class="wallet-right">
+      <text class="wallet-money">￥{{balance}}</text>
+      <view class="wallet-withdraw-btn">去提现 ›</view>
+    </view>
+  </navigator>
+
+  <!-- 我的订单 -->
   <view class="card">
-    <text class="card-title">我的订单</text>
+    <view class="card-head">
+      <text class="card-title">我的订单</text>
+      <navigator class="card-more" url="../book-my/book-my">全部订单 ›</navigator>
+    </view>
     <view class="menu-grid">
       <block wx:for="{{orderMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
           <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
-        </view>
-          <text class="menu-name">{{item.name}}</text>
-      </navigator>
-        <view wx:else class="menu-item">
-          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
-          </view>
-          <text class="menu-name">{{item.name}}</text>
-        </view>
-      </block>
-    </view>
-  </view>
-
-  <view class="card">
-    <text class="card-title">我的社区</text>
-    <view class="menu-grid">
-      <block wx:for="{{communityMenus}}" wx:key="name">
-        <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
-          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
+            <text class="menu-emoji">{{item.emoji}}</text>
           </view>
           <text class="menu-name">{{item.name}}</text>
         </navigator>
         <view wx:else class="menu-item" bindtap="showToastWait">
           <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
+            <text class="menu-emoji">{{item.emoji}}</text>
           </view>
           <text class="menu-name">{{item.name}}</text>
         </view>
       </block>
     </view>
-        </view>
+  </view>
 
+  <!-- 我的社区 -->
   <view class="card">
-    <text class="card-title">加入家事速配</text>
+    <view class="card-head">
+      <text class="card-title">我的社区</text>
+    </view>
+    <view class="list-menu">
+      <block wx:for="{{communityMenus}}" wx:key="name">
+        <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
+          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
+            <text class="list-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="list-name">{{item.name}}</text>
+          <text class="list-arrow">›</text>
+        </navigator>
+        <view wx:else class="list-item" bindtap="showToastWait">
+          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
+            <text class="list-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="list-name">{{item.name}}</text>
+          <text class="list-arrow">›</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 加入家事速配 -->
+  <view class="card">
+    <view class="card-head">
+      <text class="card-title">加入家事速配</text>
+    </view>
     <view class="join-grid">
       <block wx:for="{{joinMenus}}" wx:key="name">
-        <view class="join-item">
-          <view class="menu-icon-wrap join-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
-        </view>
-          <text class="menu-name">{{item.name}}</text>
+        <navigator wx:if="{{item.url}}" class="join-item" url="{{item.url}}">
+          <view class="join-icon-bg" style="background: {{item.iconBg}};">
+            <text class="join-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="join-name">{{item.name}}</text>
+          <text class="join-sub">{{item.sub}}</text>
+        </navigator>
+        <view wx:else class="join-item" bindtap="showToastWait">
+          <view class="join-icon-bg" style="background: {{item.iconBg}};">
+            <text class="join-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </view>
       </block>
     </view>
   </view>
 
+  <!-- 其他服务 -->
   <view class="card">
-    <text class="card-title">其他服务</text>
-    <view class="menu-grid">
+    <view class="card-head">
+      <text class="card-title">其他服务</text>
+    </view>
+    <view class="list-menu">
       <block wx:for="{{serviceMenus}}" wx:key="name">
-        <view class="menu-item">
-          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <image class="menu-icon" src="{{item.icon}}"></image>
+        <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
+          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
+            <text class="list-emoji">{{item.emoji}}</text>
           </view>
-          <text class="menu-name">{{item.name}}</text>
+          <text class="list-name">{{item.name}}</text>
+          <text class="list-arrow">›</text>
+        </navigator>
+        <view wx:else class="list-item" bindtap="showToastWait">
+          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
+            <text class="list-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="list-name">{{item.name}}</text>
+          <text class="list-arrow">›</text>
         </view>
       </block>
     </view>
   </view>
+
+  <view class="bottom-space"></view>
 </view>

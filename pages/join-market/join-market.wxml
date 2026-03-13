@@ -1,0 +1,122 @@
+<view class="form-page">
+
+  <!-- 基础信息（全部在一个card内） -->
+  <view class="form-section">
+    <view class="form-row">
+      <text class="form-label required">联系人</text>
+      <input class="form-input" placeholder="请输入联系人" value="{{form.contact}}" bindinput="onInput" data-key="contact"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">联系电话</text>
+      <input class="form-input" placeholder="请输入联系电话" value="{{form.phone}}" bindinput="onInput" data-key="phone" type="number"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">商家名称</text>
+      <input class="form-input" placeholder="请输入商家名称" value="{{form.shopName}}" bindinput="onInput" data-key="shopName"/>
+    </view>
+    <picker mode="selector" range="{{categoryList}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+      <view class="form-row">
+        <text class="form-label required">商家分类</text>
+        <text class="{{form.category?'form-value':'form-placeholder'}}">{{form.category || '请选择商家分类'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+    <view class="form-row" bindtap="comingSoon">
+      <text class="form-label required">商家地址</text>
+      <text class="{{form.address?'form-value':'form-placeholder'}}">{{form.address || '请输入商家地址'}}</text>
+      <text class="form-arrow">›</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">商家简介</text>
+      <input class="form-input" placeholder="请输入商家简介" value="{{form.intro}}" bindinput="onInput" data-key="intro"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label">推广员</text>
+      <input class="form-input" placeholder="请输入推广员编码（选填）" value="{{form.promoter}}" bindinput="onInput" data-key="promoter"/>
+    </view>
+  </view>
+
+  <!-- 证件照片 -->
+  <view class="form-section">
+    <text class="photo-section-title required" style="display:block;margin-bottom:20rpx;">证件照片</text>
+    <view class="cert-grid">
+      <!-- 店铺招牌 -->
+      <view class="cert-slot" bindtap="chooseSignboard">
+        <view wx:if="{{!form.signboard}}" class="cert-empty">
+          <text class="cert-plus">＋</text>
+        </view>
+        <view wx:else class="cert-filled">
+          <image src="{{form.signboard}}" mode="aspectFill"></image>
+          <view class="cert-del" catchtap="delField" data-key="signboard">✕</view>
+        </view>
+        <text class="cert-label">店铺招牌</text>
+      </view>
+      <!-- 门店内景 -->
+      <view class="cert-slot" bindtap="chooseIndoor">
+        <view wx:if="{{!form.indoor}}" class="cert-empty">
+          <text class="cert-plus">＋</text>
+        </view>
+        <view wx:else class="cert-filled">
+          <image src="{{form.indoor}}" mode="aspectFill"></image>
+          <view class="cert-del" catchtap="delField" data-key="indoor">✕</view>
+        </view>
+        <text class="cert-label">门店内景</text>
+      </view>
+    </view>
+    <!-- 营业执照 -->
+    <view class="cert-grid" style="margin-top:16rpx;">
+      <view class="cert-slot" bindtap="chooseBizLicense">
+        <view wx:if="{{!form.bizLicense}}" class="cert-empty">
+          <text class="cert-plus">＋</text>
+        </view>
+        <view wx:else class="cert-filled">
+          <image src="{{form.bizLicense}}" mode="aspectFill"></image>
+          <view class="cert-del" catchtap="delField" data-key="bizLicense">✕</view>
+        </view>
+        <text class="cert-label">营业执照/从业资格证</text>
+      </view>
+      <view style="flex:1;display:flex;align-items:flex-end;padding-bottom:36rpx;padding-left:16rpx;">
+        <text class="orange-link" bindtap="comingSoon">查看营业执照/从业资格证样例</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资质信息 -->
+  <view class="form-section">
+    <view class="form-row">
+      <text class="form-label required">统一社会信用代码</text>
+      <input class="form-input" placeholder="请输入统一社会信用代码" value="{{form.creditCode}}" bindinput="onInput" data-key="creditCode"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">主体名称</text>
+      <input class="form-input" placeholder="请输入主体名称" value="{{form.bizName}}" bindinput="onInput" data-key="bizName"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">法人或者经营者名称</text>
+      <input class="form-input" placeholder="请输入法人或者经营者名称" value="{{form.legalPerson}}" bindinput="onInput" data-key="legalPerson"/>
+    </view>
+  </view>
+
+  <!-- 选择小区 -->
+  <view class="form-section community-row">
+    <text class="community-label required">选择小区</text>
+    <picker mode="selector" range="{{communityList}}" value="{{communityIndex}}" bindchange="onCommunityChange">
+      <view class="community-btn">
+        <text>{{form.community || '请选择'}}</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 底部提交栏 -->
+  <view class="submit-bar">
+    <view class="submit-btn {{submitting?'disabled':''}}" bindtap="submit">
+      {{submitting ? '提交中...' : '提交资料'}}
+    </view>
+    <view class="agree-row" style="margin-top:16rpx;margin-bottom:0;">
+      <view class="agree-check {{agreed?'checked':''}}" bindtap="toggleAgree">
+        <text wx:if="{{agreed}}" class="check-mark">✓</text>
+      </view>
+      <text class="agree-text">已阅读并同意 <text class="agree-link">《家事速配宓家入驻协议》《商家入驻规范》《商品上架规范》</text></text>
+    </view>
+  </view>
+</view>
