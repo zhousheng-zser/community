@@ -84,21 +84,55 @@ Page({
     const { form, agreed, submitting } = this.data;
     if (submitting) return;
     if (!form.realName) return wx.showToast({ title: '请填写真实姓名', icon: 'none' });
+    if (!form.phone) return wx.showToast({ title: '系统未能获取到手机号', icon: 'none' });
     if (!form.idCard) return wx.showToast({ title: '请填写身份证号', icon: 'none' });
     if (!form.community) return wx.showToast({ title: '请选择接单社区', icon: 'none' });
     if (!form.industry) return wx.showToast({ title: '请选择意向行业', icon: 'none' });
     if (!form.idFront) return wx.showToast({ title: '请上传身份证照片', icon: 'none' });
     if (!agreed) return wx.showToast({ title: '请先同意入驻协议', icon: 'none' });
     this.setData({ submitting: true });
-    wx.showLoading({ title: '提交中...', mask: true });
+    wx.showLoading({ title: '图片上传中...', mask: true });
     try {
-      await util.post('worker/apply', {
-        real_name: form.realName, gender: form.gender, phone: form.phone,
-        hometown: form.hometown, id_card: form.idCard, address: form.address,
-        invite_code: form.inviteCode, education: form.education, work_exp: form.workExp,
-        resume: form.resume, work_history: form.workHistory,
-        community: form.community, industry: form.industry
+      let idCardUrl = form.idFront;
+      let workPhotoUrl = form.workPhoto;
+      let certUrl = form.cert;
+
+      // 将本地临时图片上传换取服务器相对路径
+      const uploadIfNeeded = async (path) => {
+        if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
+        if (path.includes('/uploads/')) return path; // 已经是服务器路径
+        const res = await util.uploadFile('upload', path, 'file');
+        // 兼容后端返回结构：{ url: '/xx' } 或者是直接的字符串
+        return (res && res.url) ? res.url : res;
+      };
+
+      idCardUrl = await uploadIfNeeded(idCardUrl);
+      
+      wx.showLoading({ title: '提交数据中...', mask: true });
+      workPhotoUrl = await uploadIfNeeded(workPhotoUrl);
+      certUrl = await uploadIfNeeded(certUrl);
+
+      const certArr = certUrl ? [certUrl] : [];
+      let payload = {
+        name: form.realName,
+        phone: form.phone,
+        industry: form.industry,
+        education: form.education || '',
+        city: form.hometown || form.address || '',
+        resume: form.resume || '',
+        id_card_url: idCardUrl,
+        work_photo_url: workPhotoUrl || '',
+        certificate_url: certArr
+      };
+
+      // 剔除所有空字符串或空数组属性，避免后端发生意外的序列化错误或默认值覆盖失败
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '' || (Array.isArray(payload[key]) && payload[key].length === 0)) {
+          delete payload[key];
+        }
       });
+
+      await util.post('worker/apply', payload);
       wx.hideLoading();
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);

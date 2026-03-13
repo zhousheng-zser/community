@@ -10,7 +10,7 @@ Page({
     communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
     communityIndex: -1,
     form: {
-      contact: '', phone: '', shopName: '', category: '', address: '',
+      contact: '', phone: '', shopName: '', category: '', address: '杭州市滨江区网商路100号 (临时填充)',
       intro: '', promoter: '', creditCode: '', bizName: '', legalPerson: '',
       signboard: '', indoor: '', bizLicense: '', community: ''
     }
@@ -68,20 +68,53 @@ Page({
     const { form, agreed, submitting } = this.data;
     if (submitting) return;
     if (!form.contact) return wx.showToast({ title: '请填写联系人', icon: 'none' });
+    if (!form.phone) return wx.showToast({ title: '请填写联系电话', icon: 'none' });
     if (!form.shopName) return wx.showToast({ title: '请填写商家名称', icon: 'none' });
     if (!form.category) return wx.showToast({ title: '请选择商家分类', icon: 'none' });
-    if (!form.community) return wx.showToast({ title: '请选择所在社区', icon: 'none' });
-    if (!form.signboard) return wx.showToast({ title: '请上传店铺招牌照片', icon: 'none' });
+    if (!form.address) return wx.showToast({ title: '请填写详细地址', icon: 'none' });
+    if (!form.signboard && !form.bizLicense) return wx.showToast({ title: '请上传至少一张证件照片', icon: 'none' });
     if (!agreed) return wx.showToast({ title: '请先同意入驻协议', icon: 'none' });
     this.setData({ submitting: true });
-    wx.showLoading({ title: '提交中...', mask: true });
+    wx.showLoading({ title: '图片上传中...', mask: true });
     try {
-      await util.post('market/apply', {
-        contact: form.contact, phone: form.phone, shop_name: form.shopName,
-        category: form.category, intro: form.intro, promoter: form.promoter,
-        credit_code: form.creditCode, biz_name: form.bizName,
-        legal_person: form.legalPerson, community: form.community
+      const uploadIfNeeded = async (path) => {
+        if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
+        if (path.includes('/uploads/')) return path;
+        const res = await util.uploadFile('upload', path, 'file');
+        return (res && res.url) ? res.url : res;
+      };
+
+      let placePhotoUrl = [];
+      let licenseUrl = '';
+
+      if (form.signboard) placePhotoUrl.push(await uploadIfNeeded(form.signboard));
+      wx.showLoading({ title: '稍等...', mask: true });
+      if (form.indoor) placePhotoUrl.push(await uploadIfNeeded(form.indoor));
+      if (form.bizLicense) licenseUrl = await uploadIfNeeded(form.bizLicense);
+
+      wx.showLoading({ title: '提交数据中...', mask: true });
+      let payload = {
+        contact_name: form.contact, 
+        phone: form.phone, 
+        shop_name: form.shopName,
+        category: form.category, 
+        address: form.address,
+        description: form.intro || '', 
+        promoter_id: form.promoter || '',
+        credit_code: form.creditCode || '', 
+        legal_person: form.legalPerson || '', 
+        // community_id: form.community === '...' ? // 社区暂不处理除非有id
+        place_photo_url: placePhotoUrl,
+        license_url: licenseUrl
+      };
+
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === '' || (Array.isArray(payload[key]) && payload[key].length === 0)) {
+          delete payload[key];
+        }
       });
+
+      await util.post('market/apply', payload);
       wx.hideLoading();
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);
