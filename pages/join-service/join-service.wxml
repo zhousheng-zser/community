@@ -1,0 +1,172 @@
+<view class="form-page">
+
+  <!-- 基础信息 -->
+  <view class="form-section">
+    <view class="form-row" bindtap="chooseLogo">
+      <text class="form-label required">门店LOGO</text>
+      <view wx:if="{{form.logo}}" style="flex:1;display:flex;align-items:center;gap:12rpx;">
+        <image src="{{form.logo}}" style="width:72rpx;height:72rpx;border-radius:10rpx;" mode="aspectFill"></image>
+        <text class="change-tip">点击更换</text>
+      </view>
+      <text wx:else class="form-placeholder">请上传门店LOGO</text>
+      <text class="form-arrow">›</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">门店名称</text>
+      <input class="form-input" placeholder="请输入门店名称" value="{{form.shopName}}" bindinput="onInput" data-key="shopName"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">手机号码</text>
+      <input class="form-input" placeholder="请输入手机号码" value="{{form.phone}}" bindinput="onInput" data-key="phone" type="number"/>
+    </view>
+    <picker mode="selector" range="{{communityList}}" value="{{communityIndex}}" bindchange="onCommunityChange">
+      <view class="form-row">
+        <text class="form-label required">接单社区</text>
+        <text class="{{form.community?'form-value':'form-placeholder'}}">{{form.community || '请选择接单社区'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{industryList}}" value="{{industryIndex}}" bindchange="onIndustryChange">
+      <view class="form-row">
+        <text class="form-label required">意向行业</text>
+        <text class="{{form.industry?'form-value':'form-placeholder'}}">{{form.industry || '请选择意向行业'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+    <view class="form-row" bindtap="comingSoon">
+      <text class="form-label required">服务商地址</text>
+      <text class="{{form.address?'form-value':'form-placeholder'}}">{{form.address || '请选择服务商地址'}}</text>
+      <text class="form-arrow">›</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label">邀请码</text>
+      <input class="form-input" placeholder="请输入邀请码" value="{{form.inviteCode}}" bindinput="onInput" data-key="inviteCode"/>
+    </view>
+  </view>
+
+  <!-- 营业执照 -->
+  <view class="form-section">
+    <view class="photo-section-head">
+      <text class="photo-section-title required">营业执照</text>
+      <text class="orange-link" bindtap="comingSoon">营业执照样例</text>
+    </view>
+    <view class="photo-upload-area" bindtap="chooseLicense">
+      <view wx:if="{{!form.license}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.license}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="license">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 营业执照基本信息 -->
+  <view class="form-section">
+    <text class="section-title">营业执照基本信息</text>
+    <view class="form-row">
+      <text class="form-label required">主体名称</text>
+      <input class="form-input" placeholder="请输入营业执照名称" value="{{form.bizName}}" bindinput="onInput" data-key="bizName"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">法人/经营者</text>
+      <input class="form-input" placeholder="请输入法人人或者经营者" value="{{form.legalPerson}}" bindinput="onInput" data-key="legalPerson"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">社会信用代码</text>
+      <input class="form-input" placeholder="请输入营业执照统一信用代码" value="{{form.creditCode}}" bindinput="onInput" data-key="creditCode"/>
+    </view>
+  </view>
+
+  <!-- 门头图 -->
+  <view class="form-section">
+    <text class="photo-section-title required" style="display:block;margin-bottom:16rpx;">门头图</text>
+    <view class="photo-upload-area" bindtap="chooseShopFront">
+      <view wx:if="{{!form.shopFront}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.shopFront}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="shopFront">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 环境图 -->
+  <view class="form-section">
+    <text class="photo-section-title required" style="display:block;margin-bottom:16rpx;">环境图</text>
+    <view class="photo-upload-area" bindtap="chooseEnvPhoto">
+      <view wx:if="{{!form.envPhoto}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.envPhoto}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="envPhoto">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 法人身份证 -->
+  <view class="form-section">
+    <text class="photo-section-title required" style="display:block;margin-bottom:16rpx;">法人身份证或者委托书+委托人身份证</text>
+    <view class="photo-upload-area" bindtap="chooseIdCard">
+      <view wx:if="{{!form.idCard}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.idCard}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="idCard">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 专业证书 -->
+  <view class="form-section">
+    <text class="photo-section-title" style="display:block;margin-bottom:16rpx;">专业证书（选填）</text>
+    <view class="photo-upload-area" bindtap="chooseCert">
+      <view wx:if="{{!form.cert}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.cert}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="cert">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 特殊证书 -->
+  <view class="form-section">
+    <text class="photo-section-title" style="display:block;margin-bottom:16rpx;">特殊证书（选填）</text>
+    <view class="photo-upload-area" bindtap="chooseSpecialCert">
+      <view wx:if="{{!form.specialCert}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.specialCert}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="specialCert">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提交栏 -->
+  <view class="submit-bar">
+    <view class="agree-row">
+      <view class="agree-check {{agreed?'checked':''}}" bindtap="toggleAgree">
+        <text wx:if="{{agreed}}" class="check-mark">✓</text>
+      </view>
+      <text class="agree-text">已阅读并同意 <text class="agree-link">《家事速配服务商服务协议》</text></text>
+    </view>
+    <view class="btn-row">
+      <view class="save-btn" bindtap="saveDraft">保存</view>
+      <view class="submit-btn {{submitting?'disabled':''}}" bindtap="submit">
+        {{submitting ? '提交中...' : '发布审核'}}
+      </view>
+    </view>
+  </view>
+</view>

@@ -50,7 +50,18 @@
     "pages/push-live-promo/push-live-promo",
     "pages/push-local-live-list/push-local-live-list",
     "pages/push-hot-video-list/push-hot-video-list",
-    "pages/push-periodic-list/push-periodic-list"
+    "pages/push-periodic-list/push-periodic-list",
+    "pages/settings/settings",
+    "pages/feedback/feedback",
+    "pages/my-follows/my-follows",
+    "pages/my-activities/my-activities",
+    "pages/order-service/order-service",
+    "pages/order-publish/order-publish",
+    "pages/join-worker/join-worker",
+    "pages/join-service/join-service",
+    "pages/join-market/join-market",
+    "pages/address/address",
+    "pages/about/about"
   ],
   "window": {
     "backgroundTextStyle": "light",

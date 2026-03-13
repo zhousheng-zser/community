@@ -26,11 +26,17 @@
           </view>
           
     <view class="tab-row">
-      <view class="tab {{activeTab === item ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">
-        {{item}}
-            </view>
-          </view>
+      <view class="tab-list">
+        <view class="tab {{activeTab === item ? 'active' : ''}}" wx:for="{{tabs}}" wx:key="*this" bindtap="switchTab" data-tab="{{item}}">
+          {{item}}
         </view>
+      </view>
+      <view class="publish-tab" bindtap="goPublish">
+        <text class="publish-tab-text">一键发布</text>
+        <view class="publish-tab-badge">填需求 马上帮</view>
+      </view>
+    </view>
+  </view>
 
   <view class="post-list" wx:if="{{posts.length > 0}}">
     <view class="post-card" wx:for="{{posts}}" wx:key="id">
@@ -67,5 +73,56 @@
   </view>
   <view class="empty-board" wx:else>
       <text class="empty-note">暂无动态，快来发一条吧~</text>
+  </view>
+
+  <!-- 底部悬浮发帖按钮 -->
+  <view class="fab-post" bindtap="goNewPost">
+    <text class="fab-icon">✏️</text>
+    <text class="fab-text">发帖</text>
+  </view>
+
+  <!-- 评论遮罩 -->
+  <view wx:if="{{commentPanel.show}}" class="cp-overlay" bindtap="closeCommentPanel"></view>
+
+  <!-- 评论面板 -->
+  <view class="comment-panel {{commentPanel.show ? 'cp-show' : ''}}" style="bottom: {{commentPanel.keyboardHeight}}px;">
+    <view class="cp-header">
+      <text class="cp-title">发表评论</text>
+      <text class="cp-close" bindtap="closeCommentPanel">✕</text>
+    </view>
+
+    <textarea
+      class="cp-textarea"
+      placeholder="文明上网，理性发言..."
+      placeholder-class="cp-placeholder"
+      value="{{commentPanel.content}}"
+      bindinput="onCommentInput"
+      adjust-position="{{false}}"
+      bindkeyboardheightchange="onCommentKeyboard"
+      maxlength="500"
+      auto-focus="{{commentPanel.show}}"
+    ></textarea>
+
+    <!-- 已选图片预览 -->
+    <view class="cp-img-list" wx:if="{{commentPanel.images.length > 0}}">
+      <view class="cp-img-item" wx:for="{{commentPanel.images}}" wx:key="index">
+        <image src="{{item}}" mode="aspectFill" bindtap="previewCommentImage" data-idx="{{index}}"></image>
+        <view class="cp-img-del" catchtap="delCommentImage" data-idx="{{index}}">✕</view>
+      </view>
+    </view>
+
+    <!-- 工具栏 -->
+    <view class="cp-toolbar">
+      <view class="cp-add-img" bindtap="addCommentImage" wx:if="{{commentPanel.images.length < 3}}">
+        <text class="cp-add-icon">🖼️</text>
+        <text class="cp-add-text">图片</text>
+      </view>
+      <view style="flex:1;"></view>
+      <text class="cp-count">{{commentPanel.content.length}}/500</text>
+      <view
+        class="cp-send-btn {{(commentPanel.content.length > 0 || commentPanel.images.length > 0) && !commentPanel.sending ? 'active' : ''}}"
+        bindtap="submitComment"
+      >{{commentPanel.sending ? '发送中' : '发送'}}</view>
+    </view>
   </view>
 </view>

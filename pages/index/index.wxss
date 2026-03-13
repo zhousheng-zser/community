@@ -59,29 +59,39 @@
 }
 
 .location-pill {
-  height: 56rpx;
-  border-radius: 28rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   background: #fff;
   color: #222;
-  padding: 0 18rpx;
+  padding: 0 14rpx;
   font-size: 22rpx;
   display: flex;
   align-items: center;
-  margin-right: 10rpx;
+  gap: 6rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+  max-width: 150rpx;
 }
 
-.dot-black {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: 50%;
-  background: #111;
-  margin-right: 10rpx;
+.loc-icon {
+  font-size: 20rpx;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.loc-text {
+  font-size: 20rpx;
+  font-weight: 500;
+  color: #222;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .search-input {
   flex: 1;
-  height: 56rpx;
-  border-radius: 28rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   background: #fff;
   color: #9a9a9a;
   font-size: 22rpx;
@@ -99,8 +109,8 @@
 
 .search-btn {
   width: 92rpx;
-  height: 56rpx;
-  border-radius: 28rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
   background: #d91f16;
   border: 1rpx solid rgba(255, 255, 255, 0.4);
   margin-left: 10rpx;
@@ -134,10 +144,19 @@
   margin-bottom: 18rpx;
 }
 
-.service-item image {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 40rpx;
+.service-item .svc-icon-wrap,
+.svc-icon-wrap {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svc-emoji {
+  font-size: 40rpx;
+  line-height: 1;
 }
 
 .service-item text {
@@ -159,9 +178,18 @@
   align-items: center;
 }
 
-.quick-item image {
-  width: 46rpx;
-  height: 46rpx;
+.quick-icon-wrap {
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quick-emoji {
+  font-size: 28rpx;
+  line-height: 1;
 }
 
 .quick-item text {
@@ -185,7 +213,7 @@
 
 .section-head {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   padding: 18rpx 20rpx;
 }
@@ -213,10 +241,19 @@
   align-items: center;
 }
 
-.knowledge-item image {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 36rpx;
+.know-icon-wrap {
+  width: 78rpx;
+  height: 78rpx;
+  border-radius: 39rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.know-emoji {
+  font-size: 34rpx;
+  line-height: 1;
 }
 
 .knowledge-item text {
@@ -243,7 +280,7 @@
   padding-bottom: 18rpx;
 }
 
-.neighborhood-services .knowledge-item image {
+.neighborhood-services .know-icon-wrap {
   width: 78rpx;
   height: 78rpx;
   border-radius: 39rpx;
@@ -555,20 +592,19 @@
   align-items: center;
 }
 
-.jt-cate-item .icon-wrap {
-  width: 110rpx;
-  height: 110rpx;
-  background: #fffafa; /* 拟态的微底色 */
+.jt-cate-emoji-wrap {
+  width: 100rpx;
+  height: 100rpx;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: inset 0 -4rpx 8rpx rgba(0,0,0,0.02);
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.06);
 }
 
-.jt-cate-item image {
-  width: 80rpx;
-  height: 80rpx;
+.jt-cate-emoji {
+  font-size: 44rpx;
+  line-height: 1;
 }
 
 .jt-cate-item text {
@@ -1315,11 +1351,19 @@
   margin-top: 12rpx;
 }
 
-.fuka-local-item image,
-.fuka-service-item image {
+.fuka-emoji-wrap {
   width: 64rpx;
   height: 64rpx;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.fuka-emoji {
+  font-size: 30rpx;
+  line-height: 1;
 }
 
 .fuka-local-item text,
@@ -1451,10 +1495,19 @@
   text-align: center;
 }
 
-.market-top-item image {
-  width: 76rpx;
-  height: 76rpx;
+.market-emoji-wrap {
+  width: 80rpx;
+  height: 80rpx;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.market-emoji {
+  font-size: 36rpx;
+  line-height: 1;
 }
 
 .market-top-item text {

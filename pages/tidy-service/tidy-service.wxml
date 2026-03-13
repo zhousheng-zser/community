@@ -1,0 +1,49 @@
+<view class="tidy-page" style="padding-top: {{navTopPadding}}px;">
+
+  <!-- 自定义顶部导航 -->
+  <view class="top-nav">
+    <view class="back-btn" bindtap="goBack">‹</view>
+    <text class="page-title">{{pageTitle}}</text>
+    <view class="nav-ph"></view>
+  </view>
+
+  <!-- 分类标签横向滚动栏 -->
+  <scroll-view class="cate-scroll" scroll-x scroll-with-animation>
+    <view class="cate-row">
+      <view
+        class="cate-item {{activeCategory === item.key ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="key"
+        bindtap="switchCategory"
+        data-key="{{item.key}}"
+      >
+        <image class="cate-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <text class="cate-name">{{item.name}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 服务卡片列表 -->
+  <view class="service-list">
+    <view
+      class="service-card"
+      wx:for="{{filteredServices}}"
+      wx:key="id"
+      bindtap="goServiceDetail"
+      data-id="{{item.id}}"
+    >
+      <image src="{{item.image}}" mode="aspectFill" lazy-load></image>
+      <view class="info">
+        <text class="s-title">{{item.title}}</text>
+        <text class="s-price">{{item.price}}</text>
+        <text class="s-meta">{{item.sold}}</text>
+      </view>
+    </view>
+
+    <text class="nomore" wx:if="{{filteredServices.length > 0}}">没有更多了</text>
+    <view class="empty-tip" wx:elif="{{!loading}}">
+      <text>暂无服务</text>
+    </view>
+  </view>
+
+</view>

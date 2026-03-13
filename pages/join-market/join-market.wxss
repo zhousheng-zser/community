@@ -1,0 +1,46 @@
+page { background: #fef3dc; }
+.form-page { min-height: 100vh; padding: 16rpx 0 200rpx; }
+
+/* ===== 卡片 ===== */
+.form-section { background: #fff; border-radius: 16rpx; margin: 0 24rpx 16rpx; padding: 4rpx 24rpx 20rpx; }
+
+/* ===== 区块标题 ===== */
+.section-title { display: block; font-size: 28rpx; font-weight: 700; color: #333; padding: 24rpx 0 4rpx; }
+.photo-section-title { display: block; font-size: 28rpx; font-weight: 700; color: #333; padding-top: 24rpx; margin-bottom: 16rpx; }
+.orange-link { font-size: 24rpx; color: #e8a000; }
+
+/* ===== 表单行 ===== */
+.form-row { display: flex; align-items: center; min-height: 96rpx; padding: 18rpx 0; border-bottom: 1rpx solid #f2f2f2; }
+.form-row:last-child { border-bottom: none; }
+.form-label { font-size: 28rpx; color: #333; width: 200rpx; flex-shrink: 0; line-height: 1.4; }
+.required::before { content: '*'; color: #e8a000; margin-right: 4rpx; }
+.form-input { flex: 1; font-size: 28rpx; color: #333; }
+.form-value { flex: 1; font-size: 28rpx; color: #333; }
+.form-placeholder { flex: 1; font-size: 28rpx; color: #c0c0c0; }
+.form-arrow { font-size: 32rpx; color: #ccc; }
+
+/* ===== 证件照片网格（2列正方形） ===== */
+.cert-grid { display: flex; gap: 20rpx; }
+.cert-slot { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.cert-empty { width: 100%; height: 240rpx; background: #f8f8f8; border: 2rpx dashed #e0c87a; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; }
+.cert-plus { font-size: 72rpx; color: #e8a000; line-height: 1; font-weight: 300; }
+.cert-filled { width: 100%; height: 240rpx; border-radius: 12rpx; overflow: hidden; position: relative; }
+.cert-filled image { width: 100%; height: 100%; }
+.cert-del { position: absolute; top: 8rpx; right: 8rpx; width: 44rpx; height: 44rpx; border-radius: 22rpx; background: rgba(0,0,0,0.45); color: #fff; font-size: 22rpx; display: flex; align-items: center; justify-content: center; z-index: 10; }
+.cert-label { font-size: 24rpx; color: #666; margin-top: 12rpx; text-align: center; line-height: 1.4; }
+
+/* ===== 选择小区行 ===== */
+.community-row { display: flex; align-items: center; justify-content: space-between; min-height: 96rpx; }
+.community-label { font-size: 28rpx; font-weight: 700; color: #333; }
+.community-btn { background: linear-gradient(90deg, #f87c00, #ffa000); color: #fff; font-size: 28rpx; font-weight: 500; padding: 16rpx 40rpx; border-radius: 36rpx; }
+
+/* ===== 底部提交栏 ===== */
+.submit-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fef3dc; border-top: 1rpx solid #f5dea0; padding: 16rpx 24rpx 32rpx; }
+.submit-btn { height: 88rpx; border-radius: 44rpx; background: linear-gradient(90deg, #f87c00, #ffa000); color: #fff; font-size: 32rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.submit-btn.disabled { opacity: 0.6; }
+.agree-row { display: flex; align-items: flex-start; }
+.agree-check { width: 32rpx; height: 32rpx; border-radius: 6rpx; border: 2rpx solid #e0c87a; margin-right: 12rpx; margin-top: 4rpx; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.agree-check.checked { background: #e8a000; border-color: #e8a000; }
+.check-mark { color: #fff; font-size: 22rpx; }
+.agree-text { font-size: 22rpx; color: #999; line-height: 1.6; flex: 1; }
+.agree-link { color: #e8a000; }

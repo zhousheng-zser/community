@@ -1,0 +1,23 @@
+<view class="fb-page">
+  <view class="fb-card">
+    <text class="fb-section-title">建议内容</text>
+    <text class="fb-hint">亲，我们非常重视您给我们提出的宝贵建议，帮助我们不断完善产品，谢谢！</text>
+    <textarea class="fb-textarea" placeholder="请详细描述您的问题或建议..." value="{{content}}" bindinput="onInput" maxlength="500" auto-height></textarea>
+    <view class="fb-upload-area" bindtap="chooseImages">
+      <view wx:if="{{images.length === 0}}" class="fb-upload-placeholder">
+        <text class="fb-camera-icon">📷</text>
+        <text class="fb-upload-tip">请上传图片(最多5张)</text>
+      </view>
+      <view wx:else class="fb-img-grid">
+        <view class="fb-img-wrap" wx:for="{{images}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" class="fb-img"></image>
+          <view class="fb-img-del" catchtap="removeImage" data-idx="{{index}}">×</view>
+        </view>
+        <view class="fb-add-more" wx:if="{{images.length < 5}}" bindtap="chooseImages">
+          <text>＋</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="fb-submit-btn" bindtap="submit">提交</view>
+</view>

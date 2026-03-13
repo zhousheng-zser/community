@@ -1,5 +1,6 @@
 // pages/community/community.js
 const util = require('../../utils/util.js');
+const { imgUrl } = util;
 
 Page({
   data: {
@@ -7,7 +8,16 @@ Page({
     communitySearchKeyword: "",
     tabs: ["热门话题", "热门活动", "邻里互动"],
     activeTab: "热门话题", // 默认改为第一个选项卡
-    posts: []
+    posts: [],
+    commentPanel: {
+      show: false,
+      postId: null,
+      postIndex: null,
+      content: '',
+      images: [],
+      sending: false,
+      keyboardHeight: 0
+    }
   },
   onLoad() {
     const sys = wx.getSystemInfoSync();
@@ -42,7 +52,7 @@ Page({
 
             // 处理作者信息
             const author = post.author || post.User || {};
-            let avatar = author.avatar_url || author.avatar || '/img/placeholders/avatar_worker.png';
+            let avatar = author.avatar_url || author.avatar || imgUrl('/uploads/placeholders/avatar_worker.png');
             if (avatar.startsWith('/uploads')) avatar = apiOrigin + avatar;
 
             return {
@@ -65,6 +75,14 @@ Page({
         wx.showToast({ title: '加载失败', icon: 'none' });
       });
   },
+  goPublish() {
+    wx.navigateTo({ url: '../order-publish/order-publish' });
+  },
+
+  goNewPost() {
+    wx.navigateTo({ url: '../community-publish/community-publish' });
+  },
+
   handleLocationTap() {
     wx.chooseLocation({
       success: (res) => {
@@ -119,34 +137,93 @@ Page({
 
   handleComment(e) {
     const { id, index } = e.currentTarget.dataset;
-    wx.showModal({
-      title: '发表评论',
-      editable: true,
-      placeholderText: '文明上网，理性发言...',
-      success: (res) => {
-        if (res.confirm && res.content) {
-          util.post(`posts/${id}/comment`, { content: res.content })
-            .then(commentData => {
-              wx.showToast({ title: '评论成功', icon: 'success' });
-
-              const posts = this.data.posts;
-              const post = posts[index];
-              if (!post.comments) post.comments = [];
-              
-              // 统一渲染格式
-              post.comments.push({
-                  ...commentData,
-                  createdAt: '刚刚'
-              });
-
-              this.setData({ [`posts[${index}]`]: post });
-            })
-            .catch(err => {
-              console.error("评论失败", err);
-              wx.showToast({ title: '评论失败', icon: 'none' });
-            });
-        }
+    this.setData({
+      commentPanel: {
+        show: true,
+        postId: id,
+        postIndex: index,
+        content: '',
+        images: [],
+        sending: false,
+        keyboardHeight: 0
       }
     });
+  },
+
+  closeCommentPanel() {
+    this.setData({ 'commentPanel.show': false, 'commentPanel.keyboardHeight': 0 });
+  },
+
+  onCommentInput(e) {
+    this.setData({ 'commentPanel.content': e.detail.value });
+  },
+
+  onCommentKeyboard(e) {
+    this.setData({ 'commentPanel.keyboardHeight': e.detail.height || 0 });
+  },
+
+  addCommentImage() {
+    const remain = 3 - this.data.commentPanel.images.length;
+    wx.chooseMedia({
+      count: remain,
+      mediaType: ['image'],
+      success: (res) => {
+        const newImgs = this.data.commentPanel.images.concat(
+          res.tempFiles.map(f => f.tempFilePath)
+        );
+        this.setData({ 'commentPanel.images': newImgs });
+      }
+    });
+  },
+
+  delCommentImage(e) {
+    const arr = [...this.data.commentPanel.images];
+    arr.splice(e.currentTarget.dataset.idx, 1);
+    this.setData({ 'commentPanel.images': arr });
+  },
+
+  previewCommentImage(e) {
+    const idx = e.currentTarget.dataset.idx;
+    wx.previewImage({
+      current: this.data.commentPanel.images[idx],
+      urls: this.data.commentPanel.images
+    });
+  },
+
+  async submitComment() {
+    const { content, images, postId, postIndex, sending } = this.data.commentPanel;
+    if (sending) return;
+    if (!content && images.length === 0) return wx.showToast({ title: '请输入评论内容', icon: 'none' });
+    this.setData({ 'commentPanel.sending': true });
+
+    try {
+      // 先上传图片（如有），获取服务器 URL
+      let imageUrls = [];
+      for (const filePath of images) {
+        const result = await util.uploadFile('upload', filePath, 'file', { type: 'comment' });
+        const url = result.url || result.filePath || result;
+        if (url) imageUrls.push(url);
+      }
+
+      const commentData = await util.post(`posts/${postId}/comment`, {
+        content: content,
+        image_urls: imageUrls
+      });
+
+      wx.showToast({ title: '评论成功', icon: 'success' });
+
+      // 更新帖子评论数
+      const posts = this.data.posts;
+      const post = posts[postIndex];
+      if (!post.comments) post.comments = [];
+      post.comments.push({ ...commentData, createdAt: '刚刚' });
+      this.setData({ [`posts[${postIndex}]`]: post });
+
+      this.closeCommentPanel();
+    } catch (err) {
+      console.error('评论失败', err);
+      wx.showToast({ title: '评论失败，请重试', icon: 'none' });
+      this.setData({ 'commentPanel.sending': false });
+    }
   }
 });

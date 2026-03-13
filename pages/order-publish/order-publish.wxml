@@ -1,0 +1,152 @@
+<!--pages/order-publish/order-publish.wxml-->
+<view class="pub-page">
+
+  <!-- 顶部两个 Tab -->
+  <view class="top-tabs">
+    <view class="top-tab {{activeMainTab === '邻里帮帮' ? 'active' : ''}}" bindtap="switchMainTab" data-tab="邻里帮帮">邻里帮帮</view>
+    <view class="top-tab {{activeMainTab === '一键发布' ? 'active' : ''}}" bindtap="switchMainTab" data-tab="一键发布">
+      一键发布
+      <view class="tab-badge">填需求 马上帮</view>
+    </view>
+  </view>
+
+  <!-- ===== 邻里帮帮 ===== -->
+  <view wx:if="{{activeMainTab === '邻里帮帮'}}">
+    <view class="pub-banner">
+      <view class="banner-left">
+        <text class="banner-title">一键发布 邻里响应</text>
+        <text class="banner-slogan">邻里帮帮 · 解决身边家事小烦恼</text>
+      </view>
+      <view class="banner-right"><text class="banner-emoji">🧑‍🤝‍🧑</text></view>
+    </view>
+
+    <scroll-view class="cat-scroll" scroll-x scroll-with-animation>
+      <view class="cat-row">
+        <view class="cat-item {{activeCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="switchCategory" data-cat="{{item}}">{{item}}</view>
+      </view>
+    </scroll-view>
+
+    <view class="form-card">
+      <view class="addr-row" bindtap="openAddrDialog" data-field="pickup">
+        <text class="addr-dot pickup">取</text>
+        <text class="addr-placeholder" wx:if="{{!helperForm.pickup}}">填写取货地址</text>
+        <text class="addr-value" wx:else>{{helperForm.pickup}}</text>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="addr-row" bindtap="openAddrDialog" data-field="delivery">
+        <text class="addr-dot delivery">收</text>
+        <text class="addr-placeholder" wx:if="{{!helperForm.delivery}}">填写收货地址</text>
+        <text class="addr-value" wx:else>{{helperForm.delivery}}</text>
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="submit-btn {{helperForm.pickup && helperForm.delivery ? '' : 'disabled'}}" bindtap="submitHelper">去发布</view>
+      <text class="flow-tips">填写取送信息 › 支付服务费用 › 技工取送 › 完成</text>
+    </view>
+
+    <view class="recent-section" wx:if="{{recentList.length > 0}}">
+      <view class="recent-item" wx:for="{{recentList}}" wx:key="id">
+        <view class="recent-badge">代取</view>
+        <text class="recent-text">{{item.content}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 一键发布 ===== -->
+  <view wx:elif="{{activeMainTab === '一键发布'}}">
+    <view class="pub-banner pub-banner-alt">
+      <view class="banner-left">
+        <text class="banner-title">一键发布 邻里响应</text>
+        <view class="banner-tags">
+          <text class="banner-tag">· 家事有需不用慌</text>
+          <text class="banner-tag">· 速配服务来帮忙</text>
+        </view>
+        <view class="banner-sub-row">
+          <text class="banner-sub">家事急 找速配 马上帮</text>
+          <view class="banner-badge">邻里互助新方式</view>
+        </view>
+      </view>
+      <view class="banner-right"><text class="banner-emoji">🧑‍🤝‍🧑</text></view>
+    </view>
+
+    <view class="form-card">
+      <!-- 服务地址 -->
+      <view class="form-row" bindtap="openAddrDialog" data-field="address">
+        <view class="dot blue"></view>
+        <text class="form-placeholder" wx:if="{{!form.address}}">请填写服务地址</text>
+        <text class="form-value" wx:else>{{form.address}}</text>
+        <text class="row-arrow">›</text>
+      </view>
+
+      <!-- 服务时间 - 多列 picker -->
+      <picker mode="multiSelector" :value="{{timeIndexes}}" range="{{timeRanges}}" bindchange="onTimeChange" bindcolumnchange="onTimeColumnChange">
+        <view class="form-row">
+          <view class="dot green"></view>
+          <text class="time-label">服务时间</text>
+          <text class="time-placeholder" wx:if="{{!form.time}}">期望服务时间</text>
+          <text class="time-value" wx:else>{{form.time}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </picker>
+
+      <!-- 需求描述 -->
+      <view class="need-section">
+        <text class="need-title">发布需求：</text>
+        <textarea
+          class="need-textarea"
+          placeholder="请填写您需要帮助的详细需求"
+          placeholder-class="need-placeholder"
+          value="{{form.content}}"
+          bindinput="onContentInput"
+          maxlength="300"
+          auto-height
+        ></textarea>
+      </view>
+
+      <!-- 图片上传 -->
+      <view class="photo-row">
+        <view class="photo-slot" wx:for="{{form.images}}" wx:key="index">
+          <image src="{{item}}" mode="aspectFill" class="photo-img"></image>
+          <view class="photo-del" catchtap="delImage" data-idx="{{index}}">✕</view>
+        </view>
+        <view class="photo-add" bindtap="addImage" wx:if="{{form.images.length < 3}}">
+          <text class="photo-add-icon">📷</text>
+        </view>
+      </view>
+
+      <view class="submit-btn {{canSubmit ? '' : 'disabled'}}" bindtap="submitPublish">
+        {{submitting ? '发布中...' : '去发布'}}
+      </view>
+
+      <view class="agree-row" bindtap="toggleAgree">
+        <view class="agree-circle {{agreed ? 'checked' : ''}}"></view>
+        <text class="agree-text">已阅读并同意 <text class="agree-link">《服务协议》</text><text class="agree-link">《免责协议》</text></text>
+      </view>
+      <text class="flow-tips">发布意向需求 › 询单定价 › 支付服务费 › 技工服务 › 服务完成</text>
+    </view>
+
+    <view class="recent-section" wx:if="{{recentList.length > 0}}">
+      <view class="recent-item" wx:for="{{recentList}}" wx:key="id">
+        <view class="recent-badge">一键发布</view>
+        <text class="recent-text">{{item.content}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 地址输入对话框 ===== -->
+  <view wx:if="{{addrDialog.show}}" class="dialog-overlay" catchtap="closeAddrDialog"></view>
+  <view wx:if="{{addrDialog.show}}" class="addr-dialog">
+    <text class="dialog-title">填写{{addrDialog.field === 'pickup' ? '取货' : addrDialog.field === 'delivery' ? '收货' : '服务'}}地址</text>
+    <input
+      class="dialog-input"
+      placeholder="请输入详细地址"
+      value="{{addrDialog.value}}"
+      bindinput="onAddrInput"
+      focus="{{addrDialog.show}}"
+    />
+    <view class="dialog-btns">
+      <view class="dialog-cancel" bindtap="closeAddrDialog">取消</view>
+      <view class="dialog-confirm" bindtap="confirmAddr">确定</view>
+    </view>
+  </view>
+
+</view>

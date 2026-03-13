@@ -1,0 +1,62 @@
+page { background: #f5f5f5; }
+.form-page { min-height: 100vh; padding: 16rpx 0 260rpx; }
+
+/* ===== 卡片 ===== */
+.form-section { background: #fff; border-radius: 16rpx; margin: 0 24rpx 16rpx; padding: 0 24rpx; }
+
+/* ===== 区块标题 ===== */
+.section-title { display: block; font-size: 28rpx; font-weight: 700; color: #333; padding: 24rpx 0 4rpx; border-bottom: 1rpx solid #f2f2f2; margin-bottom: 0; }
+.photo-section-title { font-size: 28rpx; font-weight: 700; color: #333; }
+
+/* ===== 表单行 ===== */
+.form-row { display: flex; align-items: center; min-height: 96rpx; padding: 18rpx 0; border-bottom: 1rpx solid #f2f2f2; }
+.form-row:last-child { border-bottom: none; }
+.form-label { font-size: 28rpx; color: #333; width: 180rpx; flex-shrink: 0; }
+.required::before { content: '*'; color: #e8a000; margin-right: 4rpx; }
+.form-input { flex: 1; font-size: 28rpx; color: #333; }
+.form-value { flex: 1; font-size: 28rpx; color: #333; }
+.form-placeholder { flex: 1; font-size: 28rpx; color: #c0c0c0; }
+.form-arrow { font-size: 32rpx; color: #ccc; }
+.change-tip { font-size: 22rpx; color: #e8a000; }
+
+/* ===== 性别 ===== */
+.gender-row { display: flex; gap: 48rpx; }
+.gender-opt { display: flex; align-items: center; font-size: 28rpx; color: #333; gap: 10rpx; }
+.radio { width: 36rpx; height: 36rpx; border-radius: 18rpx; border: 2rpx solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.radio.checked { border-color: #e8a000; background: #e8a000; }
+.radio-dot { width: 18rpx; height: 18rpx; border-radius: 9rpx; background: #fff; }
+
+/* ===== 简历文本域 ===== */
+.resume-textarea { width: 100%; min-height: 160rpx; font-size: 26rpx; color: #333; padding: 16rpx 0; box-sizing: border-box; line-height: 1.7; display: block; }
+.textarea-count { display: block; text-align: right; font-size: 22rpx; color: #bbb; padding-bottom: 16rpx; }
+
+/* ===== 照片上传区 ===== */
+.photo-upload-area { min-height: 200rpx; background: #f8f8f8; border: 2rpx dashed #ddd; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; margin-bottom: 24rpx; }
+.photo-empty { display: flex; flex-direction: column; align-items: center; padding: 40rpx 0; }
+.photo-empty-icon { font-size: 64rpx; color: #c8c8c8; line-height: 1; }
+.photo-empty-text { font-size: 24rpx; color: #bbb; margin-top: 12rpx; }
+.photo-filled { width: 100%; height: 200rpx; position: relative; }
+.photo-filled image { width: 100%; height: 100%; }
+.photo-del { position: absolute; top: 8rpx; right: 8rpx; width: 44rpx; height: 44rpx; border-radius: 22rpx; background: rgba(0,0,0,0.45); color: #fff; font-size: 22rpx; display: flex; align-items: center; justify-content: center; z-index: 10; }
+
+/* ===== 推荐信息栏 ===== */
+.promo-bar { background: #fff; border-radius: 16rpx 16rpx 0 0; margin: 0 24rpx 0; padding: 20rpx 24rpx 12rpx; display: flex; justify-content: space-between; align-items: center; }
+.promo-left { display: flex; align-items: center; gap: 16rpx; }
+.promo-avatar { width: 72rpx; height: 72rpx; border-radius: 36rpx; background: linear-gradient(135deg, #ffe0b2, #ffcc80); display: flex; align-items: center; justify-content: center; font-size: 36rpx; flex-shrink: 0; }
+.promo-text { display: flex; flex-direction: column; }
+.promo-title { font-size: 26rpx; font-weight: 700; color: #333; }
+.promo-sub { font-size: 22rpx; color: #888; margin-top: 4rpx; }
+.promo-link { font-size: 24rpx; color: #e8a000; flex-shrink: 0; }
+.promo-links-row { background: #fff; margin: 0 24rpx 16rpx; padding: 12rpx 24rpx 20rpx; border-radius: 0 0 16rpx 16rpx; display: flex; gap: 32rpx; border-top: 1rpx solid #f5f5f5; }
+.promo-tag-link { font-size: 24rpx; color: #e8a000; background: #fff8e8; border: 1rpx solid #ffd591; border-radius: 8rpx; padding: 8rpx 20rpx; }
+
+/* ===== 底部提交栏 ===== */
+.submit-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1rpx solid #eee; padding: 16rpx 24rpx 32rpx; }
+.submit-btn { height: 88rpx; border-radius: 44rpx; background: linear-gradient(90deg, #f87c00, #ffa000); color: #fff; font-size: 32rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.submit-btn.disabled { opacity: 0.6; }
+.agree-row { display: flex; align-items: flex-start; margin-bottom: 16rpx; }
+.agree-check { width: 32rpx; height: 32rpx; border-radius: 6rpx; border: 2rpx solid #ddd; margin-right: 12rpx; margin-top: 4rpx; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.agree-check.checked { background: #e8a000; border-color: #e8a000; }
+.check-mark { color: #fff; font-size: 22rpx; }
+.agree-text { font-size: 22rpx; color: #999; line-height: 1.6; flex: 1; }
+.agree-link { color: #e8a000; }

@@ -1,0 +1,185 @@
+<view class="form-page">
+
+  <!-- 个人基础信息 -->
+  <view class="form-section">
+    <text class="section-title">个人基础信息</text>
+    <view class="form-row" bindtap="chooseAvatar">
+      <text class="form-label required">头像</text>
+      <view wx:if="{{form.avatar}}" style="flex:1;display:flex;align-items:center;gap:12rpx;">
+        <image src="{{form.avatar}}" style="width:72rpx;height:72rpx;border-radius:36rpx;" mode="aspectFill"></image>
+        <text class="change-tip">点击更换</text>
+      </view>
+      <text wx:else class="form-placeholder">请上传头像</text>
+      <text class="form-arrow">›</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">真实姓名</text>
+      <input class="form-input" placeholder="请输入真实姓名" value="{{form.realName}}" bindinput="onInput" data-key="realName"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">性别</text>
+      <view class="gender-row">
+        <view class="gender-opt" bindtap="setGender" data-val="男">
+          <view class="radio {{form.gender==='男'?'checked':''}}">
+            <view wx:if="{{form.gender==='男'}}" class="radio-dot"></view>
+          </view>
+          <text>男</text>
+        </view>
+        <view class="gender-opt" bindtap="setGender" data-val="女">
+          <view class="radio {{form.gender==='女'?'checked':''}}">
+            <view wx:if="{{form.gender==='女'}}" class="radio-dot"></view>
+          </view>
+          <text>女</text>
+        </view>
+      </view>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">手机号码</text>
+      <input class="form-input" placeholder="{{maskedPhone || '请输入手机号码'}}" value="{{form.phone}}" bindinput="onInput" data-key="phone" type="number"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">籍贯</text>
+      <input class="form-input" placeholder="请输入籍贯" value="{{form.hometown}}" bindinput="onInput" data-key="hometown"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">身份证号</text>
+      <input class="form-input" placeholder="请输入身份证号" value="{{form.idCard}}" bindinput="onInput" data-key="idCard"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label required">居住地址</text>
+      <input class="form-input" placeholder="请输入居住地址" value="{{form.address}}" bindinput="onInput" data-key="address"/>
+    </view>
+    <view class="form-row">
+      <text class="form-label">邀请码</text>
+      <input class="form-input" placeholder="请输入邀请码" value="{{form.inviteCode}}" bindinput="onInput" data-key="inviteCode"/>
+    </view>
+  </view>
+
+  <!-- 服务内容 -->
+  <view class="form-section">
+    <text class="section-title">服务内容</text>
+    <view class="form-row" bindtap="comingSoon">
+      <text class="form-label">服务商</text>
+      <text class="form-placeholder">可选择所属服务商</text>
+      <text class="form-arrow">›</text>
+    </view>
+    <picker mode="selector" range="{{communityList}}" value="{{communityIndex}}" bindchange="onCommunityChange">
+      <view class="form-row">
+        <text class="form-label required">接单社区</text>
+        <text class="{{form.community?'form-value':'form-placeholder'}}">{{form.community || '请选择接单社区'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+    <picker mode="selector" range="{{industryList}}" value="{{industryIndex}}" bindchange="onIndustryChange">
+      <view class="form-row">
+        <text class="form-label required">意向行业</text>
+        <text class="{{form.industry?'form-value':'form-placeholder'}}">{{form.industry || '请选择意向行业'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 个人履历 -->
+  <view class="form-section">
+    <text class="section-title">个人履历</text>
+    <picker mode="selector" range="{{educationList}}" value="{{educationIndex}}" bindchange="onEducationChange">
+      <view class="form-row">
+        <text class="form-label">学历</text>
+        <text class="{{form.education?'form-value':'form-placeholder'}}">{{form.education || '请选择学历'}}</text>
+        <text class="form-arrow">›</text>
+      </view>
+    </picker>
+    <view class="form-row">
+      <text class="form-label required">工作经验</text>
+      <input class="form-input" placeholder="请填写工作经验(例:10年)" value="{{form.workExp}}" bindinput="onInput" data-key="workExp"/>
+    </view>
+  </view>
+
+  <!-- 个人简历 -->
+  <view class="form-section">
+    <text class="section-title">个人简历</text>
+    <textarea class="resume-textarea" placeholder="请简要介绍自己（比如您会做什么/工作经历/期望薪资等），有助于您更快找到好工作。" value="{{form.resume}}" bindinput="onInput" data-key="resume" maxlength="140"></textarea>
+    <text class="textarea-count">{{form.resume.length}}/140</text>
+  </view>
+
+  <!-- 工作经历 -->
+  <view class="form-section">
+    <text class="section-title">工作经历</text>
+    <textarea class="resume-textarea" placeholder="请填写工作经历" value="{{form.workHistory}}" bindinput="onInput" data-key="workHistory" maxlength="140"></textarea>
+    <text class="textarea-count">{{form.workHistory.length}}/140</text>
+  </view>
+
+  <!-- 身份证照 -->
+  <view class="form-section">
+    <text class="photo-section-title required" style="display:block;margin-bottom:16rpx;">身份证照（正反）</text>
+    <view class="photo-upload-area" bindtap="chooseIdCard">
+      <view wx:if="{{!form.idFront}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.idFront}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="idFront">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 工作生活照 -->
+  <view class="form-section">
+    <text class="photo-section-title" style="display:block;margin-bottom:16rpx;">工作生活照</text>
+    <view class="photo-upload-area" bindtap="chooseWorkPhoto">
+      <view wx:if="{{!form.workPhoto}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.workPhoto}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="workPhoto">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 专业证书 -->
+  <view class="form-section">
+    <text class="photo-section-title" style="display:block;margin-bottom:16rpx;">专业证书（选填）</text>
+    <view class="photo-upload-area" bindtap="chooseCert">
+      <view wx:if="{{!form.cert}}" class="photo-empty">
+        <text class="photo-empty-icon">🖼️</text>
+        <text class="photo-empty-text">添加图片</text>
+      </view>
+      <view wx:else class="photo-filled">
+        <image src="{{form.cert}}" mode="aspectFill"></image>
+        <view class="photo-del" catchtap="delField" data-key="cert">✕</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐信息栏 -->
+  <view class="promo-bar">
+    <view class="promo-left">
+      <view class="promo-avatar">👤</view>
+      <view class="promo-text">
+        <text class="promo-title">推荐信息</text>
+        <text class="promo-sub">系统帮忙完善资料</text>
+      </view>
+    </view>
+    <text class="promo-link">立即查询 ›</text>
+  </view>
+  <view class="promo-links-row">
+    <text class="promo-tag-link">背调结果 ›</text>
+    <text class="promo-tag-link">查询订单 ›</text>
+  </view>
+
+  <!-- 底部提交栏 -->
+  <view class="submit-bar">
+    <view class="agree-row">
+      <view class="agree-check {{agreed?'checked':''}}" bindtap="toggleAgree">
+        <text wx:if="{{agreed}}" class="check-mark">✓</text>
+      </view>
+      <text class="agree-text">已阅读同意 <text class="agree-link">《家事速配技工入驻协议》</text></text>
+    </view>
+    <view class="submit-btn {{submitting?'disabled':''}}" bindtap="submit">
+      {{submitting ? '提交中...' : '发布审核'}}
+    </view>
+  </view>
+</view>
