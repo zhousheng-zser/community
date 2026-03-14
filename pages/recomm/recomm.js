@@ -42,15 +42,57 @@ Page({
     this.setData({ [`formData.${tab}.${field}`]: e.detail.value });
   },
 
-  // 📍 调用系统地址簿
+  // 📍 地图选址
   pickAddress(e) {
     const { tab, field } = e.currentTarget.dataset;
-    wx.chooseAddress({
-      success: (res) => {
-        const addr = `${res.provinceName}${res.cityName}${res.countyName}${res.detailInfo}`;
-        this.setData({ [`formData.${tab}.${field}`]: addr });
+    const self = this;
+
+    function doChooseLocation() {
+      wx.chooseLocation({
+        success(res) {
+          // res.address 是详细地址，res.name 是地点名称
+          const addr = (res.address || '') + (res.name && res.name !== res.address ? ' ' + res.name : '');
+          if (addr.trim()) {
+            self.setData({ [`formData.${tab}.${field}`]: addr.trim() });
+          }
+        },
+        fail(err) {
+          if (err.errMsg && err.errMsg.indexOf('auth deny') !== -1) {
+            wx.showModal({
+              title: '需要位置权限',
+              content: '请在设置中开启位置权限以使用地图选址',
+              confirmText: '去设置',
+              cancelText: '手动输入',
+              success(r) {
+                if (r.confirm) wx.openSetting();
+              }
+            });
+          }
+        }
+      });
+    }
+
+    // 先检查授权状态，避免直接弹失败
+    wx.getSetting({
+      success(res) {
+        if (res.authSetting['scope.userLocation'] === false) {
+          // 已明确拒绝，引导去设置
+          wx.showModal({
+            title: '需要位置权限',
+            content: '地图选址需要位置权限，请先在设置中开启',
+            confirmText: '去设置',
+            cancelText: '手动输入',
+            success(r) {
+              if (r.confirm) wx.openSetting();
+            }
+          });
+        } else {
+          doChooseLocation();
+        }
       },
-      fail: () => {}
+      fail() {
+        doChooseLocation();
+      }
     });
   },
 
