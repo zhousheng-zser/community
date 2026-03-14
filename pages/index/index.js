@@ -128,43 +128,12 @@ Page({
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id });
   },
-  init() {
+  async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
     // 假数据填充，方便本地预览首页布局
     const banner = [
       { imageUrl: imgUrl('/uploads/placeholders/home_cleaning.png') },
       { imageUrl: imgUrl('/uploads/placeholders/sale_banner.png') }
-    ];
-
-    const goods = [
-      {
-        id: 1,
-        remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'),
-        goodsTitle: '金牌日常保洁 (2小时)',
-        goodsSub: '专业团队，包含客厅、卧室、厨房、卫生间表面清洁，不含擦玻璃。',
-        price: '99.00'
-      },
-      {
-        id: 2,
-        remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'),
-        goodsTitle: '挂壁式空调深度清洗',
-        goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味。',
-        price: '89.00'
-      },
-      {
-        id: 3,
-        remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'),
-        goodsTitle: '家庭常驻保姆 (按月)',
-        goodsSub: '负责三餐及家庭卫生，持证上岗，经验丰富。',
-        price: '4500.00'
-      },
-      {
-        id: 4,
-        remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'),
-        goodsTitle: '同城小面搬家',
-        goodsSub: '适合单身公寓搬迁，含司机帮忙搬运，价格透明不坐地起价。',
-        price: '150.00'
-      }
     ];
 
     const categoryList = [
@@ -192,12 +161,48 @@ Page({
       { name: "代扔垃圾", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
       { name: "宠物喂养", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
     ];
-    const hotList = [
+    // ===== 从数据库获取热门服务（小区热卖榜）=====
+    let hotList = [
       { name: "洗衣机清洗", price: "128", image: imgUrl('/uploads/placeholders/home_cleaning.png'), rank: "NO.1" },
       { name: "热水器清洗", price: "150", image: imgUrl('/uploads/placeholders/home_cleaning.png'), rank: "NO.2" },
       { name: "油烟机清洗", price: "158", image: imgUrl('/uploads/placeholders/home_cleaning.png'), rank: "NO.3" },
-      { name: "家电清洗(新)", price: "399", image: imgUrl('/uploads/placeholders/home_cleaning.png'), rank: "上新" }
+      { name: "金牌日常保洁", price: "99", image: imgUrl('/uploads/placeholders/home_cleaning.png'), rank: "热门" }
     ];
+    try {
+      const hotRes = await util.get('core/services/hot');
+      const hotData = Array.isArray(hotRes) ? hotRes : (hotRes.data || hotRes);
+      if (Array.isArray(hotData) && hotData.length > 0) {
+        const ranks = ["NO.1", "NO.2", "NO.3", "NO.4", "NO.5", "上新"];
+        hotList = hotData.slice(0, 6).map((s, i) => ({
+          id: s.id,
+          name: s.title.replace(/【.*?】/g, '').trim(),
+          price: String(s.price),
+          image: s.cover_image,
+          rank: ranks[i] || "热门"
+        }));
+      }
+    } catch (e) {}
+
+    // ===== 从数据库获取服务商品（直约服务商）=====
+    let goods = [
+      { id: 1, remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'), goodsTitle: '金牌日常保洁 (2小时)', goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
+      { id: 2, remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'), goodsTitle: '挂壁式空调深度清洗', goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
+      { id: 3, remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'), goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
+      { id: 4, remarkC: imgUrl('/uploads/placeholders/home_cleaning.png'), goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
+    ];
+    try {
+      const svcRes = await util.get('core/services/hot');
+      const svcData = Array.isArray(svcRes) ? svcRes : (svcRes.data || svcRes);
+      if (Array.isArray(svcData) && svcData.length > 0) {
+        goods = svcData.slice(0, 4).map(s => ({
+          id: s.id,
+          remarkC: s.cover_image,
+          goodsTitle: s.title.replace(/【.*?】/g, '').trim(),
+          goodsSub: s.description || '',
+          price: String(Number(s.price).toFixed(2))
+        }));
+      }
+    } catch (e) {}
     const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
     const merchantList = goods.map((item) => ({
       id: item.id,
