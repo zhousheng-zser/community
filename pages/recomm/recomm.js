@@ -54,34 +54,10 @@ Page({
     this.setData({ [`currentForm.${field}`]: e.detail.value });
   },
 
-  // 📍 地图选址
-  pickAddress(e) {
+  // 跳转地址填写子页面
+  goPickAddr(e) {
     const field = e.currentTarget.dataset.field;
-    const self = this;
-
-    wx.authorize({
-      scope: 'scope.userLocation',
-      success() {
-        wx.chooseLocation({
-          success(res) {
-            const name = res.name || '';
-            const addr = res.address || '';
-            const full = addr ? (name && name !== addr ? addr + ' ' + name : addr) : name;
-            if (full) self.setData({ [`currentForm.${field}`]: full });
-          },
-          fail() {}
-        });
-      },
-      fail() {
-        wx.showModal({
-          title: '需要位置权限',
-          content: '请在设置中开启位置权限，或直接在输入框手动输入地址',
-          confirmText: '去设置',
-          cancelText: '手动输入',
-          success(r) { if (r.confirm) wx.openSetting(); }
-        });
-      }
-    });
+    wx.navigateTo({ url: `../address/address?mode=pick&field=currentForm.${field}` });
   },
 
   doSubmit() {

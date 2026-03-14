@@ -1,42 +1,90 @@
 <!--pages/order-confrim/order-confrim.wxml-->
-<view class='container'>
-  <view class='choose' bindtap='chooseAddress'>
-    <image class='icon' src='/img/icon-dzgl.png'></image>
-    <view wx:if="{{address}}" class='address'>
-      <view class='text-bold'>
-        <text class='name'>{{address.name}}</text>
-        <text>{{address.tel}}</text>
-      </view>
-      <view class='info'>
-        <text>{{address.detail}}</text>
-      </view>
+<view class="oc-page">
+
+  <!-- 服务地址卡片 -->
+  <view class="oc-card">
+    <view class="oc-row" bindtap="pickServiceAddr">
+      <view class="oc-required">*</view>
+      <text class="oc-label">服务地址</text>
+      <text class="oc-val {{serviceAddr ? '' : 'oc-ph'}}">{{serviceAddr || '请选择服务地址'}}</text>
+      <text class="oc-arrow">›</text>
     </view>
-    <view wx:else class='address'>请选择服务地址</view>
-    <image class='icon arrow' src='/img/arrow-right.png'></image>
-  </view>
-  <view class='list'>
-    <view class='item' bindtap='goService'>
-      <image class='img' src='{{service.imageUrl}}' mode='center'></image>
-      <view class='info'>
-        <text class='name'>{{service.goodsTitle}}</text>
-        <text class='desc'>{{service.goodsSub}}</text>
-        <view class='price' wx:if="{{service.goodsPrice}}">
-          <text class='text-red'>{{service.goodsPrice}}</text>
-          <text wx:if="{{service.remarkA}}">{{service.remarkA}}</text>
+    <view class="oc-divider"></view>
+    <view class="oc-row">
+      <view class="oc-required">*</view>
+      <text class="oc-label">门牌号</text>
+      <input class="oc-input" placeholder="请选择地点" placeholder-class="oc-ph" value="{{doorNum}}" bindinput="onOcInput" data-field="doorNum" />
+    </view>
+    <view class="oc-divider"></view>
+    <view class="oc-row oc-contact-row">
+      <view class="oc-required">*</view>
+      <text class="oc-label">联系人</text>
+      <input class="oc-input" placeholder="请输入联系人姓名" placeholder-class="oc-ph" value="{{contactName}}" bindinput="onOcInput" data-field="contactName" />
+      <view class="oc-gender">
+        <view class="oc-gender-opt" bindtap="setGender" data-g="先生">
+          <view class="oc-radio {{contactGender === '先生' ? 'checked' : ''}}"></view>
+          <text class="oc-gender-txt">先生</text>
+        </view>
+        <view class="oc-gender-opt" bindtap="setGender" data-g="女士">
+          <view class="oc-radio {{contactGender === '女士' ? 'checked' : ''}}"></view>
+          <text class="oc-gender-txt">女士</text>
         </view>
       </view>
     </view>
+    <view class="oc-divider"></view>
+    <view class="oc-row">
+      <view class="oc-required">*</view>
+      <text class="oc-label">联系电话</text>
+      <input class="oc-input" placeholder="请填写联系电话" placeholder-class="oc-ph" type="number" value="{{contactPhone}}" bindinput="onOcInput" data-field="contactPhone" maxlength="11" />
+    </view>
   </view>
-  <!-- <view class='tips'>
-    <text class='title'>温馨提示</text>
-    <text class='row'>-温馨提示；大撒旦送多萨克拉高达撒的谎悼念萨达宏sad</text>
-    <text class='row'>-温馨提示；大撒旦送啊等候高达撒的萨达宏sad</text>
-    <text class='row'>-温馨提示；大撒旦送啊等候拉高达撒的谎悼念萨达宏sad</text>
-    <text class='row'>-温啊等候阿什顿多萨克拉高达撒的谎dkjsahdioahd都哈是否啊哈都悼念萨达宏sad</text>
-  </view> -->
+
+  <!-- 商品卡片 -->
+  <view class="oc-card oc-prod-card">
+    <image class="oc-prod-img" src="{{product.image}}" mode="aspectFill"></image>
+    <view class="oc-prod-info">
+      <text class="oc-prod-name">{{product.name}}</text>
+      <text class="oc-prod-sub">{{product.sub}}</text>
+      <text class="oc-prod-price">{{product.price}}元/份</text>
+    </view>
+    <view class="oc-qty">
+      <view class="oc-qty-btn" bindtap="decQty">−</view>
+      <text class="oc-qty-num">{{qty}}</text>
+      <view class="oc-qty-btn" bindtap="incQty">+</view>
+    </view>
+  </view>
+
+  <!-- 优惠券 -->
+  <view class="oc-card">
+    <view class="oc-row">
+      <text class="oc-label">优惠券</text>
+      <text class="oc-val oc-ph">暂无可用优惠券</text>
+      <text class="oc-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 备注 -->
+  <view class="oc-card">
+    <view class="oc-remark-tip">可提前来，来之前打电话，请尽快联系我</view>
+    <textarea
+      class="oc-remark"
+      placeholder="如有特殊要求,请给商家带句话"
+      placeholder-class="oc-ph"
+      value="{{remark}}"
+      bindinput="onOcInput"
+      data-field="remark"
+      auto-height
+    ></textarea>
+  </view>
+
+  <view class="oc-spacer"></view>
 </view>
-<form report-submit="true" bindsubmit="goOrderDetail">
-  <view class='redbtn-fixed'>
-    <button form-type='submit'>提交订单</button>
+
+<!-- 底部支付栏 -->
+<view class="oc-bottom-bar">
+  <view class="oc-total">
+    <text class="oc-total-label">待支付</text>
+    <text class="oc-total-price">{{totalPrice}}元</text>
   </view>
-</form>
+  <view class="oc-submit-btn" bindtap="submitOrder">立即购买</view>
+</view>

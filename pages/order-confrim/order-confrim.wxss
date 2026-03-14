@@ -1,95 +1,195 @@
 /* pages/order-confrim/order-confrim.wxss */
-.choose{
+page { background: #f5f0e8; }
+
+.oc-page { padding: 20rpx 24rpx 0; }
+
+.oc-card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  padding: 0 32rpx;
+}
+
+.oc-prod-card {
   display: flex;
-   padding: 40rpx 20rpx; 
-  border: 2px dashed #ccc;
   align-items: center;
-    background-color: #fff;
-  margin-bottom: 20rpx; 
-  /* color: #a8a8a8; */
+  padding: 24rpx 24rpx;
+  gap: 20rpx;
 }
-.choose .icon{
-  flex: 0 0 40rpx;
-  width: 40rpx;
-  height: 48rpx;
+
+.oc-row {
+  display: flex;
+  align-items: center;
+  min-height: 96rpx;
+  gap: 12rpx;
 }
-.choose .icon.arrow{
-  flex: 0 0 25rpx;
-  width: 25rpx;
-}
-.address{
-  flex: 1;
-  /* padding: 40rpx 20rpx; */
-  /* border-bottom: 1px solid #eee; */
-  color: #8a8a8a;
-  margin-left: 20rpx;
-}
-.address .name{
-  margin-right: 40rpx;
-}
-.address .info{
-  font-size: 24rpx;
-}
-.text-bold{
-  margin-bottom: 10rpx;
-  color: #333;
-  font-weight: 600;
+
+.oc-contact-row { flex-wrap: nowrap; }
+
+.oc-divider { height: 1rpx; background: #f5f5f5; }
+
+.oc-required {
+  color: #e84040;
   font-size: 28rpx;
+  flex-shrink: 0;
+  width: 16rpx;
 }
-.list{
+
+.oc-label {
+  font-size: 28rpx;
+  color: #333;
+  width: 140rpx;
+  flex-shrink: 0;
+}
+
+.oc-val { flex: 1; font-size: 28rpx; color: #333; }
+.oc-ph { color: #c8c8c8 !important; }
+
+.oc-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  min-width: 0;
+}
+
+.oc-arrow { font-size: 32rpx; color: #c8c8c8; flex-shrink: 0; }
+
+.oc-gender {
   display: flex;
-  flex-wrap: wrap;
-  flex: 1 1 100%;
-  background-color: #fff;
-  margin-bottom: 20rpx;
+  gap: 20rpx;
+  flex-shrink: 0;
+  margin-left: 8rpx;
 }
-.section-image{
-  width: 100%;
-  height: 250rpx;
-  margin-bottom: 20rpx;
-}
-.item{
+
+.oc-gender-opt {
   display: flex;
-  padding: 30rpx;
-  background-color: #fff;
+  align-items: center;
+  gap: 8rpx;
 }
-.item .img{
-  flex:  0 0 150rpx;
-  width: 150rpx;
-  height: 120rpx;
-  margin-right: 30rpx;
+
+.oc-radio {
+  width: 36rpx; height: 36rpx;
+  border-radius: 50%;
+  border: 3rpx solid #d0d0d0;
+  background: #fff;
+  flex-shrink: 0;
 }
-.item .info{
+
+.oc-radio.checked {
+  border-color: #e84040;
+  background: #e84040;
+  box-shadow: inset 0 0 0 6rpx #fff;
+}
+
+.oc-gender-txt { font-size: 26rpx; color: #333; }
+
+/* 商品卡片 */
+.oc-prod-img {
+  width: 140rpx; height: 140rpx;
+  border-radius: 12rpx; flex-shrink: 0;
+}
+
+.oc-prod-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  font-size: 24rpx;  
+  gap: 8rpx;
+  min-width: 0;
 }
-.item .name{
-  font-size: 28rpx;
-  font-weight: 500;
-}
-.desc{
-  color: #a8a8a8;
-}
-.text-red{
-  font-size: 28rpx;  
-  color: #d81e06;
-}
-.tips{
-  background-color: #fff;
-  font-size: 24rpx;
-  color: #a8a8a8;
-  padding: 20rpx;
-}
-.tips .title{
-  display: block;
+
+.oc-prod-name {
+  font-size: 30rpx;
   font-weight: 600;
-  color: #333;
-  line-height: 2;
-}
-.tips .row{
+  color: #222;
   display: block;
-  line-height: 1.5;  
-  margin-bottom: 10rpx;
+}
+
+.oc-prod-sub {
+  font-size: 24rpx;
+  color: #888;
+  display: block;
+}
+
+.oc-prod-price {
+  font-size: 26rpx;
+  color: #333;
+  display: block;
+}
+
+/* 数量控制 */
+.oc-qty {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+}
+
+.oc-qty-btn {
+  width: 52rpx; height: 52rpx;
+  border-radius: 50%;
+  border: 1rpx solid #ddd;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32rpx; color: #555;
+}
+
+.oc-qty-num { font-size: 30rpx; color: #222; min-width: 40rpx; text-align: center; }
+
+/* 备注 */
+.oc-remark-tip {
+  font-size: 24rpx;
+  color: #aaa;
+  padding: 20rpx 0 8rpx;
+}
+
+.oc-remark {
+  width: 100%;
+  min-height: 100rpx;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.6;
+  padding-bottom: 24rpx;
+  box-sizing: border-box;
+}
+
+.oc-spacer { height: 140rpx; }
+
+/* 底部支付栏 */
+.oc-bottom-bar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 120rpx;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 32rpx;
+  box-shadow: 0 -2rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.oc-total {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.oc-total-label { font-size: 28rpx; color: #333; }
+
+.oc-total-price {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: #e8880a;
+}
+
+.oc-submit-btn {
+  width: 220rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: #e8880a;
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

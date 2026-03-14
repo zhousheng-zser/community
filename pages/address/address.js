@@ -14,6 +14,8 @@ const EMPTY_FORM = {
   isDefault: false,
 };
 
+const EMPTY_PICK_FORM = { address: '', door: '', name: '', gender: '先生', phone: '', isDefault: false };
+
 Page({
   data: {
     list: [],
@@ -21,14 +23,33 @@ Page({
     tags: ['家', '公司', '学校', '其他'],
     form: Object.assign({}, EMPTY_FORM),
     canSave: false,
+    // pick mode
+    pickMode: false,
+    sourceField: 'currentForm.from',
+    pickForm: Object.assign({}, EMPTY_PICK_FORM),
   },
 
-  onLoad() {
-    this.loadAddresses();
+  onLoad(options) {
+    if (options && options.mode === 'pick') {
+      const pickForm = Object.assign({}, EMPTY_PICK_FORM);
+      // pre-fill from default saved address
+      const cached = wx.getStorageSync('address_list') || [];
+      const def = cached.find(a => a.isDefault) || cached[0];
+      if (def) {
+        pickForm.address = def._rawAddress || [def.province, def.city, def.district].filter(Boolean).join('');
+        pickForm.door = def.detail || '';
+        pickForm.name = def.name || '';
+        pickForm.gender = def.gender || '先生';
+        pickForm.phone = def.phone || '';
+      }
+      this.setData({ pickMode: true, sourceField: options.field || 'currentForm.from', pickForm });
+    } else {
+      this.loadAddresses();
+    }
   },
 
   onShow() {
-    this.loadAddresses();
+    if (!this.data.pickMode) this.loadAddresses();
   },
 
   // ===== 加载地址列表 =====
@@ -209,6 +230,50 @@ Page({
       this.setData({ list });
       wx.showToast({ title: '已设为默认', icon: 'success' });
     }
+  },
+
+  // ===== PICK MODE 方法 =====
+  pickLocation() {
+    wx.chooseLocation({
+      success: (res) => {
+        const addr = (res.address || '') + (res.name && res.name !== res.address ? ' ' + res.name : '');
+        if (addr.trim()) this.setData({ 'pickForm.address': addr.trim() });
+      },
+      fail() {}
+    });
+  },
+
+  onPickInput(e) {
+    this.setData({ [`pickForm.${e.currentTarget.dataset.field}`]: e.detail.value });
+  },
+
+  setPickGender(e) {
+    this.setData({ 'pickForm.gender': e.currentTarget.dataset.gender });
+  },
+
+  onPickDefault(e) {
+    this.setData({ 'pickForm.isDefault': e.detail.value });
+  },
+
+  saveAndUse() {
+    const { pickForm, sourceField } = this.data;
+    if (!pickForm.address && !pickForm.door) {
+      return wx.showToast({ title: '请填写服务地址', icon: 'none' });
+    }
+    const fullAddr = [pickForm.address, pickForm.door].filter(Boolean).join(' ');
+    // save locally for future pre-fill
+    if (pickForm.name || pickForm.isDefault) {
+      let list = wx.getStorageSync('address_list') || [];
+      if (pickForm.isDefault) list = list.map(a => Object.assign({}, a, { isDefault: false }));
+      list.unshift({ id: Date.now(), name: pickForm.name, phone: pickForm.phone, gender: pickForm.gender, detail: pickForm.door, _rawAddress: pickForm.address, isDefault: pickForm.isDefault, tag: '家' });
+      wx.setStorageSync('address_list', list);
+    }
+    // pass data back to calling page
+    const pages = getCurrentPages();
+    if (pages.length >= 2) {
+      pages[pages.length - 2].setData({ [sourceField]: fullAddr });
+    }
+    wx.navigateBack();
   },
 
   // ===== 删除地址 =====

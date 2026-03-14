@@ -1,109 +1,139 @@
 <!--pages/address/address.wxml-->
 <view class="addr-page">
 
-  <!-- 地址列表 -->
-  <view class="addr-list" wx:if="{{list.length > 0}}">
-    <view class="addr-card" wx:for="{{list}}" wx:key="id">
-      <!-- 默认标签 -->
-      <view class="default-tag" wx:if="{{item.isDefault}}">默认</view>
-
-      <view class="card-body" bindtap="editAddress" data-item="{{item}}">
-        <view class="addr-top">
-          <text class="addr-name">{{item.name}}</text>
-          <text class="addr-phone">{{item.phone}}</text>
-        </view>
-        <text class="addr-detail">{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</text>
+  <!-- ===== PICK MODE: 填写服务地址表单 ===== -->
+  <view wx:if="{{pickMode}}" class="pick-wrap">
+    <view class="pick-form-card">
+      <!-- 地址 -->
+      <view class="pf-row" bindtap="pickLocation">
+        <text class="pf-label">地址：</text>
+        <text wx:if="{{pickForm.address}}" class="pf-val">{{pickForm.address}}</text>
+        <text wx:else class="pf-ph-txt">请选择地址</text>
+        <text class="pf-arrow">›</text>
       </view>
-
-      <view class="card-footer">
-        <view class="footer-left" bindtap="setDefault" data-id="{{item.id}}" wx:if="{{!item.isDefault}}">
-          <view class="circle-check"></view>
-          <text class="set-default-text">设为默认</text>
-        </view>
-        <view class="footer-left" wx:else>
-          <view class="circle-check checked"></view>
-          <text class="set-default-text active">已设默认</text>
-        </view>
-        <view class="footer-right">
-          <view class="foot-btn" bindtap="editAddress" data-item="{{item}}">
-            <text class="foot-icon">✏️</text>
-            <text>编辑</text>
+      <view class="pf-line"></view>
+      <!-- 门牌号 -->
+      <view class="pf-row">
+        <text class="pf-label">门牌号：</text>
+        <input class="pf-input" placeholder="详细地址，如A座102室" placeholder-class="pf-ph-cls" value="{{pickForm.door}}" bindinput="onPickInput" data-field="door" />
+        <text class="pf-arrow">›</text>
+      </view>
+      <view class="pf-line"></view>
+      <!-- 联系人 -->
+      <view class="pf-row pf-contact-row">
+        <text class="pf-label">联系人：</text>
+        <input class="pf-input" placeholder="联系人姓名" placeholder-class="pf-ph-cls" value="{{pickForm.name}}" bindinput="onPickInput" data-field="name" />
+        <view class="gender-btns">
+          <view class="gender-opt" bindtap="setPickGender" data-gender="先生">
+            <view class="radio-dot {{pickForm.gender === '先生' ? 'checked' : ''}}"></view>
+            <text class="gender-label">先生</text>
           </view>
-          <view class="foot-btn danger" bindtap="deleteAddress" data-id="{{item.id}}">
-            <text class="foot-icon">🗑️</text>
-            <text>删除</text>
+          <view class="gender-opt" bindtap="setPickGender" data-gender="女士">
+            <view class="radio-dot {{pickForm.gender === '女士' ? 'checked' : ''}}"></view>
+            <text class="gender-label">女士</text>
+          </view>
+        </view>
+      </view>
+      <view class="pf-line"></view>
+      <!-- 手机号 -->
+      <view class="pf-row">
+        <text class="pf-label">手机号：</text>
+        <input class="pf-input" placeholder="联系人手机号" placeholder-class="pf-ph-cls" type="number" value="{{pickForm.phone}}" bindinput="onPickInput" data-field="phone" maxlength="11" />
+      </view>
+      <view class="pf-line"></view>
+      <!-- 默认地址 -->
+      <view class="pf-row">
+        <text class="pf-label">默认地址</text>
+        <switch checked="{{pickForm.isDefault}}" bindchange="onPickDefault" color="#4cd964" />
+      </view>
+    </view>
+    <view class="save-use-btn" bindtap="saveAndUse">保存并使用</view>
+  </view>
+
+  <!-- ===== LIST MODE: 地址列表管理 ===== -->
+  <view wx:else>
+    <view class="addr-list" wx:if="{{list.length > 0}}">
+      <view class="addr-card" wx:for="{{list}}" wx:key="id">
+        <view class="default-tag" wx:if="{{item.isDefault}}">默认</view>
+        <view class="card-body" bindtap="editAddress" data-item="{{item}}">
+          <view class="addr-top">
+            <text class="addr-name">{{item.name}}</text>
+            <text class="addr-phone">{{item.phone}}</text>
+          </view>
+          <text class="addr-detail">{{item.province}}{{item.city}}{{item.district}}{{item.detail}}</text>
+        </view>
+        <view class="card-footer">
+          <view class="footer-left" bindtap="setDefault" data-id="{{item.id}}" wx:if="{{!item.isDefault}}">
+            <view class="circle-check"></view>
+            <text class="set-default-text">设为默认</text>
+          </view>
+          <view class="footer-left" wx:else>
+            <view class="circle-check checked"></view>
+            <text class="set-default-text active">已设默认</text>
+          </view>
+          <view class="footer-right">
+            <view class="foot-btn" bindtap="editAddress" data-item="{{item}}">
+              <text class="foot-icon">✏️</text>
+              <text>编辑</text>
+            </view>
+            <view class="foot-btn danger" bindtap="deleteAddress" data-id="{{item.id}}">
+              <text class="foot-icon">🗑️</text>
+              <text>删除</text>
+            </view>
           </view>
         </view>
       </view>
     </view>
-  </view>
-
-  <!-- 空状态 -->
-  <view class="empty-wrap" wx:elif="{{!loading}}">
-    <text class="empty-emoji">📭</text>
-    <text class="empty-title">暂无收货地址</text>
-    <text class="empty-sub">添加地址，下单时快速填写</text>
-  </view>
-
-  <!-- 底部新增按钮 -->
-  <view class="add-bar">
-    <view class="add-btn" bindtap="addAddress">
-      <text class="add-icon">＋</text>
-      <text class="add-text">新增收货地址</text>
+    <view class="empty-wrap" wx:elif="{{!loading}}">
+      <text class="empty-emoji">📭</text>
+      <text class="empty-title">暂无收货地址</text>
+      <text class="empty-sub">添加地址，下单时快速填写</text>
     </view>
-  </view>
-
-  <!-- 编辑/新增弹窗 -->
-  <view wx:if="{{form.show}}" class="modal-overlay" catchtap="closeForm"></view>
-  <view wx:if="{{form.show}}" class="modal-sheet">
-    <view class="modal-header">
-      <text class="modal-title">{{form.id ? '编辑地址' : '新增地址'}}</text>
-      <text class="modal-close" bindtap="closeForm">✕</text>
+    <view class="add-bar">
+      <view class="add-btn" bindtap="addAddress">
+        <text class="add-icon">＋</text>
+        <text class="add-text">新增收货地址</text>
+      </view>
     </view>
-    <scroll-view class="modal-body" scroll-y>
-      <!-- 姓名 -->
-      <view class="form-row">
-        <text class="form-label required">收货人</text>
-        <input class="form-input" placeholder="请输入姓名" value="{{form.name}}" bindinput="onInput" data-field="name" />
+    <view wx:if="{{form.show}}" class="modal-overlay" catchtap="closeForm"></view>
+    <view wx:if="{{form.show}}" class="modal-sheet">
+      <view class="modal-header">
+        <text class="modal-title">{{form.id ? '编辑地址' : '新增地址'}}</text>
+        <text class="modal-close" bindtap="closeForm">✕</text>
       </view>
-      <!-- 手机 -->
-      <view class="form-row">
-        <text class="form-label required">手机号</text>
-        <input class="form-input" placeholder="请输入手机号" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" maxlength="11" />
-      </view>
-      <!-- 地区 picker -->
-      <view class="form-row" bindtap="chooseRegion">
-        <text class="form-label required">所在地区</text>
-        <text class="form-value" wx:if="{{form.province}}">{{form.province}} {{form.city}} {{form.district}}</text>
-        <text class="form-placeholder" wx:else>请选择省/市/区</text>
-        <text class="form-arrow">›</text>
-      </view>
-      <!-- 详细地址 -->
-      <view class="form-row detail-row">
-        <text class="form-label required">详细地址</text>
-        <textarea class="form-textarea" placeholder="街道、楼栋、门牌号" value="{{form.detail}}" bindinput="onInput" data-field="detail" maxlength="100" auto-height></textarea>
-      </view>
-      <!-- 标签 -->
-      <view class="form-row">
-        <text class="form-label">标签</text>
-        <view class="tag-list">
-          <view
-            class="tag-item {{form.tag === item ? 'active' : ''}}"
-            wx:for="{{tags}}"
-            wx:key="*this"
-            bindtap="selectTag"
-            data-tag="{{item}}"
-          >{{item}}</view>
+      <scroll-view class="modal-body" scroll-y>
+        <view class="form-row">
+          <text class="form-label required">收货人</text>
+          <input class="form-input" placeholder="请输入姓名" value="{{form.name}}" bindinput="onInput" data-field="name" />
         </view>
+        <view class="form-row">
+          <text class="form-label required">手机号</text>
+          <input class="form-input" placeholder="请输入手机号" type="number" value="{{form.phone}}" bindinput="onInput" data-field="phone" maxlength="11" />
+        </view>
+        <view class="form-row" bindtap="chooseRegion">
+          <text class="form-label required">所在地区</text>
+          <text class="form-value" wx:if="{{form.province}}">{{form.province}} {{form.city}} {{form.district}}</text>
+          <text class="form-placeholder" wx:else>请选择省/市/区</text>
+          <text class="form-arrow">›</text>
+        </view>
+        <view class="form-row detail-row">
+          <text class="form-label required">详细地址</text>
+          <textarea class="form-textarea" placeholder="街道、楼栋、门牌号" value="{{form.detail}}" bindinput="onInput" data-field="detail" maxlength="100" auto-height></textarea>
+        </view>
+        <view class="form-row">
+          <text class="form-label">标签</text>
+          <view class="tag-list">
+            <view class="tag-item {{form.tag === item ? 'active' : ''}}" wx:for="{{tags}}" wx:key="*this" bindtap="selectTag" data-tag="{{item}}">{{item}}</view>
+          </view>
+        </view>
+        <view class="form-row">
+          <text class="form-label">设为默认</text>
+          <switch checked="{{form.isDefault}}" bindchange="onDefaultChange" color="#f64e4e" />
+        </view>
+      </scroll-view>
+      <view class="modal-footer">
+        <view class="save-btn {{canSave ? 'active' : ''}}" bindtap="saveAddress">保存</view>
       </view>
-      <!-- 设为默认 -->
-      <view class="form-row">
-        <text class="form-label">设为默认</text>
-        <switch checked="{{form.isDefault}}" bindchange="onDefaultChange" color="#f64e4e" />
-      </view>
-    </scroll-view>
-    <view class="modal-footer">
-      <view class="save-btn {{canSave ? 'active' : ''}}" bindtap="saveAddress">保存</view>
     </view>
   </view>
 

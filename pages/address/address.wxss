@@ -251,3 +251,99 @@ page { background: #f5f5f5; }
   background: linear-gradient(90deg, #f64e4e, #ff8a65);
   color: #fff;
 }
+
+/* ===== PICK MODE 样式 ===== */
+.pick-wrap {
+  padding: 24rpx 24rpx 0;
+}
+
+.pick-form-card {
+  background: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.05);
+}
+
+.pf-row {
+  display: flex;
+  align-items: center;
+  min-height: 100rpx;
+  padding: 0 32rpx;
+}
+
+.pf-contact-row { flex-wrap: nowrap; }
+
+.pf-label {
+  font-size: 30rpx;
+  color: #333;
+  width: 150rpx;
+  flex-shrink: 0;
+}
+
+.pf-val { flex: 1; font-size: 28rpx; color: #333; }
+.pf-ph-txt { flex: 1; font-size: 28rpx; color: #c8c8c8; }
+.pf-ph-cls { color: #c8c8c8; font-size: 28rpx; }
+
+.pf-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  min-width: 0;
+}
+
+.pf-arrow {
+  font-size: 32rpx;
+  color: #c8c8c8;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}
+
+.pf-line {
+  height: 1rpx;
+  background: #f5f5f5;
+  margin: 0 32rpx;
+}
+
+.gender-btns {
+  display: flex;
+  gap: 24rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.gender-opt {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.radio-dot {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 3rpx solid #e0e0e0;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.radio-dot.checked {
+  border-color: #e64340;
+  background: #e64340;
+  box-shadow: inset 0 0 0 6rpx #fff;
+}
+
+.gender-label { font-size: 28rpx; color: #333; }
+
+.save-use-btn {
+  margin: 32rpx 0 48rpx;
+  height: 100rpx;
+  border-radius: 14rpx;
+  background: #c0392b;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(192,57,43,0.35);
+}

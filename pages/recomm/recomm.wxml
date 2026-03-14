@@ -28,33 +28,21 @@
   <view class="form-card">
 
     <!-- 主地址（取货/服务地址） -->
-    <view class="input-item">
+    <view class="input-item" bindtap="goPickAddr" data-field="from">
       <view class="label-dot blue">{{activeTabConfig.label}}</view>
-      <input
-        class="addr-field"
-        placeholder="{{activeTabConfig.placeholder}}"
-        placeholder-class="addr-ph"
-        value="{{currentForm.from}}"
-        bindinput="onAddrInput"
-        data-field="from"
-        confirm-type="done"
-      />
-      <view class="pick-btn" bindtap="pickAddress" data-field="from">📍</view>
+      <view class="addr-nav-wrap">
+        <text class="addr-nav-text {{currentForm.from ? 'has-val' : 'addr-ph'}}">{{currentForm.from || activeTabConfig.placeholder}}</text>
+      </view>
+      <text class="pick-btn">📍</text>
     </view>
 
     <!-- 第二地址（仅代取有收货地址） -->
-    <view class="input-item" wx:if="{{activeTabConfig.secondLabel}}">
+    <view class="input-item" wx:if="{{activeTabConfig.secondLabel}}" bindtap="goPickAddr" data-field="to">
       <view class="label-dot green">{{activeTabConfig.secondLabel}}</view>
-      <input
-        class="addr-field"
-        placeholder="{{activeTabConfig.secondPlaceholder}}"
-        placeholder-class="addr-ph"
-        value="{{currentForm.to}}"
-        bindinput="onAddrInput"
-        data-field="to"
-        confirm-type="done"
-      />
-      <view class="pick-btn" bindtap="pickAddress" data-field="to">📍</view>
+      <view class="addr-nav-wrap">
+        <text class="addr-nav-text {{currentForm.to ? 'has-val' : 'addr-ph'}}">{{currentForm.to || activeTabConfig.secondPlaceholder}}</text>
+      </view>
+      <text class="pick-btn">📍</text>
     </view>
 
     <!-- 备注 -->

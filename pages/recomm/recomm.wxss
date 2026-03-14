@@ -132,6 +132,12 @@ page {
 .placeholder { flex: 1; color: #c2c2c2; font-size: 36rpx; }
 .arrow { color: #3b3b3b; font-size: 34rpx; }
 
+/* 地址导航行 */
+.addr-nav-wrap { flex: 1; min-width: 0; }
+.addr-nav-text { font-size: 30rpx; color: #333; }
+.addr-nav-text.addr-ph { color: #c2c2c2; }
+.addr-nav-text.has-val { color: #222; }
+
 .submit-btn {
   margin-top: 26rpx;
   height: 96rpx;

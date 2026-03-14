@@ -29,8 +29,42 @@
   <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
 
   <view class="bottom-bar">
-    <text class="home">首页</text>
+    <text class="home" bindtap="goBack">首页</text>
     <text class="share">￥{{product.rebate}} 分享每单赚</text>
-    <text class="buy">￥{{product.rebate}} 购买每单返</text>
+    <text class="buy" bindtap="openBuyPanel">立即购买</text>
   </view>
+</view>
+
+<!-- 购买弹出层 -->
+<view wx:if="{{showBuyPanel}}" class="panel-overlay" catchtap="closeBuyPanel"></view>
+<view wx:if="{{showBuyPanel}}" class="buy-panel">
+  <view class="bp-close" bindtap="closeBuyPanel">✕</view>
+  <view class="bp-top">
+    <image class="bp-img" src="{{product.image}}" mode="aspectFill"></image>
+    <view class="bp-top-info">
+      <text class="bp-price">{{product.price}}元/份</text>
+      <text class="bp-selected">已选 {{product.name}} {{product.name}}</text>
+    </view>
+  </view>
+  <view class="bp-section">
+    <text class="bp-sec-title">服务项目</text>
+    <view class="bp-tags">
+      <view class="bp-tag active">{{product.name}}</view>
+    </view>
+  </view>
+  <view class="bp-section">
+    <text class="bp-sec-title">服务规格</text>
+    <view class="bp-tags">
+      <view class="bp-tag active">{{product.name}}</view>
+    </view>
+  </view>
+  <view class="bp-qty-row">
+    <text class="bp-qty-label">购买数量</text>
+    <view class="bp-qty-ctrl">
+      <view class="bp-qty-btn" bindtap="decQty">−</view>
+      <text class="bp-qty-num">{{buyQty}}</text>
+      <view class="bp-qty-btn" bindtap="incQty">+</view>
+    </view>
+  </view>
+  <view class="bp-submit-btn" bindtap="confirmBuy">立即购买</view>
 </view>

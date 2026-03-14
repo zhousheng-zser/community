@@ -22,7 +22,9 @@ Page({
       rebate: "1.58",
       image: "/img/placeholders/home_cleaning.png",
       shop: "腹说营养旗舰店"
-    }
+    },
+    showBuyPanel: false,
+    buyQty: 1,
   },
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
@@ -44,5 +46,18 @@ Page({
   },
   goShopAll() {
     wx.navigateTo({ url: "../market-shop/market-shop?id=" + this.data.shopId });
+  },
+
+  openBuyPanel() { this.setData({ showBuyPanel: true }); },
+  closeBuyPanel() { this.setData({ showBuyPanel: false }); },
+  incQty() { this.setData({ buyQty: Math.min(this.data.buyQty + 1, 99) }); },
+  decQty() { this.setData({ buyQty: Math.max(this.data.buyQty - 1, 1) }); },
+
+  confirmBuy() {
+    const { product, buyQty, shopId } = this.data;
+    this.setData({ showBuyPanel: false });
+    wx.navigateTo({
+      url: `../order-confrim/order-confrim?name=${encodeURIComponent(product.name)}&price=${product.price}&image=${encodeURIComponent(product.image)}&qty=${buyQty}&shopId=${shopId}`
+    });
   }
 });
