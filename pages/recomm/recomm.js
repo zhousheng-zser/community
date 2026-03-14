@@ -10,15 +10,11 @@ Page({
       { key: "pet",    text: "宠物喂养", label: "服", placeholder: "填写宠物服务地址",   secondLabel: "",   secondPlaceholder: "" }
     ],
     activeServiceTab: "take",
-    // 每个 tab 独立存储表单值
-    formData: {
-      take:   { from: '', to: '', remark: '' },
-      child:  { from: '', to: '', remark: '' },
-      escort: { from: '', to: '', remark: '' },
-      study:  { from: '', to: '', remark: '' },
-      trash:  { from: '', to: '', remark: '' },
-      pet:    { from: '', to: '', remark: '' }
-    },
+    activeTabConfig: { key: "take", text: "代取", label: "取", placeholder: "填写取货地址", secondLabel: "收", secondPlaceholder: "填写收货地址" },
+    // 当前 tab 表单（WXML 只访问这个，不用动态 key）
+    currentForm: { from: '', to: '', remark: '' },
+    // 各 tab 表单缓存
+    _cache: {},
     history: [
       { tag: "代取", text: "帮取文件1件 重1公斤" }
     ]
@@ -28,110 +24,89 @@ Page({
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
     if (options.type) {
-      this.setData({ activeServiceTab: options.type });
+      const tab = this.data.serviceTabs.find(t => t.key === options.type);
+      this.setData({
+        activeServiceTab: options.type,
+        activeTabConfig: tab || this.data.activeTabConfig
+      });
     }
   },
 
   switchServiceTab(e) {
-    this.setData({ activeServiceTab: e.currentTarget.dataset.key });
+    const key = e.currentTarget.dataset.key;
+    // 保存当前表单到缓存
+    const cache = Object.assign({}, this.data._cache, {
+      [this.data.activeServiceTab]: Object.assign({}, this.data.currentForm)
+    });
+    // 读取目标 tab 缓存
+    const form = cache[key] || { from: '', to: '', remark: '' };
+    const tab = this.data.serviceTabs.find(t => t.key === key);
+    this.setData({
+      activeServiceTab: key,
+      activeTabConfig: tab,
+      currentForm: form,
+      _cache: cache
+    });
   },
 
-  // 地址文字输入
   onAddrInput(e) {
-    const { tab, field } = e.currentTarget.dataset;
-    this.setData({ [`formData.${tab}.${field}`]: e.detail.value });
+    const field = e.currentTarget.dataset.field;
+    this.setData({ [`currentForm.${field}`]: e.detail.value });
   },
 
   // 📍 地图选址
   pickAddress(e) {
-    const { tab, field } = e.currentTarget.dataset;
+    const field = e.currentTarget.dataset.field;
     const self = this;
 
-    function doChooseLocation() {
-      wx.chooseLocation({
-        success(res) {
-          // res.address 是详细地址，res.name 是地点名称
-          const addr = (res.address || '') + (res.name && res.name !== res.address ? ' ' + res.name : '');
-          if (addr.trim()) {
-            self.setData({ [`formData.${tab}.${field}`]: addr.trim() });
-          }
-        },
-        fail(err) {
-          if (err.errMsg && err.errMsg.indexOf('auth deny') !== -1) {
-            wx.showModal({
-              title: '需要位置权限',
-              content: '请在设置中开启位置权限以使用地图选址',
-              confirmText: '去设置',
-              cancelText: '手动输入',
-              success(r) {
-                if (r.confirm) wx.openSetting();
-              }
-            });
-          }
-        }
-      });
-    }
-
-    // 先检查授权状态，避免直接弹失败
-    wx.getSetting({
-      success(res) {
-        if (res.authSetting['scope.userLocation'] === false) {
-          // 已明确拒绝，引导去设置
-          wx.showModal({
-            title: '需要位置权限',
-            content: '地图选址需要位置权限，请先在设置中开启',
-            confirmText: '去设置',
-            cancelText: '手动输入',
-            success(r) {
-              if (r.confirm) wx.openSetting();
-            }
-          });
-        } else {
-          doChooseLocation();
-        }
+    wx.authorize({
+      scope: 'scope.userLocation',
+      success() {
+        wx.chooseLocation({
+          success(res) {
+            const name = res.name || '';
+            const addr = res.address || '';
+            const full = addr ? (name && name !== addr ? addr + ' ' + name : addr) : name;
+            if (full) self.setData({ [`currentForm.${field}`]: full });
+          },
+          fail() {}
+        });
       },
       fail() {
-        doChooseLocation();
+        wx.showModal({
+          title: '需要位置权限',
+          content: '请在设置中开启位置权限，或直接在输入框手动输入地址',
+          confirmText: '去设置',
+          cancelText: '手动输入',
+          success(r) { if (r.confirm) wx.openSetting(); }
+        });
       }
     });
   },
 
-  // 检查当前 tab 是否可以提交
-  canSubmit(key) {
-    const d = this.data.formData[key];
-    const tab = this.data.serviceTabs.find(t => t.key === key);
-    if (!d || !d.from) return false;
-    if (tab && tab.secondLabel && !d.to) return false;
-    return true;
-  },
-
-  doSubmit(e) {
-    const key = e.currentTarget.dataset.key;
-    if (!this.canSubmit(key)) {
-      return wx.showToast({ title: '请填写完整地址', icon: 'none' });
+  doSubmit() {
+    const { currentForm, activeTabConfig } = this.data;
+    if (!currentForm.from) {
+      return wx.showToast({ title: '请填写' + activeTabConfig.label + '地址', icon: 'none' });
+    }
+    if (activeTabConfig.secondLabel && !currentForm.to) {
+      return wx.showToast({ title: '请填写' + activeTabConfig.secondLabel + '地址', icon: 'none' });
     }
     wx.showToast({ title: '发布成功！', icon: 'success' });
-    // 清空该 tab 表单
-    const formData = Object.assign({}, this.data.formData, {
-      [key]: { from: '', to: '', remark: '' }
-    });
-    this.setData({ formData });
+    this.setData({ currentForm: { from: '', to: '', remark: '' } });
   },
 
   goBack() {
     const pages = getCurrentPages();
-    if (pages.length > 1) {
-      wx.navigateBack({ delta: 1 });
-      return;
-    }
-    wx.switchTab({ url: "/pages/index/index" });
+    if (pages.length > 1) { wx.navigateBack({ delta: 1 }); return; }
+    wx.switchTab({ url: '/pages/index/index' });
   },
 
   goMonthCard() {
-    wx.navigateTo({ url: "../book/book?tab=" + this.data.activeServiceTab });
+    wx.navigateTo({ url: '../book/book?tab=' + this.data.activeServiceTab });
   },
 
   goServiceList() {
-    wx.navigateTo({ url: "../order-publish/order-publish" });
+    wx.navigateTo({ url: '../order-publish/order-publish' });
   }
 });
