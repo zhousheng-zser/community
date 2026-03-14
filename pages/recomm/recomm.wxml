@@ -14,28 +14,77 @@
 
   <scroll-view class="service-tabs" scroll-x="{{true}}">
     <view class="service-row">
-      <view class="tab-item {{activeServiceTab===item.key?'active':''}}" wx:for="{{serviceTabs}}" wx:key="key" bindtap="switchServiceTab" data-key="{{item.key}}">
-        {{item.text}}
-      </view>
+      <view
+        class="tab-item {{activeServiceTab===item.key?'active':''}}"
+        wx:for="{{serviceTabs}}"
+        wx:key="key"
+        bindtap="switchServiceTab"
+        data-key="{{item.key}}"
+      >{{item.text}}</view>
     </view>
   </scroll-view>
 
-  <view class="form-card" wx:for="{{serviceTabs}}" wx:key="key" wx:if="{{activeServiceTab===item.key}}">
-    <view class="input-item">
-      <text class="label">{{item.label}}</text>
-      <text class="placeholder">{{item.placeholder}}</text>
-      <text class="arrow">〉</text>
-    </view>
-    <view class="input-item" wx:if="{{item.secondLabel}}">
-      <text class="label green">{{item.secondLabel}}</text>
-      <text class="placeholder">{{item.secondPlaceholder}}</text>
-      <text class="arrow">〉</text>
-    </view>
-    <view class="submit-btn">去发布</view>
-    <text class="steps">填写服务信息>支付服务费用>技工服务>完成</text>
-  </view>
+  <!-- 表单卡片 -->
+  <block wx:for="{{serviceTabs}}" wx:key="key">
+    <view class="form-card" wx:if="{{activeServiceTab===item.key}}">
 
-  <view class="history-card">
+      <!-- 主地址行 -->
+      <view class="input-item">
+        <view class="label-dot blue">{{item.label}}</view>
+        <input
+          class="addr-field"
+          placeholder="{{item.placeholder}}"
+          placeholder-class="addr-ph"
+          value="{{formData[item.key].from}}"
+          bindinput="onAddrInput"
+          data-tab="{{item.key}}"
+          data-field="from"
+          confirm-type="done"
+        />
+        <view class="pick-btn" bindtap="pickAddress" data-tab="{{item.key}}" data-field="from">📍</view>
+      </view>
+
+      <!-- 第二地址行（仅代取有收货地址） -->
+      <view class="input-item" wx:if="{{item.secondLabel}}">
+        <view class="label-dot green">{{item.secondLabel}}</view>
+        <input
+          class="addr-field"
+          placeholder="{{item.secondPlaceholder}}"
+          placeholder-class="addr-ph"
+          value="{{formData[item.key].to}}"
+          bindinput="onAddrInput"
+          data-tab="{{item.key}}"
+          data-field="to"
+          confirm-type="done"
+        />
+        <view class="pick-btn" bindtap="pickAddress" data-tab="{{item.key}}" data-field="to">📍</view>
+      </view>
+
+      <!-- 备注 -->
+      <view class="input-item">
+        <view class="label-dot gray">备</view>
+        <input
+          class="addr-field"
+          placeholder="补充说明（可选）"
+          placeholder-class="addr-ph"
+          value="{{formData[item.key].remark}}"
+          bindinput="onAddrInput"
+          data-tab="{{item.key}}"
+          data-field="remark"
+          confirm-type="done"
+        />
+      </view>
+
+      <view
+        class="submit-btn {{!formData[item.key].from || (item.secondLabel && !formData[item.key].to) ? 'disabled' : ''}}"
+        bindtap="doSubmit"
+        data-key="{{item.key}}"
+      >去发布</view>
+      <text class="steps">填写服务信息 › 支付服务费用 › 技工服务 › 完成</text>
+    </view>
+  </block>
+
+  <view class="history-card" wx:if="{{history.length > 0}}">
     <view class="history-item" wx:for="{{history}}" wx:key="text">
       <text class="tag">{{item.tag}}</text>
       <text class="desc">{{item.text}}</text>
