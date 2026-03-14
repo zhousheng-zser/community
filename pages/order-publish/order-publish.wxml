@@ -28,7 +28,7 @@
 
     <view class="form-card">
       <view class="addr-row">
-        <text class="addr-dot pickup">取</text>
+        <view class="addr-dot pickup">取</view>
         <input
           class="addr-input"
           placeholder="填写取货地址"
@@ -41,7 +41,7 @@
         <view class="addr-pick-btn" bindtap="chooseAddrFromBook" data-field="pickup">📍</view>
       </view>
       <view class="addr-row">
-        <text class="addr-dot delivery">收</text>
+        <view class="addr-dot delivery">收</view>
         <input
           class="addr-input"
           placeholder="填写收货地址"
@@ -111,7 +111,7 @@
       </view>
 
       <!-- 服务时间 - 多列 picker -->
-      <picker mode="multiSelector" :value="{{timeIndexes}}" range="{{timeRanges}}" bindchange="onTimeChange" bindcolumnchange="onTimeColumnChange">
+      <picker mode="multiSelector" value="{{timeIndexes}}" range="{{timeRanges}}" bindchange="onTimeChange" bindcolumnchange="onTimeColumnChange">
         <view class="form-row">
           <view class="dot green"></view>
           <text class="time-label">服务时间</text>
