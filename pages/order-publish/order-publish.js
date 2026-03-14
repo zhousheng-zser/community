@@ -25,7 +25,7 @@ Page({
     activeCategory: '代取',
 
     // 邻里帮帮表单
-    helperForm: { pickup: '', delivery: '' },
+    helperForm: { pickup: '', delivery: '', remark: '' },
 
     // 一键发布表单
     form: { address: '', time: '', content: '', images: [] },
@@ -36,9 +36,6 @@ Page({
     // 时间 picker
     timeRanges: [[], [], [], []],
     timeIndexes: [0, 0, 0, 8], // 默认 8:00
-
-    // 地址对话框
-    addrDialog: { show: false, field: '', value: '' },
 
     recentList: []
   },
@@ -65,36 +62,33 @@ Page({
     this.setData({ activeCategory: e.currentTarget.dataset.cat });
   },
 
-  /* ===== 地址对话框 ===== */
-  openAddrDialog(e) {
+  /* ===== 邻里帮帮地址输入 ===== */
+  onHelperInput(e) {
     const field = e.currentTarget.dataset.field;
-    let current = '';
-    if (field === 'address') current = this.data.form.address;
-    else if (field === 'pickup') current = this.data.helperForm.pickup;
-    else if (field === 'delivery') current = this.data.helperForm.delivery;
-    this.setData({ addrDialog: { show: true, field, value: current } });
+    this.setData({ [`helperForm.${field}`]: e.detail.value });
   },
 
-  onAddrInput(e) {
-    this.setData({ 'addrDialog.value': e.detail.value });
+  /* ===== 一键发布地址输入 ===== */
+  onAddressInput(e) {
+    this.setData({ 'form.address': e.detail.value });
+    this.updateCanSubmit();
   },
 
-  closeAddrDialog() {
-    this.setData({ 'addrDialog.show': false });
-  },
-
-  confirmAddr() {
-    const { field, value } = this.data.addrDialog;
-    if (!value.trim()) return wx.showToast({ title: '请输入地址', icon: 'none' });
-    if (field === 'address') {
-      this.setData({ 'form.address': value });
-      this.updateCanSubmit();
-    } else if (field === 'pickup') {
-      this.setData({ 'helperForm.pickup': value });
-    } else if (field === 'delivery') {
-      this.setData({ 'helperForm.delivery': value });
-    }
-    this.setData({ 'addrDialog.show': false });
+  /* ===== 从通讯录/系统地址簿选择地址 ===== */
+  chooseAddrFromBook(e) {
+    const field = e.currentTarget.dataset.field;
+    wx.chooseAddress({
+      success: (res) => {
+        const addr = `${res.provinceName}${res.cityName}${res.countyName}${res.detailInfo}`;
+        if (field === 'address') {
+          this.setData({ 'form.address': addr });
+          this.updateCanSubmit();
+        } else {
+          this.setData({ [`helperForm.${field}`]: addr });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   /* ===== 时间 Picker ===== */
@@ -193,6 +187,7 @@ Page({
     const { pickup, delivery } = this.data.helperForm;
     if (!pickup || !delivery) return wx.showToast({ title: '请填写取送地址', icon: 'none' });
     wx.showToast({ title: '发布成功', icon: 'success' });
+    this.setData({ helperForm: { pickup: '', delivery: '', remark: '' } });
   },
 
   loadRecentList() {

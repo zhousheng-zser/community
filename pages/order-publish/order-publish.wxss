@@ -139,9 +139,23 @@ page { background: #fdf3ef; }
 }
 .addr-dot.pickup { background: #4a90e2; }
 .addr-dot.delivery { background: #4caf50; }
+.addr-input { flex: 1; font-size: 28rpx; color: #333; min-width: 0; }
+.addr-ph { color: #bbb; }
+.addr-pick-btn { font-size: 34rpx; padding-left: 12rpx; flex-shrink: 0; }
 .addr-placeholder { flex: 1; font-size: 28rpx; color: #bbb; }
 .addr-value { flex: 1; font-size: 28rpx; color: #333; }
 .row-arrow { font-size: 32rpx; color: #ccc; }
+
+/* 备注行 */
+.remark-row {
+  display: flex;
+  align-items: center;
+  min-height: 88rpx;
+  border-bottom: 1rpx solid #f2f2f2;
+  gap: 16rpx;
+}
+.remark-label { font-size: 28rpx; color: #666; flex-shrink: 0; width: 80rpx; }
+.remark-input { flex: 1; font-size: 28rpx; color: #333; }
 
 /* 一键发布表单行 */
 .form-row {
@@ -215,40 +229,5 @@ page { background: #fdf3ef; }
 }
 .recent-text { font-size: 28rpx; color: #333; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ===== 地址对话框 ===== */
-.dialog-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.45); z-index: 200;
-}
-.addr-dialog {
-  position: fixed; left: 60rpx; right: 60rpx;
-  top: 50%; transform: translateY(-50%);
-  background: #fff; border-radius: 24rpx;
-  padding: 40rpx 36rpx 32rpx;
-  z-index: 201;
-  box-shadow: 0 16rpx 48rpx rgba(0,0,0,0.2);
-}
-.dialog-title {
-  display: block;
-  font-size: 32rpx; font-weight: 700; color: #222;
-  text-align: center; margin-bottom: 32rpx;
-}
-.dialog-input {
-  width: 100%; height: 88rpx;
-  background: #f8f8f8; border-radius: 12rpx;
-  padding: 0 24rpx; box-sizing: border-box;
-  font-size: 28rpx; color: #333;
-  margin-bottom: 32rpx;
-}
-.dialog-btns { display: flex; gap: 20rpx; }
-.dialog-cancel {
-  flex: 1; height: 80rpx; border-radius: 40rpx;
-  border: 2rpx solid #eee; color: #999; font-size: 28rpx;
-  display: flex; align-items: center; justify-content: center;
-}
-.dialog-confirm {
-  flex: 1; height: 80rpx; border-radius: 40rpx;
-  background: linear-gradient(90deg, #f64e4e, #ff8c42);
-  color: #fff; font-size: 28rpx; font-weight: 600;
-  display: flex; align-items: center; justify-content: center;
-}
+/* 一键发布表单行内联输入 */
+.form-input-inline { flex: 1; font-size: 28rpx; color: #333; min-width: 0; }

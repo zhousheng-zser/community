@@ -27,17 +27,44 @@
     </scroll-view>
 
     <view class="form-card">
-      <view class="addr-row" bindtap="openAddrDialog" data-field="pickup">
+      <view class="addr-row">
         <text class="addr-dot pickup">取</text>
-        <text class="addr-placeholder" wx:if="{{!helperForm.pickup}}">填写取货地址</text>
-        <text class="addr-value" wx:else>{{helperForm.pickup}}</text>
-        <text class="row-arrow">›</text>
+        <input
+          class="addr-input"
+          placeholder="填写取货地址"
+          placeholder-class="addr-ph"
+          value="{{helperForm.pickup}}"
+          bindinput="onHelperInput"
+          data-field="pickup"
+          confirm-type="done"
+        />
+        <view class="addr-pick-btn" bindtap="chooseAddrFromBook" data-field="pickup">📍</view>
       </view>
-      <view class="addr-row" bindtap="openAddrDialog" data-field="delivery">
+      <view class="addr-row">
         <text class="addr-dot delivery">收</text>
-        <text class="addr-placeholder" wx:if="{{!helperForm.delivery}}">填写收货地址</text>
-        <text class="addr-value" wx:else>{{helperForm.delivery}}</text>
-        <text class="row-arrow">›</text>
+        <input
+          class="addr-input"
+          placeholder="填写收货地址"
+          placeholder-class="addr-ph"
+          value="{{helperForm.delivery}}"
+          bindinput="onHelperInput"
+          data-field="delivery"
+          confirm-type="done"
+        />
+        <view class="addr-pick-btn" bindtap="chooseAddrFromBook" data-field="delivery">📍</view>
+      </view>
+      <!-- 备注 -->
+      <view class="remark-row">
+        <text class="remark-label">备注</text>
+        <input
+          class="remark-input"
+          placeholder="补充说明（可选）"
+          placeholder-class="addr-ph"
+          value="{{helperForm.remark}}"
+          bindinput="onHelperInput"
+          data-field="remark"
+          confirm-type="done"
+        />
       </view>
       <view class="submit-btn {{helperForm.pickup && helperForm.delivery ? '' : 'disabled'}}" bindtap="submitHelper">去发布</view>
       <text class="flow-tips">填写取送信息 › 支付服务费用 › 技工取送 › 完成</text>
@@ -70,11 +97,17 @@
 
     <view class="form-card">
       <!-- 服务地址 -->
-      <view class="form-row" bindtap="openAddrDialog" data-field="address">
+      <view class="form-row">
         <view class="dot blue"></view>
-        <text class="form-placeholder" wx:if="{{!form.address}}">请填写服务地址</text>
-        <text class="form-value" wx:else>{{form.address}}</text>
-        <text class="row-arrow">›</text>
+        <input
+          class="addr-input"
+          placeholder="请填写服务地址"
+          placeholder-class="addr-ph"
+          value="{{form.address}}"
+          bindinput="onAddressInput"
+          confirm-type="done"
+        />
+        <view class="addr-pick-btn" bindtap="chooseAddrFromBook" data-field="address">📍</view>
       </view>
 
       <!-- 服务时间 - 多列 picker -->
@@ -129,23 +162,6 @@
         <view class="recent-badge">一键发布</view>
         <text class="recent-text">{{item.content}}</text>
       </view>
-    </view>
-  </view>
-
-  <!-- ===== 地址输入对话框 ===== -->
-  <view wx:if="{{addrDialog.show}}" class="dialog-overlay" catchtap="closeAddrDialog"></view>
-  <view wx:if="{{addrDialog.show}}" class="addr-dialog">
-    <text class="dialog-title">填写{{addrDialog.field === 'pickup' ? '取货' : addrDialog.field === 'delivery' ? '收货' : '服务'}}地址</text>
-    <input
-      class="dialog-input"
-      placeholder="请输入详细地址"
-      value="{{addrDialog.value}}"
-      bindinput="onAddrInput"
-      focus="{{addrDialog.show}}"
-    />
-    <view class="dialog-btns">
-      <view class="dialog-cancel" bindtap="closeAddrDialog">取消</view>
-      <view class="dialog-confirm" bindtap="confirmAddr">确定</view>
     </view>
   </view>
 
