@@ -725,47 +725,56 @@
 }
 
 .jt-daily-news .grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10rpx;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12rpx;
 }
 
 .jt-daily-news .news-item {
-  width: calc(50% - 5rpx);
+  width: 100%; /* 由 Grid 父级分配 */
   background: #fff;
-  border-radius: 10rpx;
-  padding-bottom: 10rpx;
+  border-radius: 12rpx;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .jt-daily-news .news-item image {
   width: 100%;
-  height: 180rpx;
+  height: 160rpx;
+  object-fit: cover;
 }
 
 .rebate-tag {
-  background: #ff4d3d;
+  background: linear-gradient(90deg, #ff7e70, #ff4c3b);
   color: #fff;
-  font-size: 18rpx;
-  padding: 2rpx 6rpx;
-  border-radius: 4rpx 16rpx 16rpx 4rpx;
+  font-size: 16rpx; /* 字体改小一点适应窄列 */
+  padding: 4rpx 8rpx;
+  border-radius: 4rpx 12rpx 12rpx 4rpx;
   position: absolute;
-  bottom: 40rpx;
+  top: 130rpx; /* 紧贴图片下沿 */
   left: 0;
+  z-index: 2;
+  white-space: nowrap; /* 保证文字不换行 */
+  transform: scale(0.9);
+  transform-origin: left bottom;
 }
 
 .jt-daily-news .price-row {
   color: #ff4d3d;
-  padding: 6rpx 8rpx 0;
+  padding: 8rpx 6rpx;
+  display: flex;
+  align-items: baseline;
 }
-.jt-daily-news .price-row .yen { font-size: 18rpx; }
-.jt-daily-news .price-row .num { font-size: 26rpx; font-weight: 700; }
+.jt-daily-news .price-row .yen { font-size: 16rpx; }
+.jt-daily-news .price-row .num { font-size: 24rpx; font-weight: 700; }
 
 .jt-top-sales .list {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  justify-content: space-between; /* 自适应高度平均分布 */
   flex: 1;
 }
 
@@ -773,32 +782,32 @@
   display: flex;
   background: #fff;
   border-radius: 12rpx;
-  padding: 16rpx 10rpx;
+  padding: 10rpx 12rpx;
   align-items: center;
   position: relative;
   width: 100%;
   box-sizing: border-box;
-  flex: 1;
 }
 
 .rank-badge {
   position: absolute;
   left: 0;
   top: 0;
-  background: linear-gradient(135deg, #e8c68c, #cda25e);
+  background: linear-gradient(135deg, #e4cca2, #cca062);
   color: #fff;
-  padding: 2rpx 6rpx;
-  border-radius: 10rpx 0 10rpx 0;
+  padding: 4rpx 10rpx;
+  border-radius: 12rpx 0 12rpx 0;
   text-align: center;
   z-index: 2;
+  box-shadow: 2rpx 2rpx 6rpx rgba(204,160,98,0.4);
 }
 
-.rank-badge .top { font-size: 14rpx; display: block; }
-.rank-badge .num { font-size: 20rpx; font-weight: bold; }
+.rank-badge .top { font-size: 16rpx; display: block; }
+.rank-badge .num { font-size: 22rpx; font-weight: bold; }
 
 .jt-top-sales .top-item image {
-  width: 100rpx;
-  height: 100rpx;
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 8rpx;
   margin-right: 12rpx;
   flex-shrink: 0;
