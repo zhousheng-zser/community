@@ -1,27 +1,96 @@
 const util = require('../../utils/util.js');
 const { imgUrl } = util;
+
+const mockWorkers = [
+  {
+    id: 1,
+    name: "何志",
+    region: "四川巴中",
+    gender: "♂",
+    serviceCount: 0,
+    exp: 4,
+    desc: "主要从事建筑回收，全品类建材可回收",
+    tags: ["组长", "上门回收"],
+    avatar: imgUrl('/img/placeholders/home_cleaning.png')
+  },
+  {
+    id: 2,
+    name: "余静",
+    region: "四川",
+    gender: "♀",
+    serviceCount: 1,
+    exp: 20,
+    desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
+    tags: ["擅长", "衣柜收纳", "宠物喂养", "陪护作业"],
+    avatar: imgUrl('/img/placeholders/home_cleaning.png')
+  }
+];
+
+const mockGoods = [
+  { id: 1001, name: "衣橱整理收纳（2小时）", price: "196/份", image: imgUrl('/img/placeholders/home_cleaning.png') },
+  { id: 1002, name: "羽绒服/大衣（任意2件）", price: "79/2件", image: imgUrl('/img/placeholders/home_cleaning.png') },
+  { id: 1003, name: "马桶疏通", price: "158/洞", image: imgUrl('/img/placeholders/home_cleaning.png') }
+];
+
 Page({
   data: {
     navTopPadding: 20,
-    worker: {
-      name: "余静",
-      gender: "♀",
-      region: "四川",
-      serviceCount: 1,
-      exp: 20,
-      desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
-      avatar: imgUrl('/uploads/placeholders/home_cleaning.png'),
-      tags: ["擅长", "衣柜收纳", "宠物喂养", "宠物搭遛", "衣服干洗", "家庭快修", "陪护作业"]
-    },
-    goods: [
-      { name: "衣橱整理收纳（2小时）", price: "196/份", image: imgUrl('/uploads/placeholders/home_cleaning.png') },
-      { name: "羽绒服/大衣（任意2件）", price: "79/2件", image: imgUrl('/uploads/placeholders/home_cleaning.png') },
-      { name: "马桶疏通", price: "158/洞", image: imgUrl('/uploads/placeholders/home_cleaning.png') }
-    ]
+    worker: {},
+    goods: []
   },
-  onLoad() {
+  async onLoad(options) {
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+    const id = Number((options && options.id) || 1) || 1;
+    await this.loadData(id);
+  },
+  async loadData(id) {
+    const worker = await this.loadWorker(id);
+    this.setData({
+      worker,
+      goods: mockGoods
+    });
+  },
+  async loadWorker(id) {
+    try {
+      const w = await util.get(`core/workers/${id}`);
+      const normalized = this.normalizeWorker(w);
+      if (normalized) return normalized;
+    } catch (e) {}
+
+    try {
+      const list = await util.get('core/workers');
+      const arr = Array.isArray(list) ? list : (list && list.data) || [];
+      const found = arr.find(x => Number(x.id) === Number(id));
+      const normalized = this.normalizeWorker(found);
+      if (normalized) return normalized;
+    } catch (e) {}
+
+    return mockWorkers.find(w => w.id === id) || mockWorkers[0] || {
+      id,
+      name: "技工",
+      gender: "",
+      region: "",
+      serviceCount: 0,
+      exp: 0,
+      desc: "",
+      avatar: imgUrl('/img/placeholders/home_cleaning.png'),
+      tags: []
+    };
+  },
+  normalizeWorker(w) {
+    if (!w || typeof w !== 'object') return null;
+    return {
+      id: w.id,
+      name: w.name || w.real_name || w.nickname || "技工",
+      gender: w.gender || "",
+      region: w.region || w.city || w.hometown || "",
+      serviceCount: Number(w.serviceCount || w.service_count || w.orders || 0) || 0,
+      exp: Number(w.exp || w.work_years || w.workExp || 0) || 0,
+      desc: w.desc || w.resume || "",
+      avatar: imgUrl(w.avatar || w.avatar_url || '/img/placeholders/home_cleaning.png'),
+      tags: Array.isArray(w.tags) ? w.tags : []
+    };
   },
   goBack() {
     const pages = getCurrentPages();
@@ -31,7 +100,8 @@ Page({
     }
     wx.switchTab({ url: "/pages/index/index" });
   },
-  goBuy() {
-    wx.navigateTo({ url: "../service/service?id=2" });
+  goBuy(e) {
+    const id = Number(e.currentTarget.dataset.id || 0);
+    wx.navigateTo({ url: `../service/service?id=${id || 1003}` });
   }
 });
