@@ -135,7 +135,7 @@
             </view>
           </view>
         </view>
-        <navigator url="/pages/push-live-promo/push-live-promo?id={{item.id}}&status=live" class="push-btn">去推广</navigator>
+        <navigator url="/pages/push-live-promo/push-live-promo?id={{item.id}}&status=live&username={{item.finderUsername}}&logo={{item.avatarUrl || item.brandLogo}}&brand={{item.brand}}&goods={{item.hotGoods.length>0 ? '1' : '0'}}" class="push-btn">去推广</navigator>
       </view>
     </view>
 
@@ -173,7 +173,7 @@
             </view>
           </view>
         </view>
-        <navigator url="/pages/push-live-promo/push-live-promo?id={{item.id}}&status={{item.status}}" class="push-btn">去推广</navigator>
+        <navigator url="/pages/push-live-promo/push-live-promo?id={{item.id}}&status={{item.status}}&username={{item.finderUsername}}&logo={{item.avatarUrl || item.brandLogo}}&brand={{item.brand}}&goods={{item.hotGoods.length>0 ? '1' : '0'}}" class="push-btn">去推广</navigator>
       </view>
 
     </view>

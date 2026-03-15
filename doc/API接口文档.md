@@ -40,6 +40,9 @@
 | 4    | 2026-06-12     | 前端 → 后端                   | 帖子表增加 `category`、评论表增加 `image_urls`，评论接口支持图文。       | 迁移、`Comment` 模型、`POST /api/v1/posts/:postId/comment` | 已完成（全链路跑通） |
 | 5    | 2026-06-12     | 前端 → 后端                   | 基础用户交互：我的关注、我参与的活动、地址 CRUD、意见反馈。             | `GET /api/v1/user/follows`、`GET /api/v1/activities/my`、`/user/addresses`、`POST /api/v1/feedback/submit` | 已完成   |
 | 6    | 2026-06-12     | 前端 → 后端                   | 管理后台：技工入驻申请列表与审批接口预留。                               | `GET /api/v1/admin/worker-applications`、`PUT /api/v1/admin/worker-applications/:id` | 已完成   |
+| 7    | 2026-03-15     | 前端 → 后端                   | 首页家推：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
+| 8    | 2026-03-15     | 前端 → 后端                   | 首页家推：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
+| 9    | 2026-03-15     | 用户 → 架构师                 | 产品与直播运营位结构再完善：增加商品图片及多维价格标识、主播头像等 | `API接口文档.md` 9, 10节扩充 | 文档已更新 |
 
 > 后续有新的需求或接口调整，请在此表中新增一行，并在下方对应接口说明里同步更新。
 
@@ -447,9 +450,147 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 - `GET /api/v1/admin/worker-applications` 获取技工入驻申请列表
 - `PUT /api/v1/admin/worker-applications/:id` 审批操作通过或驳回
 
+#### 8.5 管理后台审核流预留 (Admin UI)
+未来供 PC 端操作的总管理接口预留规范（目前只需返回简单的待确认 JSON 数据结构）：
+- `GET /api/v1/admin/worker-applications` 获取技工入驻申请列表
+- `PUT /api/v1/admin/worker-applications/:id` 审批操作通过或驳回
+
 ---
 
-### 9. 维护约定
+### 9. 微信小店“购买每单返”分销交易需求 (待研发)
+
+> [!IMPORTANT]
+> **前端已完成 `<store-product>` 组件接入及相关页面的改造。现向后端提出完整的建表与接口需求：**
+
+由于前端在“家推”商品详情页点击购买时，不再走自有的订单支付体系，而是直接拉起微信官方的 `<store-product>` 微信小店组件完成闭环交易。我们需要后端做好 **返佣记录的登记** 以及 **接收微信小店服务端成功支付的回调监听**。
+
+<details>
+<summary>展开查看：返利记录表 Sql 结构建议</summary>
+
+```sql
+CREATE TABLE `rewards` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `openid` varchar(100) NOT NULL COMMENT '下拉人/推广人的微信openid',
+  `product_id` varchar(100) NOT NULL COMMENT '微信小店的商品ID',
+  `order_id` varchar(100) NOT NULL COMMENT '微信小店生成的唯一订单号',
+  `amount` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '应返利金额',
+  `status` enum('pending','paid','failed','refunded') DEFAULT 'pending' COMMENT '返利状态',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `paid_at` timestamp NULL DEFAULT NULL COMMENT '确认返利到账时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_order_id` (`order_id`),
+  KEY `idx_openid` (`openid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='微信小店分销交易返利记录表';
+
+CREATE TABLE `shop_products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) NOT NULL COMMENT '商品分类，如: 爆款专区、高佣专区',
+  `product_id` varchar(100) NOT NULL COMMENT '微信小店真实商品ID (用于唤起交易)',
+  `shop_appid` varchar(100) NOT NULL COMMENT '小店所属小程序AppId',
+  `name` varchar(150) NOT NULL COMMENT '商品外显名称',
+  `main_image` varchar(255) NOT NULL COMMENT '首页展示主图 (建议尺寸 1:1 或 800x800px)',
+  `detail_images` json DEFAULT NULL COMMENT '详情页轮播图数组 (建议至少3张，比例 1:1)',
+  `poster_image` varchar(255) DEFAULT NULL COMMENT '分享专属海报素材底图 (建议尺寸 750x1334px)',
+  `pay_price` decimal(10,2) NOT NULL COMMENT '到手支付价',
+  `original_price` decimal(10,2) DEFAULT NULL COMMENT '划线参考价',
+  `rebate_amount` decimal(10,2) NOT NULL COMMENT '每单返利单价(或百分比值)',
+  `sales_volume` int(11) DEFAULT '0' COMMENT '已售数量/基础销量基数',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT '推流上下架状态',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前端展示用: 家推商品推广信息管理表';
+```
+</details>
+
+1. **商品管理需求**：必须通过后台手动（或接口抓取）维护 `shop_products` 表中的推流展示信息。前端会在诸如“每日上新”、“热卖TOP榜”直接拉取这些信息用于预展示，并在用户点击时真正用 `product_id` 呼叫出微信原生交易面板。
+2. **前端触发返利记录的接口**：`POST /api/v1/reward/trigger`
+   - **请求体 JSON 示例**：
+     ```json
+     {
+       "openid": "o123456789xxxx",
+       "productId": "PRODUCT_123456789",
+       "orderId": "ORDER_123456789"
+     }
+     ```
+   - **后端实现建议**：收到请求后，后端调用微信小店官方 API 验证该 `orderId`，确定真实有效后在 `rewards` 表里写入一条状态为 `pending` 的登记记录。
+
+2. **接收微信小店回调接口（核心）**：`POST /api/v1/wechat/shop/callback`
+   - **说明**：此接口的URL需要你登录微信商户后台（或优选联盟配置处）填入回调白名单中。该接口不可以加业务的 JWT Token 校验拦截。
+   - **核心逻辑**：微信在订单支付成功、退款等节点会自动给此接口发 POST 请求。你必须用环境变量 `WECHAT_SHOP_SECRET` 先做 MD5（或SHA）签章验证防伪。当 `status` 等于 `"PAID"` 时，将 `rewards` 表中这笔订单定为 `"paid"` 并为对应用户的系统钱包增加这笔返利数值。
+   - **Node.js (Express) 实现参考代码**：
+     ```javascript
+     const crypto = require('crypto');
+     
+     router.post('/api/wechat/shop/callback', async (req, res) => {
+       const { orderId, status, timestamp, nonce, signature } = req.body;
+       
+       // 验签验证
+       const calculatedSign = crypto.createHash('md5')
+         .update(`orderId=${orderId}&status=${status}&timestamp=${timestamp}&nonce=${nonce}${process.env.WECHAT_SHOP_SECRET}`)
+         .digest('hex');
+       
+       if (calculatedSign !== signature) {
+         return res.status(401).send('Invalid signature');
+       }
+       
+       if (status === 'PAID') {
+         // 根据你实际的库调整更新语句
+         await db.query('UPDATE rewards SET status = ?, paid_at = NOW() WHERE order_id = ?', ['paid', orderId]);
+         // TODO: 并为对应 openid 用户余额增加奖励金额规则
+       }
+       res.send('SUCCESS'); //必须回复以防微信重试机制
+     });
+     ```
+
+---
+
+### 10. 家推-视频号直播推流管理 (待研发)
+
+> [!IMPORTANT]  
+> **需求背景与原理说明**：
+> 前端“进入直播间”点击后，使用的是微信原生 API `wx.openChannelsLive({ finderUserName: "xxx" })` 以唤起视频号直播。
+> 为了不将视频号 ID 锁死在前端代码中，我们需要后端管理并下发各个直播场次的数据配置。
+
+<details>
+<summary>展开查看：直播场次表结构建议</summary>
+
+```sql
+CREATE TABLE `live_streams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `category` varchar(50) NOT NULL DEFAULT '热推直播间' COMMENT '直播分类(如:热推直播间, 当地特产直播间)',
+  `title` varchar(100) NOT NULL COMMENT '直播间外显标题(如:科尔沁食品官方直播)',
+  `avatar_url` varchar(255) DEFAULT NULL COMMENT '主播或品牌头像图 (圆图，建议尺寸 200x200px)',
+  `brand_logo` varchar(255) DEFAULT NULL COMMENT '品牌/商家 Logo图',
+  `cover_image` varchar(255) DEFAULT NULL COMMENT '直播封面图 (通常用于大卡片场景)',
+  `rebate_info` varchar(50) DEFAULT '10%' COMMENT '外显最高返佣描述(如: 10% 或 ￥50)',
+  `promoters_count` int(11) DEFAULT '0' COMMENT '目前推广人数',
+  `hot_goods` json DEFAULT NULL COMMENT '直播间主推爆品的图片数组 [{"image":"url"}] (要求为正方形 400x400px，供详情页三宫格展示)',
+  `finder_username` varchar(100) NOT NULL COMMENT '必须是视频号原始ID，通常以sph开头',
+  `feed_id` varchar(100) DEFAULT NULL COMMENT '(可选)特定某场直播的ID',
+  `is_active` tinyint(1) DEFAULT '1' COMMENT '1为上架显示，0为下架',
+  `sort_order` int(11) DEFAULT '0' COMMENT '显示排序，数字越大越靠前',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_category` (`category`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='视频号直播推广配置表';
+```
+</details>
+
+1. **管理后台（运营操作）接口需求**：
+   - 需实现针对 `live_streams` 表的增、删、改、查管理接口。
+   - 运营上传数据时，除了录入封面和标题，还需要上传该场次对应的“爆品图片”到 `hot_goods` 列中。其中**爆品图片建议统一为 1:1 正方形（推荐分辨率不少于 400x400px）**以防止在前端变形。
+   - 必须记录 `avatar_url`（主播头像），以便在直播详情页（`push-live-promo`）的左上角区域渲染圆形头像信息。
+   - **关键告知点**：提醒运营录入时，核心字段 `finder_username` 必须填入该主播或品牌的**视频号原始ID**（并非微信号和名字，而是一串带 "sph" 的英文数字代码。获取方式需登录其视频号助手后台查看）。
+
+2. **小程序端拉取接口**：`GET /api/v1/lives/active`
+   - **查询参数**：`?category=热推直播间` (选填)
+   - 前端通过此接口向后端请求在“家推”展示的活跃直播源。若传了 `category` 按照对应条件检索，如“当地特产直播间”。
+   - 须返回按照 `sort_order` 排好序的活跃项目列表。前端除了需要 `finder_username` 用于跳转外，还需要后端下发展示元素如：`promoters_count` (推广人数)、`rebate_info` (返佣比例)、`brand_logo` 和 `hot_goods` (爆品JSON)。
+
+---
+
+### 11. 维护约定
 
 - 如需 **新增 / 修改 / 下线接口**，请在修改对应 `routes/*.js` 或 `controllers` 后，
   同步更新本文件中对应章节，以保证前后端文档一致。

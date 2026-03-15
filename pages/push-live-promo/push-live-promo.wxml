@@ -5,7 +5,6 @@
       <text class="arrow">〈</text>
     </view>
     <view class="header-title">直播详情</view>
-    <view class="right-icon">•••</view>
     
     <!-- 商家头部信息区 -->
     <view class="brand-panel">
@@ -32,6 +31,14 @@
     
     <!-- 右侧大号摄影机水印点缀 -->
     <image class="camera-watermark" src="/img/index/menuicon4.png" mode="aspectFit"></image>
+  </view>
+
+  <!-- 新增：正在直播爆品 -->
+  <view class="hot-goods" wx:if="{{hasHotGoods}}">
+    <text class="section-title">正在直播爆品</text>
+    <view class="goods-list">
+      <image class="goods-img" src="{{item.image}}" mode="aspectFill" wx:for="{{hotGoods}}" wx:key="index"></image>
+    </view>
   </view>
 
   <!-- 中间：推广教程面板 -->

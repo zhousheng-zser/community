@@ -84,6 +84,19 @@ Page({
     that.init();
     app.save(parentOpId, that.init.bind(that));
   },
+  onShow: function() {
+    const app = getApp();
+    if (app.globalData && app.globalData.targetIndexTab) {
+      this.setData({ activeTab: app.globalData.targetIndexTab });
+      app.globalData.targetIndexTab = ""; // 消费后清空
+      
+      // 强制将页面滚动回最顶部
+      wx.pageScrollTo({
+        scrollTop: 0,
+        duration: 300 // 带点平滑滚动的动画体验更好
+      });
+    }
+  },
   onShareAppMessage: function (res) {
     const openid = app.globalData.user.opId;
     return app.onShare(openid, res);
@@ -288,18 +301,34 @@ Page({
     ];
 
     // 模块五：大厂热推直播间
-    const pushHotLiveStreams = [
+    let pushHotLiveStreams = [
       {
         id: 1, brand: "牛肉生鲜旗舰店", subBrand: "官方补贴 现场切块",
         brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
         rebate: "10%", promoters: "128"
-      },
-      {
-        id: 2, brand: "蒙牛营养官方", subBrand: "学生奶营养加倍",
-        brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
-        rebate: "10%", promoters: "136"
       }
     ];
+
+    try {
+      // 尝试获取后端管理配置的热推直播间
+      const hotLiveRes = await util.get('api/v1/lives/active?category=热推直播间');
+      const hotLiveData = Array.isArray(hotLiveRes) ? hotLiveRes : (hotLiveRes.data || hotLiveRes);
+      if (Array.isArray(hotLiveData) && hotLiveData.length > 0) {
+        pushHotLiveStreams = hotLiveData.map(live => ({
+          id: live.id,
+          brand: live.title,
+          subBrand: "官方背书 品质保障", // 可视需求增加配置列
+          brandLogo: live.brand_logo || imgUrl('/img/placeholders/home_cleaning.png'),
+          avatarUrl: live.avatar_url,
+          rebate: live.rebate_info || "10%",
+          promoters: live.promoters_count || 0,
+          finderUsername: live.finder_username,
+          hotGoods: typeof live.hot_goods === 'string' ? JSON.parse(live.hot_goods || '[]') : (live.hot_goods || [])
+        }));
+      }
+    } catch (e) {
+      console.log('加载热推直播间API异常，兜底使用测试数据', e);
+    }
 
     // 模块六：地方馆地球矩阵 + 地方直播间
     // 将一维数组改造为二维数组 (每页10项) 以供 <swiper> 遍历
@@ -325,18 +354,34 @@ Page({
       ]
     ];
 
-    const pushLocalLiveStreams = [
+    let pushLocalLiveStreams = [
       {
         id: 3, brand: "家事速配-遵义市汇川区土特产店", subBrand: "云南哀牢山冰糖橙-收官之夜",
         brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
         rebate: "10%", promoters: "1109", status: 'closed'
-      },
-      {
-        id: 4, brand: "家事速配-毕节特产店", subBrand: "暂无",
-        brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
-        rebate: "10%", promoters: "159", status: 'closed'
       }
     ];
+
+    try {
+      // 尝试获取后端管理配置的当地特产直播间
+      const localLiveRes = await util.get('api/v1/lives/active?category=当地特产直播间');
+      const localLiveData = Array.isArray(localLiveRes) ? localLiveRes : (localLiveRes.data || localLiveRes);
+      if (Array.isArray(localLiveData) && localLiveData.length > 0) {
+        pushLocalLiveStreams = localLiveData.map(live => ({
+          id: live.id,
+          brand: live.title,
+          subBrand: "当地原产 极速发货",
+          brandLogo: live.brand_logo || imgUrl('/img/placeholders/home_cleaning.png'),
+          avatarUrl: live.avatar_url,
+          rebate: live.rebate_info || "10%",
+          promoters: live.promoters_count || 0,
+          finderUsername: live.finder_username,
+          hotGoods: typeof live.hot_goods === 'string' ? JSON.parse(live.hot_goods || '[]') : (live.hot_goods || [])
+        }));
+      }
+    } catch (e) {
+      console.log('加载特产直播间API异常，兜底使用测试数据', e);
+    }
 
     // 模块七：横排带货视频录播
     const pushHotVideos = [
@@ -361,25 +406,49 @@ Page({
 
     // 模块九长效分类导航数据与缓存字典
     const pushFeedTabs = ["高佣推荐", "健康食品", "美妆个护", "日用百货"];
-    const pushFeedGoodsDict = {
+    // 记录获取到的商品
+    let pushFeedGoodsDict = {
       "高佣推荐": [
         { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90", comm: "0.45", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 203, title: "舒缓膏清凉薄荷驱蚊止痒婴幼童适用", price: "19.00", comm: "2.43", tag: "定向高佣", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 204, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 205, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: imgUrl('/img/placeholders/home_cleaning.png') }
       ],
-      "健康食品": [
-        { id: 601, title: "燕麦麸皮轻食代餐冲饮 500g 饱腹减脂", price: "28.50", comm: "3.10", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 602, title: "纯黑芝麻核桃黑豆粉营养早餐免煮即食", price: "35.00", comm: "4.50", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ],
-      "美妆个护": [
-        { id: 701, title: "氨基酸洗面奶深层清洁温和控油学生男女", price: "15.90", comm: "1.20", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ],
-      "日用百货": [
-        { id: 801, title: "天然竹浆抽纸本色纸巾家用整箱实惠装", price: "12.90", comm: "0.80", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ]
+      "健康食品": [], "美妆个护": [], "日用百货": []
     };
+
+    // 统一切换拉取真实推送商品（包含上新、热卖等所有品类）
+    try {
+      const spRes = await util.get('api/v1/shop-products');
+      const spData = Array.isArray(spRes) ? spRes : (spRes.data || spRes);
+      if (Array.isArray(spData) && spData.length > 0) {
+        // 分配给每日上新
+        const news = spData.filter(s => s.category === '每日上新');
+        if (news.length > 0) {
+          pushDailyNews = news.map(s => ({
+            id: s.id, name: s.name, price: String(s.pay_price), comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png'), isHot: false
+          }));
+        }
+        
+        // 分配给热卖榜
+        const tops = spData.filter(s => s.category === '热卖TOP榜');
+        if (tops.length > 0) {
+          pushTopSales = tops.map((s, i) => ({
+            id: s.id, rank: (i + 1).toString().padStart(2, '0'), name: s.name, comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png')
+          }));
+        }
+
+        // 分配给 Feed 流
+        ["高佣推荐", "健康食品", "美妆个护", "日用百货"].forEach(cat => {
+          const feedItems = spData.filter(s => s.category === cat);
+          if (feedItems.length > 0) {
+            pushFeedGoodsDict[cat] = feedItems.map(s => ({
+              id: s.id, title: s.name, price: String(s.pay_price), comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png'), tag: cat === "高佣推荐" ? "定向高佣" : ""
+            }));
+          }
+        });
+      }
+    } catch (e) {
+      console.log("加载真实推流商品数据失败, 仍采用兜底测试数据", e);
+    }
 
     // 初始化默认页签商品
     const pushFeedGoods = [...pushFeedGoodsDict["高佣推荐"]];

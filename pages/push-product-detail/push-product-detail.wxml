@@ -1,11 +1,6 @@
 <view class="pp-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
     <text bindtap="goBack">〈</text>
-    <view class="icons">
-      <text>🛒</text>
-      <text>🔍</text>
-      <text>💬</text>
-    </view>
     <text>•••</text>
   </view>
 
@@ -26,45 +21,29 @@
   </view>
 
   <view class="section-title">商品详情</view>
-  <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
+  <block wx:if="{{product.detail_images && product.detail_images.length}}">
+    <image wx:for="{{product.detail_images}}" wx:key="*this" class="detail-img" src="{{item}}" mode="widthFix"></image>
+  </block>
+  <block wx:else>
+    <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
+  </block>
 
   <view class="bottom-bar">
-    <text class="home" bindtap="goBack">首页</text>
+    <text class="home" bindtap="goHome">首页</text>
     <text class="share">￥{{product.rebate}} 分享每单赚</text>
-    <text class="buy" bindtap="openBuyPanel">立即购买</text>
+    <text class="buy" bindtap="handleBuyClick">购买每单返</text>
   </view>
 </view>
 
-<!-- 购买弹出层 -->
-<view wx:if="{{showBuyPanel}}" class="panel-overlay" catchtap="closeBuyPanel"></view>
-<view wx:if="{{showBuyPanel}}" class="buy-panel">
-  <view class="bp-close" bindtap="closeBuyPanel">✕</view>
-  <view class="bp-top">
-    <image class="bp-img" src="{{product.image}}" mode="aspectFill"></image>
-    <view class="bp-top-info">
-      <text class="bp-price">{{product.price}}元/份</text>
-      <text class="bp-selected">已选 {{product.name}} {{product.name}}</text>
-    </view>
-  </view>
-  <view class="bp-section">
-    <text class="bp-sec-title">服务项目</text>
-    <view class="bp-tags">
-      <view class="bp-tag active">{{product.name}}</view>
-    </view>
-  </view>
-  <view class="bp-section">
-    <text class="bp-sec-title">服务规格</text>
-    <view class="bp-tags">
-      <view class="bp-tag active">{{product.name}}</view>
-    </view>
-  </view>
-  <view class="bp-qty-row">
-    <text class="bp-qty-label">购买数量</text>
-    <view class="bp-qty-ctrl">
-      <view class="bp-qty-btn" bindtap="decQty">−</view>
-      <text class="bp-qty-num">{{buyQty}}</text>
-      <view class="bp-qty-btn" bindtap="incQty">+</view>
-    </view>
-  </view>
-  <view class="bp-submit-btn" bindtap="confirmBuy">立即购买</view>
+<!-- 微信小店商品组件（浮层） -->
+<view class="overlay" wx:if="{{showStoreProduct}}"></view>
+<view class="store-product-wrapper" wx:if="{{showStoreProduct}}">
+  <store-product
+    appid="{{shopAppId}}"
+    product-id="{{productId}}"
+    custom-style="{{customStyle}}"
+    bind:success="onStoreProductSuccess"
+    bind:fail="onStoreProductFail"
+  />
 </view>
+

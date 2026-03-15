@@ -8,7 +8,13 @@ Page({
             logo: "/img/placeholders/home_cleaning.png",
             rebate: "10%",
             promoters: 100
-        }
+        },
+        hasHotGoods: false,
+        hotGoods: [
+          { image: '/img/placeholders/home_cleaning.png' },
+          { image: '/img/placeholders/home_cleaning.png' },
+          { image: '/img/placeholders/home_cleaning.png' }
+        ]
     },
 
     onLoad(options) {
@@ -16,11 +22,16 @@ Page({
         // 优先读取路由传参的状态
         let pageStatus = options.status || 'booking';
 
-        // 如果是通过点击首页过来的，可以使用 Mock 数据假装请求
-        // 此处简化，只改变状态
+        // 解析并展示传入的品牌等信息
+        let hasGoods = options.goods === '1';
+        
         this.setData({
             navTopPadding: (sys.statusBarHeight || 20) + 6,
-            status: pageStatus
+            status: pageStatus,
+            hasHotGoods: hasGoods,
+            finderUserName: options.username || '',
+            ['liveInfo.brand']: options.brand || this.data.liveInfo.brand,
+            ['liveInfo.logo']: options.logo || this.data.liveInfo.logo
         });
     },
 
@@ -36,7 +47,20 @@ Page({
             return;
         }
         if (status === 'live') {
-            wx.showToast({ title: '即将跳转小程序直播间...', icon: 'none' });
+            const targetFinderUserName = this.data.finderUserName || 'sphJ1iCq7wE7Kj1';
+            wx.openChannelsLive({
+              finderUserName: targetFinderUserName,
+              success(res) {
+                console.log('成功拉起视频号直播间', res);
+              },
+              fail(err) {
+                console.error('拉起视频号直播间失败', err);
+                wx.showToast({
+                  title: '拉起直播间失败, 请检查ID或稍后再试',
+                  icon: 'none'
+                });
+              }
+            });
         }
     },
 
