@@ -1506,9 +1506,9 @@
 }
 
 .market-emoji-wrap {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 40rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1516,26 +1516,26 @@
 }
 
 .market-emoji {
-  font-size: 36rpx;
+  font-size: 50rpx;
   line-height: 1;
 }
 
 .market-top-item text {
   display: block;
-  margin-top: 10rpx;
-  font-size: 22rpx;
+  margin-top: 14rpx;
+  font-size: 26rpx;
 }
 
 .market-title-row {
   display: flex;
   align-items: center;
-  margin: 18rpx 20rpx 8rpx;
+  margin: 24rpx 20rpx 12rpx;
 }
 
 .market-title-row .near {
   color: #ef3e2f;
-  font-size: 30rpx;
-  font-weight: 700;
+  font-size: 34rpx;
+  font-weight: 800;
   margin-right: 16rpx;
 }
 
@@ -1564,8 +1564,8 @@
 }
 
 .shop-head .name {
-  font-size: 30rpx;
-  font-weight: 700;
+  font-size: 34rpx;
+  font-weight: 800;
   color: #222;
 }
 
@@ -1574,22 +1574,23 @@
   background: #f44336;
   color: #fff;
   border-radius: 8rpx;
-  padding: 4rpx 8rpx;
+  padding: 4rpx 10rpx;
+  margin-left: 14rpx;
 }
 
 .shop-meta {
-  margin-top: 8rpx;
-  color: #8f8f8f;
-  font-size: 22rpx;
+  margin-top: 10rpx;
+  color: #888;
+  font-size: 24rpx;
 }
 
 .shop-meta .sold {
-  margin-left: 16rpx;
+  margin-left: 20rpx;
 }
 
 .shop-goods-scroll {
   white-space: nowrap;
-  margin-top: 14rpx;
+  margin-top: 20rpx;
 }
 
 .shop-goods-row {
@@ -1597,25 +1598,30 @@
 }
 
 .shop-goods-item {
-  width: 150rpx;
-  margin-right: 12rpx;
+  width: 180rpx;
+  margin-right: 16rpx;
 }
 
 .shop-goods-item image {
-  width: 150rpx;
-  height: 110rpx;
-  border-radius: 8rpx;
+  width: 180rpx;
+  height: 130rpx;
+  border-radius: 12rpx;
 }
 
 .shop-goods-item .g-name {
   display: block;
-  margin-top: 6rpx;
-  font-size: 20rpx;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shop-goods-item .g-price {
   display: block;
-  margin-top: 4rpx;
+  margin-top: 6rpx;
   color: #f44336;
-  font-size: 20rpx;
+  font-size: 26rpx;
+  font-weight: bold;
 }
