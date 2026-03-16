@@ -31,14 +31,14 @@
   </view>
 
   <view class="goods-card">
-    <view class="goods-item" wx:for="{{goods}}" wx:key="name">
+    <view class="goods-item" wx:for="{{goods}}" wx:key="id">
       <image src="{{item.image}}" mode="aspectFill"></image>
       <view class="right">
         <text class="name">{{item.name}}</text>
         <text class="price">￥{{item.price}}</text>
         <text class="sold">已售出0 好评率100%</text>
       </view>
-      <view class="buy-btn" bindtap="goBuy">立即购买</view>
+      <view class="buy-btn" bindtap="goBuy" data-id="{{item.id}}">立即购买</view>
     </view>
   </view>
 </view>
