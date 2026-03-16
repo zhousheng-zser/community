@@ -3,6 +3,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const { imgUrl } = util;
+const images = require('../../utils/images.js');
 Page({
   data: {
     noOrderTip: "您还没有订单",
@@ -145,8 +146,8 @@ Page({
     const { id, userFlag, userMobile } = app.globalData.user || {};
     // 假数据填充，方便本地预览首页布局
     const banner = [
-      { imageUrl: imgUrl('/img/placeholders/home_cleaning.png') },
-      { imageUrl: imgUrl('/img/placeholders/sale_banner.png') }
+      { imageUrl: images.bannerHome },
+      { imageUrl: images.bannerSale }
     ];
 
     const categoryList = [
@@ -176,10 +177,10 @@ Page({
     ];
     // ===== 从数据库获取热门服务（小区热卖榜）=====
     let hotList = [
-      { name: "洗衣机清洗", price: "128", image: imgUrl('/img/placeholders/home_cleaning.png'), rank: "NO.1" },
-      { name: "热水器清洗", price: "150", image: imgUrl('/img/placeholders/home_cleaning.png'), rank: "NO.2" },
-      { name: "油烟机清洗", price: "158", image: imgUrl('/img/placeholders/home_cleaning.png'), rank: "NO.3" },
-      { name: "金牌日常保洁", price: "99", image: imgUrl('/img/placeholders/home_cleaning.png'), rank: "热门" }
+      { name: "洗衣机清洗", price: "128", image: images.hotWasher,  rank: "NO.1" },
+      { name: "热水器清洗", price: "150", image: images.hotHeater,  rank: "NO.2" },
+      { name: "油烟机清洗", price: "158", image: images.hotHood,    rank: "NO.3" },
+      { name: "金牌日常保洁", price: "99", image: images.hotClean,  rank: "热门" }
     ];
     try {
       const hotRes = await util.get('core/services/hot');
@@ -198,10 +199,10 @@ Page({
 
     // ===== 从数据库获取服务商品（直约服务商）=====
     let goods = [
-      { id: 1, remarkC: imgUrl('/img/placeholders/home_cleaning.png'), goodsTitle: '金牌日常保洁 (2小时)', goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
-      { id: 2, remarkC: imgUrl('/img/placeholders/home_cleaning.png'), goodsTitle: '挂壁式空调深度清洗', goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
-      { id: 3, remarkC: imgUrl('/img/placeholders/home_cleaning.png'), goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
-      { id: 4, remarkC: imgUrl('/img/placeholders/home_cleaning.png'), goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
+      { id: 1, remarkC: images.hotClean,   goodsTitle: '金牌日常保洁 (2小时)',   goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
+      { id: 2, remarkC: images.svcAircon,  goodsTitle: '挂壁式空调深度清洗',     goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
+      { id: 3, remarkC: images.svcWasher,  goodsTitle: '洗衣机深度清洗',         goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
+      { id: 4, remarkC: images.svcHood,    goodsTitle: '油烟机深度清洗',         goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
     try {
       const svcRes = await util.get('core/services/hot');
@@ -245,9 +246,9 @@ Page({
 
     // ===== 从数据库获取管家精选商品 =====
     let marketList = [
-      { name: "映萃美活研奇肌霜", price: "469", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { name: "映萃美活肤洁颜粉", price: "235", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { name: "当地特产一键速达", price: "99", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
+      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
+      { id: 2003, name: "当地特产一键速达", price: "99",  image: images.goodsLocal }
     ];
     try {
       const mRes = await util.get('core/goods/featured');
@@ -267,8 +268,8 @@ Page({
 
     // 模块一：顶级海报轮播图
     const pushHeroBanners = [
-      { id: 1, image: imgUrl('/img/placeholders/home_cleaning.png') }, // Sale/Retail bg
-      { id: 2, image: imgUrl('/img/placeholders/home_cleaning.png') }  // Lifestyle
+      { id: 1, image: images.bannerHome },
+      { id: 2, image: images.bannerSale }
     ];
 
     // 模块二：分类金刚
@@ -282,29 +283,29 @@ Page({
 
     // 模块三：导购窗
     const pushPromoCards = {
-      left: { title: "品牌好货", image: imgUrl('/img/placeholders/home_cleaning.png') }, // Cosmetics
-      right: { title: "秋冬好物", image: imgUrl('/img/placeholders/home_cleaning.png') } // Fashion
+      left:  { title: "品牌好货", image: images.goodsSkincare1 },
+      right: { title: "秋冬好物", image: images.pushFashion1 }
     };
 
     // 模块四：上新与热卖
     const pushDailyNews = [
-      { id: 1, name: "正宗东北黑木耳", price: "19.00", comm: "2.43", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 2, name: "大果新鲜蓝莓", price: "39.90", comm: "13.53", image: imgUrl('/img/placeholders/home_cleaning.png'), isHot: true },
-      { id: 3, name: "深层洁净洗衣液", price: "15.90", comm: "2.04", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 4, name: "特级婴儿柔护纸巾", price: "99.00", comm: "22.18", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { id: 1, name: "正宗东北黑木耳",   price: "19.00", comm: "2.43",  image: images.pushFood1,   isHot: false },
+      { id: 2, name: "大果新鲜蓝莓",     price: "39.90", comm: "13.53", image: images.pushFood2,   isHot: true },
+      { id: 3, name: "深层洁净洗衣液",   price: "15.90", comm: "2.04",  image: images.pushDaily1,  isHot: false },
+      { id: 4, name: "特级婴儿柔护纸巾", price: "99.00", comm: "22.18", image: images.pushDaily2,  isHot: false }
     ];
 
     const pushTopSales = [
-      { rank: "01", name: "浓缩纯牛奶整箱", comm: "3.83", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { rank: "02", name: "早餐手撕面包", comm: "2.52", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { rank: "03", name: "除菌持久洗衣凝珠", comm: "4.78", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { rank: "01", name: "浓缩纯牛奶整箱",   comm: "3.83", image: images.pushFood1 },
+      { rank: "02", name: "早餐手撕面包",     comm: "2.52", image: images.pushFood2 },
+      { rank: "03", name: "除菌持久洗衣凝珠", comm: "4.78", image: images.pushDaily1 }
     ];
 
     // 模块五：大厂热推直播间
     let pushHotLiveStreams = [
       {
         id: 1, brand: "牛肉生鲜旗舰店", subBrand: "官方补贴 现场切块",
-        brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
+        brandLogo: images.liveBeef,
         rebate: "10%", promoters: "128"
       }
     ];
@@ -357,7 +358,7 @@ Page({
     let pushLocalLiveStreams = [
       {
         id: 3, brand: "家事速配-遵义市汇川区土特产店", subBrand: "云南哀牢山冰糖橙-收官之夜",
-        brandLogo: imgUrl('/img/placeholders/home_cleaning.png'),
+        brandLogo: images.liveLocal,
         rebate: "10%", promoters: "1109", status: 'closed'
       }
     ];
@@ -385,21 +386,21 @@ Page({
 
     // 模块七：横排带货视频录播
     const pushHotVideos = [
-      { id: 101, title: "老榆木板原木桌面实木切割测试", price: "300.00", comm: "15.00", likes: 2, author: "榆园家具", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 102, title: "日常保养，补钙还是喝奶更好？", price: "97.80", comm: "14.67", likes: 0, author: "养生说", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 103, title: "新西兰厚切牛排，买二送一！", price: "129.9", comm: "8.80", likes: 5, author: "生鲜直供", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 104, title: "大师香氛玫瑰洗衣液护色洁净柔顺", price: "99.90", comm: "24.97", likes: 13, author: "立白精品", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 105, title: "立白大师格拉斯玫瑰香氛洗衣液深层...", price: "69.0", comm: "10.00", likes: 8, author: "立白精品", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 106, title: "立白小白白衣物去油王250g精化...", price: "35.50", comm: "5.00", likes: 11, author: "立白精品", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { id: 101, title: "老榆木板原木桌面实木切割测试",          price: "300.00", comm: "15.00", likes: 2,  author: "榆园家具",   image: images.pushDaily1 },
+      { id: 102, title: "日常保养，补钙还是喝奶更好？",          price: "97.80",  comm: "14.67", likes: 0,  author: "养生说",     image: images.pushFood2 },
+      { id: 103, title: "新西兰厚切牛排，买二送一！",            price: "129.9",  comm: "8.80",  likes: 5,  author: "生鲜直供",   image: images.pushFood1 },
+      { id: 104, title: "大师香氛玫瑰洗衣液护色洁净柔顺",       price: "99.90",  comm: "24.97", likes: 13, author: "立白精品",   image: images.pushDaily1 },
+      { id: 105, title: "立白大师格拉斯玫瑰香氛洗衣液深层...",  price: "69.0",   comm: "10.00", likes: 8,  author: "立白精品",   image: images.pushDaily2 },
+      { id: 106, title: "立白小白白衣物去油王250g精化...",       price: "35.50",  comm: "5.00",  likes: 11, author: "立白精品",   image: images.pushDaily2 }
     ];
 
     // 模块八：排期榜单 (周期主推) - 提供不同的三组带货数据假刷新效果
     const pushPeriodicTabs = ["今日主推", "本周热卖", "本月排行"];
     const pushPeriodicBaseGoods = [
-      { id: 201, title: "多功能厨房沥水篮家用洗菜盆三件套加厚", price: "24.90", comm: "3.22", tag: "全网爆款", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子", price: "9.90", comm: "1.08", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 203, title: "[品质升级！ 三合一快充线]三合一数据线快充...", price: "4.99", comm: "0.22", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 204, title: "[年年宏]桑葚坚果糕红枣枸杞核桃软糕美味手...", price: "39.90", comm: "6.38", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { id: 201, title: "多功能厨房沥水篮家用洗菜盆三件套加厚",       price: "24.90", comm: "3.22", tag: "全网爆款", image: images.pushDaily1 },
+      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子",       price: "9.90",  comm: "1.08",              image: images.pushFood2 },
+      { id: 203, title: "[品质升级！ 三合一快充线]三合一数据线快充...", price: "4.99",  comm: "0.22",              image: images.pushDaily2 },
+      { id: 204, title: "[年年宏]桑葚坚果糕红枣枸杞核桃软糕美味手...", price: "39.90", comm: "6.38",              image: images.pushFood1 }
     ];
     // 默认展示两项
     const pushPeriodicGoods = [pushPeriodicBaseGoods[0], pushPeriodicBaseGoods[1]];
@@ -409,8 +410,8 @@ Page({
     // 记录获取到的商品
     let pushFeedGoodsDict = {
       "高佣推荐": [
-        { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90", comm: "0.45", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动", price: "19.90", comm: "2.16", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90",  comm: "0.45", image: images.pushDaily1 },
+        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动",         price: "19.90", comm: "2.16", image: images.pushDaily2 }
       ],
       "健康食品": [], "美妆个护": [], "日用百货": []
     };
@@ -473,15 +474,15 @@ Page({
       { name: "爆品会玩", emoji: "🎮", bgColor: "#e4ffe0" }
     ];
     const fukaTopicCards = [
-      { title: "低价福利专区", price: "19.9专区", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { title: "精选生活好物", price: "9.9专区", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { title: "低价福利专区", price: "19.9专区", image: images.pushDaily1 },
+      { title: "精选生活好物", price: "9.9专区",  image: images.goodsSkincare2 }
     ];
     const fukaFilterTabs = ["精选", "拼多多", "淘宝", "京东"];
     const fukaGoods = [
-      { name: "正宗大凉山核桃", price: "36.8", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { name: "近视眼镜", price: "79.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { name: "冻干草莓", price: "39.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
-      { name: "黄冰糖", price: "29.9", image: imgUrl('/img/placeholders/home_cleaning.png') }
+      { name: "正宗大凉山核桃", price: "36.8", image: images.pushFood1 },
+      { name: "近视眼镜",       price: "79.9", image: images.pushDaily2 },
+      { name: "冻干草莓",       price: "39.9", image: images.pushFood2 },
+      { name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = [
       { name: "母婴生活馆", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },
@@ -497,8 +498,8 @@ Page({
         delivery: "起送￥0  免配送费",
         sold: "已售1",
         goods: [
-          { id: 101, name: "明辉紫薯", price: "5", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 102, name: "明辉香黍", price: "4", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 101, name: "明辉紫薯", price: "5", image: images.pushFood1 },
+          { id: 102, name: "明辉香黍", price: "4", image: images.pushFood2 }
         ]
       },
       {
@@ -508,8 +509,8 @@ Page({
         delivery: "起送￥0  免配送费",
         sold: "已售3",
         goods: [
-          { id: 201, name: "卫生间翻新", price: "1", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 202, name: "旧房改装", price: "19800", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 201, name: "卫生间翻新",  price: "1",     image: images.svcTile },
+          { id: 202, name: "旧房改装",    price: "19800", image: images.catHouseRepair }
         ]
       },
       {
@@ -519,8 +520,8 @@ Page({
         delivery: "起送￥0  免配送费",
         sold: "已售1",
         goods: [
-          { id: 301, name: "日常保洁", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 302, name: "清洗油烟机", price: "160", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 301, name: "日常保洁",   price: "45",  image: images.hotClean },
+          { id: 302, name: "清洗油烟机", price: "160", image: images.svcHood }
         ]
       }
     ];
