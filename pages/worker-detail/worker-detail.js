@@ -1,5 +1,6 @@
 const util = require('../../utils/util.js');
 const { imgUrl } = util;
+const images = require('../../utils/images.js');
 
 const mockWorkers = [
   {
@@ -11,7 +12,7 @@ const mockWorkers = [
     exp: 4,
     desc: "主要从事建筑回收，全品类建材可回收",
     tags: ["组长", "上门回收"],
-    avatar: imgUrl('/img/placeholders/home_cleaning.png')
+    avatar: images.avatarWorker
   },
   {
     id: 2,
@@ -22,14 +23,14 @@ const mockWorkers = [
     exp: 20,
     desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
     tags: ["擅长", "衣柜收纳", "宠物喂养", "陪护作业"],
-    avatar: imgUrl('/img/placeholders/home_cleaning.png')
+    avatar: images.avatarWorker
   }
 ];
 
 const mockGoods = [
-  { id: 1001, name: "衣橱整理收纳（2小时）", price: "196/份", image: imgUrl('/img/placeholders/home_cleaning.png') },
-  { id: 1002, name: "羽绒服/大衣（任意2件）", price: "79/2件", image: imgUrl('/img/placeholders/home_cleaning.png') },
-  { id: 1003, name: "马桶疏通", price: "158/洞", image: imgUrl('/img/placeholders/home_cleaning.png') }
+  { id: 1,  name: "衣橱整理收纳（2小时）",  price: "196/份", image: images.svcTidyCloset },
+  { id: 57, name: "地毯深度清洗（1小时）",  price: "159/次", image: images.svcCarpet },
+  { id: 14, name: "马桶疏通",               price: "158/次", image: images.svcRepairWater }
 ];
 
 Page({
