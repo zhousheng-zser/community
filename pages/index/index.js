@@ -177,10 +177,10 @@ Page({
     ];
     // ===== 从数据库获取热门服务（小区热卖榜）=====
     let hotList = [
-      { name: "洗衣机清洗", price: "128", image: images.hotWasher,  rank: "NO.1" },
-      { name: "热水器清洗", price: "150", image: images.hotHeater,  rank: "NO.2" },
-      { name: "油烟机清洗", price: "158", image: images.hotHood,    rank: "NO.3" },
-      { name: "金牌日常保洁", price: "99", image: images.hotClean,  rank: "热门" }
+      { id: 28, name: "洗衣机清洗",   price: "128", image: images.hotWasher, rank: "NO.1" },
+      { id: 30, name: "热水器清洗",   price: "150", image: images.hotHeater, rank: "NO.2" },
+      { id: 27, name: "油烟机清洗",   price: "158", image: images.hotHood,   rank: "NO.3" },
+      { id: 26, name: "金牌日常保洁", price: "99",  image: images.hotClean,  rank: "热门" }
     ];
     try {
       const hotRes = await util.get('core/services/hot');
@@ -479,10 +479,10 @@ Page({
     ];
     const fukaFilterTabs = ["精选", "拼多多", "淘宝", "京东"];
     const fukaGoods = [
-      { name: "正宗大凉山核桃", price: "36.8", image: images.pushFood1 },
-      { name: "近视眼镜",       price: "79.9", image: images.pushDaily2 },
-      { name: "冻干草莓",       price: "39.9", image: images.pushFood2 },
-      { name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
+      { id: 3001, name: "正宗大凉山核桃", price: "36.8", image: images.pushFood1 },
+      { id: 3002, name: "近视眼镜",       price: "79.9", image: images.pushDaily2 },
+      { id: 3003, name: "冻干草莓",       price: "39.9", image: images.pushFood2 },
+      { id: 3004, name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = [
       { name: "母婴生活馆", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },

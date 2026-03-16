@@ -335,7 +335,7 @@
 
     <view class="card section-card">
       <view class="fuka-goods-grid">
-        <navigator class="fuka-goods-item" wx:for="{{fukaGoods}}" wx:key="name" url="../service/service">
+        <navigator class="fuka-goods-item" wx:for="{{fukaGoods}}" wx:key="name" url="../goods-detail/goods-detail?id={{item.id}}">
           <image src="{{item.image}}" mode="aspectFill"></image>
           <text class="name">{{item.name}}</text>
           <text class="price">￥{{item.price}}</text>
@@ -442,7 +442,7 @@
     </view>
     <scroll-view class="hot-scroll" scroll-x="{{true}}">
       <view class="hot-wrap">
-        <navigator class="hot-item" wx:for="{{hotList}}" wx:key="name" url="../service/service">
+        <navigator class="hot-item" wx:for="{{hotList}}" wx:key="name" url="../service/service?id={{item.id}}">
           <image src="{{item.image}}" mode="aspectFill"></image>
           <text class="hot-rank">{{item.rank}}</text>
           <text class="hot-name">{{item.name}}</text>
