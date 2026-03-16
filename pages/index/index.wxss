@@ -1495,19 +1495,20 @@
 
 .market-top-cats {
   display: flex;
-  justify-content: space-around;
+  flex-wrap: wrap;
   padding: 20rpx 10rpx;
 }
 
 .market-top-item {
-  width: 33.33%;
+  width: 20%;
   text-align: center;
+  margin-bottom: 20rpx;
 }
 
 .market-emoji-wrap {
   width: 80rpx;
   height: 80rpx;
-  border-radius: 50%;
+  border-radius: 40rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1525,17 +1526,6 @@
   font-size: 22rpx;
 }
 
-.market-banner .cta {
-  position: absolute;
-  right: 18rpx;
-  bottom: 16rpx;
-  font-size: 20rpx;
-  color: #fff;
-  background: #ff5f4e;
-  border-radius: 999rpx;
-  padding: 6rpx 16rpx;
-}
-
 .market-title-row {
   display: flex;
   align-items: center;
@@ -1547,11 +1537,6 @@
   font-size: 30rpx;
   font-weight: 700;
   margin-right: 16rpx;
-}
-
-.market-title-row .shop {
-  font-size: 30rpx;
-  font-weight: 700;
 }
 
 .market-filter-row {

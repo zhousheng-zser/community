@@ -52,6 +52,9 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 4 });
+    }
     const user = app.globalData.user || {};
 
     // 脱敏手机号

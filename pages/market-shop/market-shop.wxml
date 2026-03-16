@@ -2,15 +2,13 @@
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
     <text class="back" bindtap="goBack">〈</text>
     <view class="top-actions">
-      <text class="icon">🛒</text>
-      <text class="icon">🔍</text>
-      <text class="icon">💬</text>
+      <text class="icon" style="margin-right: 180rpx;">🔍</text>
     </view>
-    <view class="capsule">•••</view>
   </view>
 
   <image class="cover" src="{{shop.cover}}" mode="aspectFill"></image>
 
+  <!-- 顶部店铺信息 -->
   <view class="shop-card">
     <image class="shop-logo" src="{{shop.logo}}" mode="aspectFill"></image>
     <view class="shop-info">
@@ -28,91 +26,136 @@
           <text class="meta-label">配送</text>
           <text class="meta-value">{{shop.deliveryType}}</text>
         </view>
-        <view class="meta-item">
-          <text class="meta-label">营业时间：</text>
-          <text class="meta-value">{{shop.businessHours}}</text>
-        </view>
+      </view>
+      <view class="shop-notice">
+        <text class="tag">公告</text>
+        <text class="notice-text">{{shop.notice}}</text>
       </view>
     </view>
   </view>
 
   <view class="main-tabs">
-    <text class="tab {{activeTab === 'goods' ? 'active' : ''}}" data-tab="goods" bindtap="switchMainTab">商品</text>
+    <text class="tab {{activeTab === 'goods' ? 'active' : ''}}" data-tab="goods" bindtap="switchMainTab">点单</text>
     <text class="tab {{activeTab === 'comment' ? 'active' : ''}}" data-tab="comment" bindtap="switchMainTab">评价</text>
-    <text class="tab {{activeTab === 'about' ? 'active' : ''}}" data-tab="about" bindtap="switchMainTab">关于店铺</text>
+    <text class="tab {{activeTab === 'about' ? 'active' : ''}}" data-tab="about" bindtap="switchMainTab">商家</text>
   </view>
 
+  <!-- 商品面板：左右双向联动结构 -->
   <view wx:if="{{activeTab === 'goods'}}" class="goods-panel">
-    <scroll-view class="left-cats" scroll-y="{{true}}">
+    <!-- 左侧分类菜单 -->
+    <scroll-view class="left-menu" scroll-y="{{true}}" scroll-with-animation="{{true}}">
       <view
-        class="cat-item {{activeCategoryKey === item.key ? 'active' : ''}}"
+        class="menu-item {{activeCategoryKey === item.key ? 'active' : ''}}"
         wx:for="{{categories}}"
         wx:key="key"
         data-key="{{item.key}}"
+        data-index="{{index}}"
         bindtap="switchCategory"
       >
-        {{item.name}}
+        <text class="menu-name">{{item.name}}</text>
       </view>
     </scroll-view>
 
-    <scroll-view class="goods-list" scroll-y="{{true}}">
-      <view class="goods-item" wx:for="{{filteredGoods}}" wx:key="id" data-id="{{item.id}}" bindtap="goProductDetail">
-        <image src="{{item.image}}" mode="aspectFill"></image>
-        <view class="goods-main">
-          <text class="name">{{item.name}}</text>
-          <text class="sold">{{item.sold}}</text>
-          <view class="price-row">
-            <text class="price">￥{{item.price}}</text>
-            <text class="old">￥{{item.oldPrice}}</text>
+    <!-- 右侧商品列表 -->
+    <scroll-view 
+      class="right-goods" 
+      scroll-y="{{true}}" 
+      scroll-into-view="{{targetViewId}}"
+      bindscroll="onGoodsScroll"
+      scroll-with-animation="{{true}}"
+    >
+      <view class="goods-group" wx:for="{{goodsGroupList}}" wx:for-item="group" wx:key="id" id="{{group.id}}">
+        <view class="group-title">{{group.name}}</view>
+        <view class="goods-item" wx:for="{{group.items}}" wx:for-item="item" wx:key="id">
+          <image src="{{item.image}}" mode="aspectFill" data-id="{{item.id}}" bindtap="goProductDetail"></image>
+          <view class="goods-main">
+            <text class="name" data-id="{{item.id}}" bindtap="goProductDetail">{{item.name}}</text>
+            <text class="desc">{{item.desc}}</text>
+            <text class="sold">{{item.sold}}</text>
+            <view class="price-row">
+              <view class="prices">
+                <text class="price">￥{{item.price}}</text>
+                <text class="old">￥{{item.oldPrice}}</text>
+              </view>
+              <!-- 加减数量控件 -->
+              <view class="stepper">
+                <view class="step-btn minus" wx:if="{{cart[item.id] && cart[item.id].quantity > 0}}" data-item="{{item}}" catchtap="minusCart">-</view>
+                <text class="step-num" wx:if="{{cart[item.id] && cart[item.id].quantity > 0}}">{{cart[item.id].quantity}}</text>
+                <view class="step-btn plus" data-item="{{item}}" catchtap="addCart">+</view>
+              </view>
+            </view>
           </view>
         </view>
-        <text class="add" data-price="{{item.price}}" catchtap="addGoods">+</text>
       </view>
+      <view class="placeholder-bottom"></view>
     </scroll-view>
   </view>
 
+  <!-- 评价面板 -->
   <view wx:elif="{{activeTab === 'comment'}}" class="comment-panel">
-    <view class="notice-card">
-      <text class="comment-title">用户评价</text>
+    <view class="notice-card empty-state">
       <text class="comment-empty">暂时还没有用户评价</text>
     </view>
   </view>
 
+  <!-- 商家面板 -->
   <view wx:else class="about-panel">
-    <view class="notice-card">
-      <text class="notice-title">公告：</text>
-      <text class="notice-content">暂无公告</text>
-    </view>
     <view class="table-card">
       <view class="table-row"><text>手机号</text><text class="value">{{shop.phone}}</text></view>
       <view class="table-row"><text>联系人</text><text class="value">{{shop.contact}}</text></view>
-      <view class="table-row"><text>店铺名称</text><text class="value">{{shop.name}}</text></view>
-      <view class="table-row"><text>店铺类目</text><text class="value">{{shop.categoryName}}</text></view>
-      <view class="table-row"><text>起送费</text><text class="value">0元</text></view>
-      <view class="table-row"><text>配送费</text><text class="value">0元</text></view>
+      <view class="table-row"><text>营业时间</text><text class="value">{{shop.businessHours}}</text></view>
       <view class="table-row"><text>店铺地址</text><text class="value">{{shop.shopAddress}}</text></view>
     </view>
     <view class="gallery-title-row">
-      <text>店铺招牌</text>
-      <text>门店内景</text>
+      <text>店铺照片</text>
     </view>
     <view class="gallery-row">
       <image src="{{shop.facadeImage}}" mode="aspectFill"></image>
       <image src="{{shop.interiorImage}}" mode="aspectFill"></image>
     </view>
-    <text class="license-title">营业执照</text>
+    <text class="license-title">资质证照</text>
     <image class="license" src="{{shop.licenseImage}}" mode="aspectFill"></image>
   </view>
 
-  <view class="bottom-bar">
-    <view class="cart-box">
-      <text class="cart-icon">🛒</text>
-      <text class="dot">{{cartCount}}</text>
+  <!-- 购物车弹窗遮罩 -->
+  <view class="cart-mask" wx:if="{{showCartPopup}}" bindtap="closeCartPopup"></view>
+  
+  <!-- 购物车弹窗列表 -->
+  <view class="cart-popup {{showCartPopup ? 'show' : ''}}">
+    <view class="cart-header">
+      <text class="title">已选商品</text>
+      <view class="clear-btn" bindtap="clearCart">
+        <text class="icon">🗑</text> 清空购物车
+      </view>
     </view>
-    <view class="total">
-      <text class="money">合计￥{{totalAmount}}</text>
-      <text class="desc">另需配送费￥0 打包费￥0.00起送费￥0</text>
+    <scroll-view scroll-y="{{true}}" class="cart-list">
+      <view class="cart-item" wx:for="{{cart}}" wx:for-item="item" wx:key="id">
+        <text class="c-name">{{item.name}}</text>
+        <text class="c-price">￥{{item.price}}</text>
+        <view class="stepper">
+          <view class="step-btn minus" data-item="{{item}}" catchtap="minusCart">-</view>
+          <text class="step-num">{{item.quantity}}</text>
+          <view class="step-btn plus" data-item="{{item}}" catchtap="addCart">+</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部购物车 Bar -->
+  <view class="bottom-bar" style="padding-bottom: env(safe-area-inset-bottom);">
+    <view class="cart-box" bindtap="toggleCartPopup">
+      <view class="cart-icon-wrap {{cartCount > 0 ? 'active' : ''}}">
+        <text class="cart-icon">🛒</text>
+        <text class="dot" wx:if="{{cartCount > 0}}">{{cartCount}}</text>
+      </view>
     </view>
-    <text class="settle">去结算</text>
+    <view class="total" bindtap="toggleCartPopup">
+      <text class="money" wx:if="{{cartCount > 0}}">￥{{totalAmount}}</text>
+      <text class="money empty" wx:else>未选购商品</text>
+      <text class="desc">另需配送费￥0 | 支持自取</text>
+    </view>
+    <view class="settle {{cartCount > 0 ? 'active' : ''}}" bindtap="goSettle">
+      {{cartCount > 0 ? '去结算' : '￥0 起送'}}
+    </view>
   </view>
 </view>

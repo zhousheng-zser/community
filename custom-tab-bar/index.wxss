@@ -1,0 +1,85 @@
+.tab-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: #ffffff;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05); /* 轻微顶部阴影 */
+  z-index: 999;
+}
+
+.tab-bar-border {
+  background-color: rgba(0, 0, 0, 0.1);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1px;
+  transform: scaleY(0.5);
+}
+
+.tab-bar-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+}
+
+.tab-bar-item image {
+  width: 27px;
+  height: 27px;
+  margin-bottom: 2px;
+}
+
+.tab-bar-item view {
+  font-size: 10px;
+}
+
+/* 一键发布 凸起按钮容器 */
+.publish-item {
+  position: relative;
+  z-index: 10;
+}
+
+.publish-btn-wrap {
+  position: absolute;
+  top: -30px; /* 控制凸起的高度 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 60px;
+  /* 白色背景圈制造外层的凹槽镂空视效 */
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 可选：加一点上方的投影让她更像是一个“座” */
+  box-shadow: 0 -4px 6px rgba(0,0,0,0.04); 
+}
+
+/* 按钮内胆（红色渐变实心） */
+.publish-btn-inner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f13c32; /* 图二红色 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(241,60,50,0.3);
+}
+
+.publish-btn-inner text {
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 500;
+  text-align: center;
+}

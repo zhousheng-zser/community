@@ -16,9 +16,16 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    const { indexs, totle } = options;
-    this.getGoods(indexs, totle);
-    this.getCoupons();
+    if (options.from === 'local') {
+      const list = wx.getStorageSync('local_checkout_goods') || [];
+      const totle = wx.getStorageSync('local_checkout_totle') || "0.00";
+      this.setData({ list, totle });
+      this.getCoupons();
+    } else {
+      const { indexs, totle } = options;
+      this.getGoods(indexs, totle);
+      this.getCoupons();
+    }
   },
   getCoupons() {
     const { id: userId } = app.globalData.user;

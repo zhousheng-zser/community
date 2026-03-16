@@ -1,0 +1,21 @@
+<view class="tab-bar">
+  <view class="tab-bar-border"></view>
+  <view wx:for="{{list}}" wx:key="index" class="tab-bar-item {{item.isPublish ? 'publish-item' : ''}}" data-path="{{item.pagePath}}" data-is-publish="{{item.isPublish}}" bindtap="switchTab">
+    
+    <!-- 正常 Tab 图标与文字 -->
+    <block wx:if="{{!item.isPublish}}">
+      <image src="{{selected === index ? item.selectedIconPath : item.iconPath}}"></image>
+      <view style="color: {{selected === index ? selectedColor : color}}">{{item.text}}</view>
+    </block>
+    
+    <!-- 中间凸起的“一键发布”大按钮 -->
+    <block wx:else>
+      <view class="publish-btn-wrap">
+        <view class="publish-btn-inner">
+          <text>一键\n发布</text>
+        </view>
+      </view>
+    </block>
+
+  </view>
+</view>

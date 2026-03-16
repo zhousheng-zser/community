@@ -48,8 +48,10 @@ Page({
     fukaTopicCards: [],
     fukaFilterTabs: [],
     fukaGoods: [],
+    activeMarketCat: "母婴生活馆",
     marketTopCats: [],
     marketFilters: [],
+    allMarketShops: [],
     marketShops: []
   },
   onLoad: function (options) {
@@ -85,6 +87,9 @@ Page({
     app.save(parentOpId, that.init.bind(that));
   },
   onShow: function() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 0 });
+    }
     const app = getApp();
     if (app.globalData && app.globalData.targetIndexTab) {
       this.setData({ activeTab: app.globalData.targetIndexTab });
@@ -108,6 +113,14 @@ Page({
   switchTopTab(e) {
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
+  },
+  switchMarketCategory(e) {
+    const cat = e.currentTarget.dataset.name;
+    const marketShops = this.data.allMarketShops.filter(s => s.cat === cat);
+    this.setData({ 
+      activeMarketCat: cat,
+      marketShops 
+    });
   },
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
@@ -486,44 +499,165 @@ Page({
     const marketTopCats = [
       { name: "母婴生活馆", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },
       { name: "家庭服务", emoji: "🏠", bgColor: "#e0eeff", url: "../market-banner/market-banner?title=家庭服务" },
-      { name: "超市便利", emoji: "🛒", bgColor: "#e4ffe0", url: "../market-banner/market-banner?title=超市便利" }
+      { name: "超市便利", emoji: "🛒", bgColor: "#e4ffe0", url: "../market-banner/market-banner?title=超市便利" },
+      { name: "美食外卖", emoji: "🍱", bgColor: "#ffe0df", url: "../market-banner/market-banner?title=美食外卖" },
+      { name: "看病买药", emoji: "💊", bgColor: "#e6ffe0", url: "../market-banner/market-banner?title=看病买药" },
+      { name: "鲜花礼品", emoji: "💐", bgColor: "#ffe0f5", url: "../market-banner/market-banner?title=鲜花礼品" },
+      { name: "水果蔬菜", emoji: "🥬", bgColor: "#f0ffe0", url: "../market-banner/market-banner?title=水果蔬菜" },
+      { name: "服装首饰", emoji: "👗", bgColor: "#ede8ff", url: "../market-banner/market-banner?title=服装首饰" },
+      { name: "电子数码", emoji: "💻", bgColor: "#e0f3ff", url: "../market-banner/market-banner?title=电子数码" },
+      { name: "本地玩乐", emoji: "🎡", bgColor: "#fff0f5", url: "../market-banner/market-banner?title=本地玩乐" }
     ];
     const marketFilters = ["综合排序", "邻工秒送", "商家自送", "重置筛选"];
-    const marketShops = [
+    const allMarketShops = [
+      // 母婴生活馆
       {
         id: 1,
-        name: "明辉香黍",
-        badge: "邻工秒送",
-        delivery: "起送￥0  免配送费",
-        sold: "已售1",
+        cat: "母婴生活馆",
+        name: "爱婴坊母婴生活馆",
+        badge: "商家自送",
+        delivery: "起送￥30  免配送费",
+        sold: "已售156",
         goods: [
-          { id: 101, name: "明辉紫薯", price: "5", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 102, name: "明辉香黍", price: "4", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 101, name: "婴儿纯棉柔巾", price: "15", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 102, name: "新生儿奶瓶", price: "88", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 103, name: "婴儿沐浴露", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') }
         ]
       },
+      // 家庭服务
       {
         id: 2,
+        cat: "家庭服务",
         name: "成都尚辰空间装饰",
         badge: "邻工秒送",
         delivery: "起送￥0  免配送费",
-        sold: "已售3",
+        sold: "已售38",
         goods: [
-          { id: 201, name: "卫生间翻新", price: "1", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 202, name: "旧房改装", price: "19800", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 201, name: "卫生间翻新", price: "1999", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 202, name: "旧房改装", price: "19800", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 203, name: "墙面刷新", price: "599", image: imgUrl('/img/placeholders/home_cleaning.png') }
         ]
       },
       {
         id: 3,
+        cat: "家庭服务",
         name: "四川洁而诺保洁有限公司",
         badge: "商家自送",
         delivery: "起送￥0  免配送费",
-        sold: "已售1",
+        sold: "已售215",
         goods: [
-          { id: 301, name: "日常保洁", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 302, name: "清洗油烟机", price: "160", image: imgUrl('/img/placeholders/home_cleaning.png') }
+          { id: 301, name: "日常保洁(2小时)", price: "90", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 302, name: "深度清洗油烟机", price: "160", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 超市便利
+      {
+        id: 4,
+        cat: "超市便利",
+        name: "家家悦连锁超市",
+        badge: "邻工秒送",
+        delivery: "起送￥20  配送费￥3",
+        sold: "已售890",
+        goods: [
+          { id: 401, name: "新鲜纯牛奶(箱)", price: "49.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 402, name: "原味薯片", price: "8.5", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 403, name: "抽纸提装", price: "12.9", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 美食外卖
+      {
+        id: 5,
+        name: "老张家川菜馆",
+        badge: "商家自送",
+        delivery: "起送￥25  配送费￥2",
+        sold: "已售423",
+        goods: [
+          { id: 501, name: "鱼香肉丝盖饭", price: "18", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 502, name: "麻婆豆腐", price: "15", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 503, name: "干煸四季豆", price: "16", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 看病买药
+      {
+        id: 6,
+        name: "平安大药房",
+        badge: "邻工秒送",
+        delivery: "起送￥0  配送费￥5",
+        sold: "已售312",
+        goods: [
+          { id: 601, name: "医用外科口罩", price: "19.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 602, name: "维生素C泡腾片", price: "28", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 603, name: "退热贴", price: "25", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 鲜花礼品
+      {
+        id: 7,
+        name: "浪漫花语鲜花店",
+        badge: "商家自送",
+        delivery: "起送￥99  免配送费",
+        sold: "已售86",
+        goods: [
+          { id: 701, name: "红玫瑰11朵混搭", price: "138", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 702, name: "康乃馨花束", price: "118", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 703, name: "向日葵礼盒", price: "158", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 水果蔬菜
+      {
+        id: 8,
+        name: "每日鲜果园",
+        badge: "邻工秒送",
+        delivery: "起送￥20  免配送费",
+        sold: "已售645",
+        goods: [
+          { id: 801, name: "妃子笑荔枝(斤)", price: "15.8", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 802, name: "海南麒麟西瓜", price: "25", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 803, name: "红心火龙果", price: "12.5", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 服装首饰
+      {
+        id: 9,
+        name: "优衣库风尚店",
+        badge: "商家自送",
+        delivery: "起送￥0  免配送费",
+        sold: "已售234",
+        goods: [
+          { id: 901, name: "纯棉短袖T恤", price: "59", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 902, name: "防晒衣女款", price: "129", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 903, name: "休闲短裤", price: "79", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 电子数码
+      {
+        id: 10,
+        name: "极客数码配件",
+        badge: "邻工秒送",
+        delivery: "起送￥30  配送费￥4",
+        sold: "已售520",
+        goods: [
+          { id: 1001, name: "快充数据线", price: "19.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 1002, name: "蓝牙无线耳机", price: "139", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 1003, name: "大容量充电宝", price: "89", image: imgUrl('/img/placeholders/home_cleaning.png') }
+        ]
+      },
+      // 本地玩乐
+      {
+        id: 11,
+        name: "星空剧本杀体验馆",
+        badge: "商家自送",
+        delivery: "起送￥0  免配送费",
+        sold: "已售128",
+        goods: [
+          { id: 1101, name: "单人剧本杀门票", price: "88", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 1102, name: "密室逃脱(工作日)", price: "98", image: imgUrl('/img/placeholders/home_cleaning.png') },
+          { id: 1103, name: "狼人杀畅玩券", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') }
         ]
       }
     ];
+
+    const marketShops = allMarketShops.filter(s => s.cat === this.data.activeMarketCat);
 
     this.setData({
       banner,
@@ -561,6 +695,7 @@ Page({
       fukaGoods,
       marketTopCats,
       marketFilters,
+      allMarketShops,
       marketShops
     });
 
