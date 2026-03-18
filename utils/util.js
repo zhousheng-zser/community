@@ -31,23 +31,24 @@ const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
 }
-const get = (url, query) => {
-  const contentType = query ? "application/x-www-form-urlencoded" : "application/json",
-    data = query || {};
-  
-  // 智能拼接 URL，防止出现 v1auth 或 v1//posts
+const buildUrl = (url) => {
   let finalUrl = config.baseUrl;
   if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
     finalUrl += '/';
   } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
     finalUrl = finalUrl.slice(0, -1);
   }
-  finalUrl += url;
+  return finalUrl + url;
+};
+
+const request = (method, url, data, contentType = 'application/json') => {
+  const finalUrl = buildUrl(url);
 
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
     wx.request({
       url: finalUrl,
+      method,
       data,
       header: {
         'content-type': contentType,
@@ -73,55 +74,25 @@ const get = (url, query) => {
     })
   })
 }
+const get = (url, query) => {
+  const contentType = query ? "application/x-www-form-urlencoded" : "application/json";
+  const data = query || {};
+  return request('GET', url, data, contentType);
+}
 const post = (url, data) => {
-  // 智能拼接 URL
-  let finalUrl = config.baseUrl;
-  if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
-    finalUrl += '/';
-  } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
-    finalUrl = finalUrl.slice(0, -1);
-  }
-  finalUrl += url;
-
-  return new Promise((resolve, reject) => {
-    const token = wx.getStorageSync('token');
-    wx.request({
-      url: finalUrl,
-      method: "POST",
-      data,
-      header: {
-        'content-type': 'application/json',
-        'Authorization': token ? 'Bearer ' + token : ''
-      },
-      success: (res) => {
-        const data = res.data;
-        if (data.errno == 0 || res.statusCode === 200 || res.statusCode === 201) {
-          resolve(data.data || data)
-        } else {
-          reject({
-            errno: data.errno || res.statusCode,
-            errmsg: data.errmsg || data.error
-          })
-        }
-      },
-      fail: (res) => {
-        wx.showToast({
-          title: '网络错误',
-        })
-        reject(res)
-      }
-    })
-  })
+  return request('POST', url, data);
+}
+const put = (url, data) => {
+  return request('PUT', url, data);
+}
+const del = (url, query) => {
+  const contentType = query ? "application/x-www-form-urlencoded" : "application/json";
+  const data = query || {};
+  return request('DELETE', url, data, contentType);
 }
 const uploadFile = (url, filePath, name = 'file', formData = {}) => {
   // 智能拼接 URL
-  let finalUrl = config.baseUrl;
-  if (!finalUrl.endsWith('/') && !url.startsWith('/')) {
-    finalUrl += '/';
-  } else if (finalUrl.endsWith('/') && url.startsWith('/')) {
-    finalUrl = finalUrl.slice(0, -1);
-  }
-  finalUrl += url;
+  const finalUrl = buildUrl(url);
 
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
@@ -390,6 +361,8 @@ module.exports = {
   formatTime,
   get,
   post,
+  put,
+  del,
   uploadFile,
   goodsStateTabel,
   booksStateTabel,

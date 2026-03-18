@@ -45,7 +45,7 @@
     </view>
     <view class='row'>
       <text>优惠金额</text>
-      <text class='color-red'>- ￥{{parseFloat(canuseCoupons[couponIndex].couponMoney).toFixed(2)||'0.00'}}</text>
+      <text class='color-red'>- ￥{{discountMoney}}</text>
     </view>
     <view class='row'>
       <text>运费</text>
@@ -57,7 +57,7 @@
 <form report-submit="true" bindsubmit="submitOrder">
 <view class="pay-wrap">
   <view class='left'>
-    <text class='totle'>实付款：￥{{totle-(canuseCoupons[couponIndex].couponMoney||0)}}</text>
+    <text class='totle'>实付款：￥{{realPayMoney}}</text>
   </view>
   <view class='right' >
     <!-- <text>提交订单</text> -->

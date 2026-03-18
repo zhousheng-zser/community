@@ -49,11 +49,12 @@ Page({
     fukaTopicCards: [],
     fukaFilterTabs: [],
     fukaGoods: [],
-    activeMarketCat: "母婴生活馆",
+    activeMarketCat: "AAAA",
     marketTopCats: [],
     marketFilters: [],
     allMarketShops: [],
-    marketShops: []
+    marketShops: [],
+    marketShopsCacheByCat: {} // { [catName]: mappedShopList }
   },
   onLoad: function (options) {
     const sysInfo = wx.getSystemInfoSync();
@@ -116,12 +117,62 @@ Page({
     this.setData({ activeTab: tab });
   },
   switchMarketCategory(e) {
-    const cat = e.currentTarget.dataset.name;
-    const marketShops = this.data.allMarketShops.filter(s => s.cat === cat);
-    this.setData({ 
-      activeMarketCat: cat,
-      marketShops 
-    });
+    const cat = e.currentTarget.dataset.code || e.currentTarget.dataset.name;
+    this.setData({ activeMarketCat: cat });
+
+    // 优先走缓存，避免频繁请求
+    const cache = this.data.marketShopsCacheByCat || {};
+    if (cache[cat] && Array.isArray(cache[cat])) {
+      this.setData({ marketShops: cache[cat] });
+      return;
+    }
+
+    wx.showLoading({ title: '加载中...', mask: true });
+    util.get('market/shops', { category: cat, page: 1, page_size: 30 })
+      .then((marketRes) => {
+        wx.hideLoading();
+        const list = Array.isArray(marketRes)
+          ? marketRes
+          : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
+        const mapped = Array.isArray(list) ? list.map(s => this.normalizeMarketShop(s)).filter(s => !!s.id) : [];
+        const newCache = { ...cache, [cat]: mapped };
+        this.setData({
+          marketShops: mapped,
+          marketShopsCacheByCat: newCache
+        });
+      })
+      .catch(() => {
+        wx.hideLoading();
+        // 兜底：用本地已缓存的数据做一次过滤
+        const marketShops = (this.data.allMarketShops || []).filter(s => s.cat === cat);
+        this.setData({
+          marketShops,
+          marketShopsCacheByCat: { ...cache, [cat]: marketShops }
+        });
+      });
+  },
+  normalizeMarketShop(item) {
+    const goodsRaw = Array.isArray(item.goods) ? item.goods : (Array.isArray(item.preview_goods) ? item.preview_goods : []);
+    const goods = goodsRaw.slice(0, 8).map((g, idx) => ({
+      id: g.id || g.goods_id || (idx + 1),
+      name: g.name || g.goods_name || '精选商品',
+      price: String(g.price || g.goods_price || '0'),
+      image: imgUrl(g.main_image || g.image || '/img/placeholders/home_cleaning.png')
+    }));
+    const soldCount = Number(item.sold_count || 0);
+    const deliveryText = item.delivery_desc
+      || (item.min_order_amount != null
+        ? `起送￥${item.min_order_amount}  配送费￥${item.delivery_fee || 0}`
+        : '起送￥0  免配送费');
+    return {
+      id: item.id,
+      cat: item.category || '家集市',
+      name: item.name || item.shop_name || '社区店铺',
+      badge: item.delivery_type_text || item.delivery_type || '商家自送',
+      delivery: deliveryText,
+      sold: `已售${soldCount}`,
+      goods
+    };
   },
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
@@ -498,23 +549,23 @@ Page({
       { id: 3004, name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = [
-      { name: "母婴生活馆", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },
-      { name: "家庭服务", emoji: "🏠", bgColor: "#e0eeff", url: "../market-banner/market-banner?title=家庭服务" },
-      { name: "超市便利", emoji: "🛒", bgColor: "#e4ffe0", url: "../market-banner/market-banner?title=超市便利" },
-      { name: "美食外卖", emoji: "🍱", bgColor: "#ffe0df", url: "../market-banner/market-banner?title=美食外卖" },
-      { name: "看病买药", emoji: "💊", bgColor: "#e6ffe0", url: "../market-banner/market-banner?title=看病买药" },
-      { name: "鲜花礼品", emoji: "💐", bgColor: "#ffe0f5", url: "../market-banner/market-banner?title=鲜花礼品" },
-      { name: "水果蔬菜", emoji: "🥬", bgColor: "#f0ffe0", url: "../market-banner/market-banner?title=水果蔬菜" },
-      { name: "服装首饰", emoji: "👗", bgColor: "#ede8ff", url: "../market-banner/market-banner?title=服装首饰" },
-      { name: "电子数码", emoji: "💻", bgColor: "#e0f3ff", url: "../market-banner/market-banner?title=电子数码" },
-      { name: "本地玩乐", emoji: "🎡", bgColor: "#fff0f5", url: "../market-banner/market-banner?title=本地玩乐" }
+      { name: "母婴生活馆", code: "AAAA", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },
+      { name: "家庭服务", code: "AAAB", emoji: "🏠", bgColor: "#e0eeff", url: "../market-banner/market-banner?title=家庭服务" },
+      { name: "超市便利", code: "AAAC", emoji: "🛒", bgColor: "#e4ffe0", url: "../market-banner/market-banner?title=超市便利" },
+      { name: "美食外卖", code: "AAAD", emoji: "🍱", bgColor: "#ffe0df", url: "../market-banner/market-banner?title=美食外卖" },
+      { name: "看病买药", code: "AAAE", emoji: "💊", bgColor: "#e6ffe0", url: "../market-banner/market-banner?title=看病买药" },
+      { name: "鲜花礼品", code: "AAAF", emoji: "💐", bgColor: "#ffe0f5", url: "../market-banner/market-banner?title=鲜花礼品" },
+      { name: "水果蔬菜", code: "AAAG", emoji: "🥬", bgColor: "#f0ffe0", url: "../market-banner/market-banner?title=水果蔬菜" },
+      { name: "服装首饰", code: "AAAH", emoji: "👗", bgColor: "#ede8ff", url: "../market-banner/market-banner?title=服装首饰" },
+      { name: "电子数码", code: "AAAI", emoji: "💻", bgColor: "#e0f3ff", url: "../market-banner/market-banner?title=电子数码" },
+      { name: "本地玩乐", code: "AAAJ", emoji: "🎡", bgColor: "#fff0f5", url: "../market-banner/market-banner?title=本地玩乐" }
     ];
     const marketFilters = ["综合排序", "邻工秒送", "商家自送", "重置筛选"];
     const allMarketShops = [
       // 母婴生活馆
       {
         id: 1,
-        cat: "母婴生活馆",
+        cat: "AAAA",
         name: "爱婴坊母婴生活馆",
         badge: "商家自送",
         delivery: "起送￥30  免配送费",
@@ -528,7 +579,7 @@ Page({
       // 家庭服务
       {
         id: 2,
-        cat: "家庭服务",
+        cat: "AAAB",
         name: "成都尚辰空间装饰",
         badge: "邻工秒送",
         delivery: "起送￥0  免配送费",
@@ -541,7 +592,7 @@ Page({
       },
       {
         id: 3,
-        cat: "家庭服务",
+        cat: "AAAB",
         name: "四川洁而诺保洁有限公司",
         badge: "商家自送",
         delivery: "起送￥0  免配送费",
@@ -554,7 +605,7 @@ Page({
       // 超市便利
       {
         id: 4,
-        cat: "超市便利",
+        cat: "AAAC",
         name: "家家悦连锁超市",
         badge: "邻工秒送",
         delivery: "起送￥20  配送费￥3",
@@ -568,7 +619,7 @@ Page({
       // 美食外卖
       {
         id: 5,
-        cat: "美食外卖",
+        cat: "AAAD",
         name: "老张家川菜馆",
         badge: "商家自送",
         delivery: "起送￥25  配送费￥2",
@@ -582,7 +633,7 @@ Page({
       // 看病买药
       {
         id: 6,
-        cat: "看病买药",
+        cat: "AAAE",
         name: "平安大药房",
         badge: "邻工秒送",
         delivery: "起送￥0  配送费￥5",
@@ -596,7 +647,7 @@ Page({
       // 鲜花礼品
       {
         id: 7,
-        cat: "鲜花礼品",
+        cat: "AAAF",
         name: "浪漫花语鲜花店",
         badge: "商家自送",
         delivery: "起送￥99  免配送费",
@@ -610,7 +661,7 @@ Page({
       // 水果蔬菜
       {
         id: 8,
-        cat: "水果蔬菜",
+        cat: "AAAG",
         name: "每日鲜果园",
         badge: "邻工秒送",
         delivery: "起送￥20  免配送费",
@@ -624,7 +675,7 @@ Page({
       // 服装首饰
       {
         id: 9,
-        cat: "服装首饰",
+        cat: "AAAH",
         name: "优衣库风尚店",
         badge: "商家自送",
         delivery: "起送￥0  免配送费",
@@ -638,7 +689,7 @@ Page({
       // 电子数码
       {
         id: 10,
-        cat: "电子数码",
+        cat: "AAAI",
         name: "极客数码配件",
         badge: "邻工秒送",
         delivery: "起送￥30  配送费￥4",
@@ -652,7 +703,7 @@ Page({
       // 本地玩乐
       {
         id: 11,
-        cat: "本地玩乐",
+        cat: "AAAJ",
         name: "星空剧本杀体验馆",
         badge: "商家自送",
         delivery: "起送￥0  免配送费",
@@ -665,7 +716,27 @@ Page({
       }
     ];
 
-    const marketShops = allMarketShops.filter(s => s.cat === this.data.activeMarketCat);
+    let mergedMarketShops = allMarketShops;
+    let activeMarketCat = this.data.activeMarketCat;
+    try {
+      // 优先读取后端真实店铺数据；接口不可用时继续兜底本地 mock
+      const marketRes = await util.get('market/shops', { page: 1, page_size: 50 });
+      const marketData = Array.isArray(marketRes)
+        ? marketRes
+        : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
+      if (Array.isArray(marketData) && marketData.length > 0) {
+        const mapped = marketData.map(this.normalizeMarketShop).filter(s => !!s.id);
+        if (mapped.length > 0) {
+          mergedMarketShops = mapped;
+          if (!mapped.some(s => s.cat === activeMarketCat)) {
+            activeMarketCat = mapped[0].cat;
+          }
+        }
+      }
+    } catch (e) {
+      console.log('家集市店铺接口不可用，继续使用本地数据', e);
+    }
+    const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
     this.setData({
       banner,
@@ -703,7 +774,8 @@ Page({
       fukaGoods,
       marketTopCats,
       marketFilters,
-      allMarketShops,
+      activeMarketCat,
+      allMarketShops: mergedMarketShops,
       marketShops
     });
 

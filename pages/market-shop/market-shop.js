@@ -67,6 +67,10 @@ Page({
 
     // 购物车相关
     cart: {},              // 购物车数据映射表 { goodsId: quantity }
+    cartList: [],          // 购物车弹窗列表（数组）
+    cartItemIdByGoodsId: {}, // 服务端购物车 itemId 映射 { goodsId: itemId }
+    currentShopId: 1,
+    useRemoteCart: false,  // 是否已成功启用服务端购物车
     cartCount: 0,
     totalAmount: "0.00",
     showCartPopup: false
@@ -97,13 +101,164 @@ Page({
       shop,
       categories: goodsGroupList,
       goodsGroupList,
-      activeCategoryKey: firstCategoryKey
+      activeCategoryKey: firstCategoryKey,
+      currentShopId: shop.id
     });
 
     // 延迟计算右侧滚动区域每个分类的高度
     setTimeout(() => {
       this.calculateGroupTops();
     }, 500);
+    // 后端接口可用时，覆盖本地 mock 数据
+    this.loadShopFromApi(id);
+    // 尝试同步服务端购物车
+    this.syncCartFromApi(id);
+  },
+  extractList(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.list)) return payload.list;
+    if (payload && payload.data && Array.isArray(payload.data.list)) return payload.data.list;
+    if (payload && payload.data && Array.isArray(payload.data)) return payload.data;
+    return [];
+  },
+  buildGoodsGroups(categories, goodsList) {
+    const grouped = {};
+    goodsList.forEach((g) => {
+      const key = g.category_key || g.categoryKey || 'default';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({
+        id: g.id || g.goods_id,
+        name: g.name || g.goods_name || '精选商品',
+        desc: g.description || g.desc || '',
+        sold: `已售${Number(g.sold_count || 0)}`,
+        price: String(g.price || 0),
+        oldPrice: String(g.origin_price || g.old_price || g.price || 0),
+        image: imgUrl(g.main_image || g.image || '/img/placeholders/home_cleaning.png')
+      });
+    });
+
+    let baseCats = categories.map((c) => ({
+      key: c.category_key || c.key,
+      name: c.category_name || c.name
+    })).filter(c => c.key);
+
+    if (baseCats.length === 0) {
+      baseCats = Object.keys(grouped).map((key) => ({ key, name: key }));
+    }
+
+    return baseCats.map((cat, index) => ({
+      ...cat,
+      id: `cat_${index}`,
+      items: grouped[cat.key] || []
+    })).filter(cat => cat.items.length > 0);
+  },
+  async loadShopFromApi(id) {
+    try {
+      const shopRes = await util.get(`market/shops/${id}`);
+      const shopData = shopRes && shopRes.data ? shopRes.data : shopRes;
+      if (!shopData || !shopData.id) return;
+
+      const [categoriesRes, goodsRes] = await Promise.all([
+        util.get(`market/shops/${id}/categories`),
+        util.get(`market/shops/${id}/goods`, { page: 1, page_size: 200 })
+      ]);
+
+      const categories = this.extractList(categoriesRes);
+      const goodsList = this.extractList(goodsRes);
+      const goodsGroupList = this.buildGoodsGroups(categories, goodsList);
+      if (goodsGroupList.length === 0) return;
+
+      const firstCategoryKey = goodsGroupList[0].key;
+      const shop = {
+        id: shopData.id,
+        cover: imgUrl(shopData.cover_url || shopData.cover || '/img/placeholders/home_cleaning.png'),
+        logo: imgUrl(shopData.logo_url || shopData.logo || '/img/placeholders/home_cleaning.png'),
+        name: shopData.name || shopData.shop_name || '社区店铺',
+        scoreText: String(shopData.rating || '4.8'),
+        soldCount: String(shopData.sold_count || 0),
+        deliveryType: shopData.delivery_type_text || shopData.delivery_type || '邻工配送',
+        businessHours: shopData.business_hours || '09:00~22:00',
+        notice: shopData.notice || '欢迎光临',
+        phone: shopData.contact_phone || '',
+        contact: shopData.contact_name || '',
+        shopAddress: shopData.address || '',
+        facadeImage: imgUrl(shopData.facade_image || '/img/placeholders/home_cleaning.png'),
+        interiorImage: imgUrl(shopData.interior_image || '/img/placeholders/home_cleaning.png'),
+        licenseImage: imgUrl(shopData.license_image || '/img/placeholders/home_cleaning.png')
+      };
+
+      this.setData({
+        shop,
+        categories: goodsGroupList,
+        goodsGroupList,
+        activeCategoryKey: firstCategoryKey,
+        targetViewId: '',
+        currentShopId: shop.id
+      });
+
+      setTimeout(() => this.calculateGroupTops(), 200);
+      // 店铺数据覆盖后，再同步一次购物车（防止 shop.id 不一致）
+      this.syncCartFromApi(shop.id);
+    } catch (e) {
+      console.log('店铺详情接口不可用，继续使用本地数据', e);
+    }
+  },
+  rebuildCartDerived(cart) {
+    const cartList = Object.values(cart || {});
+    const cartCount = cartList.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+    const totalAmount = cartList.reduce((sum, it) => sum + Number(it.price || 0) * Number(it.quantity || 0), 0).toFixed(2);
+    this.setData({ cart, cartList, cartCount, totalAmount });
+  },
+  async syncCartFromApi(shopId) {
+    const sid = Number(shopId || this.data.currentShopId);
+    if (!sid) return;
+    try {
+      const res = await util.get('market/cart', { shop_id: sid });
+      const list = this.extractList(res);
+      if (!Array.isArray(list)) return;
+
+      const cart = {};
+      const cartItemIdByGoodsId = {};
+      list.forEach((it) => {
+        const goodsId = Number(it.goods_id || it.goodsId || it.id);
+        if (!goodsId) return;
+        const itemId = Number(it.id || it.item_id);
+        if (itemId) cartItemIdByGoodsId[goodsId] = itemId;
+        cart[goodsId] = {
+          id: goodsId,
+          name: it.goods_name || it.name || '精选商品',
+          desc: it.goods_desc || it.desc || '',
+          sold: it.sold || '',
+          price: String(it.price || it.goods_price || 0),
+          oldPrice: String(it.origin_price || it.old_price || it.price || 0),
+          image: imgUrl(it.main_image || it.image || '/img/placeholders/home_cleaning.png'),
+          quantity: Number(it.quantity || 0)
+        };
+      });
+
+      this.setData({ useRemoteCart: true, cartItemIdByGoodsId });
+      this.rebuildCartDerived(cart);
+    } catch (e) {
+      // 接口不可用时维持本地购物车逻辑
+      this.setData({ useRemoteCart: false });
+    }
+  },
+  async ensureRemoteCartItem(goodsId, quantity, itemPayload) {
+    const sid = Number(this.data.currentShopId);
+    const gid = Number(goodsId);
+    if (!sid || !gid) throw new Error('invalid shopId/goodsId');
+
+    const itemId = this.data.cartItemIdByGoodsId[gid];
+    if (itemId) {
+      await util.put(`market/cart/items/${itemId}`, { quantity });
+      return { itemId };
+    }
+    const created = await util.post('market/cart/items', { shop_id: sid, goods_id: gid, quantity });
+    const newItemId = Number((created && created.id) || (created && created.item_id));
+    if (newItemId) {
+      this.setData({ cartItemIdByGoodsId: { ...this.data.cartItemIdByGoodsId, [gid]: newItemId } });
+    }
+    return { itemId: newItemId, created };
   },
 
   goBack() {
@@ -166,7 +321,7 @@ Page({
 
   // ===== 购物车交互 =====
   // 增加数量
-  addCart(e) {
+  async addCart(e) {
     const item = e.currentTarget.dataset.item;
     let { cart, cartCount, totalAmount } = this.data;
     
@@ -177,11 +332,19 @@ Page({
     cartCount += 1;
     totalAmount = (Number(totalAmount) + Number(item.price)).toFixed(2);
 
-    this.setData({ cart, cartCount, totalAmount });
+    this.rebuildCartDerived(cart);
+    if (this.data.useRemoteCart) {
+      try {
+        await this.ensureRemoteCartItem(item.id, cart[item.id].quantity, item);
+      } catch (err) {
+        // 服务端失败时降级本地，但不回滚用户交互
+        this.setData({ useRemoteCart: false });
+      }
+    }
   },
 
   // 减少数量
-  minusCart(e) {
+  async minusCart(e) {
     const item = e.currentTarget.dataset.item;
     let { cart, cartCount, totalAmount } = this.data;
 
@@ -194,7 +357,29 @@ Page({
         delete cart[item.id]; // 数量为0时移除
       }
       
-      this.setData({ cart, cartCount, totalAmount });
+      this.rebuildCartDerived(cart);
+      if (this.data.useRemoteCart) {
+        try {
+          const gid = Number(item.id);
+          const itemId = this.data.cartItemIdByGoodsId[gid];
+          if (itemId) {
+            const nextQty = cart[gid] ? cart[gid].quantity : 0;
+            if (nextQty <= 0) {
+              await util.del(`market/cart/items/${itemId}`);
+              const nextMap = { ...this.data.cartItemIdByGoodsId };
+              delete nextMap[gid];
+              this.setData({ cartItemIdByGoodsId: nextMap });
+            } else {
+              await util.put(`market/cart/items/${itemId}`, { quantity: nextQty });
+            }
+          } else {
+            // 没有 itemId 映射时，直接重新同步一次
+            await this.syncCartFromApi(this.data.currentShopId);
+          }
+        } catch (err) {
+          this.setData({ useRemoteCart: false });
+        }
+      }
 
       // 如果购物车空了，关闭弹窗
       if (cartCount === 0) {
@@ -209,14 +394,27 @@ Page({
       title: '提示',
       content: '确认清空购物车？',
       success: (res) => {
-        if (res.confirm) {
+        if (!res.confirm) return;
+        const afterClear = () => {
           this.setData({
             cart: {},
+            cartList: [],
+            cartItemIdByGoodsId: {},
             cartCount: 0,
             totalAmount: "0.00",
             showCartPopup: false
           });
+        };
+        if (this.data.useRemoteCart) {
+          util.del('market/cart', { shop_id: this.data.currentShopId })
+            .then(() => afterClear())
+            .catch(() => {
+              this.setData({ useRemoteCart: false });
+              afterClear();
+            });
+          return;
         }
+        afterClear();
       }
     });
   },
@@ -253,6 +451,7 @@ Page({
     // 存入本地缓存，供确认订单页面读取
     wx.setStorageSync('local_checkout_goods', cartItems);
     wx.setStorageSync('local_checkout_totle', this.data.totalAmount);
+    wx.setStorageSync('local_checkout_shop_id', this.data.currentShopId || (this.data.shop && this.data.shop.id));
     
     // 跳转到结算页
     wx.navigateTo({ url: '../goods-confrim/goods-confrim?from=local' });

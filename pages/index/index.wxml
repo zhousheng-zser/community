@@ -346,11 +346,11 @@
 
   <view wx:elif="{{activeTab === '家集市'}}">
     <view class="card market-top-cats">
-      <view class="market-top-item {{activeMarketCat === item.name ? 'active' : ''}}" wx:for="{{marketTopCats}}" wx:key="name" bindtap="switchMarketCategory" data-name="{{item.name}}">
-        <view class="market-emoji-wrap" style="background:{{item.bgColor}}; border: {{activeMarketCat === item.name ? '4rpx solid #ff4d4f' : '4rpx solid transparent'}};">
+      <view class="market-top-item {{activeMarketCat === item.code ? 'active' : ''}}" wx:for="{{marketTopCats}}" wx:key="code" bindtap="switchMarketCategory" data-code="{{item.code}}">
+        <view class="market-emoji-wrap" style="background:{{item.bgColor}}; border: {{activeMarketCat === item.code ? '4rpx solid #ff4d4f' : '4rpx solid transparent'}};">
           <text class="market-emoji">{{item.emoji}}</text>
         </view>
-        <text style="color: {{activeMarketCat === item.name ? '#ff4d4f' : '#333'}}; font-weight: {{activeMarketCat === item.name ? 'bold' : 'normal'}};">{{item.name}}</text>
+        <text style="color: {{activeMarketCat === item.code ? '#ff4d4f' : '#333'}}; font-weight: {{activeMarketCat === item.code ? 'bold' : 'normal'}};">{{item.name}}</text>
       </view>
     </view>
 

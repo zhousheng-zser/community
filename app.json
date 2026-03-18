@@ -62,6 +62,7 @@
     "pages/join-market/join-market",
     "pages/address/address",
     "pages/about/about"
+    ,"pages/market-order-detail/market-order-detail"
   ],
   "window": {
     "backgroundTextStyle": "light",
