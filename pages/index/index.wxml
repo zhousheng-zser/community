@@ -282,7 +282,7 @@
 
   <view wx:elif="{{activeTab === '福卡'}}">
     <view class="card fuka-banner">
-      <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
+      <image src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" mode="aspectFill"></image>
       <view class="mask">
         <text class="title">家事生活 购物消费</text>
       </view>

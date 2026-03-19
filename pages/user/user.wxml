@@ -5,7 +5,7 @@
   <view class="mine-header" style="padding-top: {{navTop}}px;">
     <view class="header-row">
       <navigator url="../user-edit/user-edit" class="avatar-wrap">
-        <image class="avatar" src="{{user.userPhoto || '/img/head.jpg'}}" mode="aspectFill"></image>
+        <image class="avatar" src="{{user.userPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}}" mode="aspectFill"></image>
         <view class="avatar-edit">编辑</view>
       </navigator>
       <view class="header-info">

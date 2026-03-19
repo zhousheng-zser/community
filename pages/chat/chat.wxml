@@ -8,7 +8,7 @@
 
       <!-- 对方发的消息 (左边) -->
       <view class="chat-row left" wx:if="{{item.sender_id != myUserId}}">
-        <image class="avatar" src="{{item.sender ? item.sender.avatar_url : '/img/placeholders/home_cleaning.png'}}"></image>
+        <image class="avatar" src="{{item.sender ? item.sender.avatar_url : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80'}}"></image>
         <view class="bubble left-bubble">
           <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
           <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
@@ -21,7 +21,7 @@
           <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
           <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
         </view>
-        <image class="avatar" src="/img/placeholders/avatar_worker.png"></image>
+        <image class="avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"></image>
         <!-- 实际项目中获取自己的真实头像，这里用固定占位 -->
       </view>
 

@@ -5,7 +5,7 @@
     <view class="capsule">•••</view>
   </view>
 
-  <image class="hero-banner" src="/img/placeholders/sale_banner.png" mode="aspectFill"></image>
+  <image class="hero-banner" src="https://images.unsplash.com/photo-1607083206869-4c76720db39f?auto=format&fit=crop&w=600&q=80" mode="aspectFill"></image>
 
   <view class="shop-list">
     <view class="shop-card" wx:for="{{shops}}" wx:key="id" bindtap="goShop" data-id="{{item.id}}">

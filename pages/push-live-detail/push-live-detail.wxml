@@ -5,7 +5,7 @@
   </view>
 
   <view class="header">
-    <image class="logo" src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
+    <image class="logo" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" mode="aspectFill"></image>
     <view class="right">
       <text class="name">三只松鼠 ThreeSquirrels</text>
       <text>暂无</text>
@@ -26,7 +26,7 @@
     <text>1 点击《去直播间》</text>
     <text>2 直播间点击右下角，选择转发给朋友或分享到朋友圈</text>
     <text>3 好友下单，您可拿到对应商品佣金</text>
-    <image src="/img/placeholders/home_cleaning.png" mode="aspectFill"></image>
+    <image src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" mode="aspectFill"></image>
   </view>
 
   <view class="bottom-bar">

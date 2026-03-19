@@ -17,7 +17,7 @@
         <!-- 头像区 -->
         <view class="avatar-box">
           <!-- TODO: Handle system bot vs real user picture -->
-          <image class="avatar" src="{{item.peerUser ? item.peerUser.avatar_url : '/img/placeholders/home_cleaning.png'}}"></image>
+          <image class="avatar" src="{{item.peerUser ? item.peerUser.avatar_url : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80'}}"></image>
           <!-- 未读红点 -->
           <view class="unread-badge" wx:if="{{item.unread_count > 0}}">{{item.unread_count > 99 ? '99+' : item.unread_count}}</view>
         </view>

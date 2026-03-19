@@ -49,7 +49,44 @@
   },
   "simulatorPluginLibVersion": {},
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      {
+        "type": "folder",
+        "value": "node_modules"
+      },
+      {
+        "type": "folder",
+        "value": "admin"
+      },
+      {
+        "type": "folder",
+        "value": "backend"
+      },
+      {
+        "type": "folder",
+        "value": "doc"
+      },
+      {
+        "type": "folder",
+        "value": "frontend"
+      },
+      {
+        "type": "folder",
+        "value": ".claude"
+      },
+      {
+        "type": "file",
+        "value": "README.md"
+      },
+      {
+        "type": "file",
+        "value": "install.cmd"
+      },
+      {
+        "type": "file",
+        "value": "test_community.js"
+      }
+    ],
     "include": []
   },
   "editorSetting": {}

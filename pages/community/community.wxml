@@ -42,7 +42,7 @@
     <view class="post-card" wx:for="{{posts}}" wx:key="id">
       <view class="user-row">
         <view class="left">
-          <image class="avatar" src="{{item.author ? item.author.avatar_url : '/img/placeholders/avatar_worker.png'}}" mode="aspectFill"></image>
+          <image class="avatar" src="{{item.author ? item.author.avatar_url : 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80'}}" mode="aspectFill"></image>
           <text class="name">{{item.author ? item.author.nickname : '匿名'}}</text>
         </view>
         <text class="time">{{item.createdAt}}</text>
