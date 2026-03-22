@@ -67,10 +67,25 @@
   padding:18rpx 20rpx calc(env(safe-area-inset-bottom));
   background:#fff;
   border-top:1px solid #f0f0f0;
+  display:flex;
+  gap:16rpx;
+  align-items:center;
+}
+.payBtn{
+  flex:1;
+  background:#07c160;
+  color:#fff;
+  font-size:30rpx;
 }
 .cancelBtn{
-  width:100%;
+  flex:1;
   background:#ff4d4f;
   color:#fff;
+  font-size:30rpx;
+}
+.cancelBtn.ghost{
+  background:#fff;
+  color:#ff4d4f;
+  border:1px solid #ffccc7;
 }
 

@@ -2,7 +2,9 @@
 //获取应用实例
 const app = getApp();
 const util = require('../../utils/util.js');
-const { imgUrl } = util;
+const config = require('../../utils/config.js');
+const geo = require('../../utils/geo.js');
+const { imgUrl, pickMarketShopAvatarPath } = util;
 const images = require('../../utils/images.js');
 Page({
   data: {
@@ -51,7 +53,11 @@ Page({
     fukaGoods: [],
     activeMarketCat: "AAAA",
     marketTopCats: [],
-    marketFilters: [],
+    marketFilters: [
+      { key: 'comprehensive', label: '综合排序' },
+      { key: 'distance', label: '距离优先' }
+    ],
+    activeMarketSort: 'distance',
     allMarketShops: [],
     marketShops: [],
     marketShopsCacheByCat: {} // { [catName]: mappedShopList }
@@ -103,6 +109,24 @@ Page({
         duration: 300 // 带点平滑滚动的动画体验更好
       });
     }
+    this._maybeRefreshMarketAfterAddressChange();
+  },
+  /** 地址页保存/编辑/删除/设默认后，清空家集市缓存并重拉当前分类店铺 */
+  _maybeRefreshMarketAfterAddressChange() {
+    const flag = wx.getStorageSync('market_refresh_after_address');
+    if (!flag) return;
+    wx.removeStorageSync('market_refresh_after_address');
+    wx.removeStorageSync('market_user_lat');
+    wx.removeStorageSync('market_user_lng');
+    wx.removeStorageSync('market_user_location_manual');
+    wx.removeStorageSync('market_snap_address_id');
+    wx.removeStorageSync('market_snap_distance_km');
+    wx.removeStorageSync('market_location_label');
+    const cat = this.data.activeMarketCat;
+    this.switchMarketCategory(
+      { currentTarget: { dataset: { code: cat } } },
+      true
+    );
   },
   onShareAppMessage: function (res) {
     const openid = app.globalData.user.opId;
@@ -116,40 +140,191 @@ Page({
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
   },
-  switchMarketCategory(e) {
+  /** 家集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
+  getMarketLocationCacheKey() {
+    const lat = wx.getStorageSync('market_user_lat');
+    const lng = wx.getStorageSync('market_user_lng');
+    if (lat == null || lng == null || lat === '' || lng === '') return 'noloc';
+    return `${Number(lat).toFixed(3)}_${Number(lng).toFixed(3)}`;
+  },
+  cacheKeyForMarketCat(cat) {
+    const sort = this.data.activeMarketSort || 'distance';
+    // 店铺卡片图字段映射变更时递增，避免命中旧版 normalize 的内存缓存
+    const MAP_VER = 'avatar-v2';
+    return `${MAP_VER}::${this.getMarketLocationCacheKey()}::${cat}::${sort}`;
+  },
+  buildMarketShopsQuery(extra = {}) {
+    const q = { ...extra };
+    if (!q.page) q.page = 1;
+    if (!q.page_size) q.page_size = 30;
+    const lat = wx.getStorageSync('market_user_lat');
+    const lng = wx.getStorageSync('market_user_lng');
+    const hasCoords = lat != null && lng != null && lat !== '' && lng !== '';
+    if (hasCoords) {
+      q.user_lat = Number(lat);
+      q.user_lng = Number(lng);
+      q.radius_km = config.marketShopRadiusKm != null ? config.marketShopRadiusKm : 5;
+      const sortMode = this.data.activeMarketSort || 'distance';
+      q.sort = sortMode === 'comprehensive' ? 'comprehensive' : 'distance';
+    } else {
+      // 无定位且无可用坐标回退时：不按距离，固定综合排序
+      q.sort = 'comprehensive';
+    }
+    return q;
+  },
+  /** 切换「综合排序 / 距离优先」，重新拉取当前分类店铺列表 */
+  async switchMarketSort(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!key || key === this.data.activeMarketSort) return;
+    const lat = wx.getStorageSync('market_user_lat');
+    const lng = wx.getStorageSync('market_user_lng');
+    const hasCoords = lat != null && lng != null && lat !== '' && lng !== '';
+    if (key === 'distance' && !hasCoords) {
+      wx.showToast({ title: '需定位或默认地址坐标后可用距离排序', icon: 'none' });
+      return;
+    }
+    this.setData({ activeMarketSort: key, marketShopsCacheByCat: {} });
+    await this.switchMarketCategory({
+      currentTarget: { dataset: { code: this.data.activeMarketCat } }
+    });
+  },
+  /** 拉取收货地址（接口优先，失败用本地缓存），供「1km 吸附」 */
+  async loadUserAddressesForSnap() {
+    try {
+      const res = await util.get('user/addresses');
+      return Array.isArray(res) ? res : (res.list || []);
+    } catch (e) {
+      return wx.getStorageSync('address_list') || [];
+    }
+  },
+
+  /**
+   * 家集市定位（须与产品一致）：
+   * 1) 拿不到当前 GPS → 用默认收货地址坐标（有经纬度）；
+   * 2) 拿不到 GPS 且无可用默认地址坐标 → hasCoords=false，店铺综合排序；
+   * 3) 拿到 GPS → 与全部已存地址比，若最近一条 &lt;1km → 用该条存储坐标；
+   * 4) 否则 → 用当前 GPS。
+   * 用户点「定位」地图选点会设 market_user_location_manual，在清除前会话内不自动覆盖。
+   * 自动 getLocation：仅在冷启动清空坐标后首次需要时执行；同一次打开小程序内复用 storage 坐标（无定时、无 Tab 切换重打 GPS）。
+   * @returns {Promise<{ hasCoords: boolean }>}
+   */
+  ensureMarketUserCoordsForList() {
+    return new Promise((resolve) => {
+      if (wx.getStorageSync('market_user_location_manual')) {
+        const lat = wx.getStorageSync('market_user_lat');
+        const lng = wx.getStorageSync('market_user_lng');
+        if (lat != null && lng != null && lat !== '' && lng !== '') {
+          resolve({ hasCoords: true });
+          return;
+        }
+        wx.removeStorageSync('market_user_location_manual');
+      }
+      const lat0 = wx.getStorageSync('market_user_lat');
+      const lng0 = wx.getStorageSync('market_user_lng');
+      if (lat0 != null && lng0 != null && lat0 !== '' && lng0 !== '') {
+        resolve({ hasCoords: true });
+        return;
+      }
+      wx.getLocation({
+        type: 'gcj02',
+        success: async (res) => {
+          let finalLat = res.latitude;
+          let finalLng = res.longitude;
+          let snapLabel = '';
+          try {
+            const list = await this.loadUserAddressesForSnap();
+            const snap = geo.findNearestAddressWithin(res.latitude, res.longitude, list, 1);
+            if (snap) {
+              finalLat = snap.lat;
+              finalLng = snap.lng;
+              snapLabel = snap.label;
+              wx.setStorageSync('market_snap_address_id', snap.id);
+              wx.setStorageSync('market_snap_distance_km', snap.dKm);
+            } else {
+              wx.removeStorageSync('market_snap_address_id');
+              wx.removeStorageSync('market_snap_distance_km');
+            }
+          } catch (e) {
+            /* 吸附失败则仍用 GPS */
+          }
+          wx.setStorageSync('market_user_lat', finalLat);
+          wx.setStorageSync('market_user_lng', finalLng);
+          if (snapLabel) {
+            wx.setStorageSync('market_location_label', snapLabel);
+            this.setData({ currentCity: snapLabel });
+          } else {
+            wx.removeStorageSync('market_location_label');
+            this.setData({ currentCity: '已定位' });
+          }
+          resolve({ hasCoords: true });
+        },
+        fail: async () => {
+          try {
+            const list = await this.loadUserAddressesForSnap();
+            const fallback = geo.getDefaultAddressCoords(list);
+            if (fallback) {
+              wx.setStorageSync('market_user_lat', fallback.lat);
+              wx.setStorageSync('market_user_lng', fallback.lng);
+              wx.setStorageSync('market_location_label', fallback.label);
+              if (fallback.id != null) wx.setStorageSync('market_snap_address_id', fallback.id);
+              this.setData({ currentCity: fallback.label });
+              resolve({ hasCoords: true });
+              return;
+            }
+          } catch (e) {
+            /* ignore */
+          }
+          wx.removeStorageSync('market_user_lat');
+          wx.removeStorageSync('market_user_lng');
+          wx.removeStorageSync('market_snap_address_id');
+          wx.removeStorageSync('market_snap_distance_km');
+          wx.removeStorageSync('market_location_label');
+          resolve({ hasCoords: false });
+        }
+      });
+    });
+  },
+  // force：true 时忽略店铺列表缓存（地址变更后需重拉）；定位仍遵循「本会话已算过则复用」
+  async switchMarketCategory(e, force) {
     const cat = e.currentTarget.dataset.code || e.currentTarget.dataset.name;
     this.setData({ activeMarketCat: cat });
 
-    // 优先走缓存，避免频繁请求
-    const cache = this.data.marketShopsCacheByCat || {};
-    if (cache[cat] && Array.isArray(cache[cat])) {
-      this.setData({ marketShops: cache[cat] });
-      return;
-    }
-
     wx.showLoading({ title: '加载中...', mask: true });
-    util.get('market/shops', { category: cat, page: 1, page_size: 30 })
-      .then((marketRes) => {
+    try {
+      const locRes = await this.ensureMarketUserCoordsForList();
+      if (locRes && locRes.hasCoords === false) {
+        this.setData({ activeMarketSort: 'comprehensive' });
+      }
+      const cache = this.data.marketShopsCacheByCat || {};
+      const ck = this.cacheKeyForMarketCat(cat);
+      if (!force && cache[ck] && Array.isArray(cache[ck])) {
         wx.hideLoading();
-        const list = Array.isArray(marketRes)
-          ? marketRes
-          : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
-        const mapped = Array.isArray(list) ? list.map(s => this.normalizeMarketShop(s)).filter(s => !!s.id) : [];
-        const newCache = { ...cache, [cat]: mapped };
-        this.setData({
-          marketShops: mapped,
-          marketShopsCacheByCat: newCache
-        });
-      })
-      .catch(() => {
-        wx.hideLoading();
-        // 兜底：用本地已缓存的数据做一次过滤
-        const marketShops = (this.data.allMarketShops || []).filter(s => s.cat === cat);
-        this.setData({
-          marketShops,
-          marketShopsCacheByCat: { ...cache, [cat]: marketShops }
-        });
+        this.setData({ marketShops: cache[ck] });
+        return;
+      }
+      const query = this.buildMarketShopsQuery({ category: cat, page: 1, page_size: 30 });
+      const marketRes = await util.get('market/shops', query);
+      wx.hideLoading();
+      const list = Array.isArray(marketRes)
+        ? marketRes
+        : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
+      const mapped = Array.isArray(list) ? list.map(s => this.normalizeMarketShop(s)).filter(s => !!s.id) : [];
+      const newCache = { ...cache, [ck]: mapped };
+      this.setData({
+        marketShops: mapped,
+        marketShopsCacheByCat: newCache
       });
+    } catch (err) {
+      wx.hideLoading();
+      const cache = this.data.marketShopsCacheByCat || {};
+      const ck = this.cacheKeyForMarketCat(cat);
+      const marketShops = [];
+      const newCache = { ...cache, [ck]: marketShops };
+      this.setData({
+        marketShops,
+        marketShopsCacheByCat: newCache
+      });
+    }
   },
   normalizeMarketShop(item) {
     const goodsRaw = Array.isArray(item.goods) ? item.goods : (Array.isArray(item.preview_goods) ? item.preview_goods : []);
@@ -164,6 +339,12 @@ Page({
       || (item.min_order_amount != null
         ? `起送￥${item.min_order_amount}  配送费￥${item.delivery_fee || 0}`
         : '起送￥0  免配送费');
+    let distanceLabel = '';
+    if (item.distance_km != null && item.distance_km !== '') {
+      const d = Number(item.distance_km);
+      if (!Number.isNaN(d)) distanceLabel = `距您${d.toFixed(1)}km`;
+    }
+    const coverPath = pickMarketShopAvatarPath(item);
     return {
       id: item.id,
       cat: item.category || '家集市',
@@ -171,21 +352,34 @@ Page({
       badge: item.delivery_type_text || item.delivery_type || '商家自送',
       delivery: deliveryText,
       sold: `已售${soldCount}`,
+      distanceLabel,
+      coverUrl: coverPath ? imgUrl(coverPath) : '',
+      ratingText: item.rating != null && item.rating !== '' ? `评分 ${item.rating}` : '',
       goods
     };
   },
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
   },
+  /** 用户主动选点：覆盖自动定位逻辑，家集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
   handleLocationTap() {
     wx.chooseLocation({
       success: (res) => {
+        wx.setStorageSync('market_user_location_manual', 1);
+        wx.setStorageSync('market_user_lat', res.latitude);
+        wx.setStorageSync('market_user_lng', res.longitude);
+        wx.removeStorageSync('market_snap_address_id');
+        wx.removeStorageSync('market_snap_distance_km');
+        wx.removeStorageSync('market_location_label');
+        this.setData({ marketShopsCacheByCat: {} });
         const city = res.address ? res.address.replace(/省.*/, '').replace(/市.*/, '').slice(0, 4) : (res.name ? res.name.slice(0, 4) : '已定位');
         this.setData({ currentCity: city || '已定位' });
         wx.showToast({
           title: res.name ? "已定位到" + res.name : "定位已更新",
           icon: "none"
         });
+        const cat = this.data.activeMarketCat;
+        this.switchMarketCategory({ currentTarget: { dataset: { code: cat } } }, true);
       },
       fail: () => {
         wx.showToast({
@@ -560,167 +754,15 @@ Page({
       { name: "电子数码", code: "AAAI", emoji: "💻", bgColor: "#e0f3ff", url: "../market-banner/market-banner?title=电子数码" },
       { name: "本地玩乐", code: "AAAJ", emoji: "🎡", bgColor: "#fff0f5", url: "../market-banner/market-banner?title=本地玩乐" }
     ];
-    const marketFilters = ["综合排序", "邻工秒送", "商家自送", "重置筛选"];
-    const allMarketShops = [
-      // 母婴生活馆
-      {
-        id: 1,
-        cat: "AAAA",
-        name: "爱婴坊母婴生活馆",
-        badge: "商家自送",
-        delivery: "起送￥30  免配送费",
-        sold: "已售156",
-        goods: [
-          { id: 101, name: "婴儿纯棉柔巾", price: "15", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 102, name: "新生儿奶瓶", price: "88", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 103, name: "婴儿沐浴露", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 家庭服务
-      {
-        id: 2,
-        cat: "AAAB",
-        name: "成都尚辰空间装饰",
-        badge: "邻工秒送",
-        delivery: "起送￥0  免配送费",
-        sold: "已售38",
-        goods: [
-          { id: 201, name: "卫生间翻新", price: "1999", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 202, name: "旧房改装", price: "19800", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 203, name: "墙面刷新", price: "599", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      {
-        id: 3,
-        cat: "AAAB",
-        name: "四川洁而诺保洁有限公司",
-        badge: "商家自送",
-        delivery: "起送￥0  免配送费",
-        sold: "已售215",
-        goods: [
-          { id: 301, name: "日常保洁(2小时)", price: "90", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 302, name: "深度清洗油烟机", price: "160", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 超市便利
-      {
-        id: 4,
-        cat: "AAAC",
-        name: "家家悦连锁超市",
-        badge: "邻工秒送",
-        delivery: "起送￥20  配送费￥3",
-        sold: "已售890",
-        goods: [
-          { id: 401, name: "新鲜纯牛奶(箱)", price: "49.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 402, name: "原味薯片", price: "8.5", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 403, name: "抽纸提装", price: "12.9", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 美食外卖
-      {
-        id: 5,
-        cat: "AAAD",
-        name: "老张家川菜馆",
-        badge: "商家自送",
-        delivery: "起送￥25  配送费￥2",
-        sold: "已售423",
-        goods: [
-          { id: 501, name: "鱼香肉丝盖饭", price: "18", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 502, name: "麻婆豆腐", price: "15", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 503, name: "干煸四季豆", price: "16", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 看病买药
-      {
-        id: 6,
-        cat: "AAAE",
-        name: "平安大药房",
-        badge: "邻工秒送",
-        delivery: "起送￥0  配送费￥5",
-        sold: "已售312",
-        goods: [
-          { id: 601, name: "医用外科口罩", price: "19.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 602, name: "维生素C泡腾片", price: "28", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 603, name: "退热贴", price: "25", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 鲜花礼品
-      {
-        id: 7,
-        cat: "AAAF",
-        name: "浪漫花语鲜花店",
-        badge: "商家自送",
-        delivery: "起送￥99  免配送费",
-        sold: "已售86",
-        goods: [
-          { id: 701, name: "红玫瑰11朵混搭", price: "138", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 702, name: "康乃馨花束", price: "118", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 703, name: "向日葵礼盒", price: "158", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 水果蔬菜
-      {
-        id: 8,
-        cat: "AAAG",
-        name: "每日鲜果园",
-        badge: "邻工秒送",
-        delivery: "起送￥20  免配送费",
-        sold: "已售645",
-        goods: [
-          { id: 801, name: "妃子笑荔枝(斤)", price: "15.8", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 802, name: "海南麒麟西瓜", price: "25", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 803, name: "红心火龙果", price: "12.5", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 服装首饰
-      {
-        id: 9,
-        cat: "AAAH",
-        name: "优衣库风尚店",
-        badge: "商家自送",
-        delivery: "起送￥0  免配送费",
-        sold: "已售234",
-        goods: [
-          { id: 901, name: "纯棉短袖T恤", price: "59", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 902, name: "防晒衣女款", price: "129", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 903, name: "休闲短裤", price: "79", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 电子数码
-      {
-        id: 10,
-        cat: "AAAI",
-        name: "极客数码配件",
-        badge: "邻工秒送",
-        delivery: "起送￥30  配送费￥4",
-        sold: "已售520",
-        goods: [
-          { id: 1001, name: "快充数据线", price: "19.9", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 1002, name: "蓝牙无线耳机", price: "139", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 1003, name: "大容量充电宝", price: "89", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      },
-      // 本地玩乐
-      {
-        id: 11,
-        cat: "AAAJ",
-        name: "星空剧本杀体验馆",
-        badge: "商家自送",
-        delivery: "起送￥0  免配送费",
-        sold: "已售128",
-        goods: [
-          { id: 1101, name: "单人剧本杀门票", price: "88", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 1102, name: "密室逃脱(工作日)", price: "98", image: imgUrl('/img/placeholders/home_cleaning.png') },
-          { id: 1103, name: "狼人杀畅玩券", price: "45", image: imgUrl('/img/placeholders/home_cleaning.png') }
-        ]
-      }
-    ];
+    const allMarketShops = [];
 
     let mergedMarketShops = allMarketShops;
     let activeMarketCat = this.data.activeMarketCat;
+    let locRes = null;
     try {
-      // 优先读取后端真实店铺数据；接口不可用时继续兜底本地 mock
-      const marketRes = await util.get('market/shops', { page: 1, page_size: 50 });
+      // 仅使用接口返回的店铺；无数据则为空列表
+      locRes = await this.ensureMarketUserCoordsForList();
+      const marketRes = await util.get('market/shops', this.buildMarketShopsQuery({ page: 1, page_size: 50 }));
       const marketData = Array.isArray(marketRes)
         ? marketRes
         : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
@@ -734,7 +776,7 @@ Page({
         }
       }
     } catch (e) {
-      console.log('家集市店铺接口不可用，继续使用本地数据', e);
+      console.log('家集市店铺接口不可用', e);
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
@@ -773,7 +815,11 @@ Page({
       fukaFilterTabs,
       fukaGoods,
       marketTopCats,
-      marketFilters,
+      marketFilters: [
+        { key: 'comprehensive', label: '综合排序' },
+        { key: 'distance', label: '距离优先' }
+      ],
+      activeMarketSort: locRes && locRes.hasCoords === false ? 'comprehensive' : 'distance',
       activeMarketCat,
       allMarketShops: mergedMarketShops,
       marketShops

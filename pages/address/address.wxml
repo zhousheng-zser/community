@@ -113,8 +113,12 @@
         <view class="form-row" bindtap="chooseRegion">
           <text class="form-label required">所在地区</text>
           <text class="form-value" wx:if="{{form.province}}">{{form.province}} {{form.city}} {{form.district}}</text>
-          <text class="form-placeholder" wx:else>请选择省/市/区</text>
+          <text class="form-placeholder" wx:else>省市区 / 地图 / 微信地址</text>
           <text class="form-arrow">›</text>
+        </view>
+        <view class="form-row map-pick-row" catchtap="">
+          <text class="form-label">地图选点</text>
+          <text class="map-pick-link" catchtap="pickAddressOnMap">{{form.latitude ? '重新在地图选点' : '打开地图选择位置'}}</text>
         </view>
         <view class="form-row detail-row">
           <text class="form-label required">详细地址</text>

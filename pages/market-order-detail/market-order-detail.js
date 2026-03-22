@@ -1,17 +1,28 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const marketPay = require('../../utils/marketPay.js');
 
 Page({
   data: {
     orderNo: '',
     order: null,
-    items: []
+    items: [],
+    autoRefreshTimer: null,
+    autoRefreshTimes: 0
   },
 
   onLoad(options) {
     const orderNo = options.orderNo || options.order_no || '';
     this.setData({ orderNo });
     this.loadOrder(orderNo);
+    this.startAutoRefresh(orderNo);
+  },
+
+  onUnload() {
+    const timer = this.data.autoRefreshTimer;
+    if (timer) {
+      clearTimeout(timer);
+    }
   },
 
   async loadOrder(orderNo) {
@@ -40,13 +51,52 @@ Page({
         items,
         ...normalizedOrder
       });
+
+      return normalizedOrder;
     } catch (e) {
       wx.showToast({ title: '订单加载失败', icon: 'none' });
+      return null;
     }
+  },
+
+  async startAutoRefresh(orderNo) {
+    // 避免用户触发回调稍晚导致“已支付但页面还显示 unpaid”
+    const maxTimes = 20;
+    const intervalMs = 2000;
+    let count = 0;
+
+    const tick = async () => {
+      count += 1;
+      const normalized = await this.loadOrder(orderNo);
+      const orderStatus = normalized && normalized.order_status;
+      const payStatus = normalized && normalized.pay_status;
+
+      if (orderStatus === 'paid' && payStatus === 'paid') {
+        return;
+      }
+
+      if (count >= maxTimes) {
+        return;
+      }
+      const timer = setTimeout(tick, intervalMs);
+      this.setData({ autoRefreshTimer: timer, autoRefreshTimes: count });
+    };
+
+    tick();
   },
 
   itemImage(item) {
     return item.goods_image_snapshot || item.goodsImageSnapshot || item.image || '';
+  },
+
+  /** 待支付订单：再次调起微信支付（与确认页共用 marketPay，避免无入口） */
+  async payNow() {
+    const { orderNo } = this.data;
+    if (!orderNo) return;
+    await marketPay.startMarketPaymentFlow(orderNo, {
+      redirectToDetail: false,
+      onPaid: () => this.loadOrder(orderNo)
+    });
   },
 
   async cancelOrder() {

@@ -62,7 +62,8 @@
     "pages/join-market/join-market",
     "pages/address/address",
     "pages/about/about"
-    ,"pages/market-order-detail/market-order-detail"
+    ,"pages/market-order-detail/market-order-detail",
+    "pages/market-order-list/market-order-list"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -104,7 +105,12 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "选择服务地址时需要获取您的位置信息"
+      "desc": "用于家集市按距离展示附近店铺；选择服务地址时获取位置"
     }
-  }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation",
+    "chooseAddress"
+  ]
 }

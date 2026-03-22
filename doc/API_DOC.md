@@ -43,6 +43,8 @@
 | 7    | 2026-03-15     | 前端 → 后端                   | 首页家推：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
 | 8    | 2026-03-15     | 前端 → 后端                   | 首页家推：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
 | 9    | 2026-03-15     | 用户 → 架构师                 | 产品与直播运营位结构再完善：增加商品图片及多维价格标识、主播头像等 | `API接口文档.md` 9, 10节扩充 | 文档已更新 |
+| 10   | 2026-03-17     | 前端 → 后端                   | 家集市一期：店铺/商品/购物车/下单/支付回调，完整交易闭环子系统。 | `market_*` 7表、`/api/v1/market/**` | 已完成（MVP闭环） |
+| 11   | 2026-03-17     | 前端 → 后端                   | 收货地址：地图选点经纬度落库；家集市：**GPS 成功**时与**最近一条**收货地址 &lt;1km 吸附该条坐标；**GPS 失败**时用默认地址坐标；与店铺 5km 半径区分。 | `user/addresses` 扩展字段、纪要第 8 次 | 待后端对齐 |
 
 > 后续有新的需求或接口调整，请在此表中新增一行，并在下方对应接口说明里同步更新。
 
@@ -443,6 +445,12 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 - **获取我的关注列表**：`GET /api/v1/user/follows`
 - **获取我参与的活动**：`GET /api/v1/activities/my`
 - **地址管理 CRUD**：`/api/v1/user/addresses` (GET 获取列表、POST 新增、PUT 修改、DELETE 删除)
+  - **默认地址标识**：每条地址需持久化「是否默认」（如 `is_default`），同一用户唯一默认；仅一条地址时须为默认。详见 **`doc/收货地址_默认字段_前端对后端需求.md`**。
+  - **收货地址扩展字段（地图选点 / 家集市吸附依赖）**：
+    - `latitude` / `longitude`：number，**GCJ-02**（与微信小程序 `wx.getLocation` / `wx.chooseLocation` 一致）；未地图选点可为 `null`。
+    - `location_poi_name`：string，可选，地图 POI 名称。
+  - **列表 GET**：建议返回上述字段，供端上展示或二次校验。**有 GPS 时**：与 **全部收货地址** 比对，距 **最近一条** &lt;1km 则用该条存储坐标，否则用 GPS。**无 GPS 时**：用 **默认地址** 坐标（含仅一条地址的兼容）；**既无 GPS 又无可用坐标** 则 `market/shops` **综合排序**。用户可地图重选覆盖自动逻辑。**首条新增地址** 小程序侧固定 **`is_default: true`**，后端需落库并保证唯一默认。
+  - **库表变更原则**：对所有表字段 **先检查是否存在 → 不存在则新增 → 已存在则审视语义与类型 → 合理则保留（文档注明覆盖含义）、不合理则修改并评估迁移**；详见 `doc/家集市店铺化_FE-BE沟通纪要_08_BE.md` §3.2。
 - **提交意见反馈**：`POST /api/v1/feedback/submit`
 
 #### 8.5 管理后台审核流预留 (Admin UI)
@@ -589,6 +597,64 @@ CREATE TABLE `live_streams` (
    - 须返回按照 `sort_order` 排好序的活跃项目列表。前端除了需要 `finder_username` 用于跳转外，还需要后端下发展示元素如：`promoters_count` (推广人数)、`rebate_info` (返佣比例)、`brand_logo` 和 `hot_goods` (爆品JSON)。
 
 ---
+
+### 12. 家集市 Market（一期交易闭环）
+
+> 家集市为独立 `market` 领域，交易逻辑不混入 `core`。所有接口返回统一结构：`{ code, msg, data }`。
+
+#### 12.1 店铺与商品（公共接口）
+
+- **店铺列表**：`GET /api/v1/market/shops`
+  - **查询参数**：
+    - `category`（可选）：分类编码（如 `AAAA`～`AAAJ`）。
+    - `page`、`page_size`：分页。
+    - `sort`（可选）：`comprehensive` / `sales` / `delivery_time` / **`distance`**（有用户坐标时按距离升序，详见《家集市店铺化_FE-BE沟通纪要_07_BE》）。
+    - **`user_lat`、`user_lng`**（可选，GCJ-02）：用户纬度/经度；与 `radius_km` 联用时可限制只返回**方圆 X 公里内**店铺。
+    - **`radius_km`**（可选）：半径（公里）；未传时由服务端默认（产品约定 **X=5km**，见纪要 07）。
+  - **返回**：`data.list` + 分页信息；列表项可含 **`distance_km`**、**`rating`** 等；**列表卡片缩略图与店铺详情 Logo 同源**：须返回与详情一致的 **`logo_url`（或 `logo`）**；`cover_url` / `list_cover_url` 仅作无 Logo 时的回退。另可含 **`cover_url`** 供横幅等大图场景。
+  - **说明**：未传 `user_lat`/`user_lng` 时，兼容旧行为（不按距离筛选）；店铺需在库中维护 `latitude`/`longitude` 与 `address` 等（见纪要 07）。
+- **店铺详情**：`GET /api/v1/market/shops/:shopId`
+  - 返回地址、营业时间、联系电话、**封面/门面/内景/证照**图片 URL 等；**不返回联系人**（`contact_name` 已废弃，见纪要 07）。
+- **店铺评价列表（建议）**：`GET /api/v1/market/shops/:shopId/reviews?page=&page_size=`（无评价时 `list` 为空；见纪要 07）。
+- **店内分类**：`GET /api/v1/market/shops/:shopId/categories`
+- **店内商品**：`GET /api/v1/market/shops/:shopId/goods`
+  - **查询参数**：`category_key`（可选）、`page`、`page_size`
+- **商品详情**：`GET /api/v1/market/goods/:goodsId`
+
+#### 12.2 购物车（登录态）
+
+> 需登录：`Authorization: Bearer <token>`
+
+- `GET /api/v1/market/cart?shop_id=xxx`
+- `POST /api/v1/market/cart/items`（加购/累加）
+- `PUT /api/v1/market/cart/items/:itemId`（改数量，`quantity=0` 视为删除）
+- `DELETE /api/v1/market/cart/items/:itemId`
+- `DELETE /api/v1/market/cart?shop_id=xxx`（清空店铺购物车）
+
+#### 12.3 订单（登录态）
+
+- **预结算**：`POST /api/v1/market/orders/preview`
+- **创建订单（事务扣库存 + 写快照）**：`POST /api/v1/market/orders`
+- **我的订单**：`GET /api/v1/market/orders/my?status=&page=&page_size=`
+- **订单详情**：`GET /api/v1/market/orders/:orderNo`
+- **取消订单（仅待支付）**：`POST /api/v1/market/orders/:orderNo/cancel`
+
+#### 12.4 支付（登录态 + 回调）
+
+> **注意**：`GET /api/v1/market/orders/:orderNo` **不返回** JSAPI 五参数（仅订单展示）；调起支付字段**仅**来自 `POST /api/v1/market/payments/create`（与《家集市店铺化_FE-BE沟通纪要_06_BE》第 3、4 节一致）。
+
+- **创建支付**：`POST /api/v1/market/payments/create`
+  - **Body**：`{ "order_no": "<订单号>" }`
+  - **成功**（`code === 0`）：外层 `{ code:0, msg:"ok", data:{...} }`；`data` 含 `virtual_pay: false`、`pay_mode: wechat`、`order_no`、`out_trade_no`、`amount`。
+  - **五参数**（与微信 `wx.requestPayment` 一致）：`data` 根级提供驼峰五字段；**推荐解析路径**为 `data.wx_pay_params`（内含驼峰 + 蛇形别名：`time_stamp`、`nonce_str`、`sign_type`、`pay_sign`）；另提供 `data.payment.wx_pay_params`（嵌套示例 C）、`data.jsapi`（与 `wx_pay_params` 等价），便于前端递归解析。
+  - **环境变量（不落库）**：`WX_PAY_APPID`（或 `WECHAT_APPID`）、`WX_PAY_MCHID`、`WX_PAY_SERIAL_NO`、`WX_PAY_API_V3_KEY`（32 位）、`WX_PAY_PRIVATE_KEY_PATH`（商户 API 私钥 PEM 路径）或 `WX_PAY_PRIVATE_KEY`（PEM 内容，`\n` 可写成 `\\n`）、`WX_PAY_NOTIFY_URL`（须与商户平台配置的**支付回调 URL**一致，HTTPS 可公网访问）。
+  - **常见错误码**：`20043` 用户无 openid；`20044` 未配置微信参数且已设置 `MARKET_PAY_VIRTUAL_SUCCESS=false`（严格模式）；`20045` 统一下单失败；`20046` 订单金额为 0。
+  - **临时虚拟支付（无商户配置时）**：若未配置完整 `WX_PAY_*` 且**未**设置 `MARKET_PAY_VIRTUAL_SUCCESS=false`，`payments/create` 返回 `code:0`，`virtual_pay: true`、`pay_mode: virtual`，并返回占位 JSAPI 五参数；**同时将订单与支付流水直接记为已支付**（不可用于真实收款）。配置真支付后请补齐 `WX_PAY_*` 并建议设 `MARKET_PAY_VIRTUAL_SUCCESS=false`。
+- **支付状态查询**：`GET /api/v1/market/payments/status?order_no=xxx`
+- **支付回调（不走 JWT；验签+幂等+落库）**：`POST /api/v1/market/pay/callback`
+  - **微信支付 V3**：校验 `Wechatpay-*` 头 + 拉取平台证书验签，解密 `resource`，幂等更新 `market_pay_transactions` / `market_orders`；**成功应答体**为：`{"code":"SUCCESS","message":"成功"}`（HTTP 200）。
+  - **联调兼容**：若请求**无** `Wechatpay-Signature` 头，仍可使用环境变量 `PAY_CALLBACK_SECRET` 做 HMAC-SHA256 验签（与一期自定义 body 字段一致）。
+- **模拟支付成功（仅非生产）**：`POST /api/v1/market/payments/mock-success`
 
 ### 11. 维护约定
 

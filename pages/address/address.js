@@ -1,5 +1,13 @@
 // pages/address/address.js
 const util = require('../../utils/util.js');
+const geo = require('../../utils/geo.js');
+
+/** 通知首页家集市：地址有变，需重算定位并刷新分类店铺 */
+function notifyHomeMarketAddressChanged() {
+  try {
+    wx.setStorageSync('market_refresh_after_address', Date.now());
+  } catch (e) {}
+}
 
 const EMPTY_FORM = {
   show: false,
@@ -10,6 +18,10 @@ const EMPTY_FORM = {
   city: '',
   district: '',
   detail: '',
+  /** 地图选点（GCJ-02，与 wx.getLocation / chooseLocation 一致） */
+  latitude: null,
+  longitude: null,
+  locationPoiName: '',
   tag: '家',
   isDefault: false,
 };
@@ -52,33 +64,58 @@ Page({
     if (!this.data.pickMode) this.loadAddresses();
   },
 
+  /**
+   * 统一 is_default / isDefault；仅一条地址时视为默认（与产品、家集市定位一致，仍请后端落库 is_default）
+   */
+  _normalizeAddressList(raw) {
+    const arr = Array.isArray(raw) ? raw : [];
+    const mapped = arr.map((item) => {
+      const isDef =
+        item.isDefault === true ||
+        item.isDefault === 1 ||
+        item.is_default === true ||
+        item.is_default === 1;
+      return Object.assign({}, item, { isDefault: !!isDef });
+    });
+    if (mapped.length === 1) {
+      return [Object.assign({}, mapped[0], { isDefault: true })];
+    }
+    return mapped;
+  },
+
   // ===== 加载地址列表 =====
   async loadAddresses() {
     this.setData({ loading: true });
     try {
       const res = await util.get('user/addresses');
-      const list = Array.isArray(res) ? res : (res.list || []);
+      const list = this._normalizeAddressList(Array.isArray(res) ? res : (res.list || []));
       this.setData({ list, loading: false });
     } catch (e) {
       // 后端暂不支持时使用本地缓存
       const cached = wx.getStorageSync('address_list') || [];
-      this.setData({ list: cached, loading: false });
+      this.setData({ list: this._normalizeAddressList(cached), loading: false });
     }
   },
 
   // ===== 打开新增弹窗 =====
   addAddress() {
+    const isFirst = !this.data.list || this.data.list.length === 0;
     this.setData({
-      form: Object.assign({}, EMPTY_FORM, { show: true }),
+      form: Object.assign({}, EMPTY_FORM, { show: true, isDefault: isFirst }),
       canSave: false,
     });
   },
 
   // ===== 打开编辑弹窗 =====
   editAddress(e) {
-    const item = e.currentTarget.dataset.item;
+    const item = e.currentTarget.dataset.item || {};
+    const merged = Object.assign({}, item, {
+      locationPoiName: item.location_poi_name || item.locationPoiName || '',
+      latitude: item.latitude != null ? item.latitude : item.lat,
+      longitude: item.longitude != null ? item.longitude : item.lng,
+    });
     this.setData({
-      form: Object.assign({}, EMPTY_FORM, item, { show: true }),
+      form: Object.assign({}, EMPTY_FORM, merged, { show: true }),
       canSave: true,
     });
   },
@@ -109,31 +146,54 @@ Page({
     this.setData({ form });
   },
 
-  // ===== 选择地区 =====
+  // ===== 选择地区：地图选点 / 微信地址导入（参考外卖类 App：主路径为地图 POI） =====
   chooseRegion() {
-    wx.chooseLocation({
-      success: () => {},
-      fail: () => {}
-    });
-    // 使用 picker 方式选择省市区
-    wx.showActionSheet({
-      itemList: ['使用省市区选择器'],
-      success: () => {}
-    });
-    // 直接用 wx API 的地区选择
     const self = this;
-    wx.getLocation({
-      type: 'wgs84',
-      success() {},
-      fail() {}
+    wx.showActionSheet({
+      itemList: ['地图选点', '从微信地址导入省市区'],
+      success(res) {
+        if (res.tapIndex === 0) self.pickAddressOnMap();
+        else if (res.tapIndex === 1) self.chooseRegionFromWechat();
+      },
     });
-    // 采用简单的三级联动方式
-    self._openRegionPicker();
   },
 
-  _openRegionPicker() {
+  /** 调起微信地图选点，回填经纬度、省市区与详细地址 */
+  pickAddressOnMap() {
     const self = this;
-    // WeChat 内置地区选择
+    wx.chooseLocation({
+      success(res) {
+        const addrStr = (res.address || '').trim();
+        const parsed = geo.parseRegionFromAddress(addrStr);
+        const poi = (res.name || '').trim();
+        const detailFromMap = [poi, parsed.detail || ''].filter(Boolean).join(' ').trim()
+          || [addrStr, poi].filter(Boolean).join(' ').trim();
+        const form = Object.assign({}, self.data.form, {
+          latitude: res.latitude,
+          longitude: res.longitude,
+          locationPoiName: poi,
+          province: parsed.province || self.data.form.province,
+          city: parsed.city || self.data.form.city,
+          district: parsed.district || self.data.form.district,
+          detail: self.data.form.detail || detailFromMap,
+        });
+        self.setData({ form, canSave: self._checkCanSave(form) });
+        wx.showToast({ title: '已选择地图位置', icon: 'success' });
+      },
+      fail(err) {
+        if (err && err.errMsg && err.errMsg.indexOf('cancel') !== -1) return;
+        wx.showModal({
+          title: '无法打开地图',
+          content: '请在手机设置中允许定位，或稍后重试。',
+          showCancel: false,
+        });
+      },
+    });
+  },
+
+  /** 使用微信通讯录地址填充省市区（与地图选点互补） */
+  chooseRegionFromWechat() {
+    const self = this;
     wx.chooseAddress({
       success(res) {
         const form = Object.assign({}, self.data.form, {
@@ -145,25 +205,35 @@ Page({
         self.setData({ form, canSave: self._checkCanSave(form) });
       },
       fail() {
-        // 降级：手动输入省市区
         wx.showModal({
-          title: '选择地区',
-          content: '暂不支持地图选择，请在详细地址中输入完整地址',
+          title: '提示',
+          content: '未获取到微信地址，可使用「地图选点」或在详细地址中手动填写完整地址。',
           showCancel: false,
         });
-      }
+      },
     });
   },
 
   // ===== 验证是否可以保存 =====
   _checkCanSave(form) {
-    return !!(form.name && form.phone && form.phone.length === 11 && form.detail);
+    const phoneOk = form.phone && String(form.phone).length === 11;
+    const detailOk = !!(form.detail && String(form.detail).trim());
+    const mapOk =
+      form.latitude != null &&
+      form.longitude != null &&
+      !Number.isNaN(Number(form.latitude)) &&
+      !Number.isNaN(Number(form.longitude));
+    const regionOk = !!(form.province && form.city && form.district) || mapOk;
+    return !!(form.name && phoneOk && detailOk && regionOk);
   },
 
   // ===== 保存地址 =====
   async saveAddress() {
     if (!this.data.canSave) return;
     const form = this.data.form;
+    const list = this.data.list || [];
+    // 首条收货地址强制为默认，便于无 GPS 时家集市用该坐标
+    const isFirstAddress = !form.id && list.length === 0;
     const payload = {
       name: form.name,
       phone: form.phone,
@@ -172,7 +242,10 @@ Page({
       district: form.district,
       detail: form.detail,
       tag: form.tag,
-      isDefault: form.isDefault,
+      isDefault: isFirstAddress ? true : !!form.isDefault,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      location_poi_name: form.locationPoiName || '',
     };
 
     wx.showLoading({ title: '保存中...' });
@@ -184,6 +257,7 @@ Page({
       }
       wx.hideLoading();
       wx.showToast({ title: '保存成功', icon: 'success' });
+      notifyHomeMarketAddressChanged();
       this.closeForm();
       this.loadAddresses();
     } catch (e) {
@@ -211,6 +285,7 @@ Page({
     }
     wx.setStorageSync('address_list', list);
     this.setData({ list });
+    notifyHomeMarketAddressChanged();
     wx.showToast({ title: '保存成功', icon: 'success' });
     this.closeForm();
   },
@@ -220,6 +295,7 @@ Page({
     const id = e.currentTarget.dataset.id;
     try {
       await util.post('user/addresses/' + id + '/default', {});
+      notifyHomeMarketAddressChanged();
       this.loadAddresses();
     } catch (e) {
       // 本地模拟
@@ -228,6 +304,7 @@ Page({
       );
       wx.setStorageSync('address_list', list);
       this.setData({ list });
+      notifyHomeMarketAddressChanged();
       wx.showToast({ title: '已设为默认', icon: 'success' });
     }
   },
@@ -267,6 +344,7 @@ Page({
       if (pickForm.isDefault) list = list.map(a => Object.assign({}, a, { isDefault: false }));
       list.unshift({ id: Date.now(), name: pickForm.name, phone: pickForm.phone, gender: pickForm.gender, detail: pickForm.door, _rawAddress: pickForm.address, isDefault: pickForm.isDefault, tag: '家' });
       wx.setStorageSync('address_list', list);
+      notifyHomeMarketAddressChanged();
     }
     // pass data back to calling page
     const pages = getCurrentPages();
@@ -286,12 +364,14 @@ Page({
         if (!res.confirm) return;
         try {
           await util.post('user/addresses/' + id + '/delete', {});
+          notifyHomeMarketAddressChanged();
           this.loadAddresses();
         } catch (err) {
           // 本地模拟
           let list = this.data.list.filter(item => item.id !== id);
           wx.setStorageSync('address_list', list);
           this.setData({ list });
+          notifyHomeMarketAddressChanged();
           wx.showToast({ title: '已删除', icon: 'success' });
         }
       }

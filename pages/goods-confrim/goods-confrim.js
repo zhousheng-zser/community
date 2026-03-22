@@ -1,6 +1,7 @@
 // pages/good-confrim/good-confrim.js
 const app = getApp();
 const util = require('../../utils/util.js');
+const marketPay = require('../../utils/marketPay.js');
 
 Page({
 
@@ -241,127 +242,13 @@ Page({
         return false;
       }
 
-      // 下单成功后继续：发起支付
-      wx.showToast({ title: '下单成功，准备支付', icon: 'success' });
-      await this.startMarketPaymentFlow(orderNo);
+      // 下单成功后继续：发起支付（勿在此处 showToast，避免与真机 wx.requestPayment 冲突）
+      await marketPay.startMarketPaymentFlow(orderNo);
       return true;
     } catch (err) {
       wx.hideLoading();
       throw err;
     }
-  },
-  async startMarketPaymentFlow(orderNo) {
-    try {
-      wx.showLoading({ title: '拉起支付中...', mask: true });
-
-      const payRes = await util.post('market/payments/create', { order_no: orderNo });
-      const payData = payRes && payRes.data ? payRes.data : payRes;
-
-      // 调试辅助：如 BE 返回 out_trade_no，可用于后端模拟回调
-      const outTradeNo = payData && (payData.out_trade_no || payData.outTradeNo);
-      if (outTradeNo) {
-        wx.setStorageSync('last_market_out_trade_no', outTradeNo);
-      }
-      wx.setStorageSync('last_market_order_no', orderNo);
-
-      wx.hideLoading();
-
-      const payParams = this.extractWxPayParams(payData);
-      if (payParams) {
-        wx.showToast({ title: '正在拉起支付', icon: 'none' });
-        wx.requestPayment({
-          timeStamp: payParams.timeStamp,
-          nonceStr: payParams.nonceStr,
-          package: payParams.package,
-          signType: payParams.signType,
-          paySign: payParams.paySign,
-          success: async () => {
-            wx.showToast({ title: '支付成功，查询订单状态中...', icon: 'none' });
-            await this.pollMarketPayStatus(orderNo, { redirectToDetail: true });
-          },
-          fail: async () => {
-            wx.showToast({ title: '取消支付或支付失败', icon: 'none' });
-            // 失败也去查一次，避免状态不同步（例如回调成功但本地未触发 success）
-            await this.pollMarketPayStatus(orderNo, { quiet: true, redirectToDetail: true });
-          }
-        });
-      } else {
-        // 若后端未提供可直接 requestPayment 的参数，则直接轮询支付状态
-        await this.pollMarketPayStatus(orderNo, { redirectToDetail: true });
-      }
-    } catch (e) {
-      wx.hideLoading();
-      // 支付参数接口失败也需要给用户可见反馈
-      wx.showToast({ title: '支付发起失败，请稍后再试', icon: 'none' });
-    }
-  },
-  extractWxPayParams(payData) {
-    if (!payData) return null;
-    // 兼容：可能直接在对象上，也可能在嵌套字段内
-    const p = payData.pay_params || payData.wx_pay_params || payData;
-    const timeStamp = p.timeStamp || p.timestamp || p.time_stamp;
-    const nonceStr = p.nonceStr || p.nonce_str;
-    const pkg = p.package || p.pkg || p.pack;
-    const signType = p.signType || p.sign_type;
-    const paySign = p.paySign || p.pay_sign || p.sign;
-
-    if (timeStamp && nonceStr && pkg && signType && paySign) {
-      return { timeStamp, nonceStr, package: pkg, signType, paySign };
-    }
-    return null;
-  },
-  pollMarketPayStatus(orderNo, { quiet = false, redirectToDetail = false } = {}) {
-    const self = this;
-    const tryTimes = 6; // 6次 * 1500ms = 9s
-    const intervalMs = 1500;
-    let count = 0;
-
-    return new Promise((resolve) => {
-      const tick = async () => {
-        count += 1;
-        try {
-          const statusRes = await util.get('market/payments/status', { order_no: orderNo });
-          const statusData = statusRes && statusRes.data ? statusRes.data : statusRes;
-          const payStatus = statusData && (statusData.pay_status || statusData.payStatus);
-          if (!quiet) {
-            // 可选：弱提示，避免刷屏（这里只在最后两次不 quiet 的时候显示一次）
-            if (count >= tryTimes - 1) {
-              wx.showToast({ title: `支付状态：${payStatus || 'unknown'}`, icon: 'none' });
-            }
-          }
-
-          if (payStatus === 'paid' || payStatus === 'success' || payStatus === 'paid_success') {
-            wx.showToast({ title: '支付成功', icon: 'success' });
-            if (redirectToDetail) {
-              wx.redirectTo({ url: `../market-order-detail/market-order-detail?orderNo=${orderNo}` });
-            }
-            resolve(true);
-            return;
-          }
-
-          if (count >= tryTimes) {
-            wx.showToast({ title: `支付结束但未确认（状态：${payStatus || 'unknown'}）`, icon: 'none' });
-            if (redirectToDetail) {
-              wx.redirectTo({ url: `../market-order-detail/market-order-detail?orderNo=${orderNo}` });
-            }
-            resolve(false);
-            return;
-          }
-          setTimeout(tick, intervalMs);
-        } catch (e) {
-          if (count >= tryTimes) {
-            if (!quiet) wx.showToast({ title: '查询支付状态失败', icon: 'none' });
-            if (redirectToDetail) {
-              wx.redirectTo({ url: `../market-order-detail/market-order-detail?orderNo=${orderNo}` });
-            }
-            resolve(false);
-            return;
-          }
-          setTimeout(tick, intervalMs);
-        }
-      };
-      tick();
-    });
   },
   submitLegacyOrder(e, userName, userMobile, saveGoodsAdd, goodsList) {
     const { id: userId, opId: openId } = app.globalData.user;

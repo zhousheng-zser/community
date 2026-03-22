@@ -6,6 +6,21 @@
   overflow: hidden;
 }
 
+.ms-empty-page {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 48rpx;
+  padding-top: calc(120rpx + env(safe-area-inset-top));
+}
+.ms-empty-text {
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.6;
+}
+
 .top-nav {
   position: absolute;
   top: 0;

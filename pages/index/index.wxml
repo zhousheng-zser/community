@@ -359,17 +359,32 @@
     </view>
 
     <view class="card market-filter-row">
-      <text class="market-filter" wx:for="{{marketFilters}}" wx:key="*this">{{item}}</text>
+      <text
+        class="market-filter {{activeMarketSort === item.key ? 'active' : ''}}"
+        wx:for="{{marketFilters}}"
+        wx:key="key"
+        bindtap="switchMarketSort"
+        data-key="{{item.key}}"
+      >{{item.label}}</text>
     </view>
 
+    <view class="market-empty" wx:if="{{marketShops.length === 0}}">
+      <text class="market-empty-text">附近暂无商家</text>
+    </view>
     <view class="market-shop-list">
       <view class="card market-shop-card" wx:for="{{marketShops}}" wx:key="id" bindtap="goMarketShop" data-id="{{item.id}}">
+        <image wx:if="{{item.coverUrl}}" class="shop-list-cover" src="{{item.coverUrl}}" mode="aspectFill" />
+        <view class="shop-card-body">
         <view class="shop-head">
           <text class="name">{{item.name}}</text>
           <text class="badge">{{item.badge}}</text>
         </view>
+        <view class="shop-rating-row" wx:if="{{item.ratingText}}">
+          <text class="rating-text">{{item.ratingText}}</text>
+        </view>
         <view class="shop-meta">
           <text>{{item.delivery}}</text>
+          <text class="distance" wx:if="{{item.distanceLabel}}">{{item.distanceLabel}}</text>
           <text class="sold">{{item.sold}}</text>
         </view>
         <scroll-view class="shop-goods-scroll" scroll-x="{{true}}">
@@ -381,6 +396,7 @@
             </view>
           </view>
         </scroll-view>
+        </view>
       </view>
     </view>
   </view>

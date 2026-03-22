@@ -357,6 +357,48 @@ const stateTabel = (state, userFlag) => {
   }
   return result;
 }
+
+/**
+ * 合并接口里可能出现的嵌套店铺对象（如 data.shop / store），避免列表与详情字段层级不一致。
+ */
+const flattenMarketShopPayload = (item) => {
+  if (!item || typeof item !== 'object') return {};
+  const shop = item.shop && typeof item.shop === 'object' ? item.shop : {};
+  const store = item.store && typeof item.store === 'object' ? item.store : {};
+  return Object.assign({}, store, shop, item);
+};
+
+const firstNonEmptyString = (obj, keys) => {
+  if (!obj || typeof obj !== 'object') return '';
+  for (let i = 0; i < keys.length; i++) {
+    const v = obj[keys[i]];
+    if (v != null && String(v).trim() !== '') return String(v).trim();
+  }
+  return '';
+};
+
+/**
+ * 家集市：列表缩略图与详情页「店铺 Logo」共用同一套字段优先级，
+ * 避免封面(cover)与 Logo 混用导致首页卡片与详情头图不一致。
+ * 顺序：logo 类 → 封面/列表图类；兼容 camelCase 与常见别名。
+ * 注意：若列表接口完全不返回 logo 类字段，仍会回退到 cover，与详情不一致——需接口补全 logo。
+ */
+const pickMarketShopAvatarPath = (item) => {
+  const src = flattenMarketShopPayload(item);
+  const logoKeys = [
+    'logo_url', 'logoUrl', 'shop_logo_url', 'shopLogoUrl',
+    'logo', 'avatar', 'avatar_url', 'avatarUrl',
+    'brand_logo', 'brandLogo', 'headimg', 'head_img', 'headImg'
+  ];
+  const coverKeys = [
+    'cover_url', 'coverUrl', 'cover', 'cover_image', 'coverImage',
+    'list_cover_url', 'listCoverUrl',
+    'thumb', 'thumbnail', 'thumbnail_url', 'thumbnailUrl',
+    'shop_image', 'shopImage'
+  ];
+  return firstNonEmptyString(src, logoKeys) || firstNonEmptyString(src, coverKeys) || '';
+};
+
 module.exports = {
   formatTime,
   get,
@@ -367,5 +409,7 @@ module.exports = {
   goodsStateTabel,
   booksStateTabel,
   stateTabel,
-  imgUrl
+  imgUrl,
+  flattenMarketShopPayload,
+  pickMarketShopAvatarPath
 }
