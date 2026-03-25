@@ -15,7 +15,7 @@
         <icon type="search" size="13" color="#999" />
         <input
           class="search-field"
-          placeholder="{{activeTab === '家集市' ? '搜索商家、商品' : activeTab === '福卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}"
+          placeholder="{{activeTab === '本地集市' ? '搜索商家、商品' : activeTab === '惠民卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}"
           value="{{homeSearchKeyword}}"
           bindinput="onHomeSearchInput"
           confirm-type="search"
@@ -25,7 +25,7 @@
     </view>
   </view>
 
-  <view wx:if="{{activeTab === '家推'}}" class="jiatui-wrapper">
+  <view wx:if="{{activeTab === '本地好物'}}" class="jiatui-wrapper">
     <!-- 模块一：顶级海报轮播区 -->
     <view class="jt-hero">
       <swiper class="jt-hero-swiper" autoplay="true" indicator-dots="true" indicator-active-color="#fff" circular="true">
@@ -214,7 +214,7 @@
     </view>
   </view>
 
-  <view wx:elif="{{activeTab === '福卡'}}">
+  <view wx:elif="{{activeTab === '惠民卡'}}">
     <view class="card fuka-banner">
       <image src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" mode="aspectFill"></image>
       <view class="mask">
@@ -238,7 +238,7 @@
 
     <view class="card fuka-open-card">
       <view class="left">
-        <text class="title">立即开通福卡</text>
+        <text class="title">立即开通惠民卡</text>
         <text class="sub">购物立减 省钱专区</text>
       </view>
       <text class="go">GO ></text>
@@ -278,7 +278,7 @@
     </view>
   </view>
 
-  <view wx:elif="{{activeTab === '家集市'}}">
+  <view wx:elif="{{activeTab === '本地集市'}}">
     <view class="card market-top-cats">
       <view class="market-top-item {{activeMarketCat === item.code ? 'active' : ''}}" wx:for="{{marketTopCats}}" wx:key="code" bindtap="switchMarketCategory" data-code="{{item.code}}">
         <view class="market-emoji-wrap" style="background:{{item.bgColor}}; border: {{activeMarketCat === item.code ? '4rpx solid #ff4d4f' : '4rpx solid transparent'}};">

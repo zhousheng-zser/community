@@ -14,7 +14,7 @@
 | `pages/about/about` | 关于我们：App 介绍、核心功能、联系方式、法律条款 |
 | `pages/join-worker/join-worker` | 技工入驻申请表单（picker 选行业/学历/城市，身份证/工作照上传）|
 | `pages/join-service/join-service` | 服务商入驻申请（营业执照/门头/环境/证书多图上传，保存+发布双按钮）|
-| `pages/join-market/join-market` | 家集市商家入驻（琥珀色背景，2 列证件照网格，选择小区独立按钮）|
+| `pages/join-market/join-market` | 本地集市商家入驻（琥珀色背景，2 列证件照网格，选择小区独立按钮）|
 | `pages/order-publish/order-publish` | 一键发布：邻里帮帮/一键发布双 Tab，地址弹窗，年月日时四列 picker |
 | `pages/order-service/order-service` | 服务订单列表 |
 | `pages/settings/settings` | 设置页 |

@@ -3,7 +3,7 @@ Page({
     navTopPadding: 20,
     pageTitle: "专区",
     isGiftZone: false,
-    isSidebarLayout: false, // 是否是家推甄选专区(左侧边栏右瀑布流)
+    isSidebarLayout: false, // 是否是本地好物甄选专区(左侧边栏右瀑布流)
     isHighCommLayout: false, // 是否是高佣专区(顶部提示条+满宽单列)
     subCategories: [], // 专属子分类：送长辈等
     sidebarCategories: [], // 左侧分类菜单
@@ -18,7 +18,7 @@ Page({
     const titles = {
       "1": "爆款专区",
       "2": "礼物专区",
-      "3": "家推甄选",
+      "3": "本地好物甄选",
       "4": "高佣专区"
     };
     const title = titles[options.id] || "特产专区";

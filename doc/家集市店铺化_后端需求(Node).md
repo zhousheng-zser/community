@@ -1,4 +1,4 @@
-# 家集市店铺化后端需求文档（Node）
+# 本地集市店铺化后端需求文档（Node）
 
 ## 1. 文档目的
 
@@ -53,7 +53,7 @@ CREATE TABLE `market_shops` (
   UNIQUE KEY `uk_shop_no` (`shop_no`),
   KEY `idx_category_active` (`category`,`is_active`,`is_open`),
   KEY `idx_sort_order` (`sort_order`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='家集市店铺主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市店铺主表';
 
 -- 2) 店内分类
 CREATE TABLE `market_shop_categories` (
@@ -92,7 +92,7 @@ CREATE TABLE `market_goods` (
   UNIQUE KEY `uk_goods_no` (`goods_no`),
   KEY `idx_shop_category_status` (`shop_id`,`category_key`,`status`,`sort_order`),
   KEY `idx_shop_status` (`shop_id`,`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='家集市商品表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市商品表';
 
 -- 4) 购物车
 CREATE TABLE `market_cart_items` (
@@ -136,7 +136,7 @@ CREATE TABLE `market_orders` (
   KEY `idx_user_ctime` (`user_id`,`created_at`),
   KEY `idx_shop_ctime` (`shop_id`,`created_at`),
   KEY `idx_status` (`order_status`,`pay_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='家集市订单主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市订单主表';
 
 -- 6) 订单明细（下单快照）
 CREATE TABLE `market_order_items` (
@@ -154,7 +154,7 @@ CREATE TABLE `market_order_items` (
   PRIMARY KEY (`id`),
   KEY `idx_order_id` (`order_id`),
   KEY `idx_order_no` (`order_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='家集市订单明细';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市订单明细';
 
 -- 7) 支付流水表
 CREATE TABLE `market_pay_transactions` (
@@ -175,7 +175,7 @@ CREATE TABLE `market_pay_transactions` (
   UNIQUE KEY `uk_out_trade_no` (`out_trade_no`),
   KEY `idx_order_no` (`order_no`),
   KEY `idx_status` (`pay_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='家集市支付交易流水';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市支付交易流水';
 ```
 
 ## 4. 接口需求清单
@@ -183,7 +183,7 @@ CREATE TABLE `market_pay_transactions` (
 ## 4.1 店铺与商品（公共接口）
 
 1) `GET /api/v1/market/shops`
-- 用途：家集市首页店铺流
+- 用途：本地集市首页店铺流
 - 查询参数：
   - `category` 可选
   - `sort` 可选（`comprehensive`/`sales`/`delivery_time`）
@@ -396,4 +396,3 @@ CREATE TABLE `market_pay_transactions` (
 - 重复回调不会导致订单重复更新或重复入账。
 - 下单并发场景无超卖（库存扣减正确）。
 - 错误码与返回结构统一，前端可稳定展示。
-

@@ -101,7 +101,7 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于家集市按距离展示附近店铺；选择服务地址时获取位置"
+      "desc": "用于本地集市按距离展示附近店铺；选择服务地址时获取位置"
     }
   },
   "requiredPrivateInfos": [

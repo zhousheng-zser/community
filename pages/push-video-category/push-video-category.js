@@ -19,7 +19,7 @@ Page({
             { id: 2, title: "推客的分佣逻辑", viewers: 347, image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&q=80" },
             { id: 3, title: "推客的分佣规则", viewers: 63, image: "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=300&q=80" },
             { id: 4, title: "推客的染色关系与时效", viewers: 58, image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&q=80" },
-            { id: 5, title: "家推分佣逻辑", viewers: 66, image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=300&q=80" },
+            { id: 5, title: "本地好物分佣逻辑", viewers: 66, image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=300&q=80" },
             { id: 6, title: "如何成为一名优秀的推客", viewers: 91, image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=300&q=80" }
         ];
 

@@ -6,7 +6,6 @@ const {
     Category,
     Service,
     Shop,
-    LiveStream,
     Good,
     Feed,
     User,
@@ -81,7 +80,6 @@ async function seedDemo() {
             await Order.destroy({ truncate: true, cascade: true, transaction: t });
             await Feed.destroy({ truncate: true, cascade: true, transaction: t });
             await Good.destroy({ truncate: true, cascade: true, transaction: t });
-            await LiveStream.destroy({ truncate: true, cascade: true, transaction: t });
             await Shop.destroy({ truncate: true, cascade: true, transaction: t });
             await Service.destroy({ truncate: true, cascade: true, transaction: t });
             await Category.destroy({ truncate: true, cascade: true, transaction: t });
@@ -155,12 +153,9 @@ async function seedDemo() {
         const shop2 = await upsertBy(t, Shop, { name: '家电维修官方店' }, { name: '家电维修官方店', logo_url: 'https://via.placeholder.com/120?text=Shop+2', description: '维修配件与工具专卖。', status: 'open' });
 
         const goods = [
-            await upsertBy(t, Good, { title: '除螨仪（家用）' }, { title: '除螨仪（家用）', price: 399.0, commission: 39.9, cover_image: 'https://via.placeholder.com/300?text=Mite+Cleaner', detail_images: ['https://via.placeholder.com/600?text=Mite+1', 'https://via.placeholder.com/600?text=Mite+2'], stock: 120, tab_category: '家集市', shop_id: shop1.id }),
-            await upsertBy(t, Good, { title: '螺丝刀套装 24合1' }, { title: '螺丝刀套装 24合1', price: 59.0, commission: 8.0, cover_image: 'https://via.placeholder.com/300?text=Tool+Set', detail_images: ['https://via.placeholder.com/600?text=Tool+1', 'https://via.placeholder.com/600?text=Tool+2'], stock: 300, tab_category: '家集市', shop_id: shop2.id })
+            await upsertBy(t, Good, { title: '除螨仪（家用）' }, { title: '除螨仪（家用）', price: 399.0, commission: 39.9, cover_image: 'https://via.placeholder.com/300?text=Mite+Cleaner', detail_images: ['https://via.placeholder.com/600?text=Mite+1', 'https://via.placeholder.com/600?text=Mite+2'], stock: 120, tab_category: '本地集市', shop_id: shop1.id }),
+            await upsertBy(t, Good, { title: '螺丝刀套装 24合1' }, { title: '螺丝刀套装 24合1', price: 59.0, commission: 8.0, cover_image: 'https://via.placeholder.com/300?text=Tool+Set', detail_images: ['https://via.placeholder.com/600?text=Tool+1', 'https://via.placeholder.com/600?text=Tool+2'], stock: 300, tab_category: '本地集市', shop_id: shop2.id })
         ];
-
-        await upsertBy(t, LiveStream, { title: '今晚 8 点：清洁好物专场' }, { shop_id: shop1.id, title: '今晚 8 点：清洁好物专场', cover_url: 'https://via.placeholder.com/600x300?text=Live+1', status: 'live', viewers_count: 523, max_rebate: 30.0 });
-        await upsertBy(t, LiveStream, { title: '维修工具特惠专场' }, { shop_id: shop2.id, title: '维修工具特惠专场', cover_url: 'https://via.placeholder.com/600x300?text=Live+2', status: 'closed', viewers_count: 1602, max_rebate: 20.0 });
 
         await upsertBy(t, Feed, { title: '3分钟教你判断空调该不该清洗' }, { title: '3分钟教你判断空调该不该清洗', author_id: demoUsers[1].id, likes_count: 128, media_type: 'video', media_url: 'https://www.w3schools.com/html/mov_bbb.mp4', related_goods_id: goods[0].id });
         await upsertBy(t, Feed, { title: '收纳技巧：小户型也能整整齐齐' }, { title: '收纳技巧：小户型也能整整齐齐', author_id: demoUsers[0].id, likes_count: 67, media_type: 'image', media_url: 'https://via.placeholder.com/600x900?text=Feed+Image', related_goods_id: goods[1].id });
@@ -194,7 +189,7 @@ async function seedDemo() {
             { user_id: demoUsers[0].id, conversation_id: sysConv.id, peer_id: 0, unread_count: 1, is_deleted: false, bot_type: 'event' },
             { transaction: t }
         );
-        await Message.create({ conversation_id: sysConv.id, sender_id: 0, msg_type: 'text', content: '演示活动：全场立减 10 元，今晚 8 点直播专场。' }, { transaction: t });
+        await Message.create({ conversation_id: sysConv.id, sender_id: 0, msg_type: 'text', content: '演示活动：全场立减 10 元，今晚 8 点活动专场。' }, { transaction: t });
 
         const privateConv = await Conversation.create({ type: 'private', last_message_preview: '好的，马上安排师傅上门。' }, { transaction: t });
         await UserConversation.create({ user_id: demoUsers[0].id, conversation_id: privateConv.id, peer_id: demoUsers[1].id, unread_count: 0, is_deleted: false }, { transaction: t });

@@ -1,18 +1,18 @@
-# 家集市店铺化 FE-BE 沟通纪要（后端视角·第 8 次）
+# 本地集市店铺化 FE-BE 沟通纪要（后端视角·第 8 次）
 
-（本次聚焦：**收货地址地图选点、经纬度落库、家集市「1km 收货地址吸附」与数据库迁移原则**。）
+（本次聚焦：**收货地址地图选点、经纬度落库、本地集市「1km 收货地址吸附」与数据库迁移原则**。）
 
 ---
 
 ## 1. 背景与目标
 
 - **地址管理**（我的 → 个人中心 → 地址管理 → 新增/编辑）：支持 **微信原生 `wx.chooseLocation` 地图选点**，回填省市区与详细地址，并保存 **GCJ-02 经纬度**（与 `wx.getLocation` 一致）。
-- **家集市定位（须严格遵守的四条规则）**：  
+- **本地集市定位（须严格遵守的四条规则）**：  
   1）**拿不到当前 GPS** → 使用 **默认收货地址** 的经纬度（`pickDefaultOrSingleAddress`：带默认标或仅一条地址）；  
   2）**拿不到 GPS 且无可用默认地址坐标** → `market/shops` **综合排序**，不传用户坐标；  
   3）**拿到 GPS** → 与 **全部已存收货地址**（有经纬度）比对，若 **距最近一条 &lt;1km** → 使用 **该条存储坐标**；  
   4）否则 → 使用 **当前 GPS**。  
-  **自动定位**：**每次冷启动**（`App.onLaunch`）清空家集市相关坐标与 `market_user_location_manual`，随后首页首次需要时 `wx.getLocation` **自动执行一次**；**同一次打开期间**复用已写入 storage 的坐标，**无定时、无 Tab 切换重打 GPS**。**首页「定位」** 地图选点写入 `market_user_location_manual`，本会话内后续列表/分类刷新不会用自动定位覆盖；**下次冷启动**会再次自动定位（手动选点不跨重启保留，除非产品另行约定）。
+  **自动定位**：**每次冷启动**（`App.onLaunch`）清空本地集市相关坐标与 `market_user_location_manual`，随后首页首次需要时 `wx.getLocation` **自动执行一次**；**同一次打开期间**复用已写入 storage 的坐标，**无定时、无 Tab 切换重打 GPS**。**首页「定位」** 地图选点写入 `market_user_location_manual`，本会话内后续列表/分类刷新不会用自动定位覆盖；**下次冷启动**会再次自动定位（手动选点不跨重启保留，除非产品另行约定）。
 - **无 GPS 时的回退**：同规则 1–2；默认地址无坐标则无法作为 `user_lat`/`user_lng`。
 - **首条地址**：用户 **新建的第一条收货地址** 前端强制 **`isDefault: true`**（弹窗上「设为默认」默认开启），便于与「无 GPS 用默认坐标」一致；后端应落库并保证仅一条默认。
 - **与第 7 次纪要区分**：店铺列表 **5km 半径**（`radius_km`）是「店铺相对用户」的展示范围；**1km** 是「用户 GPS 相对收货地址」的吸附阈值，二者职责不同，文档与代码注释中需同时写清。
@@ -30,7 +30,7 @@
 |------|------|
 | 地图选点 | `pages/address/address`：`chooseRegion` 弹出「地图选点 / 从微信地址导入」；独立入口「地图选点」直接 `wx.chooseLocation` |
 | 工具 | `utils/geo.js`：`haversineKm`、`parseRegionFromAddress`、`findNearestAddressWithin`（GPS 成功 &lt;1km）、`getDefaultAddressCoords`（GPS 失败回退默认） |
-| 家集市定位 | `app.js` `onLaunch` 清坐标与 manual；`ensureMarketUserCoordsForList`：§1 四条规则 + 本会话内已有坐标则复用 |
+| 本地集市定位 | `app.js` `onLaunch` 清坐标与 manual；`ensureMarketUserCoordsForList`：§1 四条规则 + 本会话内已有坐标则复用 |
 | 本地缓存 | `market_snap_address_id`、`market_snap_distance_km`、`market_location_label`（可选） |
 | 隐私 | `app.json`：`requiredPrivateInfos` 含 `getLocation`、`chooseLocation` |
 

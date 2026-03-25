@@ -14,7 +14,7 @@ Page({
       { name: "服务订单", emoji: "📋", iconBg: "linear-gradient(135deg,#ffe5ea,#ffd3dc)", url: "../book-my/book-my" },
       { name: "一键发布", emoji: "⚡", iconBg: "linear-gradient(135deg,#ffeccd,#ffe0b2)", url: "../order-publish/order-publish" },
       { name: "集市订单", emoji: "🛒", iconBg: "linear-gradient(135deg,#dff0ff,#c8e4ff)", url: "../market-order-list/market-order-list" },
-      { name: "福卡订单", emoji: "🎫", iconBg: "linear-gradient(135deg,#f3e7ff,#e6d5ff)" },
+      { name: "惠民卡订单", emoji: "🎫", iconBg: "linear-gradient(135deg,#f3e7ff,#e6d5ff)" },
       { name: "推客订单", emoji: "🤝", iconBg: "linear-gradient(135deg,#dff7ef,#c9f0e0)" },
       { name: "组合套餐", emoji: "📦", iconBg: "linear-gradient(135deg,#fff4d9,#ffe7b8)" }
     ],

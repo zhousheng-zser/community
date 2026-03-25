@@ -5,7 +5,7 @@ App({
     // 冷启动：自动定位仅在本轮打开做一次；未手动选点前清空上次自动坐标，首页 init 会重新 getLocation
     this._resetMarketAutoLocationOnColdStart();
   },
-  /** 冷启动清空家集市定位缓存（含手动选点标记），下次进入首页会重新自动定位一次；同一次使用中手动选点后再不会被 Tab/列表刷新自动改坐标 */
+  /** 冷启动清空本地集市定位缓存（含手动选点标记），下次进入首页会重新自动定位一次；同一次使用中手动选点后再不会被 Tab/列表刷新自动改坐标 */
   _resetMarketAutoLocationOnColdStart() {
     try {
       wx.removeStorageSync('market_user_lat');

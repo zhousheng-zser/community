@@ -40,11 +40,11 @@
 | 4    | 2026-06-12     | 前端 → 后端                   | 帖子表增加 `category`、评论表增加 `image_urls`，评论接口支持图文。       | 迁移、`Comment` 模型、`POST /api/v1/posts/:postId/comment` | 已完成（全链路跑通） |
 | 5    | 2026-06-12     | 前端 → 后端                   | 基础用户交互：我的关注、我参与的活动、地址 CRUD、意见反馈。             | `GET /api/v1/user/follows`、`GET /api/v1/activities/my`、`/user/addresses`、`POST /api/v1/feedback/submit` | 已完成   |
 | 6    | 2026-06-12     | 前端 → 后端                   | 管理后台：技工入驻申请列表与审批接口预留。                               | `GET /api/v1/admin/worker-applications`、`PUT /api/v1/admin/worker-applications/:id` | 已完成   |
-| 7    | 2026-03-15     | 前端 → 后端                   | 首页家推：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
-| 8    | 2026-03-15     | 前端 → 后端                   | 首页家推：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
+| 7    | 2026-03-15     | 前端 → 后端                   | 首页本地好物：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
+| 8    | 2026-03-15     | 前端 → 后端                   | 首页本地好物：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
 | 9    | 2026-03-15     | 用户 → 架构师                 | 产品与直播运营位结构再完善：增加商品图片及多维价格标识、主播头像等 | `API接口文档.md` 9, 10节扩充 | 文档已更新 |
-| 10   | 2026-03-17     | 前端 → 后端                   | 家集市一期：店铺/商品/购物车/下单/支付回调，完整交易闭环子系统。 | `market_*` 7表、`/api/v1/market/**` | 已完成（MVP闭环） |
-| 11   | 2026-03-17     | 前端 → 后端                   | 收货地址：地图选点经纬度落库；家集市：**GPS 成功**时与**最近一条**收货地址 &lt;1km 吸附该条坐标；**GPS 失败**时用默认地址坐标；与店铺 5km 半径区分。 | `user/addresses` 扩展字段、纪要第 8 次 | 待后端对齐 |
+| 10   | 2026-03-17     | 前端 → 后端                   | 本地集市一期：店铺/商品/购物车/下单/支付回调，完整交易闭环子系统。 | `market_*` 7表、`/api/v1/market/**` | 已完成（MVP闭环） |
+| 11   | 2026-03-17     | 前端 → 后端                   | 收货地址：地图选点经纬度落库；本地集市：**GPS 成功**时与**最近一条**收货地址 &lt;1km 吸附该条坐标；**GPS 失败**时用默认地址坐标；与店铺 5km 半径区分。 | `user/addresses` 扩展字段、纪要第 8 次 | 待后端对齐 |
 
 > 后续有新的需求或接口调整，请在此表中新增一行，并在下方对应接口说明里同步更新。
 
@@ -446,11 +446,11 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 - **获取我参与的活动**：`GET /api/v1/activities/my`
 - **地址管理 CRUD**：`/api/v1/user/addresses` (GET 获取列表、POST 新增、PUT 修改、DELETE 删除)
   - **默认地址标识**：每条地址需持久化「是否默认」（如 `is_default`），同一用户唯一默认；仅一条地址时须为默认。详见 **`doc/收货地址_默认字段_前端对后端需求.md`**。
-  - **收货地址扩展字段（地图选点 / 家集市吸附依赖）**：
+  - **收货地址扩展字段（地图选点 / 本地集市吸附依赖）**：
     - `latitude` / `longitude`：number，**GCJ-02**（与微信小程序 `wx.getLocation` / `wx.chooseLocation` 一致）；未地图选点可为 `null`。
     - `location_poi_name`：string，可选，地图 POI 名称。
   - **列表 GET**：建议返回上述字段，供端上展示或二次校验。**有 GPS 时**：与 **全部收货地址** 比对，距 **最近一条** &lt;1km 则用该条存储坐标，否则用 GPS。**无 GPS 时**：用 **默认地址** 坐标（含仅一条地址的兼容）；**既无 GPS 又无可用坐标** 则 `market/shops` **综合排序**。用户可地图重选覆盖自动逻辑。**首条新增地址** 小程序侧固定 **`is_default: true`**，后端需落库并保证唯一默认。
-  - **库表变更原则**：对所有表字段 **先检查是否存在 → 不存在则新增 → 已存在则审视语义与类型 → 合理则保留（文档注明覆盖含义）、不合理则修改并评估迁移**；详见 `doc/家集市店铺化_FE-BE沟通纪要_08_BE.md` §3.2。
+  - **库表变更原则**：对所有表字段 **先检查是否存在 → 不存在则新增 → 已存在则审视语义与类型 → 合理则保留（文档注明覆盖含义）、不合理则修改并评估迁移**；详见 `doc/本地集市店铺化_FE-BE沟通纪要_08_BE.md` §3.2。
 - **提交意见反馈**：`POST /api/v1/feedback/submit`
 
 #### 8.5 管理后台审核流预留 (Admin UI)
@@ -470,7 +470,7 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 > [!IMPORTANT]
 > **前端已完成 `<store-product>` 组件接入及相关页面的改造。现向后端提出完整的建表与接口需求：**
 
-由于前端在“家推”商品详情页点击购买时，不再走自有的订单支付体系，而是直接拉起微信官方的 `<store-product>` 微信小店组件完成闭环交易。我们需要后端做好 **返佣记录的登记** 以及 **接收微信小店服务端成功支付的回调监听**。
+由于前端在“本地好物”商品详情页点击购买时，不再走自有的订单支付体系，而是直接拉起微信官方的 `<store-product>` 微信小店组件完成闭环交易。我们需要后端做好 **返佣记录的登记** 以及 **接收微信小店服务端成功支付的回调监听**。
 
 <details>
 <summary>展开查看：返利记录表 Sql 结构建议</summary>
@@ -507,7 +507,7 @@ CREATE TABLE `shop_products` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_category` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前端展示用: 家推商品推广信息管理表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前端展示用: 本地好物商品推广信息管理表';
 ```
 </details>
 
@@ -553,7 +553,7 @@ CREATE TABLE `shop_products` (
 
 ---
 
-### 10. 家推-视频号直播推流管理 (待研发)
+### 10. 本地好物-视频号直播推流管理 (待研发)
 
 > [!IMPORTANT]  
 > **需求背景与原理说明**：
@@ -593,14 +593,14 @@ CREATE TABLE `live_streams` (
 
 2. **小程序端拉取接口**：`GET /api/v1/lives/active`
    - **查询参数**：`?category=热推直播间` (选填)
-   - 前端通过此接口向后端请求在“家推”展示的活跃直播源。若传了 `category` 按照对应条件检索，如“当地特产直播间”。
+   - 前端通过此接口向后端请求在“本地好物”展示的活跃直播源。若传了 `category` 按照对应条件检索，如“当地特产直播间”。
    - 须返回按照 `sort_order` 排好序的活跃项目列表。前端除了需要 `finder_username` 用于跳转外，还需要后端下发展示元素如：`promoters_count` (推广人数)、`rebate_info` (返佣比例)、`brand_logo` 和 `hot_goods` (爆品JSON)。
 
 ---
 
-### 12. 家集市 Market（一期交易闭环）
+### 12. 本地集市 Market（一期交易闭环）
 
-> 家集市为独立 `market` 领域，交易逻辑不混入 `core`。所有接口返回统一结构：`{ code, msg, data }`。
+> 本地集市为独立 `market` 领域，交易逻辑不混入 `core`。所有接口返回统一结构：`{ code, msg, data }`。
 
 #### 12.1 店铺与商品（公共接口）
 
@@ -608,7 +608,7 @@ CREATE TABLE `live_streams` (
   - **查询参数**：
     - `category`（可选）：分类编码（如 `AAAA`～`AAAJ`）。
     - `page`、`page_size`：分页。
-    - `sort`（可选）：`comprehensive` / `sales` / `delivery_time` / **`distance`**（有用户坐标时按距离升序，详见《家集市店铺化_FE-BE沟通纪要_07_BE》）。
+    - `sort`（可选）：`comprehensive` / `sales` / `delivery_time` / **`distance`**（有用户坐标时按距离升序，详见《本地集市店铺化_FE-BE沟通纪要_07_BE》）。
     - **`user_lat`、`user_lng`**（可选，GCJ-02）：用户纬度/经度；与 `radius_km` 联用时可限制只返回**方圆 X 公里内**店铺。
     - **`radius_km`**（可选）：半径（公里）；未传时由服务端默认（产品约定 **X=5km**，见纪要 07）。
   - **返回**：`data.list` + 分页信息；列表项可含 **`distance_km`**、**`rating`** 等；**列表卡片缩略图与店铺详情 Logo 同源**：须返回与详情一致的 **`logo_url`（或 `logo`）**；`cover_url` / `list_cover_url` 仅作无 Logo 时的回退。另可含 **`cover_url`** 供横幅等大图场景。
@@ -641,7 +641,7 @@ CREATE TABLE `live_streams` (
 
 #### 12.4 支付（登录态 + 回调）
 
-> **注意**：`GET /api/v1/market/orders/:orderNo` **不返回** JSAPI 五参数（仅订单展示）；调起支付字段**仅**来自 `POST /api/v1/market/payments/create`（与《家集市店铺化_FE-BE沟通纪要_06_BE》第 3、4 节一致）。
+> **注意**：`GET /api/v1/market/orders/:orderNo` **不返回** JSAPI 五参数（仅订单展示）；调起支付字段**仅**来自 `POST /api/v1/market/payments/create`（与《本地集市店铺化_FE-BE沟通纪要_06_BE》第 3、4 节一致）。
 
 - **创建支付**：`POST /api/v1/market/payments/create`
   - **Body**：`{ "order_no": "<订单号>" }`

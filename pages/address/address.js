@@ -2,7 +2,7 @@
 const util = require('../../utils/util.js');
 const geo = require('../../utils/geo.js');
 
-/** 通知首页家集市：地址有变，需重算定位并刷新分类店铺 */
+/** 通知首页本地集市：地址有变，需重算定位并刷新分类店铺 */
 function notifyHomeMarketAddressChanged() {
   try {
     wx.setStorageSync('market_refresh_after_address', Date.now());
@@ -65,7 +65,7 @@ Page({
   },
 
   /**
-   * 统一 is_default / isDefault；仅一条地址时视为默认（与产品、家集市定位一致，仍请后端落库 is_default）
+   * 统一 is_default / isDefault；仅一条地址时视为默认（与产品、本地集市定位一致，仍请后端落库 is_default）
    */
   _normalizeAddressList(raw) {
     const arr = Array.isArray(raw) ? raw : [];
@@ -232,7 +232,7 @@ Page({
     if (!this.data.canSave) return;
     const form = this.data.form;
     const list = this.data.list || [];
-    // 首条收货地址强制为默认，便于无 GPS 时家集市用该坐标
+    // 首条收货地址强制为默认，便于无 GPS 时本地集市用该坐标
     const isFirstAddress = !form.id && list.length === 0;
     const payload = {
       name: form.name,

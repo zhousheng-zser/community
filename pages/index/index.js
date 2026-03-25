@@ -21,10 +21,10 @@ Page({
     isLoadingMore: false,
     pageIndex: 1,
     topTabs: [
-      { text: "福卡" },
-      { text: "家推" },
+      { text: "惠民卡" },
+      { text: "本地好物" },
       { text: "首页" },
-      { text: "家集市" }
+      { text: "本地集市" }
     ],
     categoryList: [],
     quickActions: [],
@@ -108,7 +108,7 @@ Page({
     }
     this._maybeRefreshMarketAfterAddressChange();
   },
-  /** 地址页保存/编辑/删除/设默认后，清空家集市缓存并重拉当前分类店铺 */
+  /** 地址页保存/编辑/删除/设默认后，清空本地集市缓存并重拉当前分类店铺 */
   _maybeRefreshMarketAfterAddressChange() {
     const flag = wx.getStorageSync('market_refresh_after_address');
     if (!flag) return;
@@ -137,7 +137,7 @@ Page({
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
   },
-  /** 家集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
+  /** 本地集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
   getMarketLocationCacheKey() {
     const lat = wx.getStorageSync('market_user_lat');
     const lng = wx.getStorageSync('market_user_lng');
@@ -196,7 +196,7 @@ Page({
   },
 
   /**
-   * 家集市定位（须与产品一致）：
+   * 本地集市定位（须与产品一致）：
    * 1) 拿不到当前 GPS → 用默认收货地址坐标（有经纬度）；
    * 2) 拿不到 GPS 且无可用默认地址坐标 → hasCoords=false，店铺综合排序；
    * 3) 拿到 GPS → 与全部已存地址比，若最近一条 &lt;1km → 用该条存储坐标；
@@ -344,7 +344,7 @@ Page({
     const coverPath = pickMarketShopAvatarPath(item);
     return {
       id: item.id,
-      cat: item.category || '家集市',
+      cat: item.category || '本地集市',
       name: item.name || item.shop_name || '社区店铺',
       badge: item.delivery_type_text || item.delivery_type || '商家自送',
       delivery: deliveryText,
@@ -358,7 +358,7 @@ Page({
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
   },
-  /** 用户主动选点：覆盖自动定位逻辑，家集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
+  /** 用户主动选点：覆盖自动定位逻辑，本地集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
   handleLocationTap() {
     wx.chooseLocation({
       success: (res) => {
@@ -518,7 +518,7 @@ Page({
       }
     } catch (e) {}
     // ======================================
-    // 家推 (JiaTui) 真实图片源 Mock 数据注入
+    // 本地好物 真实图片源 Mock 数据注入
     // ======================================
 
     // 模块一：顶级海报轮播图
@@ -531,7 +531,7 @@ Page({
     const pushCategories = [
       { name: "爆款专区", emoji: "🔥", bgColor: "#ffe0e0", url: "/pages/push-goods-list/push-goods-list?id=1" },
       { name: "礼物专区", emoji: "🎁", bgColor: "#ffe0f5", url: "/pages/push-goods-list/push-goods-list?id=2" },
-      { name: "家推甄选", emoji: "⭐", bgColor: "#fff5e0", url: "/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "本地好物甄选", emoji: "⭐", bgColor: "#fff5e0", url: "/pages/push-goods-list/push-goods-list?id=3" },
       { name: "高佣专区", emoji: "💰", bgColor: "#e4ffe0", url: "/pages/push-goods-list/push-goods-list?id=4" },
       { name: "推客学堂", emoji: "📚", bgColor: "#e0eeff", url: "/pages/push-video-list/push-video-list" }
     ];
@@ -690,7 +690,7 @@ Page({
         }
       }
     } catch (e) {
-      console.log('家集市店铺接口不可用', e);
+      console.log('本地集市店铺接口不可用', e);
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
@@ -785,8 +785,8 @@ Page({
 
   // ---- 小程序级：触底加载更多 ----
   onReachBottom() {
-    // 只有在家推这个模块（页面实际长列表所在区）才开启触底加载
-    if (this.data.activeTab !== '家推') return;
+    // 只有在本地好物这个模块（页面实际长列表所在区）才开启触底加载
+    if (this.data.activeTab !== '本地好物') return;
     if (this.data.isLoadingMore) return;
 
     this.setData({ isLoadingMore: true });

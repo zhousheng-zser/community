@@ -2,7 +2,7 @@
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
     <view class="nav-content">
       <view bindtap="goBack" class="back-btn">〈</view>
-      <text class="title">家推课堂 - 专业课程学...</text>
+      <text class="title">本地好物课堂 - 专业课程学...</text>
       <view class="back-btn" style="visibility: hidden">〈</view>
     </view>
   </view>

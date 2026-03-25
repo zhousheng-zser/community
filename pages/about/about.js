@@ -4,7 +4,7 @@ Page({
     features: [
       { name: '社区服务预约', desc: '家政、维修、保洁一键上门', emoji: '🔧', bg: 'linear-gradient(135deg,#dff0ff,#c8e4ff)' },
       { name: '邻里生活圈', desc: '发帖互动、参与活动、共建社区', emoji: '💬', bg: 'linear-gradient(135deg,#ffe5ea,#ffd3dc)' },
-      { name: '家集市商城', desc: '周边优质商家，好货近在身边', emoji: '🛒', bg: 'linear-gradient(135deg,#fff0d7,#ffe2bd)' },
+      { name: '本地集市商城', desc: '周边优质商家，好货近在身边', emoji: '🛒', bg: 'linear-gradient(135deg,#fff0d7,#ffe2bd)' },
       { name: '技工入驻', desc: '发挥一技之长，灵活接单赚钱', emoji: '👷', bg: 'linear-gradient(135deg,#dff7ef,#c9f0e0)' },
       { name: '推客系统', desc: '分享好物好服务，轻松获得收益', emoji: '🤝', bg: 'linear-gradient(135deg,#f3e7ff,#e6d5ff)' }
     ],

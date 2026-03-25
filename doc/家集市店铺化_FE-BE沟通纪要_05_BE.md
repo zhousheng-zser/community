@@ -1,4 +1,4 @@
-# 家集市店铺化 FE-BE 沟通纪要（后端视角·第 5 次）
+# 本地集市店铺化 FE-BE 沟通纪要（后端视角·第 5 次）
 
 （本次聚焦：支付联调能力补齐，解决“订单一直 unpaid”问题）
 
@@ -84,4 +84,3 @@
 - [ ] 调 `payments/mock-success` 后返回 `paid/success`
 - [ ] 轮询 `payments/status` 能稳定转为 `paid/paid/success`
 - [ ] 订单详情页状态与支付状态一致
-

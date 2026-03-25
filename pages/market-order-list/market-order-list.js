@@ -61,7 +61,7 @@ Page({
     return {
       id: orderNo,
       orderNo,
-      title: raw.shop_name || o.shop_name || '家集市订单',
+      title: raw.shop_name || o.shop_name || '本地集市订单',
       sub: `订单号 ${orderNo}`,
       amount: String(o.payable_amount != null ? o.payable_amount : o.amount || raw.payable_amount || '0.00'),
       orderStatus,
