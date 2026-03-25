@@ -6,7 +6,7 @@ Page({
     allGoods: [
       [ // 九州好食
         { id: 101, name: "贵州大方六龙爆浆美味小豆腐", price: "19.90", shareTag: "分享赚/购买返￥3.82", image: "/img/placeholders/home_cleaning.png", tag: "爆浆小豆腐 486g" },
-        { id: 102, name: "直播福利！！ 试吃两节 香肠口味任选香肠川...", price: "28.00", shareTag: "分享赚/购买返￥1.43", image: "/img/placeholders/home_repair.png" },
+        { id: 102, name: "福利！！ 试吃两节 香肠口味任选香肠川...", price: "28.00", shareTag: "分享赚/购买返￥1.43", image: "/img/placeholders/home_repair.png" },
         { id: 103, name: "霞浦正宗干贝瑶柱 颗粒饱满肉质紧实 煲汤煮...", price: "39.90", shareTag: "分享赚/购买返￥2.10", image: "/img/placeholders/home_repair.png" },
         { id: 104, name: "高钙淡干虾皮 无盐少添加 天然晾晒锁鲜", price: "45.00", shareTag: "分享赚/购买返￥5.00", image: "/img/placeholders/home_cleaning.png" }
       ],

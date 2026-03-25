@@ -39,9 +39,6 @@ Page({
     pushPromoCards: {},
     pushDailyNews: [],
     pushTopSales: [],
-    pushHotLiveStreams: [],
-    pushLocalLiveStreams: [],
-    pushLocalPavilions: [],
     pushHotVideos: [],
     pushPeriodicTabs: [],
     pushPeriodicGoods: [],
@@ -559,89 +556,6 @@ Page({
       { rank: "03", name: "除菌持久洗衣凝珠", comm: "4.78", image: images.pushDaily1 }
     ];
 
-    // 模块五：大厂热推直播间
-    let pushHotLiveStreams = [
-      {
-        id: 1, brand: "牛肉生鲜旗舰店", subBrand: "官方补贴 现场切块",
-        brandLogo: images.liveBeef,
-        rebate: "10%", promoters: "128"
-      }
-    ];
-
-    try {
-      // 尝试获取后端管理配置的热推直播间
-      const hotLiveRes = await util.get('api/v1/lives/active?category=热推直播间');
-      const hotLiveData = Array.isArray(hotLiveRes) ? hotLiveRes : (hotLiveRes.data || hotLiveRes);
-      if (Array.isArray(hotLiveData) && hotLiveData.length > 0) {
-        pushHotLiveStreams = hotLiveData.map(live => ({
-          id: live.id,
-          brand: live.title,
-          subBrand: "官方背书 品质保障", // 可视需求增加配置列
-          brandLogo: live.brand_logo || imgUrl('/img/placeholders/home_cleaning.png'),
-          avatarUrl: live.avatar_url,
-          rebate: live.rebate_info || "10%",
-          promoters: live.promoters_count || 0,
-          finderUsername: live.finder_username,
-          hotGoods: typeof live.hot_goods === 'string' ? JSON.parse(live.hot_goods || '[]') : (live.hot_goods || [])
-        }));
-      }
-    } catch (e) {
-      console.log('加载热推直播间API异常，兜底使用测试数据', e);
-    }
-
-    // 模块六：地方馆地球矩阵 + 地方直播间
-    // 将一维数组改造为二维数组 (每页10项) 以供 <swiper> 遍历
-    const pushLocalPavilions = [
-      [
-        { name: "贵州馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "上海馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "江西馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "山西馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "重庆馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "河南馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "福建馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "云南馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "江苏馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "湖北馆", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ],
-      [
-        { name: "浙江馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "四川馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "宁夏馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "甘肃馆", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { name: "湖南馆", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ]
-    ];
-
-    let pushLocalLiveStreams = [
-      {
-        id: 3, brand: "家事速配-遵义市汇川区土特产店", subBrand: "云南哀牢山冰糖橙-收官之夜",
-        brandLogo: images.liveLocal,
-        rebate: "10%", promoters: "1109", status: 'closed'
-      }
-    ];
-
-    try {
-      // 尝试获取后端管理配置的当地特产直播间
-      const localLiveRes = await util.get('api/v1/lives/active?category=当地特产直播间');
-      const localLiveData = Array.isArray(localLiveRes) ? localLiveRes : (localLiveRes.data || localLiveRes);
-      if (Array.isArray(localLiveData) && localLiveData.length > 0) {
-        pushLocalLiveStreams = localLiveData.map(live => ({
-          id: live.id,
-          brand: live.title,
-          subBrand: "当地原产 极速发货",
-          brandLogo: live.brand_logo || imgUrl('/img/placeholders/home_cleaning.png'),
-          avatarUrl: live.avatar_url,
-          rebate: live.rebate_info || "10%",
-          promoters: live.promoters_count || 0,
-          finderUsername: live.finder_username,
-          hotGoods: typeof live.hot_goods === 'string' ? JSON.parse(live.hot_goods || '[]') : (live.hot_goods || [])
-        }));
-      }
-    } catch (e) {
-      console.log('加载特产直播间API异常，兜底使用测试数据', e);
-    }
-
     // 模块七：横排带货视频录播
     const pushHotVideos = [
       { id: 101, title: "老榆木板原木桌面实木切割测试",          price: "300.00", comm: "15.00", likes: 2,  author: "榆园家具",   image: images.pushDaily1 },
@@ -797,9 +711,6 @@ Page({
       pushPromoCards,
       pushDailyNews,
       pushTopSales,
-      pushHotLiveStreams,
-      pushLocalLiveStreams,
-      pushLocalPavilions,
       pushHotVideos,
       pushPeriodicTabs,
       pushPeriodicGoods,
