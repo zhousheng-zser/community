@@ -64,7 +64,19 @@
       },
       {
         "type": "folder",
+        "value": "素材"
+      },
+      {
+        "type": "folder",
         "value": "doc"
+      },
+      {
+        "type": "folder",
+        "value": "img/undraw"
+      },
+      {
+        "type": "folder",
+        "value": "img/icons"
       },
       {
         "type": "folder",
@@ -85,6 +97,50 @@
       {
         "type": "file",
         "value": "test_community.js"
+      },
+      {
+        "type": "file",
+        "value": "download_images.ps1"
+      },
+      {
+        "type": "file",
+        "value": "check_final.ps1"
+      },
+      {
+        "type": "file",
+        "value": "check_img.ps1"
+      },
+      {
+        "type": "file",
+        "value": "check_miniprogram.ps1"
+      },
+      {
+        "type": "file",
+        "value": "check_size.ps1"
+      },
+      {
+        "type": "file",
+        "value": "check_size2.ps1"
+      },
+      {
+        "type": "file",
+        "value": "add_icon_effects.py"
+      },
+      {
+        "type": "file",
+        "value": "add_icon_effects_v2.py"
+      },
+      {
+        "type": "file",
+        "value": "generate_icons.py"
+      },
+      {
+        "type": "file",
+        "value": "process_images.py"
+      },
+      {
+        "type": "file",
+        "value": "fuka.jpg"
       }
     ],
     "include": []

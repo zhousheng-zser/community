@@ -3,7 +3,8 @@
  *
  * 规则：
  *  - 后端已上传文件 → 使用 base + /uploads/... 路径
- *  - 其余场景图 → 使用 Unsplash CDN 固定 photo ID（永久稳定，免费商用）
+ *  - 首页核心图片   → 使用 unDraw SVG（/img/undraw/）本地离线，MIT 开源
+ *  - 其余场景图     → 使用 Unsplash CDN 固定 photo ID（永久稳定，免费商用）
  *    格式：https://images.unsplash.com/photo-{ID}?auto=format&fit=crop&w={W}&q=80
  */
 const config = require('./config.js');
@@ -21,9 +22,8 @@ const images = {
   defaultHead:  base + '/uploads/file-1773395943186-905167166.jpg',
 
   // ── 首页 Banner ────────────────────────────────────────────────────────────
-  // 温馨客厅沙发场景 / 现代整洁家居
-  bannerHome:    usp('1555041469-9dba582ba7d7', 800),
-  bannerSale:    usp('1558618666-fcd25c85cd64', 800),
+  bannerHome:    base + '/uploads/file-1773395942165-45947155.png',
+  bannerSale:    base + '/uploads/file-1773395942500-585304598.png',
 
   // ── 9 大服务分类主图 ────────────────────────────────────────────────────────
   // 整理收纳：整洁衣橱收纳
@@ -56,10 +56,10 @@ const images = {
   svcRepairElec:   usp('1621905251189-8f63c0636e96'),
   svcRepairGeneral: usp('1581578731548-c64695cc6952'),
   // 家电清洗
-  svcAircon:       usp('1563453392212-326f5e854473'),
-  svcWasher:       usp('1626806819282-2fe86b6d603d'),
-  svcHood:         usp('1556909119-cec1500ad303'),
-  svcFridge:       usp('1584568694244-14fbdf83bd30'),
+  svcAircon:       usp('1507207611509-ec012433ff52'),
+  svcWasher:       usp('1581578015325-1108f3f4f317'),
+  svcHood:         usp('1556909114-f6e7ad7d3136'),
+  svcFridge:       usp('1514996937319-344454492b37'),
   // 开荒保洁
   svcDeepClean:    usp('1527515637462-cff94eecc1ac'),
   // 除螨
@@ -81,15 +81,15 @@ const images = {
   svcHair:         usp('1560869713-7d0a29430803'),
 
   // ── 小区热卖榜 / 直约服务商 ────────────────────────────────────────────────
-  hotWasher:    usp('1626806819282-2fe86b6d603d', 400),
-  hotHeater:    usp('1584568694244-14fbdf83bd30', 400),
-  hotHood:      usp('1556909119-cec1500ad303', 400),
-  hotClean:     usp('1527515637462-cff94eecc1ac', 400),
+  hotWasher:    usp('1581578015325-1108f3f4f317', 500),
+  hotHeater:    usp('1584622781564-1d987f7333c1', 500),
+  hotHood:      usp('1556909114-f6e7ad7d3136', 500),
+  hotClean:     usp('1527515637462-cff94eecc1ac', 500),
 
   // ── 管家精选商品 ────────────────────────────────────────────────────────────
-  goodsSkincare1: usp('1556228720-195a672e8a03', 400),
-  goodsSkincare2: usp('1512207736890-6ffed8a84e8d', 400),
-  goodsLocal:     usp('1506807803488-c8741e10d0a5', 400),
+  goodsSkincare1: usp('1522335789203-aabd1fc54bc9', 500),
+  goodsSkincare2: usp('1604654894610-df63bc536371', 500),
+  goodsLocal:     usp('1506807803488-c8741e10d0a5', 500),
 
   // ── 家推 / 带货商品 ────────────────────────────────────────────────────────
   pushFood1:    usp('1504674900247-0877df9cc836', 400),

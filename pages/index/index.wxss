@@ -148,15 +148,16 @@
 .svc-icon-wrap {
   width: 88rpx;
   height: 88rpx;
-  border-radius: 22rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.svc-emoji {
-  font-size: 40rpx;
-  line-height: 1;
+.svc-icon-img {
+  width: 88rpx;
+  height: 88rpx;
 }
 
 .service-item text {
@@ -1404,10 +1405,36 @@
   opacity: 0.95;
 }
 
+.fuka-open-left { flex: 1; }
+
 .fuka-open-card .go {
   padding: 8rpx 16rpx;
   border-radius: 999rpx;
   background: rgba(255, 255, 255, 0.2);
+}
+
+.fuka-banner-bg {
+  width: 100%;
+  height: 200rpx;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7272a 50%, #c8001e 100%);
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+}
+
+.fuka-banner-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.fuka-banner-sub {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 10rpx;
 }
 
 .fuka-topic-grid {
@@ -1454,13 +1481,16 @@
 }
 
 .fuka-filter-tabs .tab {
-  font-size: 24rpx;
-  color: #777;
+  font-size: 26rpx;
+  color: #555;
+  padding-bottom: 8rpx;
+  border-bottom: 4rpx solid transparent;
 }
 
 .fuka-filter-tabs .tab.active {
   color: #f44336;
   font-weight: 700;
+  border-bottom-color: #f44336;
 }
 
 .fuka-goods-grid {
@@ -1475,10 +1505,28 @@
   padding: 8rpx;
 }
 
-.fuka-goods-item image {
+.fuka-goods-img-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.fuka-goods-img-wrap image {
   width: 100%;
   height: 210rpx;
   border-radius: 12rpx;
+  display: block;
+}
+
+.fuka-goods-item .comm {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  background: #07c160;
+  color: #fff;
+  font-size: 18rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 20rpx;
+  line-height: 1.4;
 }
 
 .fuka-goods-item .name {
