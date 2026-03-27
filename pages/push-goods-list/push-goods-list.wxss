@@ -128,6 +128,11 @@ page {
   color: #c47663; /* 对应图一中的主题色偏粉棕 */
 }
 
+.gift-sub-item.active image {
+  border-color: #ff594d;
+  box-shadow: 0 4rpx 12rpx rgba(255, 89, 77, 0.35);
+}
+
 /* 独立圆角搜索框 */
 .search-box {
   display: flex;

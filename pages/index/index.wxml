@@ -112,42 +112,6 @@
       </view>
     </view>
 
-    <!-- 模块六：热门带货视频 -->
-    <view class="jt-video-section">
-      <view class="section-head">
-        <text class="title">热门带货视频</text>
-        <navigator url="/pages/push-hot-video-list/push-hot-video-list" class="more">查看全部 ></navigator>
-      </view>
-      <scroll-view class="video-scroll" scroll-x="{{true}}" bindscroll="handleVideoScroll">
-        <view class="video-row">
-          <view class="video-card" wx:for="{{pushHotVideos}}" wx:key="id" bindtap="openFakeVideoChannel">
-            <view class="cover-wrap">
-              <image src="{{item.image}}" mode="aspectFill"></image>
-              <view class="play-btn">▷</view>
-              <view class="bottom-info">
-                <text class="author">{{item.author}}</text>
-                <text class="likes">♡ {{item.likes}}</text>
-              </view>
-            </view>
-            <view class="v-details">
-              <text class="title">{{item.title}}</text>
-              <text class="price">￥{{item.price}}</text>
-              <view class="share">分享每单赚 ￥{{item.comm}}</view>
-            </view>
-          </view>
-        </view>
-      </scroll-view>
-      
-      <!-- 底部模拟滚动指示光标 -->
-      <view class="custom-scrollbar">
-        <!-- 背景横槽 -->
-        <view class="scrollbar-track">
-          <!-- 前景移动小胶囊，我们把轨道设定更长(80rpx)，胶囊长度(40rpx)，则活动范围40rpx -->
-          <view class="scrollbar-thumb" style="transform: translateX({{videoScrollRatio * 40}}rpx)"></view>
-        </view>
-      </view>
-    </view>
-
     <!-- 模块八：周期性主推与热卖排行 (Periodic Rankings) -->
     <view class="jt-feed-section">
       <!-- 独立的周期性榜单容器 -->

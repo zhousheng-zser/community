@@ -4,9 +4,7 @@
     <text class="back-btn" bindtap="goBack">〈</text>
     <view class="title-logo">
       <view class="title-box">
-        <text class="decor">c </text>
-        <text class="text">九州好物</text>
-        <text class="decor"> x</text>
+        <text class="text">{{pageTitle}}</text>
       </view>
     </view>
     <view class="right-icon">•••</view>

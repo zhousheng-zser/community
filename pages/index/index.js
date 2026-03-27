@@ -12,14 +12,13 @@ Page({
     currentCity: "定位",
     showGetTelModal: false,
     userFlag: 0,
-    videoScrollRatio: 0,
     homeSearchKeyword: "",
     navTopPadding: 20,
     activeTab: "首页",
     activePeriodicTabIndex: 0,
-    activeFeedTab: "高佣推荐",
+    activeFeedTab: "",
     isLoadingMore: false,
-    pageIndex: 1,
+    pageSize: 10,
     topTabs: [
       { text: "惠民卡" },
       { text: "本地好物" },
@@ -39,10 +38,13 @@ Page({
     pushPromoCards: {},
     pushDailyNews: [],
     pushTopSales: [],
-    pushHotVideos: [],
     pushPeriodicTabs: [],
+    pushPeriodicGoodsDict: {},
     pushPeriodicGoods: [],
     pushFeedGoods: [],
+    pushFeedGoodsDict: {},
+    feedPageByTab: {},
+    feedHasMoreByTab: {},
     fukaLocalList: [],
     fukaServices: [],
     fukaTopicCards: [],
@@ -518,7 +520,7 @@ Page({
       }
     } catch (e) {}
     // ======================================
-    // 本地好物 真实图片源 Mock 数据注入
+    // 本地好物：仅展示真实商品（无兜底商品）
     // ======================================
 
     // 模块一：顶级海报轮播图
@@ -532,8 +534,7 @@ Page({
       { name: "爆款专区", emoji: "🔥", bgColor: "#ffe0e0", url: "/pages/push-goods-list/push-goods-list?id=1" },
       { name: "礼物专区", emoji: "🎁", bgColor: "#ffe0f5", url: "/pages/push-goods-list/push-goods-list?id=2" },
       { name: "本地好物甄选", emoji: "⭐", bgColor: "#fff5e0", url: "/pages/push-goods-list/push-goods-list?id=3" },
-      { name: "高佣专区", emoji: "💰", bgColor: "#e4ffe0", url: "/pages/push-goods-list/push-goods-list?id=4" },
-      { name: "推客学堂", emoji: "📚", bgColor: "#e0eeff", url: "/pages/push-video-list/push-video-list" }
+      { name: "高佣专区", emoji: "💰", bgColor: "#e4ffe0", url: "/pages/push-goods-list/push-goods-list?id=4" }
     ];
 
     // 模块三：导购窗
@@ -542,89 +543,33 @@ Page({
       right: { title: "秋冬好物", image: images.pushFashion1 }
     };
 
-    // 模块四：上新与热卖
-    const pushDailyNews = [
-      { id: 1, name: "正宗东北黑木耳",   price: "19.00", comm: "2.43",  image: images.pushFood1,   isHot: false },
-      { id: 2, name: "大果新鲜蓝莓",     price: "39.90", comm: "13.53", image: images.pushFood2,   isHot: true },
-      { id: 3, name: "深层洁净洗衣液",   price: "15.90", comm: "2.04",  image: images.pushDaily1,  isHot: false },
-      { id: 4, name: "特级婴儿柔护纸巾", price: "99.00", comm: "22.18", image: images.pushDaily2,  isHot: false }
-    ];
-
-    const pushTopSales = [
-      { rank: "01", name: "浓缩纯牛奶整箱",   comm: "3.83", image: images.pushFood1 },
-      { rank: "02", name: "早餐手撕面包",     comm: "2.52", image: images.pushFood2 },
-      { rank: "03", name: "除菌持久洗衣凝珠", comm: "4.78", image: images.pushDaily1 }
-    ];
-
-    // 模块七：横排带货视频录播
-    const pushHotVideos = [
-      { id: 101, title: "老榆木板原木桌面实木切割测试",          price: "300.00", comm: "15.00", likes: 2,  author: "榆园家具",   image: images.pushDaily1 },
-      { id: 102, title: "日常保养，补钙还是喝奶更好？",          price: "97.80",  comm: "14.67", likes: 0,  author: "养生说",     image: images.pushFood2 },
-      { id: 103, title: "新西兰厚切牛排，买二送一！",            price: "129.9",  comm: "8.80",  likes: 5,  author: "生鲜直供",   image: images.pushFood1 },
-      { id: 104, title: "大师香氛玫瑰洗衣液护色洁净柔顺",       price: "99.90",  comm: "24.97", likes: 13, author: "立白精品",   image: images.pushDaily1 },
-      { id: 105, title: "立白大师格拉斯玫瑰香氛洗衣液深层...",  price: "69.0",   comm: "10.00", likes: 8,  author: "立白精品",   image: images.pushDaily2 },
-      { id: 106, title: "立白小白白衣物去油王250g精化...",       price: "35.50",  comm: "5.00",  likes: 11, author: "立白精品",   image: images.pushDaily2 }
-    ];
-
-    // 模块八：排期榜单 (周期主推) - 提供不同的三组带货数据假刷新效果
-    const pushPeriodicTabs = ["今日主推", "本周热卖", "本月排行"];
-    const pushPeriodicBaseGoods = [
-      { id: 201, title: "多功能厨房沥水篮家用洗菜盆三件套加厚",       price: "24.90", comm: "3.22", tag: "全网爆款", image: images.pushDaily1 },
-      { id: 202, title: "网红小零食休闲充饥夜宵干脆面拉面丸子",       price: "9.90",  comm: "1.08",              image: images.pushFood2 },
-      { id: 203, title: "[品质升级！ 三合一快充线]三合一数据线快充...", price: "4.99",  comm: "0.22",              image: images.pushDaily2 },
-      { id: 204, title: "[年年宏]桑葚坚果糕红枣枸杞核桃软糕美味手...", price: "39.90", comm: "6.38",              image: images.pushFood1 }
-    ];
-    // 默认展示两项
-    const pushPeriodicGoods = [pushPeriodicBaseGoods[0], pushPeriodicBaseGoods[1]];
-
-    // 模块九长效分类导航数据与缓存字典
-    const pushFeedTabs = ["高佣推荐", "健康食品", "美妆个护", "日用百货"];
-    // 记录获取到的商品
-    let pushFeedGoodsDict = {
-      "高佣推荐": [
-        { id: 201, title: "内衣裤清新剂清洁内裤持久清洗液抑菌专用", price: "5.90",  comm: "0.45", image: images.pushDaily1 },
-        { id: 202, title: "体重秤充电款 电子秤 精准光能驱动",         price: "19.90", comm: "2.16", image: images.pushDaily2 }
-      ],
-      "健康食品": [], "美妆个护": [], "日用百货": []
-    };
-
-    // 统一切换拉取真实推送商品（包含上新、热卖等所有品类）
+    let pushDailyNews = [];
+    let pushTopSales = [];
+    let pushPeriodicTabs = [];
+    let pushPeriodicGoodsDict = {};
+    let pushPeriodicGoods = [];
+    let pushFeedTabs = [];
+    let pushFeedGoodsDict = {};
+    let pushFeedGoods = [];
+    let activeFeedTab = "";
+    let feedPageByTab = {};
+    let feedHasMoreByTab = {};
     try {
-      const spRes = await util.get('api/v1/shop-products');
-      const spData = Array.isArray(spRes) ? spRes : (spRes.data || spRes);
-      if (Array.isArray(spData) && spData.length > 0) {
-        // 分配给每日上新
-        const news = spData.filter(s => s.category === '每日上新');
-        if (news.length > 0) {
-          pushDailyNews = news.map(s => ({
-            id: s.id, name: s.name, price: String(s.pay_price), comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png'), isHot: false
-          }));
-        }
-        
-        // 分配给热卖榜
-        const tops = spData.filter(s => s.category === '热卖TOP榜');
-        if (tops.length > 0) {
-          pushTopSales = tops.map((s, i) => ({
-            id: s.id, rank: (i + 1).toString().padStart(2, '0'), name: s.name, comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png')
-          }));
-        }
-
-        // 分配给 Feed 流
-        ["高佣推荐", "健康食品", "美妆个护", "日用百货"].forEach(cat => {
-          const feedItems = spData.filter(s => s.category === cat);
-          if (feedItems.length > 0) {
-            pushFeedGoodsDict[cat] = feedItems.map(s => ({
-              id: s.id, title: s.name, price: String(s.pay_price), comm: String(s.rebate_amount), image: s.main_image || imgUrl('/img/placeholders/home_cleaning.png'), tag: cat === "高佣推荐" ? "定向高佣" : ""
-            }));
-          }
-        });
-      }
+      const moduleGoods = await this.loadLocalGoodsModules();
+      pushDailyNews = moduleGoods.pushDailyNews;
+      pushTopSales = moduleGoods.pushTopSales;
+      pushPeriodicTabs = moduleGoods.pushPeriodicTabs;
+      pushPeriodicGoodsDict = moduleGoods.pushPeriodicGoodsDict;
+      pushPeriodicGoods = moduleGoods.pushPeriodicGoods;
+      pushFeedTabs = moduleGoods.pushFeedTabs;
+      pushFeedGoodsDict = moduleGoods.pushFeedGoodsDict;
+      pushFeedGoods = moduleGoods.pushFeedGoods;
+      activeFeedTab = moduleGoods.activeFeedTab;
+      feedPageByTab = moduleGoods.feedPageByTab;
+      feedHasMoreByTab = moduleGoods.feedHasMoreByTab;
     } catch (e) {
-      console.log("加载真实推流商品数据失败, 仍采用兜底测试数据", e);
+      console.log("本地好物模块真实商品加载失败", e);
     }
-
-    // 初始化默认页签商品
-    const pushFeedGoods = [...pushFeedGoodsDict["高佣推荐"]];
     const fukaLocalList = [
       { name: "天天买菜", emoji: "🥦", bgColor: "#e4ffe0" },
       { name: "外卖", emoji: "🍜", bgColor: "#fff0e0" },
@@ -711,14 +656,16 @@ Page({
       pushPromoCards,
       pushDailyNews,
       pushTopSales,
-      pushHotVideos,
       pushPeriodicTabs,
       pushPeriodicGoods,
-      pushPeriodicBaseGoods,
+      pushPeriodicGoodsDict,
 
       pushFeedTabs,
       pushFeedGoodsDict,
       pushFeedGoods,
+      activeFeedTab,
+      feedPageByTab,
+      feedHasMoreByTab,
 
       fukaLocalList,
       fukaServices,
@@ -777,40 +724,45 @@ Page({
 
     this.setData({
       activeFeedTab: tabName,
-      pageIndex: 1, // 切换重置页码
-      pushFeedGoods: [...this.data.pushFeedGoodsDict[tabName] || []],
+      pushFeedGoods: [...(this.data.pushFeedGoodsDict[tabName] || [])],
       isLoadingMore: false
     });
   },
 
   // ---- 小程序级：触底加载更多 ----
-  onReachBottom() {
-    // 只有在本地好物这个模块（页面实际长列表所在区）才开启触底加载
+  async onReachBottom() {
     if (this.data.activeTab !== '本地好物') return;
     if (this.data.isLoadingMore) return;
+    const activeFeedTab = this.data.activeFeedTab;
+    if (!activeFeedTab) return;
+    const hasMore = (this.data.feedHasMoreByTab || {})[activeFeedTab];
+    if (!hasMore) return;
 
     this.setData({ isLoadingMore: true });
-
-    // 使用假延迟模拟网络请求去服务器索要当前 activeFeedTab 分类下第二页的数据
     wx.showLoading({ title: '加载中...', mask: true });
-    setTimeout(() => {
-      const { pushFeedGoods, activeFeedTab, pageIndex } = this.data;
-      const newPage = pageIndex + 1;
-
-      // 生成几条以假乱真的分页数据
-      const mockMoreGoods = [
-        { id: 900 + newPage * 10, title: `[第${newPage}页加载] ${activeFeedTab} 热卖好物`, price: (Math.random() * 50).toFixed(2), comm: "0.88", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 901 + newPage * 10, title: `网销爆款 ${activeFeedTab} 超值特购包邮`, price: (Math.random() * 80).toFixed(2), comm: "1.10", image: imgUrl('/img/placeholders/home_cleaning.png') },
-        { id: 902 + newPage * 10, title: `品质严选 ${activeFeedTab} 家用装`, price: (Math.random() * 30).toFixed(2), comm: "1.50", image: imgUrl('/img/placeholders/home_cleaning.png') }
-      ];
-
+    try {
+      const { list, hasMore: nextHasMore, page } = await this.loadMoreFeedGoods(activeFeedTab);
+      const current = this.data.pushFeedGoods || [];
+      const merged = current.concat(list);
+      const feedPageByTab = { ...(this.data.feedPageByTab || {}), [activeFeedTab]: page };
+      const feedHasMoreByTab = { ...(this.data.feedHasMoreByTab || {}), [activeFeedTab]: nextHasMore };
+      const pushFeedGoodsDict = {
+        ...(this.data.pushFeedGoodsDict || {}),
+        [activeFeedTab]: merged
+      };
       this.setData({
-        pushFeedGoods: pushFeedGoods.concat(mockMoreGoods), // 追加数据到原数组尾部
-        pageIndex: newPage,
+        pushFeedGoods: merged,
+        pushFeedGoodsDict,
+        feedPageByTab,
+        feedHasMoreByTab,
         isLoadingMore: false
       });
+    } catch (e) {
+      this.setData({ isLoadingMore: false });
+      wx.showToast({ title: '加载失败', icon: 'none' });
+    } finally {
       wx.hideLoading();
-    }, 800);
+    }
   },
 
   chooseAdd() {
@@ -827,6 +779,92 @@ Page({
       }
     })
   },
+  normalizeModuleGoods(item, i, extra = {}) {
+    const row = util.normalizeShopProductRow(item, i);
+    const id = item.id || item.goods_id || `${extra.module || 'mod'}_${i}`;
+    const rankRaw = item.rank != null ? item.rank : (i + 1);
+    return {
+      ...row,
+      id,
+      title: row.name,
+      rank: String(rankRaw).padStart(2, '0'),
+      distance_km: util.extractDistanceKmFromProduct(item)
+    };
+  },
+  normalizeModuleList(list, extra = {}) {
+    const arr = Array.isArray(list) ? list : [];
+    return util.filterShopProductsByDistance(arr, 5).map((item, idx) => this.normalizeModuleGoods(item, idx, extra));
+  },
+  buildLocalGoodsQuery(extra = {}) {
+    return util.buildShopGoodsQuery({ distance_km: 5, ...extra });
+  },
+  async loadLocalGoodsModules() {
+    await this.ensureMarketUserCoordsForList();
+    const res = await util.get('local-goods-home/modules', this.buildLocalGoodsQuery());
+    const payload = res && typeof res === 'object' ? (res.data || res) : {};
+
+    const rawDaily = payload.daily_news || payload.dailyNews || [];
+    const rawTop = payload.top_sales || payload.topSales || [];
+    const rawPeriodic = payload.periodic_modules || payload.periodic || [];
+    const rawFeed = payload.feed_modules || payload.feed || [];
+
+    const pushDailyNews = this.normalizeModuleList(rawDaily, { module: 'daily_news' }).slice(0, 4);
+    const pushTopSales = this.normalizeModuleList(rawTop, { module: 'top_sales' }).slice(0, 3);
+
+    const pushPeriodicTabs = [];
+    const pushPeriodicGoodsDict = {};
+    (Array.isArray(rawPeriodic) ? rawPeriodic : []).forEach((m, idx) => {
+      const tab = m.module_name || m.name || m.title || `周期模块${idx + 1}`;
+      const list = this.normalizeModuleList(m.goods_list || m.products || m.items || [], { module: tab });
+      pushPeriodicTabs.push(tab);
+      pushPeriodicGoodsDict[tab] = list;
+    });
+    const pushPeriodicGoods = pushPeriodicTabs.length > 0 ? (pushPeriodicGoodsDict[pushPeriodicTabs[0]] || []) : [];
+
+    const pushFeedTabs = [];
+    const pushFeedGoodsDict = {};
+    const feedPageByTab = {};
+    const feedHasMoreByTab = {};
+    (Array.isArray(rawFeed) ? rawFeed : []).forEach((m) => {
+      const tab = m.module_name || m.name || m.title;
+      if (!tab) return;
+      const list = this.normalizeModuleList(m.goods_list || m.products || m.items || [], { module: tab });
+      pushFeedTabs.push(tab);
+      pushFeedGoodsDict[tab] = list;
+      feedPageByTab[tab] = Number(m.page || 1);
+      feedHasMoreByTab[tab] = !!m.has_more;
+    });
+    const activeFeedTab = pushFeedTabs[0] || "";
+    const pushFeedGoods = activeFeedTab ? [...(pushFeedGoodsDict[activeFeedTab] || [])] : [];
+
+    return {
+      pushDailyNews,
+      pushTopSales,
+      pushPeriodicTabs,
+      pushPeriodicGoodsDict,
+      pushPeriodicGoods,
+      pushFeedTabs,
+      pushFeedGoodsDict,
+      pushFeedGoods,
+      activeFeedTab,
+      feedPageByTab,
+      feedHasMoreByTab
+    };
+  },
+  async loadMoreFeedGoods(tabName) {
+    const currentPage = Number((this.data.feedPageByTab || {})[tabName] || 1);
+    const nextPage = currentPage + 1;
+    const q = this.buildLocalGoodsQuery({
+      module_name: tabName,
+      page: nextPage,
+      page_size: this.data.pageSize || 10
+    });
+    const res = await util.get('local-goods-home/feed-products', q);
+    const payload = res && typeof res === 'object' ? (res.data || res) : {};
+    const list = this.normalizeModuleList(payload.list || payload.items || payload.goods_list || [], { module: tabName });
+    const hasMore = !!payload.has_more;
+    return { list, hasMore, page: nextPage };
+  },
   goActivity(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
@@ -837,49 +875,14 @@ Page({
   // 周期推荐榜单切换处理
   switchPeriodicTab(e) {
     const idx = e.currentTarget.dataset.idx;
-    const { pushPeriodicBaseGoods } = this.data;
-
-    // 我们用不同的假组合来模拟数据变化
-    let newList = [];
-    if (idx === 0) {
-      newList = [pushPeriodicBaseGoods[0], pushPeriodicBaseGoods[1]];
-    } else if (idx === 1) {
-      newList = [pushPeriodicBaseGoods[3], pushPeriodicBaseGoods[2]];
-    } else {
-      newList = [pushPeriodicBaseGoods[1], pushPeriodicBaseGoods[3]];
-    }
+    const tabs = this.data.pushPeriodicTabs || [];
+    const tabName = tabs[idx];
+    const dict = this.data.pushPeriodicGoodsDict || {};
+    const newList = tabName ? (dict[tabName] || []) : [];
 
     this.setData({
       activePeriodicTabIndex: idx,
       pushPeriodicGoods: newList
-    });
-  },
-
-  handleVideoScroll(e) {
-    // scrollLeft是当前滑动的距离，scrollWidth是总可滑动宽度
-    const { scrollLeft, scrollWidth } = e.detail;
-    // 使用系统的框架宽度近似计算 (视口宽度)
-    const sys = wx.getSystemInfoSync();
-    const windowWidth = sys.windowWidth;
-
-    // 最大可滑动距离
-    const maxScroll = scrollWidth - windowWidth;
-    if (maxScroll <= 0) return;
-
-    // 计算比例 (0-1)
-    let ratio = scrollLeft / maxScroll;
-    if (ratio < 0) ratio = 0;
-    if (ratio > 1) ratio = 1;
-
-    this.setData({
-      videoScrollRatio: ratio
-    });
-  },
-
-  openFakeVideoChannel() {
-    wx.showToast({
-      title: '即将打开微信视频号...',
-      icon: 'none'
     });
   },
 

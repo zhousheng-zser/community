@@ -105,9 +105,15 @@
       <!-- 默认布局 (爆款/礼物/高佣): 搜索框 + 瀑布流网格 -->
       
       <!-- 礼物专区专属：横向滑动的子分类头像 -->
-      <scroll-view wx:if="{{isGiftZone}}" class="gift-sub-scroll" scroll-x="true" scroll-with-animation="true">
+      <scroll-view wx:if="{{isGiftZone && subCategories.length}}" class="gift-sub-scroll" scroll-x="true" scroll-with-animation="true">
         <view class="gift-sub-row">
-          <view class="gift-sub-item" wx:for="{{subCategories}}" wx:key="name">
+          <view
+            class="gift-sub-item {{giftSubActive === item.name ? 'active' : ''}}"
+            wx:for="{{subCategories}}"
+            wx:key="name"
+            data-name="{{item.name}}"
+            bindtap="handleGiftSubTap"
+          >
             <image src="{{item.image}}" mode="aspectFill"></image>
             <text>{{item.name}}</text>
           </view>

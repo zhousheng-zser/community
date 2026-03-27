@@ -1,76 +1,98 @@
+const util = require('../../utils/util.js');
+
 Page({
   data: {
     navTopPadding: 20,
     pageTitle: "专区",
+    zoneId: "",
     isGiftZone: false,
-    isSidebarLayout: false, // 是否是本地好物甄选专区(左侧边栏右瀑布流)
-    isHighCommLayout: false, // 是否是高佣专区(顶部提示条+满宽单列)
-    subCategories: [], // 专属子分类：送长辈等
-    sidebarCategories: [], // 左侧分类菜单
-    activeSidebarCategory: '家庭清洁', // 当前激活的左侧分类
+    isSidebarLayout: false,
+    isHighCommLayout: false,
+    subCategories: [],
+    sidebarCategories: [],
+    activeSidebarCategory: "",
+    giftSubActive: "",
     tabs: ["推荐", "最新", "销量", "价格"],
-    goods: []
+    goods: [],
+    loading: false
   },
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
-
-    // 映射 ID 为对应标题，规避直接传中文带来的 URL 编码失败风险
     const titles = {
       "1": "爆款专区",
       "2": "礼物专区",
       "3": "本地好物甄选",
       "4": "高佣专区"
     };
-    const title = titles[options.id] || "特产专区";
-    const isGiftZone = options.id === "2";
-    const isSidebarLayout = options.id === "3";
-    const isHighCommLayout = options.id === "4";
-
-    const mockSubCategories = isGiftZone ? [
-      { name: "送社群", image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=100&q=80" },
-      { name: "送朋友", image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=100&q=80" },
-      { name: "送对象", image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=100&q=80" },
-      { name: "送客户", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80" },
-      { name: "送长辈", image: "https://images.unsplash.com/photo-1507120410856-1f35574c3b45?w=100&q=80" },
-      { name: "送小孩", image: "https://picsum.photos/id/1025/100/100" },
-      { name: "送亲戚", image: "https://picsum.photos/id/1011/100/100" }
-    ] : [];
-
-    const mockSidebarCategories = isSidebarLayout ? [
-      "家庭清洁", "生鲜水果", "美妆护肤", "珠宝首饰", "电脑办公",
-      "厨具用品", "文玩文创", "运动户外", "家用电器", "食品饮料",
-      "服饰内衣", "文具图书", "汽摩电动", "教育培训", "中外酒类",
-      "品质鞋靴", "家居日用", "个人护理", "其他", "品质家纺",
-      "宠物生活", "母婴生活", "玩具乐器", "钟表眼镜", "保健食品",
-      "箱包皮具", "3C数码", "手机通讯", "家装建材", "品质家具",
-      "粮油调味", "农资园艺", "茶具名茶"
-    ] : [];
-
-    // 生成 6 个占位商品
-    const mockGoods = Array.from({ length: 6 }).map((_, i) => ({
-      id: i + 1,
-      name: `测试商品占位名称 ${title} 款式 ${i + 1}`,
-      price: (Math.random() * 80 + 10).toFixed(2),
-      comm: (Math.random() * 5 + 1).toFixed(2),
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",
-      tag: i % 2 === 0 ? "验货实测" : "资质齐全"
-    }));
+    const zoneId = String(options.id || "1");
+    const title = titles[zoneId] || "特产专区";
+    const isGiftZone = zoneId === "2";
+    const isSidebarLayout = zoneId === "3";
+    const isHighCommLayout = zoneId === "4";
 
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
       pageTitle: title,
+      zoneId,
       isGiftZone,
       isSidebarLayout,
-      isHighCommLayout,
-      subCategories: mockSubCategories,
-      sidebarCategories: mockSidebarCategories,
-      activeSidebarCategory: mockSidebarCategories[0] || "",
-      goods: mockGoods
+      isHighCommLayout
     });
+
+    this.loadZoneProducts(zoneId, {});
+  },
+  async loadZoneProducts(zoneId, extra = {}) {
+    this.setData({ loading: true });
+    try {
+      await util.ensureUserCoordsForShop();
+      const q = util.buildShopGoodsQuery({
+        zone_id: Number(zoneId),
+        page: extra.page || 1,
+        page_size: extra.page_size || 50,
+        ...extra
+      });
+      const res = await util.get("local-goods-home/zone-products", q);
+      const payload = res && typeof res === "object" ? (res.data || res) : {};
+      const rawList = payload.list || payload.items || payload.goods_list || [];
+      const filtered = util.filterShopProductsByDistance(rawList, 5);
+      const goods = filtered.map((it, i) => util.normalizeShopProductRow(it, i));
+
+      const subCategories = Array.isArray(payload.sub_categories)
+        ? payload.sub_categories
+        : (Array.isArray(payload.gift_sub_categories) ? payload.gift_sub_categories : []);
+      const sidebarCategories = Array.isArray(payload.sidebar_categories)
+        ? payload.sidebar_categories
+        : [];
+
+      const patch = {
+        goods,
+        loading: false
+      };
+      if (subCategories.length > 0) {
+        patch.subCategories = subCategories;
+      }
+      if (sidebarCategories.length > 0) {
+        patch.sidebarCategories = sidebarCategories;
+        patch.activeSidebarCategory = sidebarCategories[0];
+      }
+      this.setData(patch);
+    } catch (e) {
+      console.log("zone-products 加载失败", e);
+      this.setData({ goods: [], loading: false });
+      wx.showToast({ title: "商品加载失败", icon: "none" });
+    }
   },
   handleSidebarClick(e) {
     const category = e.currentTarget.dataset.name;
+    if (!category) return;
     this.setData({ activeSidebarCategory: category });
+    this.loadZoneProducts(this.data.zoneId, { sidebar_category: category, page: 1, page_size: 50 });
+  },
+  handleGiftSubTap(e) {
+    const name = e.currentTarget.dataset.name;
+    if (!name) return;
+    this.setData({ giftSubActive: name });
+    this.loadZoneProducts(this.data.zoneId, { gift_sub_category: name, page: 1, page_size: 50 });
   },
   goBack() {
     const pages = getCurrentPages();

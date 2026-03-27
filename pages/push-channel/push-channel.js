@@ -1,41 +1,87 @@
+const util = require('../../utils/util.js');
+
+const TITLE_TO_CHANNEL = {
+  品牌好货: "brand_goods",
+  寻找九州好物: "jiuzhou_haowu",
+  秋冬好物: "autumn_winter"
+};
+
 Page({
   data: {
     navTopPadding: 20,
-    categories: ['九州好食', '九州好味', '九州好物'],
+    pageTitle: "频道",
+    channelKey: "jiuzhou_haowu",
+    categories: [],
     currentTab: 0,
-    allGoods: [
-      [ // 九州好食
-        { id: 101, name: "贵州大方六龙爆浆美味小豆腐", price: "19.90", shareTag: "分享赚/购买返￥3.82", image: "/img/placeholders/home_cleaning.png", tag: "爆浆小豆腐 486g" },
-        { id: 102, name: "福利！！ 试吃两节 香肠口味任选香肠川...", price: "28.00", shareTag: "分享赚/购买返￥1.43", image: "/img/placeholders/home_repair.png" },
-        { id: 103, name: "霞浦正宗干贝瑶柱 颗粒饱满肉质紧实 煲汤煮...", price: "39.90", shareTag: "分享赚/购买返￥2.10", image: "/img/placeholders/home_repair.png" },
-        { id: 104, name: "高钙淡干虾皮 无盐少添加 天然晾晒锁鲜", price: "45.00", shareTag: "分享赚/购买返￥5.00", image: "/img/placeholders/home_cleaning.png" }
-      ],
-      [ // 九州好味
-        { id: 201, name: "四川特色老坛酸菜", price: "15.80", shareTag: "分享赚/购买返￥1.50", image: "/img/placeholders/home_repair.png" },
-        { id: 202, name: "秘制香辣红油辣椒酱", price: "22.50", shareTag: "分享赚/购买返￥2.20", image: "/img/placeholders/home_cleaning.png" }
-      ],
-      [ // 九州好物
-        { id: 301, name: "竹编收纳篮手工编织", price: "58.00", shareTag: "分享赚/购买返￥6.80", image: "/img/placeholders/home_cleaning.png" },
-        { id: 302, name: "景德镇陶瓷茶具套装", price: "128.00", shareTag: "分享赚/购买返￥15.00", image: "/img/placeholders/home_repair.png" }
-      ]
-    ],
+    allGoods: [],
     goods: []
   },
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
+    const rawTitle = options.title ? decodeURIComponent(options.title) : "";
+    const channelKey = TITLE_TO_CHANNEL[rawTitle] || "jiuzhou_haowu";
+    const pageTitle = rawTitle || "九州好物";
 
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
-      goods: this.data.allGoods[0]
+      pageTitle,
+      channelKey
     });
+
+    this.loadChannel(channelKey);
+  },
+  async loadChannel(channelKey) {
+    try {
+      await util.ensureUserCoordsForShop();
+      const q = util.buildShopGoodsQuery({
+        channel_key: channelKey,
+        page: 1,
+        page_size: 80
+      });
+      const res = await util.get("local-goods-home/channel-products", q);
+      const payload = res && typeof res === "object" ? (res.data || res) : {};
+
+      if (Array.isArray(payload.tab_groups) && payload.tab_groups.length > 0) {
+        const categories = payload.tab_groups.map((g) => g.tab_name || g.name || "分类");
+        const allGoods = payload.tab_groups.map((g) => {
+          const raw = g.goods_list || g.goods || g.items || [];
+          const filtered = util.filterShopProductsByDistance(raw, 5);
+          return filtered.map((it, i) => util.normalizeShopProductRow(it, i));
+        });
+        this.setData({
+          categories,
+          allGoods,
+          currentTab: 0,
+          goods: allGoods[0] || []
+        });
+        return;
+      }
+
+      const rawList = payload.list || payload.items || payload.goods_list || [];
+      const filtered = util.filterShopProductsByDistance(rawList, 5);
+      const goods = filtered.map((it, i) => util.normalizeShopProductRow(it, i));
+      this.setData({
+        categories: ["精选"],
+        allGoods: [goods],
+        currentTab: 0,
+        goods
+      });
+    } catch (e) {
+      console.log("channel-products 加载失败", e);
+      this.setData({
+        categories: [],
+        allGoods: [],
+        goods: []
+      });
+      wx.showToast({ title: "商品加载失败", icon: "none" });
+    }
   },
   switchTab(e) {
     const index = parseInt(e.currentTarget.dataset.index, 10);
-    console.log("Tab clicked! Index:", index);
-    console.log("New goods to load:", this.data.allGoods[index]);
+    const allGoods = this.data.allGoods || [];
     this.setData({
       currentTab: index,
-      goods: this.data.allGoods[index]
+      goods: allGoods[index] || []
     });
   },
   goBack() {

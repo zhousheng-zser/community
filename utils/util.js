@@ -399,6 +399,118 @@ const pickMarketShopAvatarPath = (item) => {
   return firstNonEmptyString(src, logoKeys) || firstNonEmptyString(src, coverKeys) || '';
 };
 
+const toNumberOrNull = (val) => {
+  const n = Number(val);
+  return Number.isNaN(n) ? null : n;
+};
+
+/**
+ * 从商品对象取主图原始路径（不拼域名），兼容多种后端字段与嵌套 product/goods。
+ */
+const pickShopProductCoverRaw = (item) => {
+  if (!item || typeof item !== 'object') return '';
+  const keys = [
+    'main_image', 'mainPicture', 'main_picture', 'cover_image', 'coverImage',
+    'image', 'thumb_url', 'thumbUrl', 'goods_image', 'goodsImage', 'pic_url', 'picUrl'
+  ];
+  for (let i = 0; i < keys.length; i++) {
+    const v = item[keys[i]];
+    if (v != null && String(v).trim() !== '') return String(v).trim();
+  }
+  const nested = item.product || item.goods;
+  if (nested && typeof nested === 'object') {
+    for (let i = 0; i < keys.length; i++) {
+      const v = nested[keys[i]];
+      if (v != null && String(v).trim() !== '') return String(v).trim();
+    }
+  }
+  return '';
+};
+
+const extractDistanceKmFromProduct = (item) => {
+  if (!item || typeof item !== 'object') return null;
+  const possible = [
+    item.distance_km,
+    item.shop_distance_km,
+    item.distanceKm,
+    item.distance,
+    item.shop && item.shop.distance_km
+  ];
+  for (let i = 0; i < possible.length; i++) {
+    const n = toNumberOrNull(possible[i]);
+    if (n != null) return n;
+  }
+  return null;
+};
+
+const filterShopProductsByDistance = (list, maxKm = 5) => {
+  if (!Array.isArray(list)) return [];
+  return list.filter((g) => {
+    const km = extractDistanceKmFromProduct(g);
+    if (km == null) return true;
+    return km <= maxKm;
+  });
+};
+
+/**
+ * 列表/频道页统一商品行（含 shareTag 供频道瀑布流使用）
+ */
+const normalizeShopProductRow = (item, idx = 0) => {
+  const id = item.id || item.goods_id || idx;
+  const name = item.name || item.title || item.goods_name || '商品';
+  const raw = pickShopProductCoverRaw(item);
+  const image = imgUrl(raw || '/img/placeholders/home_cleaning.png');
+  const priceRaw = item.pay_price != null ? item.pay_price : (item.price != null ? item.price : item.goods_price);
+  const commRaw = item.rebate_amount != null ? item.rebate_amount : (item.comm != null ? item.comm : 0);
+  const commStr = String(commRaw != null ? commRaw : 0);
+  const shareFromApi = item.share_tag || item.shareTag;
+  return {
+    id,
+    name,
+    image,
+    price: String(priceRaw != null ? priceRaw : ''),
+    comm: commStr,
+    tag: item.tag || '',
+    shareTag: shareFromApi || (`分享赚/购买返￥${commStr}`)
+  };
+};
+
+/**
+ * 列表页请求公共参数：与首页本地好物一致，带 5km 半径语义。
+ */
+const buildShopGoodsQuery = (extra = {}) => {
+  const q = { ...extra };
+  const lat = wx.getStorageSync('market_user_lat');
+  const lng = wx.getStorageSync('market_user_lng');
+  if (lat != null && lng != null && lat !== '' && lng !== '') {
+    q.user_lat = Number(lat);
+    q.user_lng = Number(lng);
+  }
+  q.distance_km = q.distance_km != null ? q.distance_km : 5;
+  return q;
+};
+
+/**
+ * 子页进入时尽量拿到坐标（复用本地集市 storage 键，与首页一致）
+ */
+const ensureUserCoordsForShop = () => new Promise((resolve) => {
+  const lat0 = wx.getStorageSync('market_user_lat');
+  const lng0 = wx.getStorageSync('market_user_lng');
+  if (lat0 != null && lng0 != null && lat0 !== '' && lng0 !== '') {
+    resolve({ hasCoords: true });
+    return;
+  }
+  wx.getLocation({
+    type: 'gcj02',
+    success: (res) => {
+      wx.setStorageSync('market_user_lat', res.latitude);
+      wx.setStorageSync('market_user_lng', res.longitude);
+      resolve({ hasCoords: true });
+    },
+    fail: () => resolve({ hasCoords: false })
+  });
+});
+
 module.exports = {
   formatTime,
   get,
@@ -411,5 +523,11 @@ module.exports = {
   stateTabel,
   imgUrl,
   flattenMarketShopPayload,
-  pickMarketShopAvatarPath
+  pickMarketShopAvatarPath,
+  pickShopProductCoverRaw,
+  extractDistanceKmFromProduct,
+  filterShopProductsByDistance,
+  normalizeShopProductRow,
+  buildShopGoodsQuery,
+  ensureUserCoordsForShop
 }
