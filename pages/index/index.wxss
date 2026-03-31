@@ -1208,6 +1208,95 @@
   color: #f44336;
 }
 
+/* 惠民卡 · 多平台联盟 */
+.benefit-card-page {
+  padding-bottom: 24rpx;
+}
+
+.benefit-alliance-tabs-scroll {
+  white-space: nowrap;
+  width: 100%;
+  margin-bottom: 8rpx;
+}
+
+.benefit-alliance-tabs-row {
+  display: inline-flex;
+  padding: 12rpx 16rpx 8rpx;
+  gap: 16rpx;
+}
+
+.benefit-alliance-tab {
+  flex-shrink: 0;
+  padding: 12rpx 28rpx;
+  font-size: 26rpx;
+  color: #555;
+  background: #fff;
+  border-radius: 999rpx;
+  border: 2rpx solid #e8e8e8;
+}
+
+.benefit-alliance-tab.active {
+  color: #fff;
+  font-weight: 700;
+  background: linear-gradient(90deg, #f44336 0%, #e53935 100%);
+  border-color: transparent;
+}
+
+.benefit-hero-banner {
+  position: relative;
+  padding: 0;
+  margin-top: 0;
+  min-height: 200rpx;
+}
+
+.benefit-hero-img {
+  width: 100%;
+  height: 220rpx;
+  display: block;
+}
+
+.benefit-hero-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  padding: 24rpx 28rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.benefit-hero-mask-pdd {
+  background: linear-gradient(180deg, transparent 0%, rgba(224, 64, 43, 0.75) 100%);
+}
+
+.benefit-hero-mask-tb {
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 106, 0, 0.72) 100%);
+}
+
+.benefit-hero-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.benefit-hero-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.4;
+}
+
+.benefit-cta-pdd {
+  background: linear-gradient(90deg, #e02e24 0%, #c8161d 100%);
+}
+
+.benefit-cta-tb {
+  background: linear-gradient(90deg, #ff6a00 0%, #ff4400 100%);
+}
+
 .market-top-cats {
   display: flex;
   flex-wrap: wrap;

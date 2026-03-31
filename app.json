@@ -108,5 +108,10 @@
     "getLocation",
     "chooseLocation",
     "chooseAddress"
+  ],
+  "navigateToMiniProgramAppIdList": [
+    "wx91d27dbf599dcd7e",
+    "wx91d27dbf599dff74",
+    "wx91d27dbf5999dbf5"
   ]
 }

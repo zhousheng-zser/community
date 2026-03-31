@@ -6,7 +6,7 @@
     "postcss": true,
     "minified": true,
     "newFeature": true,
-    "compileWorklet": false,
+    "compileWorklet": true,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
     "enhance": false,

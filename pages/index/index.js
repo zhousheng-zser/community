@@ -50,6 +50,20 @@ Page({
     fukaTopicCards: [],
     fukaFilterTabs: [],
     fukaGoods: [],
+    jdGoods: [],
+    jdBanner: "",
+    benefitAllianceTabs: [
+      { key: 'jd', name: '京东联盟' },
+      { key: 'pdd', name: '拼多多' },
+      { key: 'taobao', name: '淘宝联盟' }
+    ],
+    activeBenefitAlliance: 'jd',
+    pddGoods: [],
+    taobaoGoods: [],
+    pddBanner: '',
+    taobaoBanner: '',
+    pddEntry: { spreadUrl: '', miniPath: '', goodsId: '' },
+    taobaoEntry: { promotionUrl: '', itemId: '' },
     activeMarketCat: "AAAA",
     marketTopCats: [],
     marketFilters: [
@@ -639,6 +653,88 @@ Page({
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
+    const jdBanner = images.bannerSale;
+    const pddBanner = images.pushFood2;
+    const taobaoBanner = images.goodsSkincare2;
+    const pddEntry = {
+      spreadUrl: 'https://mobile.yangkeduo.com/',
+      miniPath: '',
+      goodsId: ''
+    };
+    const taobaoEntry = {
+      promotionUrl: 'https://s.click.taobao.com/',
+      itemId: ''
+    };
+    let jdGoods = [
+      { id: 1, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushFood1, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' },
+      { id: 2, skuId: '100012345678', title: '汽车蓝牙音箱', image: images.pushFood2, price: '99.00', rebateAmount: '', spreadUrl: 'https://u.jd.com/c6YU7o1' },
+      { id: 3, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushDaily1, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' },
+      { id: 4, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushDaily2, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' }
+    ];
+    let pddGoods = [
+      { id: 1, goodsId: 'pdd_demo_1', title: '农家土鸡蛋 30 枚', image: images.pushFood1, price: '29.90', rebateAmount: '1.5', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
+      { id: 2, goodsId: 'pdd_demo_2', title: '抽纸整箱批发', image: images.pushDaily1, price: '19.90', rebateAmount: '0.8', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
+      { id: 3, goodsId: 'pdd_demo_3', title: '当季新鲜苹果', image: images.pushFood2, price: '39.90', rebateAmount: '2', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
+      { id: 4, goodsId: 'pdd_demo_4', title: '洗衣液家庭装', image: images.pushDaily2, price: '24.90', rebateAmount: '1', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' }
+    ];
+    let taobaoGoods = [
+      { id: 1, itemId: 'tb_demo_1', title: '品牌洗衣液 4 斤装', image: images.pushDaily2, price: '35.90', rebateAmount: '2.5', promotionUrl: 'https://s.click.taobao.com/' },
+      { id: 2, itemId: 'tb_demo_2', title: '不锈钢保温杯', image: images.pushFood1, price: '49.00', rebateAmount: '3', promotionUrl: 'https://s.click.taobao.com/' },
+      { id: 3, itemId: 'tb_demo_3', title: '无线鼠标静音', image: images.goodsSkincare2, price: '59.90', rebateAmount: '4', promotionUrl: 'https://s.click.taobao.com/' },
+      { id: 4, itemId: 'tb_demo_4', title: '蓝牙音箱便携', image: images.pushDaily1, price: '89.00', rebateAmount: '6', promotionUrl: 'https://s.click.taobao.com/' }
+    ];
+    const pickAllianceList = (res) => {
+      if (Array.isArray(res)) return res;
+      if (res && res.data && Array.isArray(res.data.list)) return res.data.list;
+      if (res && Array.isArray(res.list)) return res.list;
+      return [];
+    };
+    try {
+      const res = await util.get('jd/benefit/goods', { scene: 'benefit_card' });
+      const list = pickAllianceList(res);
+      if (list.length > 0) {
+        jdGoods = list.map((x, idx) => ({
+          id: x.id || idx + 1,
+          skuId: String(x.skuId || x.sku_id || ''),
+          title: x.title || x.name || '',
+          image: x.image || x.image_url || images.pushFood1,
+          price: String(x.price || ''),
+          rebateAmount: x.rebateAmount || x.rebate_amount || '',
+          spreadUrl: x.spreadUrl || x.spread_url || ''
+        })).filter(x => !!x.skuId);
+      }
+    } catch (e) {}
+    try {
+      const res = await util.get('pdd/benefit/goods', { scene: 'benefit_card' });
+      const list = pickAllianceList(res);
+      if (list.length > 0) {
+        pddGoods = list.map((x, idx) => ({
+          id: x.id || idx + 1,
+          goodsId: String(x.goodsId || x.goods_id || ''),
+          title: x.title || x.name || '',
+          image: x.image || x.image_url || images.pushFood1,
+          price: String(x.price || ''),
+          rebateAmount: x.rebateAmount || x.rebate_amount || '',
+          spreadUrl: x.spreadUrl || x.spread_url || '',
+          miniPath: x.miniPath || x.mini_path || ''
+        })).filter(x => !!(x.goodsId || x.spreadUrl));
+      }
+    } catch (e) {}
+    try {
+      const res = await util.get('taobao/benefit/goods', { scene: 'benefit_card' });
+      const list = pickAllianceList(res);
+      if (list.length > 0) {
+        taobaoGoods = list.map((x, idx) => ({
+          id: x.id || idx + 1,
+          itemId: String(x.itemId || x.item_id || ''),
+          title: x.title || x.name || '',
+          image: x.image || x.image_url || images.pushDaily2,
+          price: String(x.price || ''),
+          rebateAmount: x.rebateAmount || x.rebate_amount || '',
+          promotionUrl: x.promotionUrl || x.promotion_url || x.url || ''
+        })).filter(x => !!(x.itemId || x.promotionUrl));
+      }
+    } catch (e) {}
     this.setData({
       banner,
       goods,
@@ -672,6 +768,14 @@ Page({
       fukaTopicCards,
       fukaFilterTabs,
       fukaGoods,
+      jdGoods,
+      jdBanner,
+      pddGoods,
+      taobaoGoods,
+      pddBanner,
+      taobaoBanner,
+      pddEntry,
+      taobaoEntry,
       marketTopCats,
       marketFilters: [
         { key: 'comprehensive', label: '综合排序' },
@@ -727,6 +831,143 @@ Page({
       pushFeedGoods: [...(this.data.pushFeedGoodsDict[tabName] || [])],
       isLoadingMore: false
     });
+  },
+  switchBenefitAllianceTab(e) {
+    const key = e.currentTarget.dataset.key;
+    if (!key || key === this.data.activeBenefitAlliance) return;
+    this.setData({ activeBenefitAlliance: key });
+  },
+
+  copyBenefitLink(url, toastTitle) {
+    const u = url && String(url).trim();
+    if (!u) {
+      wx.showToast({ title: '暂无推广链接', icon: 'none' });
+      return;
+    }
+    wx.setClipboardData({
+      data: u,
+      success: () => wx.showToast({ title: toastTitle || '已复制', icon: 'none' })
+    });
+  },
+
+  goToPddBenefit(e) {
+    const cfg = (config.benefitAlliance || {});
+    const d = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
+    const goodsId = d.goodsId ? String(d.goodsId) : '';
+    let spreadUrl = d.spreadUrl ? String(d.spreadUrl) : '';
+    const miniPath = d.miniPath ? String(d.miniPath).trim() : '';
+    const pddAppId = cfg.pddMiniAppId || '';
+
+    const openPddMini = (path) => {
+      if (!pddAppId || !path) return false;
+      const p = path.replace(/^\//, '');
+      wx.navigateToMiniProgram({
+        appId: pddAppId,
+        path: p,
+        envVersion: 'release',
+        fail: (err) => {
+          const msg = (err && err.errMsg) ? err.errMsg : '跳转失败';
+          wx.showToast({ title: msg, icon: 'none' });
+        }
+      });
+      return true;
+    };
+
+    if (miniPath && openPddMini(miniPath)) return;
+
+    if (goodsId) {
+      util.get('pdd/promotion/spread-url', { goods_id: goodsId, scene: 'benefit_card' })
+        .then((res) => {
+          const url = (res && (res.spreadUrl || res.spread_url || (res.data && (res.data.spreadUrl || res.data.spread_url)))) || '';
+          const mp = (res && (res.miniPath || res.mini_path || (res.data && (res.data.miniPath || res.data.mini_path)))) || '';
+          if (mp && openPddMini(String(mp))) return;
+          if (url) return this.copyBenefitLink(url, '推广链接已复制，可在浏览器打开');
+          if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
+          wx.showToast({ title: '暂无法生成推广链接', icon: 'none' });
+        })
+        .catch(() => {
+          if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
+          wx.showToast({ title: '网络异常', icon: 'none' });
+        });
+      return;
+    }
+    if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
+    wx.showToast({ title: '暂无推广信息', icon: 'none' });
+  },
+
+  goToTaobaoBenefit(e) {
+    const cfg = (config.benefitAlliance || {});
+    const d = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
+    const itemId = d.itemId ? String(d.itemId) : '';
+    const fallbackUrl = d.promotionUrl ? String(d.promotionUrl) : '';
+    const tbAppId = (cfg.taobaoMiniAppId || '').trim();
+    const miniPath = d.miniPath ? String(d.miniPath).trim() : '';
+
+    if (tbAppId && miniPath) {
+      wx.navigateToMiniProgram({
+        appId: tbAppId,
+        path: miniPath.replace(/^\//, ''),
+        envVersion: 'release',
+        fail: () => {
+          if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '推广链接已复制');
+          else wx.showToast({ title: '跳转失败', icon: 'none' });
+        }
+      });
+      return;
+    }
+
+    if (itemId) {
+      util.get('taobao/promotion/url', { item_id: itemId, scene: 'benefit_card' })
+        .then((res) => {
+          const url = (res && (res.promotionUrl || res.promotion_url || res.url || (res.data && (res.data.promotionUrl || res.data.url)))) || '';
+          if (url) return this.copyBenefitLink(url, '推广链接已复制，请打开淘宝/浏览器');
+          if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制');
+          wx.showToast({ title: '暂无法生成推广链接', icon: 'none' });
+        })
+        .catch(() => {
+          if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制');
+          wx.showToast({ title: '网络异常', icon: 'none' });
+        });
+      return;
+    }
+    if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制，请打开淘宝/浏览器');
+    wx.showToast({ title: '暂无推广信息', icon: 'none' });
+  },
+
+  goToJDMiniprogram(e) {
+    const cfg = (config.benefitAlliance || {});
+    const jdAppId = cfg.jdUnionAppId || 'wx91d27dbf599dff74';
+    const dataset = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
+    const skuId = dataset.skuId ? String(dataset.skuId) : '';
+    const fallbackSpreadUrl = dataset.spreadUrl ? String(dataset.spreadUrl) : '';
+    const openBySpreadUrl = (url) => {
+      const encoded = encodeURIComponent(url);
+      wx.navigateToMiniProgram({
+        appId: jdAppId,
+        path: `/pages/union/proxy/proxy?spreadUrl=${encoded}`,
+        envVersion: 'release',
+        fail: (err) => {
+          const msg = (err && err.errMsg) ? err.errMsg : '跳转失败';
+          wx.showToast({ title: msg, icon: 'none' });
+        }
+      });
+    };
+    if (!skuId) {
+      if (fallbackSpreadUrl) return openBySpreadUrl(fallbackSpreadUrl);
+      wx.showToast({ title: '缺少商品信息', icon: 'none' });
+      return;
+    }
+    util.get('jd/promotion/spread-url', { sku_id: skuId, scene: 'benefit_card' })
+      .then((res) => {
+        const url = (res && (res.spreadUrl || res.spread_url || (res.data && (res.data.spreadUrl || res.data.spread_url)))) || '';
+        if (url) return openBySpreadUrl(url);
+        if (fallbackSpreadUrl) return openBySpreadUrl(fallbackSpreadUrl);
+        wx.showToast({ title: '暂无法生成推广链接', icon: 'none' });
+      })
+      .catch(() => {
+        if (fallbackSpreadUrl) return openBySpreadUrl(fallbackSpreadUrl);
+        wx.showToast({ title: '网络异常', icon: 'none' });
+      });
   },
 
   // ---- 小程序级：触底加载更多 ----
