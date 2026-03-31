@@ -1,0 +1,19 @@
+{
+  "name": "community-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "社区小程序后端（含惠民卡·京东联盟）",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "seed:jd-benefit": "node scripts/seed-jd-benefit.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.0",
+    "sequelize": "^6.37.3"
+  }
+}

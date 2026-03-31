@@ -850,51 +850,75 @@ Page({
     });
   },
 
+  /**
+   * 跳转拼多多官方微信小程序：有 path 则打开指定页，无 path 则打开对方首页（与京东不同，拼多多 H5 链不能塞进联盟 proxy，需 path 或先进小程序首页）
+   */
   goToPddBenefit(e) {
     const cfg = (config.benefitAlliance || {});
     const d = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
     const goodsId = d.goodsId ? String(d.goodsId) : '';
-    let spreadUrl = d.spreadUrl ? String(d.spreadUrl) : '';
+    const spreadUrl = d.spreadUrl ? String(d.spreadUrl) : '';
     const miniPath = d.miniPath ? String(d.miniPath).trim() : '';
     const pddAppId = cfg.pddMiniAppId || '';
 
-    const openPddMini = (path) => {
-      if (!pddAppId || !path) return false;
-      const p = path.replace(/^\//, '');
-      wx.navigateToMiniProgram({
+    const openPddMini = (path, fallbackCopy) => {
+      if (!pddAppId) {
+        wx.showToast({ title: '未配置拼多多小程序 AppId', icon: 'none' });
+        return false;
+      }
+      const opt = {
         appId: pddAppId,
-        path: p,
         envVersion: 'release',
         fail: (err) => {
-          const msg = (err && err.errMsg) ? err.errMsg : '跳转失败';
-          wx.showToast({ title: msg, icon: 'none' });
+          const msg = (err && err.errMsg) ? String(err.errMsg) : '';
+          if (/cancel/.test(msg)) return;
+          if (typeof fallbackCopy === 'function') fallbackCopy();
+          else wx.showToast({ title: msg || '跳转失败', icon: 'none' });
         }
-      });
+      };
+      if (path && String(path).trim()) {
+        opt.path = String(path).replace(/^\//, '');
+      }
+      wx.navigateToMiniProgram(opt);
       return true;
     };
 
-    if (miniPath && openPddMini(miniPath)) return;
+    const tryCopySpread = () => {
+      if (spreadUrl) this.copyBenefitLink(spreadUrl, '跳转失败，推广链接已复制');
+      else wx.showToast({ title: '跳转失败', icon: 'none' });
+    };
+
+    if (miniPath) {
+      openPddMini(miniPath, tryCopySpread);
+      return;
+    }
 
     if (goodsId) {
       util.get('pdd/promotion/spread-url', { goods_id: goodsId, scene: 'benefit_card' })
         .then((res) => {
           const url = (res && (res.spreadUrl || res.spread_url || (res.data && (res.data.spreadUrl || res.data.spread_url)))) || '';
           const mp = (res && (res.miniPath || res.mini_path || (res.data && (res.data.miniPath || res.data.mini_path)))) || '';
-          if (mp && openPddMini(String(mp))) return;
-          if (url) return this.copyBenefitLink(url, '推广链接已复制，可在浏览器打开');
-          if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
-          wx.showToast({ title: '暂无法生成推广链接', icon: 'none' });
+          if (mp) {
+            openPddMini(String(mp), tryCopySpread);
+            return;
+          }
+          if (openPddMini('', () => {
+            if (url) this.copyBenefitLink(url, '推广链接已复制，可在浏览器打开');
+            else tryCopySpread();
+          })) return;
         })
         .catch(() => {
-          if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
-          wx.showToast({ title: '网络异常', icon: 'none' });
+          openPddMini('', tryCopySpread);
         });
       return;
     }
-    if (spreadUrl) return this.copyBenefitLink(spreadUrl, '推广链接已复制，可在浏览器打开');
-    wx.showToast({ title: '暂无推广信息', icon: 'none' });
+
+    openPddMini('', tryCopySpread);
   },
 
+  /**
+   * 跳转淘系官方微信小程序（配置里为淘特 AppId）：有 miniPath 则直达；否则打开对方首页；再不行再复制 H5 推广链
+   */
   goToTaobaoBenefit(e) {
     const cfg = (config.benefitAlliance || {});
     const d = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
@@ -903,16 +927,35 @@ Page({
     const tbAppId = (cfg.taobaoMiniAppId || '').trim();
     const miniPath = d.miniPath ? String(d.miniPath).trim() : '';
 
-    if (tbAppId && miniPath) {
-      wx.navigateToMiniProgram({
+    const openTbMini = (path, onFail) => {
+      if (!tbAppId) {
+        wx.showToast({ title: '未配置淘宝系小程序 AppId', icon: 'none' });
+        return false;
+      }
+      const opt = {
         appId: tbAppId,
-        path: miniPath.replace(/^\//, ''),
         envVersion: 'release',
-        fail: () => {
-          if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '推广链接已复制');
-          else wx.showToast({ title: '跳转失败', icon: 'none' });
+        fail: (err) => {
+          const msg = (err && err.errMsg) ? String(err.errMsg) : '';
+          if (/cancel/.test(msg)) return;
+          if (typeof onFail === 'function') onFail();
+          else wx.showToast({ title: msg || '跳转失败', icon: 'none' });
         }
-      });
+      };
+      if (path && String(path).trim()) {
+        opt.path = String(path).replace(/^\//, '');
+      }
+      wx.navigateToMiniProgram(opt);
+      return true;
+    };
+
+    const copyFallback = () => {
+      if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '跳转失败，推广链接已复制');
+      else wx.showToast({ title: '跳转失败', icon: 'none' });
+    };
+
+    if (miniPath) {
+      openTbMini(miniPath, copyFallback);
       return;
     }
 
@@ -920,18 +963,26 @@ Page({
       util.get('taobao/promotion/url', { item_id: itemId, scene: 'benefit_card' })
         .then((res) => {
           const url = (res && (res.promotionUrl || res.promotion_url || res.url || (res.data && (res.data.promotionUrl || res.data.url)))) || '';
-          if (url) return this.copyBenefitLink(url, '推广链接已复制，请打开淘宝/浏览器');
-          if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制');
-          wx.showToast({ title: '暂无法生成推广链接', icon: 'none' });
+          const mp = (res && (res.miniPath || res.mini_path || (res.data && (res.data.miniPath || res.data.mini_path)))) || '';
+          if (mp) {
+            openTbMini(String(mp), copyFallback);
+            return;
+          }
+          openTbMini('', () => {
+            if (url) this.copyBenefitLink(url, '推广链接已复制，请打开淘宝/浏览器');
+            else copyFallback();
+          });
         })
         .catch(() => {
-          if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制');
-          wx.showToast({ title: '网络异常', icon: 'none' });
+          openTbMini('', copyFallback);
         });
       return;
     }
-    if (fallbackUrl) return this.copyBenefitLink(fallbackUrl, '推广链接已复制，请打开淘宝/浏览器');
-    wx.showToast({ title: '暂无推广信息', icon: 'none' });
+
+    openTbMini('', () => {
+      if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '推广链接已复制，请打开淘宝/浏览器');
+      else wx.showToast({ title: '暂无推广信息', icon: 'none' });
+    });
   },
 
   goToJDMiniprogram(e) {
