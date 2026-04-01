@@ -17,10 +17,16 @@ const config = {
      */
     benefitAlliance: {
         jdUnionAppId: 'wx91d27dbf599dff74',
-        /** 拼多多官方小程序（用于带 miniPath 的直达跳转；空路径时走复制 H5 推广链接） */
-        pddMiniAppId: 'wx32540bd863bfa725',
-        /** 淘系小程序（如淘特等），留空则淘宝联盟仅使用复制推广链接 */
-        taobaoMiniAppId: ''
+        /**
+         * 拼多多官方微信小程序 AppID（多多进宝 / 微信侧「跳转其他小程序」文档常用，与 path 由接口 wx_app_url / miniPath 配合）
+         * 若你方进宝返回的 we_app_info 指定其他 AppId，请改为与接口一致。
+         */
+        pddMiniAppId: 'wx32540bd863b27570',
+        /**
+         * 淘特（淘宝特价版）官方微信小程序 AppID（应用宝/淘特分发页所列；淘宝联盟淘特 CPS 常与此小程序路径配合）
+         * 若仅推广「手机淘宝」等其他微信内小程序，请以联盟接口返回的 we_app_info.app_id 为准修改此处。
+         */
+        taobaoMiniAppId: 'wx21a7f55fc4ac6276'
     },
 };
 
