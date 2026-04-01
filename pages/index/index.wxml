@@ -45,8 +45,8 @@
     <!-- 模块二：五大金刚区 -->
     <view class="jt-categories">
       <navigator class="jt-cate-item" wx:for="{{pushCategories}}" wx:key="name" url="{{item.url}}">
-        <view class="jt-cate-emoji-wrap" style="background:{{item.bgColor}}">
-          <text class="jt-cate-emoji">{{item.emoji}}</text>
+        <view class="jt-cate-emoji-wrap">
+          <image src="{{item.icon}}" mode="aspectFill" style="width: 100%; height: 100%; border-radius: 50%;"></image>
         </view>
         <text>{{item.name}}</text>
       </navigator>
@@ -317,8 +317,8 @@
   <view wx:elif="{{activeTab === '本地集市'}}">
     <view class="card market-top-cats">
       <view class="market-top-item {{activeMarketCat === item.code ? 'active' : ''}}" wx:for="{{marketTopCats}}" wx:key="code" bindtap="switchMarketCategory" data-code="{{item.code}}">
-        <view class="market-emoji-wrap" style="background:{{item.bgColor}}; border: {{activeMarketCat === item.code ? '4rpx solid #ff4d4f' : '4rpx solid transparent'}};">
-          <text class="market-emoji">{{item.emoji}}</text>
+        <view class="market-emoji-wrap" style="border: {{activeMarketCat === item.code ? '4rpx solid #ff4d4f' : '4rpx solid transparent'}};">
+          <image src="{{item.icon}}" mode="aspectFill" style="width: 100%; height: 100%; border-radius: 50%;"></image>
         </view>
         <text style="color: {{activeMarketCat === item.code ? '#ff4d4f' : '#333'}}; font-weight: {{activeMarketCat === item.code ? 'bold' : 'normal'}};">{{item.name}}</text>
       </view>

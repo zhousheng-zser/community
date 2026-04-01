@@ -545,10 +545,10 @@ Page({
 
     // 模块二：分类金刚
     const pushCategories = [
-      { name: "爆款专区", emoji: "🔥", bgColor: "#ffe0e0", url: "/pages/push-goods-list/push-goods-list?id=1" },
-      { name: "礼物专区", emoji: "🎁", bgColor: "#ffe0f5", url: "/pages/push-goods-list/push-goods-list?id=2" },
-      { name: "本地好物甄选", emoji: "⭐", bgColor: "#fff5e0", url: "/pages/push-goods-list/push-goods-list?id=3" },
-      { name: "高佣专区", emoji: "💰", bgColor: "#e4ffe0", url: "/pages/push-goods-list/push-goods-list?id=4" }
+      { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/pages/push-goods-list/push-goods-list?id=1" },
+      { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/pages/push-goods-list/push-goods-list?id=2" },
+      { name: "本地好物甄选", icon: "/img/local_goods_icons/star.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/pages/push-goods-list/push-goods-list?id=4" }
     ];
 
     // 模块三：导购窗
@@ -616,16 +616,16 @@ Page({
       { id: 3004, name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = [
-      { name: "母婴生活馆", code: "AAAA", emoji: "👶", bgColor: "#fff5e0", url: "../market-banner/market-banner?title=母婴生活馆" },
-      { name: "家庭服务", code: "AAAB", emoji: "🏠", bgColor: "#e0eeff", url: "../market-banner/market-banner?title=家庭服务" },
-      { name: "超市便利", code: "AAAC", emoji: "🛒", bgColor: "#e4ffe0", url: "../market-banner/market-banner?title=超市便利" },
-      { name: "美食外卖", code: "AAAD", emoji: "🍱", bgColor: "#ffe0df", url: "../market-banner/market-banner?title=美食外卖" },
-      { name: "看病买药", code: "AAAE", emoji: "💊", bgColor: "#e6ffe0", url: "../market-banner/market-banner?title=看病买药" },
-      { name: "鲜花礼品", code: "AAAF", emoji: "💐", bgColor: "#ffe0f5", url: "../market-banner/market-banner?title=鲜花礼品" },
-      { name: "水果蔬菜", code: "AAAG", emoji: "🥬", bgColor: "#f0ffe0", url: "../market-banner/market-banner?title=水果蔬菜" },
-      { name: "服装首饰", code: "AAAH", emoji: "👗", bgColor: "#ede8ff", url: "../market-banner/market-banner?title=服装首饰" },
-      { name: "电子数码", code: "AAAI", emoji: "💻", bgColor: "#e0f3ff", url: "../market-banner/market-banner?title=电子数码" },
-      { name: "本地玩乐", code: "AAAJ", emoji: "🎡", bgColor: "#fff0f5", url: "../market-banner/market-banner?title=本地玩乐" }
+      { name: "母婴生活馆", code: "AAAA", icon: "/img/market_icons/baby.png", url: "../market-banner/market-banner?title=母婴生活馆" },
+      { name: "家庭服务", code: "AAAB", icon: "/img/market_icons/home.png", url: "../market-banner/market-banner?title=家庭服务" },
+      { name: "超市便利", code: "AAAC", icon: "/img/market_icons/supermarket.png", url: "../market-banner/market-banner?title=超市便利" },
+      { name: "美食外卖", code: "AAAD", icon: "/img/market_icons/food.png", url: "../market-banner/market-banner?title=美食外卖" },
+      { name: "看病买药", code: "AAAE", icon: "/img/market_icons/medicine.png", url: "../market-banner/market-banner?title=看病买药" },
+      { name: "鲜花礼品", code: "AAAF", icon: "/img/market_icons/gift.png", url: "../market-banner/market-banner?title=鲜花礼品" },
+      { name: "水果蔬菜", code: "AAAG", icon: "/img/market_icons/fruit.png", url: "../market-banner/market-banner?title=水果蔬菜" },
+      { name: "服装首饰", code: "AAAH", icon: "/img/market_icons/clothes.png", url: "../market-banner/market-banner?title=服装首饰" },
+      { name: "电子数码", code: "AAAI", icon: "/img/market_icons/tech.png", url: "../market-banner/market-banner?title=电子数码" },
+      { name: "本地玩乐", code: "AAAJ", icon: "/img/market_icons/fun.png", url: "../market-banner/market-banner?title=本地玩乐" }
     ];
     const allMarketShops = [];
 
