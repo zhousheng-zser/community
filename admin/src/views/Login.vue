@@ -43,11 +43,13 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import request from '../utils/request'
 
 const router = useRouter()
+const route = useRoute()
 const loading = ref(false)
 
 const form = ref({
@@ -55,24 +57,30 @@ const form = ref({
   password: ''
 })
 
-const handleLogin = () => {
+const handleLogin = async () => {
   if (!form.value.username || !form.value.password) {
     return ElMessage.warning('账号与密码不可为空')
   }
-  
   loading.value = true
-  
-  // 模拟去后端校验密码的网络延迟
-  setTimeout(() => {
-    loading.value = false
-    if (form.value.username === 'admin' && form.value.password === '123456') {
-      ElMessage.success('口令正确！正在帮您打开仪表盘...')
-      // 成功则强制跳往内部控制大屏
-      router.push('/dashboard')
+  try {
+    const res = await request.post('/admin/login', {
+      username: form.value.username,
+      password: form.value.password
+    })
+    const data = res.data || {}
+    if (data.token) {
+      localStorage.setItem('admin_token', data.token)
+      ElMessage.success('登录成功')
+      const redirect = route.query.redirect
+      router.push(typeof redirect === 'string' && redirect ? redirect : '/dashboard')
     } else {
-      ElMessage.error('账号已被锁定或密码错误，请联系技术团队！')
+      ElMessage.error('未返回令牌，请检查后端配置')
     }
-  }, 800)
+  } catch (e) {
+    ElMessage.error(e.message || '登录失败')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

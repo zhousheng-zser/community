@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const jdBenefitRouter = require('./routes/jdBenefit');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/v1/jd', jdBenefitRouter);
+app.use('/api/v1/admin', adminRouter);
 
 app.use((req, res) => {
   res.status(404).json({ errno: 404, errmsg: 'not found' });

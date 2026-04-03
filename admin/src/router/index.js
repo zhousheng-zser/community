@@ -5,7 +5,8 @@ const routes = [
     {
         path: '/login',
         name: 'Login',
-        component: () => import('../views/Login.vue')
+        component: () => import('../views/Login.vue'),
+        meta: { public: true }
     },
     {
         path: '/',
@@ -17,6 +18,12 @@ const routes = [
                 name: 'Dashboard',
                 component: () => import('../views/Dashboard.vue'),
                 meta: { title: '控制大屏', icon: 'Odometer' }
+            },
+            {
+                path: 'jd-benefit-goods',
+                name: 'JdBenefitGoods',
+                component: () => import('../views/JdBenefitGoods.vue'),
+                meta: { title: '惠民卡·京东联盟商品', icon: 'ShoppingBag' }
             },
             {
                 path: 'goods',
@@ -37,6 +44,24 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes
+})
+
+router.beforeEach((to, _from, next) => {
+    const token = localStorage.getItem('admin_token')
+    if (to.meta.public) {
+        if (token && to.path === '/login') {
+            const r = to.query.redirect
+            next(typeof r === 'string' && r ? r : '/dashboard')
+        } else {
+            next()
+        }
+        return
+    }
+    if (!token) {
+        next({ path: '/login', query: { redirect: to.fullPath } })
+        return
+    }
+    next()
 })
 
 export default router

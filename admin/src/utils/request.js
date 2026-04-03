@@ -1,41 +1,53 @@
 import axios from 'axios'
 
-// 假设我们后期的 Node.js 跑在本机的 3000 端口
+// 开发默认 /api/v1（经 Vite 代理到 backend:3000）；生产在 .env.production 写完整 https 域名
+const baseURL = import.meta.env.VITE_API_BASE || '/api/v1'
+
 const request = axios.create({
-    baseURL: 'http://114.55.167.14:3000/api',
-    timeout: 5000
+  baseURL,
+  timeout: 20000
 })
 
-// 添加请求拦截器：以后在这把登录获取到的 JWT 令牌塞入 headers 给后端验证
 request.interceptors.request.use(
-    config => {
-        // const token = localStorage.getItem('admin_token')
-        // if (token) {
-        //   config.headers['Authorization'] = 'Bearer ' + token
-        // }
-        return config
-    },
-    error => {
-        return Promise.reject(error)
+  (config) => {
+    const token = localStorage.getItem('admin_token')
+    if (token) {
+      config.headers.Authorization = 'Bearer ' + token
     }
+    return config
+  },
+  (error) => Promise.reject(error)
 )
 
-// 添加响应拦截器：集中拦取如“密码错误”、“请重新登录”等抛错并跳出警告
 request.interceptors.response.use(
-    response => {
-        const res = response.data
-        // 如果后端制定的返回码不为 200，则当做异常处理
-        if (res.code && res.code !== 200) {
-            console.error('Request Error: ' + res.message || 'Error')
-            return Promise.reject(new Error(res.message || 'Error'))
-        } else {
-            return res
-        }
-    },
-    error => {
-        console.error('Response Catch:', error)
-        return Promise.reject(error)
+  (response) => {
+    const res = response.data
+    if (res && typeof res.code === 'number' && res.code !== 200) {
+      return Promise.reject(new Error(res.message || '请求失败'))
     }
+    return res
+  },
+  (error) => {
+    const status = error.response && error.response.status
+    if (status === 401) {
+      localStorage.removeItem('admin_token')
+      if (typeof window !== 'undefined' && !window.location.pathname.endsWith('/login')) {
+        window.location.assign('/login')
+      }
+    }
+    const isNetwork =
+      !error.response &&
+      (error.code === 'ERR_NETWORK' ||
+        (error.message && String(error.message).toLowerCase().includes('network')))
+    const hint = isNetwork
+      ? '无法连接后端：请在项目 backend 目录执行 npm start（默认端口 3000），并确认 MySQL 与 .env 已配置。'
+      : ''
+    const msg =
+      (error.response && error.response.data && error.response.data.message) ||
+      error.message ||
+      '网络错误'
+    return Promise.reject(new Error(hint ? `${msg}。${hint}` : msg))
+  }
 )
 
 export default request

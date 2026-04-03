@@ -17,6 +17,10 @@
           <el-icon><Odometer /></el-icon>
           <span>数据大屏</span>
         </el-menu-item>
+        <el-menu-item index="/jd-benefit-goods">
+          <el-icon><ShoppingBag /></el-icon>
+          <span>惠民卡·京东商品</span>
+        </el-menu-item>
         <el-menu-item index="/goods">
           <el-icon><Goods /></el-icon>
           <span>商品池管理</span>
@@ -35,14 +39,13 @@
           <h3>{{ $route.meta.title }}</h3>
         </div>
         <div class="header-right">
-          <el-dropdown>
+          <el-dropdown @command="onUserCommand">
             <span class="el-dropdown-link">
-              Admin 店长 <el-icon class="el-icon--right"><arrow-down /></el-icon>
+              {{ adminName }} <el-icon class="el-icon--right"><arrow-down /></el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>系统设置</el-dropdown-item>
-                <el-dropdown-item divided>退出登录</el-dropdown-item>
+                <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -58,7 +61,33 @@
 </template>
 
 <script setup>
-import { Odometer, Goods, Money, ArrowDown } from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Odometer, Goods, Money, ArrowDown, ShoppingBag } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+
+const router = useRouter()
+const adminName = ref('管理员')
+
+onMounted(() => {
+  try {
+    const t = localStorage.getItem('admin_token')
+    if (t) {
+      const payload = JSON.parse(atob(t.split('.')[1]))
+      if (payload && payload.sub) adminName.value = payload.sub
+    }
+  } catch (_) {
+    /* ignore */
+  }
+})
+
+function onUserCommand(cmd) {
+  if (cmd === 'logout') {
+    localStorage.removeItem('admin_token')
+    ElMessage.success('已退出')
+    router.push('/login')
+  }
+}
 </script>
 
 <style scoped>
