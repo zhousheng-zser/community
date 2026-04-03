@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>图标全自动生成器</title>
+</head>
+<body style="background: #fcfcfc; font-family: sans-serif; text-align: center; padding: 40px;">
+    <h2>🔄 正在利用 WebKit 引擎为您全自动生成最高品质图标...</h2>
+    <div id="output" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 40px;"></div>
+    
+    <script>
+        const bgImg = new Image();
+        bgImg.src = 'img/sunset_gradient_bg.png';
+
+        const icons = [
+            { f: 'my_orders', n: 'service_order', e: '📋' },
+            { f: 'my_orders', n: 'quick_publish', e: '⚡' },
+            { f: 'my_orders', n: 'market_order', e: '🛒' },
+            { f: 'my_orders', n: 'benefit_card_order', e: '🎫' },
+            { f: 'my_orders', n: 'promoter_order', e: '🤝' },
+            { f: 'my_orders', n: 'combo_package', e: '📦' },
+            
+            { f: 'my_community', n: 'my_posts', e: '📝' },
+            { f: 'my_community', n: 'my_follows', e: '👥' },
+            { f: 'my_community', n: 'my_likes', e: '❤️' },
+            { f: 'my_community', n: 'joined_topics', e: '💬' },
+            { f: 'my_community', n: 'joined_activities', e: '🎉' },
+            { f: 'my_community', n: 'activity_management', e: '📅' },
+            { f: 'my_community', n: 'appeal_list', e: '📢' },
+            
+            { f: 'join_services', n: 'worker_join', e: '🔧' },
+            { f: 'join_services', n: 'market_merchant', e: '🏪' },
+            { f: 'join_services', n: 'service_provider', e: '🏡' },
+            
+            { f: 'other_services', n: 'help_feedback', e: '💭' },
+            { f: 'other_services', n: 'community_manager', e: '🏠' },
+            { f: 'other_services', n: 'about_us', e: 'ℹ️' },
+            { f: 'other_services', n: 'address_management', e: '📍' },
+            { f: 'other_services', n: 'platform_service', e: '🎧' },
+            { f: 'other_services', n: 'settings', e: '⚙️' },
+            
+            { f: 'gifts', n: 'for_elders', e: '🍵' },
+            { f: 'gifts', n: 'for_friends', e: '🎁' }
+        ];
+
+        bgImg.onload = async () => {
+            const SIZE = 120;
+            const RADIUS = 30; // iOS-like rounded corners
+
+            for (let i = 0; i < icons.length; i++) {
+                const icon = icons[i];
+                const canvas = document.createElement('canvas');
+                canvas.width = SIZE;
+                canvas.height = SIZE;
+                const ctx = canvas.getContext('2d');
+                
+                // Clear transparent bg
+                ctx.clearRect(0, 0, SIZE, SIZE);
+
+                // Create rounded rectangle clipping path
+                ctx.beginPath();
+                ctx.moveTo(RADIUS, 0);
+                ctx.arcTo(SIZE, 0, SIZE, SIZE, RADIUS);
+                ctx.arcTo(SIZE, SIZE, 0, SIZE, RADIUS);
+                ctx.arcTo(0, SIZE, 0, 0, RADIUS);
+                ctx.arcTo(0, 0, SIZE, 0, RADIUS);
+                ctx.closePath();
+                ctx.clip(); 
+
+                // Advanced sampling: Instead of pure random, we deterministically stagger coordinates so we get diverse sunset flavors
+                const safeW = Math.max(1, bgImg.width - SIZE - 20);
+                const safeH = Math.max(1, bgImg.height - SIZE - 20);
+                
+                const sx = (i * 97) % safeW;
+                const sy = (i * 73) % safeH;
+
+                // Draw background portion
+                ctx.drawImage(bgImg, sx, sy, SIZE + 20, SIZE + 20, 0, 0, SIZE, SIZE);
+                
+                // Overlay to create pastel / soft look like modern UI
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.fillRect(0, 0, SIZE, SIZE);
+
+                // Inner glow / border effect (subtle)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Draw emoji logic
+                ctx.font = '64px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Soft shadow for 3D POP effect
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 6;
+                
+                // Center drawing. 预留一点向下偏移，因为 Emoji 基线经常偏上
+                ctx.fillText(icon.e, SIZE / 2, SIZE / 2 + 4);
+                
+                document.getElementById('output').appendChild(canvas);
+                
+                const dataURL = canvas.toDataURL('image/png');
+                
+                await fetch('/upload', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        folder: icon.f,
+                        filename: icon.n,
+                        image: dataURL
+                    })
+                });
+            }
+            
+            const done = document.createElement('h2');
+            done.innerHTML = "✅ 所有图标生成完毕并已保存！您可以关闭此窗口。";
+            done.style.color = 'green';
+            done.style.marginTop = '40px';
+            done.style.width = '100%';
+            document.getElementById('output').appendChild(done);
+        }
+    </script>
+</body>
+</html>

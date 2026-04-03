@@ -9,36 +9,35 @@ Page({
     roleLabel: '普通用户',
     points: 0,
     couponCount: 0,
-    balance: '0.00',
     orderMenus: [
-      { name: "服务订单", emoji: "📋", iconBg: "linear-gradient(135deg,#ffe5ea,#ffd3dc)", url: "../book-my/book-my" },
-      { name: "一键发布", emoji: "⚡", iconBg: "linear-gradient(135deg,#ffeccd,#ffe0b2)", url: "../order-publish/order-publish" },
-      { name: "集市订单", emoji: "🛒", iconBg: "linear-gradient(135deg,#dff0ff,#c8e4ff)", url: "../market-order-list/market-order-list" },
-      { name: "惠民卡订单", emoji: "🎫", iconBg: "linear-gradient(135deg,#f3e7ff,#e6d5ff)" },
-      { name: "推客订单", emoji: "🤝", iconBg: "linear-gradient(135deg,#dff7ef,#c9f0e0)" },
-      { name: "组合套餐", emoji: "📦", iconBg: "linear-gradient(135deg,#fff4d9,#ffe7b8)" }
+      { name: "服务订单", icon: "service_order", url: "../book-my/book-my" },
+      { name: "一键发布", icon: "quick_publish", url: "../order-publish/order-publish" },
+      { name: "集市订单", icon: "market_order", url: "../market-order-list/market-order-list" },
+      { name: "惠民卡订单", icon: "benefit_card_order" },
+      { name: "推客订单", icon: "promoter_order" },
+      { name: "组合套餐", icon: "combo_package" }
     ],
     communityMenus: [
-      { name: "我的帖子", emoji: "📝", iconBg: "linear-gradient(135deg,#ffe5ea,#ffd3dc)", url: "../my-posts/my-posts?type=myposts&title=我的帖子" },
-      { name: "我的关注", emoji: "👥", iconBg: "linear-gradient(135deg,#fff0d7,#ffe2bd)", url: "../my-follows/my-follows" },
-      { name: "我的点赞", emoji: "❤️", iconBg: "linear-gradient(135deg,#dff0ff,#c8e4ff)", url: "../my-posts/my-posts?type=mylikes&title=我的点赞" },
-      { name: "参与话题", emoji: "💬", iconBg: "linear-gradient(135deg,#fff7d8,#ffedb8)", url: "../my-posts/my-posts?type=participated&category=热门话题&title=参与话题" },
-      { name: "参与活动", emoji: "🎉", iconBg: "linear-gradient(135deg,#e7ecff,#d9e1ff)", url: "../my-activities/my-activities" },
-      { name: "活动管理", emoji: "📅", iconBg: "linear-gradient(135deg,#e2f8ee,#cbf0e0)" },
-      { name: "诉求列表", emoji: "📢", iconBg: "linear-gradient(135deg,#fff0dc,#ffe2c5)" }
+      { name: "我的帖子", icon: "my_posts", url: "../my-posts/my-posts?type=myposts&title=我的帖子" },
+      { name: "我的关注", icon: "my_follows", url: "../my-follows/my-follows" },
+      { name: "我的点赞", icon: "my_likes", url: "../my-posts/my-posts?type=mylikes&title=我的点赞" },
+      { name: "参与话题", icon: "joined_topics", url: "../my-posts/my-posts?type=participated&category=热门话题&title=参与话题" },
+      { name: "参与活动", icon: "joined_activities", url: "../my-activities/my-activities" },
+      { name: "活动管理", icon: "activity_management" },
+      { name: "诉求列表", icon: "appeal_list" }
     ],
     joinMenus: [
-      { name: "技工入驻", sub: "用技能闲置赚钱", emoji: "🔧", iconBg: "linear-gradient(135deg,#dff0ff,#c8e4ff)", url: "../join-worker/join-worker" },
-      { name: "集市商家", sub: "附近商家入驻申请", emoji: "🏪", iconBg: "linear-gradient(135deg,#fff0d7,#ffe2bd)", url: "../join-market/join-market" },
-      { name: "服务商入驻", sub: "提供专业到家服务", emoji: "🏠", iconBg: "linear-gradient(135deg,#e7ecff,#d9e1ff)", url: "../join-service/join-service" }
+      { name: "技工入驻", sub: "用技能闲置赚钱", icon: "worker_join", url: "../join-worker/join-worker" },
+      { name: "集市商家", sub: "附近商家入驻申请", icon: "market_merchant", url: "../join-market/join-market" },
+      { name: "服务商入驻", sub: "提供专业到家服务", icon: "service_provider", url: "../join-service/join-service" }
     ],
     serviceMenus: [
-      { name: "帮助反馈", emoji: "💬", iconBg: "linear-gradient(135deg,#dff0ff,#c8e4ff)", url: "../feedback/feedback" },
-      { name: "小区管家", emoji: "🏘️", iconBg: "linear-gradient(135deg,#fff0dc,#ffe2c5)" },
-      { name: "关于我们", emoji: "ℹ️", iconBg: "linear-gradient(135deg,#ffe5ea,#ffd3dc)", url: "../about/about" },
-      { name: "地址管理", emoji: "📍", iconBg: "linear-gradient(135deg,#e7ecff,#d9e1ff)", url: "../address/address" },
-      { name: "平台客服", emoji: "🎧", iconBg: "linear-gradient(135deg,#fff7d8,#ffedb8)" },
-      { name: "设置", emoji: "⚙️", iconBg: "linear-gradient(135deg,#e2f8ee,#cbf0e0)", url: "../settings/settings" }
+      { name: "帮助反馈", icon: "help_feedback", url: "../feedback/feedback" },
+      { name: "小区管家", icon: "community_manager" },
+      { name: "关于我们", icon: "about_us", url: "../about/about" },
+      { name: "地址管理", icon: "address_management", url: "../address/address" },
+      { name: "平台客服", icon: "platform_service" },
+      { name: "设置", icon: "settings", url: "../settings/settings" }
     ]
   },
 

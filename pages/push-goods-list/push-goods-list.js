@@ -60,6 +60,16 @@ Page({
       const subCategories = Array.isArray(payload.sub_categories)
         ? payload.sub_categories
         : (Array.isArray(payload.gift_sub_categories) ? payload.gift_sub_categories : []);
+        
+      // 兼容：对礼物专区的子分类无图片情况直接从本地原型图拦截替换
+      subCategories.forEach(sub => {
+        if (sub.name === '送长辈') {
+          sub.image = '/img/gifts/for_elders.png';
+        } else if (sub.name === '送朋友') {
+          sub.image = '/img/gifts/for_friends.png';
+        }
+      });
+
       const sidebarCategories = Array.isArray(payload.sidebar_categories)
         ? payload.sidebar_categories
         : [];

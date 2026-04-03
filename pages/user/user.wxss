@@ -243,18 +243,9 @@ page {
   align-items: center;
 }
 
-.menu-icon-wrap {
+.menu-icon-img {
   width: 88rpx;
   height: 88rpx;
-  border-radius: 26rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-emoji {
-  font-size: 40rpx;
-  line-height: 1;
 }
 
 .menu-name {
@@ -282,19 +273,10 @@ page {
   border-bottom: none;
 }
 
-.list-icon-wrap {
+.list-icon-img {
   width: 68rpx;
   height: 68rpx;
-  border-radius: 18rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
-}
-
-.list-emoji {
-  font-size: 30rpx;
-  line-height: 1;
 }
 
 .list-name {
@@ -328,19 +310,10 @@ page {
   align-items: center;
 }
 
-.join-icon-bg {
+.join-icon-img {
   width: 84rpx;
   height: 84rpx;
-  border-radius: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   margin: 0 auto 12rpx;
-}
-
-.join-emoji {
-  font-size: 38rpx;
-  line-height: 1;
 }
 
 .join-name {

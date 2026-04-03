@@ -68,15 +68,11 @@
     <view class="menu-grid">
       <block wx:for="{{orderMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
-          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="menu-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="menu-name">{{item.name}}</text>
         </navigator>
         <view wx:else class="menu-item" bindtap="showToastWait">
-          <view class="menu-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="menu-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="menu-name">{{item.name}}</text>
         </view>
       </block>
@@ -91,16 +87,12 @@
     <view class="list-menu">
       <block wx:for="{{communityMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
-          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="list-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </navigator>
         <view wx:else class="list-item" bindtap="showToastWait">
-          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="list-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </view>
@@ -116,16 +108,12 @@
     <view class="join-grid">
       <block wx:for="{{joinMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="join-item" url="{{item.url}}">
-          <view class="join-icon-bg" style="background: {{item.iconBg}};">
-            <text class="join-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </navigator>
         <view wx:else class="join-item" bindtap="showToastWait">
-          <view class="join-icon-bg" style="background: {{item.iconBg}};">
-            <text class="join-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </view>
@@ -141,16 +129,12 @@
     <view class="list-menu">
       <block wx:for="{{serviceMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
-          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="list-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </navigator>
         <view wx:else class="list-item" bindtap="showToastWait">
-          <view class="list-icon-wrap" style="background: {{item.iconBg}};">
-            <text class="list-emoji">{{item.emoji}}</text>
-          </view>
+          <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </view>
