@@ -1,5 +1,4 @@
 const express = require('express');
-const { login } = require('../controllers/adminAuthController');
 const { adminAuthMiddleware } = require('../middleware/adminAuth');
 const {
   list,
@@ -9,8 +8,6 @@ const {
 } = require('../controllers/adminJdBenefitGoodsController');
 
 const router = express.Router();
-
-router.post('/login', login);
 
 router.use(adminAuthMiddleware);
 

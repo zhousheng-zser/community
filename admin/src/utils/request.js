@@ -28,22 +28,34 @@ request.interceptors.response.use(
     return res
   },
   (error) => {
-    const status = error.response && error.response.status
+    const res = error.response
+    const status = res && res.status
+    const data = res && res.data
+    let serverMsg = ''
+    if (data && typeof data === 'object') {
+      serverMsg =
+        data.message || data.msg || data.errmsg || data.error || ''
+    } else if (typeof data === 'string' && data.length < 200) {
+      serverMsg = data
+    }
+
     if (status === 401) {
       localStorage.removeItem('admin_token')
       if (typeof window !== 'undefined' && !window.location.pathname.endsWith('/login')) {
         window.location.assign('/login')
       }
     }
+
     const isNetwork =
-      !error.response &&
+      !res &&
       (error.code === 'ERR_NETWORK' ||
         (error.message && String(error.message).toLowerCase().includes('network')))
     const hint = isNetwork
-      ? '无法连接后端：请在项目 backend 目录执行 npm start（默认端口 3000），并确认 MySQL 与 .env 已配置。'
+      ? '无法连接后端：请确认 VITE_PROXY_TARGET 指向可访问的 API，且服务器已启动。'
       : ''
     const msg =
-      (error.response && error.response.data && error.response.data.message) ||
+      serverMsg ||
+      (status ? `HTTP ${status}${res.statusText ? ' ' + res.statusText : ''}` : '') ||
       error.message ||
       '网络错误'
     return Promise.reject(new Error(hint ? `${msg}。${hint}` : msg))

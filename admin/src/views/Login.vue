@@ -15,8 +15,8 @@
           </el-input>
         </el-form-item>
         
-        <el-form-item label="授权密令">
-          <el-input v-model="form.password" type="password" size="large" placeholder="请输入密码" show-password @keyup.enter="handleLogin">
+        <el-form-item label="授权密令（测试免密时可留空）">
+          <el-input v-model="form.password" type="password" size="large" placeholder="测试阶段服务端开启 ADMIN_TEST_BYPASS=1 时可不填" show-password @keyup.enter="handleLogin">
             <template #prefix>
               <el-icon><lock /></el-icon>
             </template>
@@ -35,14 +35,19 @@
       </el-form>
       
       <div class="footer-tips">
-        温馨提示: 这是为管理员设计的独立于小程序的 PC 端控制台
+        <p>管理员入口与小程序账号无关。</p>
+        <p v-if="isDevProxy" class="tip-remote">
+          当前通过代理访问远程 API。测试免密：在服务器 <code>backend/.env</code> 设置 <code>ADMIN_TEST_BYPASS=1</code> 后重启 Node，用户名填
+          <code>ADMIN_USERNAME</code>（默认 admin）即可，密码可留空。正式环境务必关闭该项并配置强密码。
+        </p>
+        <p v-else>温馨提示：密码以运行后端的机器上环境变量为准。</p>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -52,18 +57,23 @@ const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 
+const isDevProxy = computed(() => {
+  const t = import.meta.env.VITE_PROXY_TARGET || ''
+  return t.includes('114.55') || t.includes('http://') && !t.includes('127.0.0.1') && !t.includes('localhost')
+})
+
 const form = ref({
   username: 'admin',
   password: ''
 })
 
 const handleLogin = async () => {
-  if (!form.value.username || !form.value.password) {
-    return ElMessage.warning('账号与密码不可为空')
+  if (!form.value.username) {
+    return ElMessage.warning('账号不可为空')
   }
   loading.value = true
   try {
-    const res = await request.post('/admin/login', {
+    const res = await request.post('/auth/admin/login', {
       username: form.value.username,
       password: form.value.password
     })
@@ -120,5 +130,20 @@ const handleLogin = async () => {
   text-align: center;
   font-size: 12px;
   color: #a8abb2;
+  line-height: 1.5;
+}
+.footer-tips p {
+  margin: 6px 0;
+}
+.tip-remote {
+  text-align: left;
+  color: #606266;
+  font-size: 11px;
+}
+.tip-remote code {
+  font-size: 10px;
+  background: #f4f4f5;
+  padding: 0 4px;
+  border-radius: 3px;
 }
 </style>
