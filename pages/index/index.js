@@ -8,6 +8,7 @@ const { imgUrl, pickMarketShopAvatarPath } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
+const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 Page({
   data: {
     noOrderTip: "您还没有订单",
@@ -683,59 +684,91 @@ Page({
       if (res && Array.isArray(res.list)) return res.list;
       return [];
     };
-    try {
-      const disp = await util.get('benefit/display', { scene: 'benefit_card' });
-      if (disp && disp.jd) {
-        if (disp.jd.heroImage) jdBanner = disp.jd.heroImage;
-        jdHeroTitle = disp.jd.heroTitle || '';
-        jdHeroSubtitle = disp.jd.heroSubtitle || '';
-      }
-      if (disp && disp.pdd) {
-        if (disp.pdd.heroImage) pddBanner = disp.pdd.heroImage;
-        pddHeroTitle = disp.pdd.heroTitle || '';
-        pddHeroSubtitle = disp.pdd.heroSubtitle || '';
-      }
-    } catch (e) {
-      console.warn('[惠民卡] benefit/display 失败', e && (e.errmsg || e.message || e));
-    }
-    try {
-      const res = await util.get('jd/benefit/goods', { scene: 'benefit_card' });
-      const list = pickAllianceList(res);
-      if (list.length > 0) {
-        jdGoods = list.map((x, idx) => ({
-          id: x.id || idx + 1,
-          skuId: String(x.skuId || x.sku_id || ''),
-          title: x.title || x.name || '',
-          image: x.image || x.image_url || images.pushFood1,
-          price: x.price != null && x.price !== '' ? String(x.price) : '',
-          rebateAmount: x.rebateAmount || x.rebate_amount || '',
-          spreadUrl: x.spreadUrl || x.spread_url || ''
-        })).filter(x => !!x.skuId);
-        if (jdGoods.length > 0) {
-          jdEntry = { skuId: jdGoods[0].skuId, spreadUrl: jdGoods[0].spreadUrl };
+
+    const preferLocalAlliance = config.benefitAlliancePreferLocal !== false;
+    let useLocalJd = false;
+    let useLocalPdd = false;
+    if (preferLocalAlliance) {
+      try {
+        const L = getLocalBenefitCardPayload();
+        if (L.jdGoods && L.jdGoods.length > 0) {
+          jdGoods = L.jdGoods;
+          jdEntry = L.jdEntry;
+          jdHeroTitle = L.jdHeroTitle;
+          jdHeroSubtitle = L.jdHeroSubtitle;
+          useLocalJd = true;
         }
+        if (L.pddGoods && L.pddGoods.length > 0) {
+          pddGoods = L.pddGoods;
+          pddEntry = L.pddEntry;
+          pddHeroTitle = L.pddHeroTitle;
+          pddHeroSubtitle = L.pddHeroSubtitle;
+          useLocalPdd = true;
+        }
+      } catch (e) {
+        console.warn('[惠民卡] 流量联盟本地数据失败', e && (e.errmsg || e.message || e));
       }
-    } catch (e) {
-      console.warn('[惠民卡] jd/benefit/goods 失败', e && (e.errmsg || e.message || e));
     }
-    try {
-      const res = await util.get('pdd/benefit/goods', { scene: 'benefit_card' });
-      const list = pickAllianceList(res);
-      if (list.length > 0) {
-        pddGoods = list.map((x, idx) => ({
-          id: x.id || idx + 1,
-          goodsId: String(x.goodsId || x.goods_id || ''),
-          title: x.title || x.name || '',
-          image: x.image || x.image_url || images.pushFood1,
-          price: String(x.price || ''),
-          couponPrice: String(x.couponPrice || x.coupon_price || ''),
-          rebateAmount: x.rebateAmount || x.rebate_amount || '',
-          spreadUrl: x.spreadUrl || x.spread_url || '',
-          miniPath: x.miniPath || x.mini_path || ''
-        })).filter(x => !!(x.goodsId || x.spreadUrl));
+
+    if (!useLocalJd || !useLocalPdd) {
+      try {
+        const disp = await util.get('benefit/display', { scene: 'benefit_card' });
+        if (!useLocalJd && disp && disp.jd) {
+          if (disp.jd.heroImage) jdBanner = disp.jd.heroImage;
+          jdHeroTitle = disp.jd.heroTitle || '';
+          jdHeroSubtitle = disp.jd.heroSubtitle || '';
+        }
+        if (!useLocalPdd && disp && disp.pdd) {
+          if (disp.pdd.heroImage) pddBanner = disp.pdd.heroImage;
+          pddHeroTitle = disp.pdd.heroTitle || '';
+          pddHeroSubtitle = disp.pdd.heroSubtitle || '';
+        }
+      } catch (e) {
+        console.warn('[惠民卡] benefit/display 失败', e && (e.errmsg || e.message || e));
       }
-    } catch (e) {
-      console.warn('[惠民卡] pdd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+    }
+    if (!useLocalJd) {
+      try {
+        const res = await util.get('jd/benefit/goods', { scene: 'benefit_card' });
+        const list = pickAllianceList(res);
+        if (list.length > 0) {
+          jdGoods = list.map((x, idx) => ({
+            id: x.id || idx + 1,
+            skuId: String(x.skuId || x.sku_id || ''),
+            title: x.title || x.name || '',
+            image: x.image || x.image_url || images.pushFood1,
+            price: x.price != null && x.price !== '' ? String(x.price) : '',
+            rebateAmount: x.rebateAmount || x.rebate_amount || '',
+            spreadUrl: x.spreadUrl || x.spread_url || ''
+          })).filter((x) => !!x.skuId);
+          if (jdGoods.length > 0) {
+            jdEntry = { skuId: jdGoods[0].skuId, spreadUrl: jdGoods[0].spreadUrl };
+          }
+        }
+      } catch (e) {
+        console.warn('[惠民卡] jd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+      }
+    }
+    if (!useLocalPdd) {
+      try {
+        const res = await util.get('pdd/benefit/goods', { scene: 'benefit_card' });
+        const list = pickAllianceList(res);
+        if (list.length > 0) {
+          pddGoods = list.map((x, idx) => ({
+            id: x.id || idx + 1,
+            goodsId: String(x.goodsId || x.goods_id || ''),
+            title: x.title || x.name || '',
+            image: x.image || x.image_url || images.pushFood1,
+            price: String(x.price || ''),
+            couponPrice: String(x.couponPrice || x.coupon_price || ''),
+            rebateAmount: x.rebateAmount || x.rebate_amount || '',
+            spreadUrl: x.spreadUrl || x.spread_url || '',
+            miniPath: x.miniPath || x.mini_path || ''
+          })).filter((x) => !!(x.goodsId || x.spreadUrl));
+        }
+      } catch (e) {
+        console.warn('[惠民卡] pdd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+      }
     }
     if (Array.isArray(pddGoods) && pddGoods.length > 0) {
       const first = pddGoods[0];
@@ -905,6 +938,12 @@ Page({
       return;
     }
 
+    // 仅含 H5 推广链（流量联盟本地清单）：不请求进宝接口，直接复制链接
+    if (spreadUrl && String(spreadUrl).trim() && !goodsId) {
+      this.copyBenefitLink(String(spreadUrl).trim(), '推广链接已复制，可在浏览器打开');
+      return;
+    }
+
     if (goodsId) {
       util.get('pdd/promotion/spread-url', { goods_id: goodsId, scene: 'benefit_card' })
         .then((res) => {
@@ -949,6 +988,11 @@ Page({
     if (!skuId) {
       if (fallbackSpreadUrl) return openBySpreadUrl(fallbackSpreadUrl);
       wx.showToast({ title: '缺少商品信息', icon: 'none' });
+      return;
+    }
+    // 流量联盟本地清单已带 u.jd.com 短链时直跳，减少无效请求
+    if (config.benefitAlliancePreferLocal !== false && fallbackSpreadUrl) {
+      openBySpreadUrl(fallbackSpreadUrl);
       return;
     }
     util.get('jd/promotion/spread-url', { sku_id: skuId, scene: 'benefit_card' })

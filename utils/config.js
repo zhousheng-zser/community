@@ -21,6 +21,12 @@ const config = {
      * 惠民卡 · 多平台流量联盟
      * navigateToMiniProgram 需在小程序管理后台配置「跳转小程序」白名单（目标 AppId）。
      */
+    /**
+     * 惠民卡：true 时优先用 utils/benefitAllianceLocal.js（与 流量联盟/*.md 一致），
+     * 有本地商品列表则不再请求 benefit/display 与 jd|pdd/benefit/goods 覆盖对应块。
+     */
+    benefitAlliancePreferLocal: true,
+
     benefitAlliance: {
         jdUnionAppId: 'wx91d27dbf599dff74',
         /**
