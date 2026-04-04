@@ -422,15 +422,15 @@ Page({
     ];
 
     const categoryList = [
-      { name: "整理收纳", emoji: "🗂", bgColor: "#ede8ff", url: "../tidy-service/tidy-service?key=tidy" },
-      { name: "家修急事", emoji: "🔧", bgColor: "#fff0e0", url: "../tidy-service/tidy-service?key=urgent_fix" },
-      { name: "家电清洗", emoji: "🫧", bgColor: "#e0f3ff", url: "../tidy-service/tidy-service?key=appliance_clean" },
-      { name: "开荒保洁", emoji: "🧹", bgColor: "#e4ffe0", url: "../tidy-service/tidy-service?key=pioneer_clean" },
-      { name: "除螨服务", emoji: "🌿", bgColor: "#f0ffe0", url: "../tidy-service/tidy-service?key=mite_remove" },
-      { name: "家具养护", emoji: "🪑", bgColor: "#fff0f5", url: "../tidy-service/tidy-service?key=furniture_care" },
-      { name: "宝宝家事", emoji: "👶", bgColor: "#fff5e0", url: "../tidy-service/tidy-service?key=baby_home" },
-      { name: "房屋修缮", emoji: "🏠", bgColor: "#e0eeff", url: "../tidy-service/tidy-service?key=house_repair" },
-      { name: "上门美业", emoji: "💄", bgColor: "#ffe0f5", url: "../tidy-service/tidy-service?key=beauty_home" }
+      { name: "整理收纳", emoji: "🗂", icon: "/img/icons/jiaz/tidy_service.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=tidy" },
+      { name: "家修急事", emoji: "🔧", icon: "/img/icons/jiaz/urgent_fix.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=urgent_fix" },
+      { name: "家电清洗", emoji: "🫧", icon: "/img/icons/jiaz/appliance_clean.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=appliance_clean" },
+      { name: "开荒保洁", emoji: "🧹", icon: "/img/icons/jiaz/pioneer_clean.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=pioneer_clean" },
+      { name: "除螨服务", emoji: "🌿", icon: "/img/icons/jiaz/mite_remove.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=mite_remove" },
+      { name: "家具养护", emoji: "🪑", icon: "/img/icons/jiaz/furniture_care.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=furniture_care" },
+      { name: "宝宝家事", emoji: "👶", icon: "/img/icons/jiaz/baby_home.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=baby_home" },
+      { name: "房屋修缮", emoji: "🏠", icon: "/img/icons/jiaz/house_repair.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=house_repair" },
+      { name: "上门美业", emoji: "💄", icon: "/img/icons/jiaz/beauty_home.png", bgColor: "transparent", url: "../tidy-service/tidy-service?key=beauty_home" }
     ];
     const quickActions = [
       { name: "直约服务商", emoji: "🏪", bgColor: "#fff0e0" },
