@@ -3,11 +3,16 @@ const path = require('path');
 const { Client } = require('ssh2');
 
 const config = {
-  host: '114.55.167.14',
+  host: process.env.DEPLOY_HOST || '114.55.167.14',
   port: 22,
-  username: 'root',
-  password: '^jD=4O46Bd9'
+  username: process.env.DEPLOY_USER || 'root',
+  password: process.env.DEPLOY_SSH_PASSWORD || ''
 };
+
+if (!config.password) {
+  console.error('请设置环境变量 DEPLOY_SSH_PASSWORD');
+  process.exit(1);
+}
 
 const conn = new Client();
 conn.on('ready', () => {

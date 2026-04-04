@@ -1,0 +1,4 @@
+{
+  "说明": "惠民卡主图已与 流量联盟/京东联盟/ 截图、京东联盟.md 一一对应。请使用 流量联盟/jd_local_images.json 与 node scripts/sync-jd-benefit-images-from-local.js 生成 img/jd_benefit/{sku_id}.png。npm run fetch:jd-benefit-images 为历史占位图下载，易与真实商品错位，不建议再用。",
+  "items": []
+}

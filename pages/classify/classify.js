@@ -1,3 +1,5 @@
+const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
+
 Page({
   data: {
     navTopPadding: 20,
@@ -21,7 +23,7 @@ Page({
         exp: 4,
         desc: "主要从事建筑回收，全品类建材可回收",
         tags: ["组长", "上门回收"],
-        avatar: "/img/placeholders/home_cleaning.png"
+        avatar: ""
       },
       {
         id: 2,
@@ -32,7 +34,7 @@ Page({
         exp: 20,
         desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
         tags: ["组长", "宠物喂养", "衣柜收纳", "陪护作业"],
-        avatar: "/img/placeholders/home_cleaning.png"
+        avatar: ""
       },
       {
         id: 3,
@@ -43,13 +45,20 @@ Page({
         exp: 0,
         desc: "可接送小孩、家政保洁、简单维修等上门服务。",
         tags: ["组长", "宠物喂养", "宠物搭遛", "衣柜干洗"],
-        avatar: "/img/placeholders/home_cleaning.png"
+        avatar: ""
       }
     ]
   },
   onLoad() {
     const sys = wx.getSystemInfoSync();
-    this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+    const workers = this.data.workers.map((w) => ({
+      ...w,
+      avatar: workerAvatarUrl(w.id)
+    }));
+    this.setData({
+      navTopPadding: (sys.statusBarHeight || 20) + 6,
+      workers
+    });
   },
   goBack() {
     const pages = getCurrentPages();

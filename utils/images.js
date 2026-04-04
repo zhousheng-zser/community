@@ -55,10 +55,10 @@ const images = {
   svcRepairWater:  usp('1504328345606-18bbc8c9d7d1'),
   svcRepairElec:   usp('1621905251189-8f63c0636e96'),
   svcRepairGeneral: usp('1581578731548-c64695cc6952'),
-  // 家电清洗
-  svcAircon:       usp('1507207611509-ec012433ff52'),
-  svcWasher:       usp('1581578015325-1108f3f4f317'),
-  svcHood:         usp('1556909114-f6e7ad7d3136'),
+  // 家电清洗（与热卖榜同源实拍，便于列表与详情一致）
+  svcAircon:       '/img/home_service_photos/aircon.png',
+  svcWasher:       '/img/home_service_photos/washer.png',
+  svcHood:         '/img/home_service_photos/hood.png',
   svcFridge:       usp('1514996937319-344454492b37'),
   // 开荒保洁
   svcDeepClean:    usp('1527515637462-cff94eecc1ac'),
@@ -80,11 +80,11 @@ const images = {
   svcMakeup:       usp('1522335789203-aabd1fc54bc9'),
   svcHair:         usp('1560869713-7d0a29430803'),
 
-  // ── 小区热卖榜 / 直约服务商 ────────────────────────────────────────────────
-  hotWasher:    usp('1581578015325-1108f3f4f317', 500),
-  hotHeater:    usp('1584622781564-1d987f7333c1', 500),
-  hotHood:      usp('1556909114-f6e7ad7d3136', 500),
-  hotClean:     usp('1527515637462-cff94eecc1ac', 500),
+  // ── 小区热卖榜 / 直约服务商（实拍来自 素材/家政/首页素材/3，见 scripts/copy-home-service-photos-from-home3.js）──
+  hotWasher:    '/img/home_service_photos/washer.png',
+  hotHeater:    '/img/home_service_photos/heater.png',
+  hotHood:      '/img/home_service_photos/hood.png',
+  hotClean:     '/img/home_service_photos/daily_clean.png',
 
   // ── 管家精选商品 ────────────────────────────────────────────────────────────
   goodsSkincare1: usp('1522335789203-aabd1fc54bc9', 500),
@@ -98,6 +98,10 @@ const images = {
   pushDaily2:   usp('1556228453-efd6c1ff04f6', 400),
   pushFashion1: usp('1523275335684-37898b6baf30', 400),
   pushBeauty1:  usp('1522335789203-aabd1fc54bc9', 400),
+
+  // ── 惠民卡 · 联盟头图（源：流量联盟/京东联盟.png、拼多多.png，同步至 img/benefit_alliance/）──
+  benefitJdAllianceHero: '/img/benefit_alliance/jd-alliance.png',
+  benefitPddAllianceHero: '/img/benefit_alliance/pdd-alliance.png',
 
   // ── 直播封面 ────────────────────────────────────────────────────────────────
   // ── 便捷方法：根据原始本地路径返回服务器/CDN 地址 ──────────────────────────

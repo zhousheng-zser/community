@@ -1,0 +1,13 @@
+{
+  "说明": "与 拼多多.md 每条商品（link_key = p.pinduoduo.com 路径段）一一对应；源文件在 流量联盟/拼多多/。同步：node scripts/sync-pdd-benefit-images-from-local.js",
+  "items": [
+    { "link_key": "VRM3IEUm", "source_file": "保暖圆领上衣.jpeg" },
+    { "link_key": "jKH3Fh91", "source_file": "心相印抽纸.jpeg" },
+    { "link_key": "Vvs3caRv", "source_file": "新款雪尼尔平板拖把.jpeg" },
+    { "link_key": "6tA3bfap", "source_file": "Zippo秋水含睛保温杯女.jpeg" },
+    { "link_key": "OF53r22C", "source_file": "匹克态极维金斯天赋一代篮球鞋球鞋.jpeg" },
+    { "link_key": "QE73xVwd", "source_file": "白象经典拌面火鸡面.jpeg" },
+    { "link_key": "nbf3xg02", "source_file": "得宝抽纸.jpeg" },
+    { "link_key": "bIn3iHWL", "source_file": "遮瑕鼻影刷.jpeg" }
+  ]
+}

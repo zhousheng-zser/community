@@ -6,6 +6,8 @@ const config = require('../../utils/config.js');
 const geo = require('../../utils/geo.js');
 const { imgUrl, pickMarketShopAvatarPath } = util;
 const images = require('../../utils/images.js');
+const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
 Page({
   data: {
     noOrderTip: "您还没有订单",
@@ -52,18 +54,20 @@ Page({
     fukaGoods: [],
     jdGoods: [],
     jdBanner: "",
+    jdHeroTitle: "",
+    jdHeroSubtitle: "",
     benefitAllianceTabs: [
       { key: 'jd', name: '京东联盟' },
-      { key: 'pdd', name: '拼多多' },
-      { key: 'taobao', name: '淘宝联盟' }
+      { key: 'pdd', name: '拼多多' }
     ],
     activeBenefitAlliance: 'jd',
     pddGoods: [],
-    taobaoGoods: [],
     pddBanner: '',
-    taobaoBanner: '',
+    pddHeroTitle: "",
+    pddHeroSubtitle: "",
     pddEntry: { spreadUrl: '', miniPath: '', goodsId: '' },
-    taobaoEntry: { promotionUrl: '', itemId: '' },
+    /** 惠民卡京东底部 GO：接口返回列表后取首条，无数据时为空 */
+    jdEntry: { skuId: '', spreadUrl: '' },
     activeMarketCat: "AAAA",
     marketTopCats: [],
     marketFilters: [
@@ -422,51 +426,57 @@ Page({
     ];
 
     const categoryList = [
-      { name: "整理收纳", emoji: "🗂", bgColor: "#ede8ff", url: "../tidy-service/tidy-service?key=tidy" },
-      { name: "家修急事", emoji: "🔧", bgColor: "#fff0e0", url: "../tidy-service/tidy-service?key=urgent_fix" },
-      { name: "家电清洗", emoji: "🫧", bgColor: "#e0f3ff", url: "../tidy-service/tidy-service?key=appliance_clean" },
-      { name: "开荒保洁", emoji: "🧹", bgColor: "#e4ffe0", url: "../tidy-service/tidy-service?key=pioneer_clean" },
-      { name: "除螨服务", emoji: "🌿", bgColor: "#f0ffe0", url: "../tidy-service/tidy-service?key=mite_remove" },
-      { name: "家具养护", emoji: "🪑", bgColor: "#fff0f5", url: "../tidy-service/tidy-service?key=furniture_care" },
-      { name: "宝宝家事", emoji: "👶", bgColor: "#fff5e0", url: "../tidy-service/tidy-service?key=baby_home" },
-      { name: "房屋修缮", emoji: "🏠", bgColor: "#e0eeff", url: "../tidy-service/tidy-service?key=house_repair" },
-      { name: "上门美业", emoji: "💄", bgColor: "#ffe0f5", url: "../tidy-service/tidy-service?key=beauty_home" }
+      { name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#ede8ff", url: "../tidy-service/tidy-service?key=tidy" },
+      { name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e0", url: "../tidy-service/tidy-service?key=urgent_fix" },
+      { name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#e0f3ff", url: "../tidy-service/tidy-service?key=appliance_clean" },
+      { name: "开荒保洁", icon: "/img/home_categories/pioneer_clean.png", emoji: "🧹", bgColor: "#e4ffe0", url: "../tidy-service/tidy-service?key=pioneer_clean" },
+      { name: "除螨服务", icon: "/img/home_categories/mite_remove.png", emoji: "🌿", bgColor: "#f0ffe0", url: "../tidy-service/tidy-service?key=mite_remove" },
+      { name: "家具养护", icon: "/img/home_categories/furniture_care.png", emoji: "🪑", bgColor: "#fff0f5", url: "../tidy-service/tidy-service?key=furniture_care" },
+      { name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff5e0", url: "../tidy-service/tidy-service?key=baby_home" },
+      { name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#e0eeff", url: "../tidy-service/tidy-service?key=house_repair" },
+      { name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffe0f5", url: "../tidy-service/tidy-service?key=beauty_home" }
     ];
     const quickActions = [
-      { name: "直约服务商", emoji: "🏪", bgColor: "#fff0e0" },
-      { name: "直约技工", emoji: "🔨", bgColor: "#e8f5e0" },
-      { name: "秒杀", emoji: "⚡", bgColor: "#fff5e0" },
-      { name: "领券", emoji: "🎫", bgColor: "#ffe0ee" },
-      { name: "家事积分商城", emoji: "🎯", bgColor: "#e0eeff" }
+      { name: "直约服务商", icon: "/img/home_icons2/merchant_direct.png", emoji: "🏪", bgColor: "#fff0e0" },
+      { name: "直约技工", icon: "/img/home_icons2/worker_direct.png", emoji: "🔨", bgColor: "#e8f5e0" },
+      { name: "秒杀", icon: "/img/home_icons2/miaosha.png", emoji: "⚡", bgColor: "#fff5e0" },
+      { name: "领券", icon: "/img/home_icons2/coupon.png", emoji: "🎫", bgColor: "#ffe0ee" },
+      { name: "家事积分商城", icon: "/img/home_icons2/points.png", emoji: "🎯", bgColor: "#e0eeff" }
     ];
     const knowledgeList = [
-      { name: "代取", emoji: "📦", bgColor: "#ede8ff", url: "../recomm/recomm?type=take" },
-      { name: "接送小孩", emoji: "🚗", bgColor: "#e0f3ff", url: "../recomm/recomm?type=child" },
-      { name: "陪诊", emoji: "🏥", bgColor: "#ffe0e0", url: "../recomm/recomm?type=escort" },
-      { name: "代扔垃圾", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
-      { name: "宠物喂养", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
+      { name: "代取", icon: "/img/home_icons2/pickup.png", emoji: "📦", bgColor: "#ede8ff", url: "../recomm/recomm?type=take" },
+      { name: "接送小孩", icon: "/img/home_icons2/child_pickup.png", emoji: "🚗", bgColor: "#e0f3ff", url: "../recomm/recomm?type=child" },
+      { name: "陪诊", icon: "/img/home_icons2/escort.png", emoji: "🏥", bgColor: "#ffe0e0", url: "../recomm/recomm?type=escort" },
+      { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
+      { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
     ];
     // ===== 从数据库获取热门服务（小区热卖榜）=====
     let hotList = [
-      { id: 28, name: "洗衣机清洗",   price: "128", image: images.hotWasher, rank: "NO.1" },
-      { id: 30, name: "热水器清洗",   price: "150", image: images.hotHeater, rank: "NO.2" },
-      { id: 27, name: "油烟机清洗",   price: "158", image: images.hotHood,   rank: "NO.3" },
-      { id: 26, name: "金牌日常保洁", price: "99",  image: images.hotClean,  rank: "热门" }
+      { id: 73, name: "局部瓷砖铺贴",     price: "229", image: listImageFromHome3("局部瓷砖铺贴【2小时】", images.svcTile), rank: "NO.1" },
+      { id: 74, name: "壁纸铺贴施工",     price: "239", image: listImageFromHome3("壁纸铺贴施工【2小时】", images.svcWall), rank: "NO.2" },
+      { id: 75, name: "厨卫漏水防水修缮", price: "299", image: listImageFromHome3("厨卫漏水防水修缮【2小时】", images.svcWaterproof), rank: "NO.3" },
+      { id: 76, name: "地板铺贴修缮",     price: "279", image: listImageFromHome3("地板铺贴修缮【2小时】", images.svcFloor), rank: "NO.4" },
+      { id: 77, name: "墙面刷新施工",     price: "259", image: listImageFromHome3("墙面刷新施工【2小时】", images.svcWall), rank: "NO.5" }
     ];
-    try {
-      const hotRes = await util.get('core/services/hot');
-      const hotData = Array.isArray(hotRes) ? hotRes : (hotRes.data || hotRes);
-      if (Array.isArray(hotData) && hotData.length > 0) {
-        const ranks = ["NO.1", "NO.2", "NO.3", "NO.4", "NO.5", "上新"];
-        hotList = hotData.slice(0, 6).map((s, i) => ({
-          id: s.id,
-          name: s.title.replace(/【.*?】/g, '').trim(),
-          price: String(s.price),
-          image: s.cover_image,
-          rank: ranks[i] || "热门"
-        }));
-      }
-    } catch (e) {}
+    if (!config.useCuratedHomeHotList) {
+      try {
+        const hotRes = await util.get('core/services/hot');
+        const hotData = Array.isArray(hotRes) ? hotRes : (hotRes.data || hotRes);
+        if (Array.isArray(hotData) && hotData.length > 0) {
+          const ranks = ["NO.1", "NO.2", "NO.3", "NO.4", "NO.5", "上新"];
+          hotList = hotData.slice(0, 6).map((s, i) => ({
+            id: s.id,
+            name: s.title.replace(/【.*?】/g, '').trim(),
+            price: String(s.price),
+            image: listImageFromHome3(
+              s.title,
+              s.cover_image ? imgUrl(s.cover_image) : '/img/placeholders/home_cleaning.png'
+            ),
+            rank: ranks[i] || "热门"
+          }));
+        }
+      } catch (e) {}
+    }
 
     // ===== 从数据库获取服务商品（直约服务商）=====
     let goods = [
@@ -498,19 +508,19 @@ Page({
     }));
     // ===== 从数据库获取直约技工 =====
     let workerList = [
-      { id: 1, name: "余静", orders: "服务1单", avatar: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 2, name: "张乾坤", orders: "服务0单", avatar: imgUrl('/img/placeholders/home_cleaning.png') },
-      { id: 3, name: "张谕晗", orders: "服务0单", avatar: imgUrl('/img/placeholders/home_cleaning.png') }
+      { id: 1, name: "何志", orders: "服务0单", avatar: workerAvatarUrl(1) },
+      { id: 2, name: "余静", orders: "服务1单", avatar: workerAvatarUrl(2) },
+      { id: 3, name: "邓长超", orders: "服务0单", avatar: workerAvatarUrl(3) }
     ];
     try {
       const wRes = await util.get('core/workers');
       const wData = Array.isArray(wRes) ? wRes : (wRes.data || wRes);
       if (Array.isArray(wData) && wData.length > 0) {
-        workerList = wData.slice(0, 5).map(w => ({
+        workerList = wData.slice(0, 5).map((w) => ({
           id: w.id,
           name: w.name || '技工',
           orders: w.orders || '服务0单',
-          avatar: w.avatar || imgUrl('/img/placeholders/home_cleaning.png')
+          avatar: workerAvatarUrl(w.id)
         }));
       }
     } catch (e) {}
@@ -608,7 +618,7 @@ Page({
       { title: "低价福利专区", price: "19.9专区", image: images.pushDaily1 },
       { title: "精选生活好物", price: "9.9专区",  image: images.goodsSkincare2 }
     ];
-    const fukaFilterTabs = ["精选", "拼多多", "淘宝", "京东"];
+    const fukaFilterTabs = ["精选", "拼多多", "京东"];
     const fukaGoods = [
       { id: 3001, name: "正宗大凉山核桃", price: "36.8", image: images.pushFood1 },
       { id: 3002, name: "近视眼镜",       price: "79.9", image: images.pushDaily2 },
@@ -653,42 +663,41 @@ Page({
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
-    const jdBanner = images.bannerSale;
-    const pddBanner = images.pushFood2;
-    const taobaoBanner = images.goodsSkincare2;
-    const pddEntry = {
+    let jdBanner = images.benefitJdAllianceHero;
+    let pddBanner = images.benefitPddAllianceHero;
+    let jdHeroTitle = '';
+    let jdHeroSubtitle = '';
+    let pddHeroTitle = '';
+    let pddHeroSubtitle = '';
+    let pddEntry = {
       spreadUrl: 'https://mobile.yangkeduo.com/',
       miniPath: '',
       goodsId: ''
     };
-    const taobaoEntry = {
-      promotionUrl: 'https://s.click.taobao.com/',
-      itemId: ''
-    };
-    let jdGoods = [
-      { id: 1, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushFood1, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' },
-      { id: 2, skuId: '100012345678', title: '汽车蓝牙音箱', image: images.pushFood2, price: '99.00', rebateAmount: '', spreadUrl: 'https://u.jd.com/c6YU7o1' },
-      { id: 3, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushDaily1, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' },
-      { id: 4, skuId: '100010713464', title: '农夫山泉饮用水', image: images.pushDaily2, price: '19.90', rebateAmount: '', spreadUrl: 'https://u.jd.com/cGYRLnW' }
-    ];
-    let pddGoods = [
-      { id: 1, goodsId: 'pdd_demo_1', title: '农家土鸡蛋 30 枚', image: images.pushFood1, price: '29.90', rebateAmount: '1.5', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
-      { id: 2, goodsId: 'pdd_demo_2', title: '抽纸整箱批发', image: images.pushDaily1, price: '19.90', rebateAmount: '0.8', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
-      { id: 3, goodsId: 'pdd_demo_3', title: '当季新鲜苹果', image: images.pushFood2, price: '39.90', rebateAmount: '2', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' },
-      { id: 4, goodsId: 'pdd_demo_4', title: '洗衣液家庭装', image: images.pushDaily2, price: '24.90', rebateAmount: '1', spreadUrl: 'https://mobile.yangkeduo.com/', miniPath: '' }
-    ];
-    let taobaoGoods = [
-      { id: 1, itemId: 'tb_demo_1', title: '品牌洗衣液 4 斤装', image: images.pushDaily2, price: '35.90', rebateAmount: '2.5', promotionUrl: 'https://s.click.taobao.com/' },
-      { id: 2, itemId: 'tb_demo_2', title: '不锈钢保温杯', image: images.pushFood1, price: '49.00', rebateAmount: '3', promotionUrl: 'https://s.click.taobao.com/' },
-      { id: 3, itemId: 'tb_demo_3', title: '无线鼠标静音', image: images.goodsSkincare2, price: '59.90', rebateAmount: '4', promotionUrl: 'https://s.click.taobao.com/' },
-      { id: 4, itemId: 'tb_demo_4', title: '蓝牙音箱便携', image: images.pushDaily1, price: '89.00', rebateAmount: '6', promotionUrl: 'https://s.click.taobao.com/' }
-    ];
+    let jdGoods = [];
+    let jdEntry = { skuId: '', spreadUrl: '' };
+    let pddGoods = [];
     const pickAllianceList = (res) => {
       if (Array.isArray(res)) return res;
       if (res && res.data && Array.isArray(res.data.list)) return res.data.list;
       if (res && Array.isArray(res.list)) return res.list;
       return [];
     };
+    try {
+      const disp = await util.get('benefit/display', { scene: 'benefit_card' });
+      if (disp && disp.jd) {
+        if (disp.jd.heroImage) jdBanner = disp.jd.heroImage;
+        jdHeroTitle = disp.jd.heroTitle || '';
+        jdHeroSubtitle = disp.jd.heroSubtitle || '';
+      }
+      if (disp && disp.pdd) {
+        if (disp.pdd.heroImage) pddBanner = disp.pdd.heroImage;
+        pddHeroTitle = disp.pdd.heroTitle || '';
+        pddHeroSubtitle = disp.pdd.heroSubtitle || '';
+      }
+    } catch (e) {
+      console.warn('[惠民卡] benefit/display 失败', e && (e.errmsg || e.message || e));
+    }
     try {
       const res = await util.get('jd/benefit/goods', { scene: 'benefit_card' });
       const list = pickAllianceList(res);
@@ -698,12 +707,17 @@ Page({
           skuId: String(x.skuId || x.sku_id || ''),
           title: x.title || x.name || '',
           image: x.image || x.image_url || images.pushFood1,
-          price: String(x.price || ''),
+          price: x.price != null && x.price !== '' ? String(x.price) : '',
           rebateAmount: x.rebateAmount || x.rebate_amount || '',
           spreadUrl: x.spreadUrl || x.spread_url || ''
         })).filter(x => !!x.skuId);
+        if (jdGoods.length > 0) {
+          jdEntry = { skuId: jdGoods[0].skuId, spreadUrl: jdGoods[0].spreadUrl };
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[惠民卡] jd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+    }
     try {
       const res = await util.get('pdd/benefit/goods', { scene: 'benefit_card' });
       const list = pickAllianceList(res);
@@ -714,27 +728,23 @@ Page({
           title: x.title || x.name || '',
           image: x.image || x.image_url || images.pushFood1,
           price: String(x.price || ''),
+          couponPrice: String(x.couponPrice || x.coupon_price || ''),
           rebateAmount: x.rebateAmount || x.rebate_amount || '',
           spreadUrl: x.spreadUrl || x.spread_url || '',
           miniPath: x.miniPath || x.mini_path || ''
         })).filter(x => !!(x.goodsId || x.spreadUrl));
       }
-    } catch (e) {}
-    try {
-      const res = await util.get('taobao/benefit/goods', { scene: 'benefit_card' });
-      const list = pickAllianceList(res);
-      if (list.length > 0) {
-        taobaoGoods = list.map((x, idx) => ({
-          id: x.id || idx + 1,
-          itemId: String(x.itemId || x.item_id || ''),
-          title: x.title || x.name || '',
-          image: x.image || x.image_url || images.pushDaily2,
-          price: String(x.price || ''),
-          rebateAmount: x.rebateAmount || x.rebate_amount || '',
-          promotionUrl: x.promotionUrl || x.promotion_url || x.url || ''
-        })).filter(x => !!(x.itemId || x.promotionUrl));
-      }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('[惠民卡] pdd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+    }
+    if (Array.isArray(pddGoods) && pddGoods.length > 0) {
+      const first = pddGoods[0];
+      pddEntry = {
+        spreadUrl: first.spreadUrl || pddEntry.spreadUrl,
+        miniPath: first.miniPath || '',
+        goodsId: first.goodsId || ''
+      };
+    }
     this.setData({
       banner,
       goods,
@@ -770,12 +780,14 @@ Page({
       fukaGoods,
       jdGoods,
       jdBanner,
+      jdHeroTitle,
+      jdHeroSubtitle,
+      jdEntry,
       pddGoods,
-      taobaoGoods,
       pddBanner,
-      taobaoBanner,
+      pddHeroTitle,
+      pddHeroSubtitle,
       pddEntry,
-      taobaoEntry,
       marketTopCats,
       marketFilters: [
         { key: 'comprehensive', label: '综合排序' },
@@ -914,75 +926,6 @@ Page({
     }
 
     openPddMini('', tryCopySpread);
-  },
-
-  /**
-   * 跳转淘系官方微信小程序（配置里为淘特 AppId）：有 miniPath 则直达；否则打开对方首页；再不行再复制 H5 推广链
-   */
-  goToTaobaoBenefit(e) {
-    const cfg = (config.benefitAlliance || {});
-    const d = e && e.currentTarget ? (e.currentTarget.dataset || {}) : {};
-    const itemId = d.itemId ? String(d.itemId) : '';
-    const fallbackUrl = d.promotionUrl ? String(d.promotionUrl) : '';
-    const tbAppId = (cfg.taobaoMiniAppId || '').trim();
-    const miniPath = d.miniPath ? String(d.miniPath).trim() : '';
-
-    const openTbMini = (path, onFail) => {
-      if (!tbAppId) {
-        wx.showToast({ title: '未配置淘宝系小程序 AppId', icon: 'none' });
-        return false;
-      }
-      const opt = {
-        appId: tbAppId,
-        envVersion: 'release',
-        fail: (err) => {
-          const msg = (err && err.errMsg) ? String(err.errMsg) : '';
-          if (/cancel/.test(msg)) return;
-          if (typeof onFail === 'function') onFail();
-          else wx.showToast({ title: msg || '跳转失败', icon: 'none' });
-        }
-      };
-      if (path && String(path).trim()) {
-        opt.path = String(path).replace(/^\//, '');
-      }
-      wx.navigateToMiniProgram(opt);
-      return true;
-    };
-
-    const copyFallback = () => {
-      if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '跳转失败，推广链接已复制');
-      else wx.showToast({ title: '跳转失败', icon: 'none' });
-    };
-
-    if (miniPath) {
-      openTbMini(miniPath, copyFallback);
-      return;
-    }
-
-    if (itemId) {
-      util.get('taobao/promotion/url', { item_id: itemId, scene: 'benefit_card' })
-        .then((res) => {
-          const url = (res && (res.promotionUrl || res.promotion_url || res.url || (res.data && (res.data.promotionUrl || res.data.url)))) || '';
-          const mp = (res && (res.miniPath || res.mini_path || (res.data && (res.data.miniPath || res.data.mini_path)))) || '';
-          if (mp) {
-            openTbMini(String(mp), copyFallback);
-            return;
-          }
-          openTbMini('', () => {
-            if (url) this.copyBenefitLink(url, '推广链接已复制，请打开淘宝/浏览器');
-            else copyFallback();
-          });
-        })
-        .catch(() => {
-          openTbMini('', copyFallback);
-        });
-      return;
-    }
-
-    openTbMini('', () => {
-      if (fallbackUrl) this.copyBenefitLink(fallbackUrl, '推广链接已复制，请打开淘宝/浏览器');
-      else wx.showToast({ title: '暂无推广信息', icon: 'none' });
-    });
   },
 
   goToJDMiniprogram(e) {

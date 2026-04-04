@@ -1,6 +1,8 @@
 const util = require('../../utils/util.js');
 const { imgUrl } = util;
 const images = require('../../utils/images.js');
+const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
 
 const mockWorkers = [
   {
@@ -12,7 +14,7 @@ const mockWorkers = [
     exp: 4,
     desc: "主要从事建筑回收，全品类建材可回收",
     tags: ["组长", "上门回收"],
-    avatar: images.avatarWorker
+    avatar: workerAvatarUrl(1)
   },
   {
     id: 2,
@@ -23,14 +25,25 @@ const mockWorkers = [
     exp: 20,
     desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
     tags: ["擅长", "衣柜收纳", "宠物喂养", "陪护作业"],
-    avatar: images.avatarWorker
+    avatar: workerAvatarUrl(2)
+  },
+  {
+    id: 3,
+    name: "邓长超",
+    region: "四川",
+    gender: "♂",
+    serviceCount: 0,
+    exp: 0,
+    desc: "可接送小孩、家政保洁、简单维修等上门服务。",
+    tags: ["组长", "宠物喂养", "宠物搭遛", "衣柜干洗"],
+    avatar: workerAvatarUrl(3)
   }
 ];
 
 const mockGoods = [
-  { id: 1,  name: "衣橱整理收纳（2小时）",  price: "196/份", image: images.svcTidyCloset },
-  { id: 57, name: "地毯深度清洗（1小时）",  price: "159/次", image: images.svcCarpet },
-  { id: 14, name: "马桶疏通",               price: "158/次", image: images.svcRepairWater }
+  { id: 1,  name: "衣橱整理收纳（2小时）",  price: "196/份", image: listImageFromHome3("衣橱整理收纳（2小时）", images.svcTidyCloset) },
+  { id: 57, name: "地毯深度清洗（1小时）",  price: "159/次", image: listImageFromHome3("地毯深度清洗（1小时）", images.svcCarpet) },
+  { id: 14, name: "马桶疏通",               price: "158/次", image: listImageFromHome3("马桶疏通", images.svcRepairWater) }
 ];
 
 Page({
@@ -67,7 +80,7 @@ Page({
       if (normalized) return normalized;
     } catch (e) {}
 
-    return mockWorkers.find(w => w.id === id) || mockWorkers[0] || {
+    return mockWorkers.find((w) => w.id === id) || mockWorkers[0] || {
       id,
       name: "技工",
       gender: "",
@@ -75,7 +88,7 @@ Page({
       serviceCount: 0,
       exp: 0,
       desc: "",
-      avatar: imgUrl('/img/placeholders/home_cleaning.png'),
+      avatar: workerAvatarUrl(id),
       tags: []
     };
   },
@@ -89,7 +102,7 @@ Page({
       serviceCount: Number(w.serviceCount || w.service_count || w.orders || 0) || 0,
       exp: Number(w.exp || w.work_years || w.workExp || 0) || 0,
       desc: w.desc || w.resume || "",
-      avatar: imgUrl(w.avatar || w.avatar_url || '/img/placeholders/home_cleaning.png'),
+      avatar: workerAvatarUrl(w.id),
       tags: Array.isArray(w.tags) ? w.tags : []
     };
   },
