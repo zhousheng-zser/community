@@ -1,4 +1,15 @@
 {
+  "scripts": {
+    "deploy:backend": "node scripts/deploy-backend.js",
+    "fetch:pdd-benefit-images": "node scripts/fetch-pdd-benefit-images.js",
+    "sync:pdd-benefit-images": "node scripts/sync-pdd-benefit-images-from-local.js",
+    "fetch:jd-benefit-images": "node scripts/fetch-jd-benefit-images.js",
+    "sync:jd-benefit-images": "node scripts/sync-jd-benefit-images-from-local.js"
+  },
+  "devDependencies": {
+    "ssh2": "^1.17.0",
+    "ssh2-sftp-client": "^11.0.0"
+  },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "axios": "^1.13.6",

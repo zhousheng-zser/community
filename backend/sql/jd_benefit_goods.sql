@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS `jd_benefit_goods` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `scene` VARCHAR(32) NOT NULL DEFAULT 'benefit_card' COMMENT '投放场景',
-  `sku_id` VARCHAR(32) NOT NULL COMMENT '京东 SKU',
+  `sku_id` VARCHAR(32) NOT NULL COMMENT '京挑客短链 path（u.jd.com 路径段），非数字 SKU',
   `title` VARCHAR(255) NOT NULL,
   `image_url` VARCHAR(1024) NOT NULL COMMENT '列表主图',
   `spread_url` VARCHAR(1024) NOT NULL COMMENT '联盟推广链接',

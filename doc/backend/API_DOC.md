@@ -198,6 +198,39 @@
 
 ---
 
+### 7.1 惠民卡 · 联盟（`/api/v1/benefit`、`/jd`、`/pdd`）
+
+> 详细表结构、种子与素材同步见 **`doc/惠民卡_联盟数据与同步.md`**。
+
+- **联盟顶栏展示（头图 + 可选标题）**
+  - **URL**：`GET /api/v1/benefit/display`
+  - **Query**：`scene`（默认 `benefit_card`）
+  - **鉴权**：无
+  - **返回 `data`**：
+    - `jd`：`{ heroImage, heroTitle, heroSubtitle }`（后两项可为空字符串）
+    - `pdd`：同上
+
+- **京东联盟商品列表**
+  - **URL**：`GET /api/v1/jd/benefit/goods`
+  - **Query**：`scene`（默认 `benefit_card`）
+  - **返回 `data`**：`{ list: [{ id, skuId, title, image, price, rebateAmount, spreadUrl }] }`
+  - **说明**：`skuId` 对应京挑客短链 path（`u.jd.com` 路径段）。
+
+- **京东推广链查询（跳转前可选用）**
+  - **URL**：`GET /api/v1/jd/promotion/spread-url`
+  - **Query**：`sku_id`、`scene`
+
+- **拼多多进宝商品列表**
+  - **URL**：`GET /api/v1/pdd/benefit/goods`
+  - **Query**：`scene`
+  - **返回 `data`**：`{ list: [{ id, goodsId, title, image, price, couponPrice, rebateAmount, spreadUrl, miniPath }] }`
+
+- **拼多多推广信息**
+  - **URL**：`GET /api/v1/pdd/promotion/spread-url`
+  - **Query**：`goods_id`、`scene`
+
+---
+
 ### 8. 维护约定
 
 - 如需 **新增 / 修改 / 下线接口**，请在修改对应 `routes/*.js` 或 `controllers` 后，

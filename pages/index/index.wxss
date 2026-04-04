@@ -188,6 +188,11 @@
   justify-content: center;
 }
 
+.quick-icon-img {
+  width: 54rpx;
+  height: 54rpx;
+}
+
 .quick-emoji {
   font-size: 28rpx;
   line-height: 1;
@@ -250,6 +255,11 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+.know-icon-img {
+  width: 78rpx;
+  height: 78rpx;
 }
 
 .know-emoji {
@@ -1208,6 +1218,37 @@
   color: #f44336;
 }
 
+.fuka-goods-item .jd-price-hint {
+  font-size: 22rpx;
+  color: #888;
+  font-weight: 400;
+}
+
+.fuka-goods-item .pdd-price-block {
+  margin-top: 6rpx;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10rpx;
+}
+
+.fuka-goods-item .pdd-coupon {
+  display: inline;
+  margin-top: 0;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #e02e24;
+}
+
+.fuka-goods-item .pdd-orig {
+  display: inline;
+  margin-top: 0;
+  font-size: 22rpx;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
 /* 惠民卡 · 多平台联盟 */
 .benefit-card-page {
   padding-bottom: 24rpx;
@@ -1249,10 +1290,18 @@
   min-height: 200rpx;
 }
 
+.benefit-hero-banner--alliance {
+  min-height: 280rpx;
+}
+
 .benefit-hero-img {
   width: 100%;
   height: 220rpx;
   display: block;
+}
+
+.benefit-hero-banner--alliance .benefit-hero-img {
+  height: 300rpx;
 }
 
 .benefit-hero-mask {
@@ -1268,12 +1317,16 @@
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.55) 100%);
 }
 
+.benefit-hero-mask--light {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.42) 100%);
+}
+
 .benefit-hero-mask-pdd {
   background: linear-gradient(180deg, transparent 0%, rgba(224, 64, 43, 0.75) 100%);
 }
 
-.benefit-hero-mask-tb {
-  background: linear-gradient(180deg, transparent 0%, rgba(255, 106, 0, 0.72) 100%);
+.benefit-hero-mask--light.benefit-hero-mask-pdd {
+  background: linear-gradient(180deg, rgba(224, 64, 43, 0.12) 0%, rgba(224, 64, 43, 0.55) 100%);
 }
 
 .benefit-hero-title {
@@ -1291,10 +1344,6 @@
 
 .benefit-cta-pdd {
   background: linear-gradient(90deg, #e02e24 0%, #c8161d 100%);
-}
-
-.benefit-cta-tb {
-  background: linear-gradient(90deg, #ff6a00 0%, #ff4400 100%);
 }
 
 .market-top-cats {

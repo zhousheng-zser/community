@@ -22,7 +22,7 @@ module.exports = (sequelize) => {
       sku_id: {
         type: DataTypes.STRING(32),
         allowNull: false,
-        comment: '京东 SKU，字符串避免大整数精度问题'
+        comment: '京挑客短链 path 段（与 u.jd.com/{sku_id}、proxy 参数一致），非京东数字 SKU'
       },
       title: {
         type: DataTypes.STRING(255),

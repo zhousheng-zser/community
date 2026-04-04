@@ -1,0 +1,4 @@
+{
+  "说明": "惠民卡主图已与 流量联盟/拼多多/ 素材、拼多多.md 一一对应。请使用 流量联盟/pdd_local_images.json 与 node scripts/sync-pdd-benefit-images-from-local.js 生成 img/pdd_benefit/{link_key}.jpeg。npm run fetch:pdd-benefit-images 为历史占位图，易错位，不建议再用。",
+  "items": []
+}

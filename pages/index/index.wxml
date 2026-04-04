@@ -192,11 +192,11 @@
     </scroll-view>
 
     <block wx:if="{{activeBenefitAlliance === 'jd'}}">
-      <view class="card benefit-hero-banner">
+      <view class="card benefit-hero-banner benefit-hero-banner--alliance">
         <image src="{{jdBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
-        <view class="benefit-hero-mask">
-          <text class="benefit-hero-title">惠民卡 · 京东联盟</text>
-          <text class="benefit-hero-sub">京挑客 · 跳转京东联盟小程序购买</text>
+        <view class="benefit-hero-mask benefit-hero-mask--light">
+          <text class="benefit-hero-title">{{jdHeroTitle || '惠民卡 · 京东联盟'}}</text>
+          <text class="benefit-hero-sub">{{jdHeroSubtitle || '京挑客 · 与流量联盟/京东联盟.md 推广链、标题一致'}}</text>
         </view>
       </view>
       <view class="card section-card">
@@ -210,25 +210,26 @@
               <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
             </view>
             <text class="name">{{item.title}}</text>
-            <text class="price">￥{{item.price}}</text>
+            <text class="price" wx:if="{{item.price}}">￥{{item.price}}</text>
+            <text class="price jd-price-hint" wx:else>领券价见京东</text>
           </view>
         </view>
       </view>
-      <view class="card fuka-open-card benefit-cta-jd" bindtap="goToJDMiniprogram" data-sku-id="100010713464" data-spread-url="https://u.jd.com/cGYRLnW">
+      <view class="card fuka-open-card benefit-cta-jd" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">
         <view class="left">
           <text class="title">去京东领券购买</text>
-          <text class="sub">京东联盟推广链接跳转</text>
+          <text class="sub">与列表首条同款推广链（京东联盟小程序）</text>
         </view>
         <text class="go">GO ></text>
       </view>
     </block>
 
     <block wx:elif="{{activeBenefitAlliance === 'pdd'}}">
-      <view class="card benefit-hero-banner">
+      <view class="card benefit-hero-banner benefit-hero-banner--alliance">
         <image src="{{pddBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
-        <view class="benefit-hero-mask benefit-hero-mask-pdd">
-          <text class="benefit-hero-title">惠民卡 · 拼多多</text>
-          <text class="benefit-hero-sub">多多进宝 · 小程序直达或复制推广链接</text>
+        <view class="benefit-hero-mask benefit-hero-mask--light benefit-hero-mask-pdd">
+          <text class="benefit-hero-title">{{pddHeroTitle || '惠民卡 · 拼多多'}}</text>
+          <text class="benefit-hero-sub">{{pddHeroSubtitle || '多多进宝 · 券后价与 p.pinduoduo 推广链（与流量联盟文档对齐）'}}</text>
         </view>
       </view>
       <view class="card section-card">
@@ -250,7 +251,11 @@
               <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
             </view>
             <text class="name">{{item.title}}</text>
-            <text class="price">￥{{item.price}}</text>
+            <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+              <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+              <text class="price pdd-orig">￥{{item.price}}</text>
+            </view>
+            <text class="price" wx:else>￥{{item.price}}</text>
           </view>
         </view>
       </view>
@@ -262,52 +267,8 @@
         data-mini-path="{{pddEntry.miniPath}}"
       >
         <view class="left">
-          <text class="title">拼多多特价频道</text>
-          <text class="sub">复制推广链接或直达拼多多小程序（需配置路径）</text>
-        </view>
-        <text class="go">GO ></text>
-      </view>
-    </block>
-
-    <block wx:elif="{{activeBenefitAlliance === 'taobao'}}">
-      <view class="card benefit-hero-banner">
-        <image src="{{taobaoBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
-        <view class="benefit-hero-mask benefit-hero-mask-tb">
-          <text class="benefit-hero-title">惠民卡 · 淘宝联盟</text>
-          <text class="benefit-hero-sub">淘宝客 · 复制推广链接到淘宝或浏览器打开</text>
-        </view>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">淘宝联盟精选</text>
-        </view>
-        <view class="fuka-goods-grid">
-          <view
-            class="fuka-goods-item"
-            wx:for="{{taobaoGoods}}"
-            wx:key="id"
-            bindtap="goToTaobaoBenefit"
-            data-item-id="{{item.itemId}}"
-            data-promotion-url="{{item.promotionUrl}}"
-          >
-            <view class="fuka-goods-img-wrap">
-              <image src="{{item.image}}" mode="aspectFill"></image>
-              <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
-            </view>
-            <text class="name">{{item.title}}</text>
-            <text class="price">￥{{item.price}}</text>
-          </view>
-        </view>
-      </view>
-      <view
-        class="card fuka-open-card benefit-cta-tb"
-        bindtap="goToTaobaoBenefit"
-        data-item-id="{{taobaoEntry.itemId}}"
-        data-promotion-url="{{taobaoEntry.promotionUrl}}"
-      >
-        <view class="left">
-          <text class="title">淘宝联盟活动入口</text>
-          <text class="sub">复制官方推广链接（可接后端转链接口）</text>
+          <text class="title">拼多多进宝精选</text>
+          <text class="sub">打开小程序或复制推广链接（与列表同款素材）</text>
         </view>
         <text class="go">GO ></text>
       </view>
@@ -375,8 +336,8 @@
   <view class="card panel-grid">
     <view class="service-grid">
       <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="{{item.url}}">
-        <view class="svc-icon-wrap" style="background:{{item.bgColor}}">
-          <image wx:if="{{item.icon}}" src="{{item.icon}}" mode="aspectFit" style="width: 100%; height: 100%;"></image>
+        <view class="svc-icon-wrap" style="background:{{item.icon ? '#ffffff' : item.bgColor}}">
+          <image wx:if="{{item.icon}}" class="svc-icon-img" src="{{item.icon}}" mode="aspectFill" />
           <text wx:else class="svc-emoji">{{item.emoji}}</text>
         </view>
         <text>{{item.name}}</text>
@@ -384,8 +345,9 @@
     </view>
     <view class="quick-nav">
       <navigator class="quick-item" wx:for="{{quickActions}}" wx:key="name" url="../classify/classify">
-        <view class="quick-icon-wrap" style="background:{{item.bgColor}}">
-          <text class="quick-emoji">{{item.emoji}}</text>
+        <view class="quick-icon-wrap" style="background:{{item.icon ? 'transparent' : item.bgColor}}">
+          <image wx:if="{{item.icon}}" class="quick-icon-img" src="{{item.icon}}" mode="aspectFit" />
+          <text wx:else class="quick-emoji">{{item.emoji}}</text>
         </view>
         <text>{{item.name}}</text>
       </navigator>
@@ -408,8 +370,9 @@
     </view>
     <view class="knowledge-row neighborhood-services">
       <navigator class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="name" url="{{item.url}}">
-        <view class="know-icon-wrap" style="background:{{item.bgColor}}">
-          <text class="know-emoji">{{item.emoji}}</text>
+        <view class="know-icon-wrap" style="background:{{item.icon ? '#ffffff' : item.bgColor}}">
+          <image wx:if="{{item.icon}}" class="know-icon-img" src="{{item.icon}}" mode="aspectFit" />
+          <text wx:else class="know-emoji">{{item.emoji}}</text>
         </view>
         <text>{{item.name}}</text>
       </navigator>

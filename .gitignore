@@ -2,6 +2,7 @@
 project.private.config.json
 project.config.json
 backend/.env
+.env.deploy
 
 
 # 系统文件

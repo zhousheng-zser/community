@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const jdBenefitRouter = require('./routes/jdBenefit');
+const mountBenefitAllianceRoutes = require('./mountBenefitAlliance');
 const adminRouter = require('./routes/admin');
 const { login } = require('./controllers/adminAuthController');
 
@@ -17,7 +17,7 @@ app.get('/health', (req, res) => {
 app.post('/api/v1/admin/login', login);
 app.post('/api/v1/auth/admin/login', login);
 
-app.use('/api/v1/jd', jdBenefitRouter);
+mountBenefitAllianceRoutes(app);
 app.use('/api/v1/admin', adminRouter);
 
 app.use((req, res) => {

@@ -1,0 +1,37 @@
+{
+  "说明": "与 京东联盟.md 中每条推广（sku_id = u.jd.com 短链 path）一一对应；源文件在 流量联盟/京东联盟/ 目录。同步：node scripts/sync-jd-benefit-images-from-local.js",
+  "items": [
+    {
+      "sku_id": "c64wRk8",
+      "source_file": "Screenshot 2026-04-03 at 21-42-58 雪亮500张大包抽纸优等品5层加厚纸巾大尺寸面巾纸餐巾纸可湿水卫生纸 5层 500张 20包【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "cg409N9",
+      "source_file": "Screenshot 2026-04-03 at 21-42-38 伊利【新鲜日期】纯牛奶250ml 21盒 早餐奶 财神装普通礼盒装混发【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "c14zUDW",
+      "source_file": "Screenshot 2026-04-03 at 21-43-41 鲜京采 30_40厄瓜多尔白虾 去冰净重3.3斤 50-66只_盒 【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "cO4Gh0k",
+      "source_file": "Screenshot 2026-04-03 at 21-44-32 圣上用膳五常大米 10斤 GB_T 19266 五常香米 当季新米 东北大米【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "cG4nIbb",
+      "source_file": "Screenshot 2026-04-03 at 21-45-02 京鲜生 四川春见耙耙柑 净重8.5-9斤水果礼盒 单果170g 源头直发包邮【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "cG4vgVg",
+      "source_file": "Screenshot 2026-04-03 at 21-45-38 伊利【新鲜日期】金典纯牛奶早餐奶250ml 16 3.6g乳蛋白 礼盒装 2-3月【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "cg4pcQF",
+      "source_file": "Screenshot 2026-04-03 at 21-46-36 漫花山茶花大包抽纸纸巾大尺寸餐巾纸面巾纸家用卫生纸原木纸抽纸C 山茶花抽纸 5层 400张 6包【行情 报价 价格 评测】-京东.png"
+    },
+    {
+      "sku_id": "c14OhB8",
+      "source_file": "Screenshot 2026-04-03 at 21-47-08 广东徐闻香水菠萝新鲜水果生鲜热带孕妇水果整箱包邮 【限时低价】1个装 净重650g起【行情 报价 价格 评测】-京东.png"
+    }
+  ]
+}
