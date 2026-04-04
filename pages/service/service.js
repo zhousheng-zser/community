@@ -27,6 +27,11 @@ Page({
       beauty: ['上门服务', '专业技师', '不满意重做']
     };
     const mockMap = buildServiceMockMap(images, tagSets);
+    Object.keys(mockMap).forEach((k) => {
+      const s = mockMap[k];
+      s.banner = imgUrl(s.banner);
+      s.detailImages = (s.detailImages || []).map((p) => imgUrl(p));
+    });
 
     let service = null;
     try {
@@ -40,7 +45,8 @@ Page({
         let imgs = (Array.isArray(detailImages) ? detailImages : []).map((p) => imgUrl(p));
         const home3 = home3PathForTitle(title);
         if (home3) {
-          imgs = [home3, ...imgs.filter((u) => u !== home3)];
+          const h3u = imgUrl(home3);
+          imgs = [h3u, ...imgs.filter((u) => u !== h3u)];
         }
         service = {
           title,

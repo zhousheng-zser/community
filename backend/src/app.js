@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const mountBenefitAllianceRoutes = require('./mountBenefitAlliance');
@@ -8,6 +9,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// 小程序静态图：data/uploads/images → GET /uploads/<子目录>/...
+app.use('/uploads', express.static(path.join(__dirname, '../data/uploads/images')));
 
 app.get('/health', (req, res) => {
   res.json({ ok: true, service: 'community-backend' });

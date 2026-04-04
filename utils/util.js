@@ -1,19 +1,43 @@
 const config = require('./config.js');
 const images = require('./images.js');
 
+let _uploadsSubdirSet = null;
+function uploadsSubdirSet() {
+  if (!_uploadsSubdirSet) {
+    _uploadsSubdirSet = new Set(config.uploadsImageSubdirs || []);
+  }
+  return _uploadsSubdirSet;
+}
+
 /**
  * 将路径转成完整服务器图片 URL
  * - 已是 http 开头 → 原样返回
- * - 本地占位图路径 → 映射到服务器已上传文件
- * - 其他相对路径 → 拼接 imageBaseUrl
+ * - 本地占位图路径 → 映射到服务器已上传文件（images.resolve）
+ * - /img/<uploads 子目录>/... → imageBaseUrl + /uploads/...（段 encodeURIComponent，与后端静态目录一致）
+ * - 其余 /img/... → 保留为小程序包内路径
+ * - 其他以 / 开头的路径 → 拼接 imageBaseUrl（如接口返回 /uploads/...）
  */
 const imgUrl = (path, fallback) => {
-  if (!path) return fallback || images.homeCleaning;
+  if (!path) return fallback != null ? imgUrl(fallback) : images.homeCleaning;
   if (path.startsWith('http')) return path;
-  const resolved = images.resolve(path);
-  if (resolved !== path) return resolved;
+  let normalized = path;
+  if (!normalized.startsWith('/') && normalized.startsWith('img/')) {
+    normalized = '/' + normalized;
+  }
+  const resolved = images.resolve(normalized);
+  if (resolved !== normalized) return resolved;
+
   const base = config.imageBaseUrl.replace(/\/$/, '');
-  return base + (path.startsWith('/') ? path : '/' + path);
+  if (normalized.startsWith('/img/')) {
+    const segments = normalized.split('/').filter(Boolean);
+    if (segments[0] === 'img' && segments.length >= 2 && uploadsSubdirSet().has(segments[1])) {
+      const rest = segments.slice(1);
+      const encoded = rest.map(encodeURIComponent).join('/');
+      return `${base}/uploads/${encoded}`;
+    }
+    return normalized;
+  }
+  return base + (normalized.startsWith('/') ? normalized : '/' + normalized);
 };
 
 const formatTime = date => {

@@ -425,7 +425,8 @@ Page({
       { imageUrl: images.bannerSale }
     ];
 
-    const categoryList = [
+    const mapHomeIcon = (rows) => rows.map((r) => ({ ...r, icon: imgUrl(r.icon) }));
+    const categoryList = mapHomeIcon([
       { name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#ede8ff", url: "../tidy-service/tidy-service?key=tidy" },
       { name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e0", url: "../tidy-service/tidy-service?key=urgent_fix" },
       { name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#e0f3ff", url: "../tidy-service/tidy-service?key=appliance_clean" },
@@ -435,21 +436,21 @@ Page({
       { name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff5e0", url: "../tidy-service/tidy-service?key=baby_home" },
       { name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#e0eeff", url: "../tidy-service/tidy-service?key=house_repair" },
       { name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffe0f5", url: "../tidy-service/tidy-service?key=beauty_home" }
-    ];
-    const quickActions = [
+    ]);
+    const quickActions = mapHomeIcon([
       { name: "直约服务商", icon: "/img/home_icons2/merchant_direct.png", emoji: "🏪", bgColor: "#fff0e0" },
       { name: "直约技工", icon: "/img/home_icons2/worker_direct.png", emoji: "🔨", bgColor: "#e8f5e0" },
       { name: "秒杀", icon: "/img/home_icons2/miaosha.png", emoji: "⚡", bgColor: "#fff5e0" },
       { name: "领券", icon: "/img/home_icons2/coupon.png", emoji: "🎫", bgColor: "#ffe0ee" },
       { name: "家事积分商城", icon: "/img/home_icons2/points.png", emoji: "🎯", bgColor: "#e0eeff" }
-    ];
-    const knowledgeList = [
+    ]);
+    const knowledgeList = mapHomeIcon([
       { name: "代取", icon: "/img/home_icons2/pickup.png", emoji: "📦", bgColor: "#ede8ff", url: "../recomm/recomm?type=take" },
       { name: "接送小孩", icon: "/img/home_icons2/child_pickup.png", emoji: "🚗", bgColor: "#e0f3ff", url: "../recomm/recomm?type=child" },
       { name: "陪诊", icon: "/img/home_icons2/escort.png", emoji: "🏥", bgColor: "#ffe0e0", url: "../recomm/recomm?type=escort" },
       { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
       { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
-    ];
+    ]);
     // ===== 从数据库获取热门服务（小区热卖榜）=====
     let hotList = [
       { id: 73, name: "局部瓷砖铺贴",     price: "229", image: listImageFromHome3("局部瓷砖铺贴【2小时】", images.svcTile), rank: "NO.1" },
@@ -457,6 +458,12 @@ Page({
       { id: 75, name: "厨卫漏水防水修缮", price: "299", image: listImageFromHome3("厨卫漏水防水修缮【2小时】", images.svcWaterproof), rank: "NO.3" },
       { id: 76, name: "地板铺贴修缮",     price: "279", image: listImageFromHome3("地板铺贴修缮【2小时】", images.svcFloor), rank: "NO.4" },
       { id: 77, name: "墙面刷新施工",     price: "259", image: listImageFromHome3("墙面刷新施工【2小时】", images.svcWall), rank: "NO.5" }
+    ];
+    let goods = [
+      { id: 1, remarkC: images.hotClean,   goodsTitle: '金牌日常保洁 (2小时)',   goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
+      { id: 2, remarkC: images.svcAircon,  goodsTitle: '挂壁式空调深度清洗',     goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
+      { id: 3, remarkC: images.svcWasher,  goodsTitle: '洗衣机深度清洗',         goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
+      { id: 4, remarkC: images.svcHood,    goodsTitle: '油烟机深度清洗',         goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
     if (!config.useCuratedHomeHotList) {
       try {
@@ -478,13 +485,39 @@ Page({
       } catch (e) {}
     }
 
-    // ===== 从数据库获取服务商品（直约服务商）=====
-    let goods = [
-      { id: 1, remarkC: images.hotClean,   goodsTitle: '金牌日常保洁 (2小时)',   goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
-      { id: 2, remarkC: images.svcAircon,  goodsTitle: '挂壁式空调深度清洗',     goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
-      { id: 3, remarkC: images.svcWasher,  goodsTitle: '洗衣机深度清洗',         goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
-      { id: 4, remarkC: images.svcHood,    goodsTitle: '油烟机深度清洗',         goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
+    const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
+    const mapMerchantList = () => goods.map((item) => ({
+      id: item.id,
+      name: item.goodsTitle,
+      sub: "服务" + item.id + "单",
+      image: imgUrl(item.remarkC || '/img/placeholders/home_cleaning.png'),
+      url: "../merchant-detail/merchant-detail?id=" + item.id
+    }));
+    let merchantList = mapMerchantList();
+    let workerList = [
+      { id: 1, name: "何志", orders: "服务0单", avatar: workerAvatarUrl(1) },
+      { id: 2, name: "余静", orders: "服务1单", avatar: workerAvatarUrl(2) },
+      { id: 3, name: "邓长超", orders: "服务0单", avatar: workerAvatarUrl(3) }
     ];
+    let marketList = [
+      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
+      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
+      { id: 2003, name: "当地特产一键速达", price: "99",  image: images.goodsLocal }
+    ];
+    // 首屏先渲染「首页」tab：避免 init 末尾才 setData 时，长时间无任何图片与列表（后续接口在后台继续跑）
+    this.setData({
+      banner,
+      categoryList,
+      quickActions,
+      knowledgeList,
+      hotList,
+      hotFilters,
+      merchantList,
+      workerList,
+      marketList
+    });
+
+    // ===== 从数据库获取服务商品（直约服务商）=====
     try {
       const svcRes = await util.get('core/services/hot');
       const svcData = Array.isArray(svcRes) ? svcRes : (svcRes.data || svcRes);
@@ -498,20 +531,9 @@ Page({
         }));
       }
     } catch (e) {}
-    const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
-    const merchantList = goods.map((item) => ({
-      id: item.id,
-      name: item.goodsTitle,
-      sub: "服务" + item.id + "单",
-      image: item.remarkC,
-      url: "../merchant-detail/merchant-detail?id=" + item.id
-    }));
+    merchantList = mapMerchantList();
+
     // ===== 从数据库获取直约技工 =====
-    let workerList = [
-      { id: 1, name: "何志", orders: "服务0单", avatar: workerAvatarUrl(1) },
-      { id: 2, name: "余静", orders: "服务1单", avatar: workerAvatarUrl(2) },
-      { id: 3, name: "邓长超", orders: "服务0单", avatar: workerAvatarUrl(3) }
-    ];
     try {
       const wRes = await util.get('core/workers');
       const wData = Array.isArray(wRes) ? wRes : (wRes.data || wRes);
@@ -526,11 +548,6 @@ Page({
     } catch (e) {}
 
     // ===== 从数据库获取管家精选商品 =====
-    let marketList = [
-      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
-      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
-      { id: 2003, name: "当地特产一键速达", price: "99",  image: images.goodsLocal }
-    ];
     try {
       const mRes = await util.get('core/goods/featured');
       const mData = Array.isArray(mRes) ? mRes : (mRes.data || mRes);
@@ -539,7 +556,7 @@ Page({
           id: g.id,
           name: g.goodsTitle || g.title || g.name || '精选商品',
           price: String(g.goodsRealPrice || g.price || ''),
-          image: g.mainPicture || g.cover_image || g.image || imgUrl('/img/placeholders/home_cleaning.png')
+          image: imgUrl(g.mainPicture || g.cover_image || g.image || '/img/placeholders/home_cleaning.png')
         }));
       }
     } catch (e) {}
@@ -554,12 +571,12 @@ Page({
     ];
 
     // 模块二：分类金刚
-    const pushCategories = [
+    const pushCategories = mapHomeIcon([
       { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/pages/push-goods-list/push-goods-list?id=1" },
       { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/pages/push-goods-list/push-goods-list?id=2" },
       { name: "本地好物甄选", icon: "/img/local_goods_icons/star.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
       { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/pages/push-goods-list/push-goods-list?id=4" }
-    ];
+    ]);
 
     // 模块三：导购窗
     const pushPromoCards = {
@@ -625,7 +642,7 @@ Page({
       { id: 3003, name: "冻干草莓",       price: "39.9", image: images.pushFood2 },
       { id: 3004, name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
     ];
-    const marketTopCats = [
+    const marketTopCats = mapHomeIcon([
       { name: "母婴生活馆", code: "AAAA", icon: "/img/market_icons/baby.png", url: "../market-banner/market-banner?title=母婴生活馆" },
       { name: "家庭服务", code: "AAAB", icon: "/img/market_icons/home.png", url: "../market-banner/market-banner?title=家庭服务" },
       { name: "超市便利", code: "AAAC", icon: "/img/market_icons/supermarket.png", url: "../market-banner/market-banner?title=超市便利" },
@@ -636,7 +653,7 @@ Page({
       { name: "服装首饰", code: "AAAH", icon: "/img/market_icons/clothes.png", url: "../market-banner/market-banner?title=服装首饰" },
       { name: "电子数码", code: "AAAI", icon: "/img/market_icons/tech.png", url: "../market-banner/market-banner?title=电子数码" },
       { name: "本地玩乐", code: "AAAJ", icon: "/img/market_icons/fun.png", url: "../market-banner/market-banner?title=本地玩乐" }
-    ];
+    ]);
     const allMarketShops = [];
 
     let mergedMarketShops = allMarketShops;
@@ -663,8 +680,8 @@ Page({
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
-    let jdBanner = images.benefitJdAllianceHero;
-    let pddBanner = images.benefitPddAllianceHero;
+    let jdBanner = imgUrl(images.benefitJdAllianceHero);
+    let pddBanner = imgUrl(images.benefitPddAllianceHero);
     let jdHeroTitle = '';
     let jdHeroSubtitle = '';
     let pddHeroTitle = '';
@@ -686,12 +703,12 @@ Page({
     try {
       const disp = await util.get('benefit/display', { scene: 'benefit_card' });
       if (disp && disp.jd) {
-        if (disp.jd.heroImage) jdBanner = disp.jd.heroImage;
+        if (disp.jd.heroImage) jdBanner = imgUrl(disp.jd.heroImage);
         jdHeroTitle = disp.jd.heroTitle || '';
         jdHeroSubtitle = disp.jd.heroSubtitle || '';
       }
       if (disp && disp.pdd) {
-        if (disp.pdd.heroImage) pddBanner = disp.pdd.heroImage;
+        if (disp.pdd.heroImage) pddBanner = imgUrl(disp.pdd.heroImage);
         pddHeroTitle = disp.pdd.heroTitle || '';
         pddHeroSubtitle = disp.pdd.heroSubtitle || '';
       }
@@ -706,7 +723,7 @@ Page({
           id: x.id || idx + 1,
           skuId: String(x.skuId || x.sku_id || ''),
           title: x.title || x.name || '',
-          image: x.image || x.image_url || images.pushFood1,
+          image: imgUrl(x.image || x.image_url || images.pushFood1),
           price: x.price != null && x.price !== '' ? String(x.price) : '',
           rebateAmount: x.rebateAmount || x.rebate_amount || '',
           spreadUrl: x.spreadUrl || x.spread_url || ''
@@ -726,7 +743,7 @@ Page({
           id: x.id || idx + 1,
           goodsId: String(x.goodsId || x.goods_id || ''),
           title: x.title || x.name || '',
-          image: x.image || x.image_url || images.pushFood1,
+          image: imgUrl(x.image || x.image_url || images.pushFood1),
           price: String(x.price || ''),
           couponPrice: String(x.couponPrice || x.coupon_price || ''),
           rebateAmount: x.rebateAmount || x.rebate_amount || '',

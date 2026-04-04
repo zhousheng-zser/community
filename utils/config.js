@@ -8,6 +8,22 @@ const config = {
     // 静态资源（图片）基础地址，上传到服务器的图片均通过此前缀访问
     imageBaseUrl: 'http://114.55.167.14:3000',
 
+    /**
+     * 已迁入后端 data/uploads/images 的一级目录；/img/<目录>/... 在 imgUrl 中转为 imageBaseUrl + /uploads/...（每段 encodeURIComponent）
+     * 见 doc/微信小程序静态图片访问说明_TMP迁入.md；有新目录上传后在此追加。
+     */
+    uploadsImageSubdirs: [
+        'benefit_alliance',
+        'home_service_photos',
+        'jd_benefit',
+        'pdd_benefit',
+        'service_home3',
+        'worker_avatars',
+        '京东联盟',
+        '拼多多',
+        '流量联盟',
+    ],
+
     // 本地集市店铺列表：默认筛选半径（公里），与 GET market/shops 的 radius_km 及后端配置对齐（产品约定 X=5）
     marketShopRadiusKm: 5,
 

@@ -4,7 +4,12 @@
     "fetch:pdd-benefit-images": "node scripts/fetch-pdd-benefit-images.js",
     "sync:pdd-benefit-images": "node scripts/sync-pdd-benefit-images-from-local.js",
     "fetch:jd-benefit-images": "node scripts/fetch-jd-benefit-images.js",
-    "sync:jd-benefit-images": "node scripts/sync-jd-benefit-images-from-local.js"
+    "sync:jd-benefit-images": "node scripts/sync-jd-benefit-images-from-local.js",
+    "compress:home-service-images": "node scripts/compress-home-service-images.js",
+    "compress:homepage-material": "node scripts/compress-home-service-images.js --only=material --max=480",
+    "optimize:home-categories": "node scripts/optimize-home-categories-images.js",
+    "resize:home-icons2": "node scripts/resize-home-icons2-images.js",
+    "resize:market-icons": "node scripts/resize-market-icons-images.js"
   },
   "devDependencies": {
     "ssh2": "^1.17.0",

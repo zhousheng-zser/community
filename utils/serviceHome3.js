@@ -2,6 +2,7 @@
  * 具体服务列表/详情图：按服务标题匹配 img/service_home3/ 下文件名（由 首页素材/3 + /1 同步）
  * 例：标题「衣橱整理收纳」→ 素材文件 衣橱收纳.png（见 TITLE_TO_BASENAME）
  */
+const { imgUrl } = require('./util.js');
 const FILENAMES = require('./serviceHome3Filenames.js');
 
 const SET = new Set(FILENAMES);
@@ -46,7 +47,8 @@ function home3PathForTitle(title) {
  * @param {string} fallback 无本地图时的 Unsplash 等地址
  */
 function listImageFromHome3(title, fallback) {
-  return home3PathForTitle(title) || fallback;
+  const raw = home3PathForTitle(title) || fallback;
+  return imgUrl(raw);
 }
 
 module.exports = {
