@@ -3,7 +3,7 @@ const path = require('path');
 const { Client } = require('ssh2');
 
 const config = {
-  host: process.env.DEPLOY_HOST || '114.55.167.14',
+  host: process.env.DEPLOY_HOST || '8.140.204.254',
   port: 22,
   username: process.env.DEPLOY_USER || 'root',
   password: process.env.DEPLOY_SSH_PASSWORD || ''

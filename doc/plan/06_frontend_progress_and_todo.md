@@ -41,7 +41,7 @@
 ### 1.3 图片资源迁移
 
 - 新增 `utils/images.js`：统一管理服务器图片路径映射
-- 新增 `utils/config.js → imageBaseUrl`：`http://114.55.167.14:3000`
+- 新增 `utils/config.js → imageBaseUrl`：`http://8.140.204.254:3000`
 - 改进 `utils/util.js → imgUrl()`：自动将本地占位图路径解析为服务器 URL
 - 已上传 4 张占位图到服务器 `/uploads/`：
 
@@ -128,7 +128,7 @@
 ### 3.4 生产上线前必做
 
 - [ ] **HTTPS**：微信小程序正式版强制要求 HTTPS，服务器需配置 SSL 证书（`utils/config.js` 中已预留注释）
-- [ ] **域名备案**：将 IP 地址 `114.55.167.14` 替换为已备案域名
+- [ ] **域名备案**：将 IP 地址 `8.140.204.254` 替换为已备案域名
 - [ ] **微信小程序后台**：在 MP 后台将服务器域名加入 `request 合法域名` 和 `uploadFile 合法域名` 白名单
 - [ ] **OSS 迁移**：现阶段图片存本地服务器，正式版应迁至阿里云 OSS / 腾讯云 COS，参考 `01_database_and_cloud.md`
 - [ ] **推客/佣金系统**：`Promotions` 表及分佣结算逻辑尚未实现

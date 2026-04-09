@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dirToProcess = path.join(__dirname);
-const remoteUrl = 'http://114.55.167.14/img/';
+const remoteUrl = 'http://8.140.204.254/img/';
 
 function walk(dir, callback) {
   fs.readdir(dir, (err, list) => {
