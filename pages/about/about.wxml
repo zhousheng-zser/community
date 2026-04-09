@@ -6,8 +6,8 @@
     <view class="logo-wrap">
       <image class="logo" src="/img/home-1.png" mode="aspectFit"></image>
     </view>
-    <text class="app-name">家事速配</text>
-    <text class="app-slogan">连接邻里，温暖生活</text>
+    <text class="app-name">社区生活服务平台</text>
+    <text class="app-slogan">连接社区服务与本地消费</text>
     <text class="app-version">版本 v1.0.0</text>
   </view>
 
@@ -15,10 +15,10 @@
   <view class="card">
     <view class="card-title-row">
       <text class="card-icon">🏠</text>
-      <text class="card-title">关于家事速配</text>
+      <text class="card-title">关于我们</text>
     </view>
-    <text class="card-text">家事速配是一款专注于社区生活服务的综合平台，致力于打通居民与周边服务商、技工、商家之间的连接渠道，让家门口的服务触手可及。</text>
-    <text class="card-text mt">无论是家政清洁、水电维修、社区集市，还是邻里互动与活动参与，我们都希望以科技之力，让每个家庭的日常生活更加便利、温暖、有温度。</text>
+    <text class="card-text">我们是一款面向社区场景的本地生活服务应用，围绕“服务 + 商品 + 社区互动”构建一站式体验，让用户在一个平台内完成日常所需。</text>
+    <text class="card-text mt">当前版本聚焦首页生活服务、本地好物、本地集市与惠民卡联盟等核心模块，持续优化附近供给、商品推荐与社区连接效率。</text>
   </view>
 
   <!-- 核心功能 -->
@@ -81,7 +81,7 @@
 
   <!-- 底部版权 -->
   <view class="footer">
-    <text class="footer-company">© 2024 家事速配科技有限公司</text>
+    <text class="footer-company">© 2024 社区生活服务平台</text>
     <text class="footer-icp">增值电信业务经营许可证 备案号：待填写</text>
   </view>
 
