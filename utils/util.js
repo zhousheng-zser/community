@@ -10,6 +10,16 @@ function uploadsSubdirSet() {
 }
 
 /**
+ * 数据库常见存法：`uploads/...` 或 `market/xxx.jpg` 无前导斜杠，先规范为以 `/` 开头再拼 imageBaseUrl。
+ */
+const normalizeServerImagePath = (path) => {
+  if (path == null || path === '') return '';
+  const raw = String(path).trim();
+  if (/^https?:\/\//i.test(raw)) return raw;
+  return raw.startsWith('/') ? raw : `/${raw.replace(/^\/+/, '')}`;
+};
+
+/**
  * 将路径转成完整服务器图片 URL
  * - 已是 http 开头 → 原样返回
  * - 本地占位图路径 → 映射到服务器已上传文件（images.resolve）
@@ -18,12 +28,10 @@ function uploadsSubdirSet() {
  * - 其他以 / 开头的路径 → 拼接 imageBaseUrl（如接口返回 /uploads/...）
  */
 const imgUrl = (path, fallback) => {
-  if (!path) return fallback != null ? imgUrl(fallback) : images.homeCleaning;
-  if (path.startsWith('http')) return path;
-  let normalized = path;
-  if (!normalized.startsWith('/') && normalized.startsWith('img/')) {
-    normalized = '/' + normalized;
-  }
+  if (path == null || path === '') return fallback != null ? imgUrl(fallback) : images.homeCleaning;
+  const raw = String(path).trim();
+  if (/^https?:\/\//i.test(raw)) return raw;
+  let normalized = normalizeServerImagePath(raw);
   const resolved = images.resolve(normalized);
   if (resolved !== normalized) return resolved;
 
@@ -435,7 +443,8 @@ const pickShopProductCoverRaw = (item) => {
   if (!item || typeof item !== 'object') return '';
   const keys = [
     'main_image', 'mainPicture', 'main_picture', 'cover_image', 'coverImage',
-    'image', 'thumb_url', 'thumbUrl', 'goods_image', 'goodsImage', 'pic_url', 'picUrl'
+    'image', 'thumb_url', 'thumbUrl', 'goods_image', 'goodsImage', 'pic_url', 'picUrl',
+    'goods_image_url', 'cover', 'snapshot_image', 'snapshotImage'
   ];
   for (let i = 0; i < keys.length; i++) {
     const v = item[keys[i]];
@@ -546,6 +555,7 @@ module.exports = {
   booksStateTabel,
   stateTabel,
   imgUrl,
+  normalizeServerImagePath,
   flattenMarketShopPayload,
   pickMarketShopAvatarPath,
   pickShopProductCoverRaw,

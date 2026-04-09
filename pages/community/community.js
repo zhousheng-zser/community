@@ -1,5 +1,6 @@
 // pages/community/community.js
 const util = require('../../utils/util.js');
+const config = require('../../utils/config.js');
 const { imgUrl } = util;
 
 Page({
@@ -43,7 +44,7 @@ Page({
       .then(res => {
         const list = res.list || res;
         const userId = wx.getStorageSync('userId');
-        const apiOrigin = 'http://114.55.167.14:3000'; // 补全图片所需的域名
+        const apiOrigin = config.imageBaseUrl.replace(/\/$/, ''); // 与小程序合法域名、图片域名一致
         
         const processedPosts = (Array.isArray(list) ? list : []).map(post => {
             // 自动补全图片路径

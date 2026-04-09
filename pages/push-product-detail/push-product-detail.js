@@ -1,4 +1,5 @@
 const util = require('../../utils/util.js');
+const config = require('../../utils/config.js');
 
 const MARKET_PRODUCT_MAP = {
   101: { name: "现挖黄心土豆500g", price: "1.68", pay: "1.68", rebate: "0.10", image: "/img/placeholders/home_cleaning.png", shop: "龙泉驿区艺源农副产品经营部" },
@@ -39,45 +40,69 @@ Page({
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
     const id = Number(options.id || 0);
-    const mockProduct = MARKET_PRODUCT_MAP[id] || this.data.product;
+    const mockProduct = MARKET_PRODUCT_MAP[id];
+    const emptyProduct = {
+      name: '加载中…',
+      price: '',
+      pay: '',
+      rebate: '',
+      image: '/img/placeholders/home_cleaning.png',
+      shop: '',
+      detail_images: []
+    };
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
-      product: mockProduct,
+      product: mockProduct || emptyProduct,
       shopId: Number(options.shopId || 1)
     });
 
-    // 从真实接口拉取对应 ID 商品详情
     this.fetchRealProductDetail(id);
   },
   async fetchRealProductDetail(id) {
     if (!id) return;
+    if (MARKET_PRODUCT_MAP[id]) return;
     try {
-      const spRes = await util.get('api/v1/shop-products');
-      const spData = Array.isArray(spRes) ? spRes : (spRes.data || spRes);
-      if (Array.isArray(spData) && spData.length > 0) {
-        const found = spData.find(s => s.id === id);
-        if (found) {
-          let detailImgs = [];
-          if (found.detail_images) {
-            try {
-              detailImgs = typeof found.detail_images === 'string' ? JSON.parse(found.detail_images) : found.detail_images;
-            } catch(e) {}
-          }
-          this.setData({
-            'product.name': found.name,
-            'product.price': found.original_price || found.pay_price,
-            'product.pay': found.pay_price,
-            'product.rebate': found.rebate_amount,
-            'product.image': found.main_image,
-            'product.detail_images': detailImgs,
-            'product.shop': '家生活甄选专营店', // 或保留原逻辑，目前数据库中暂无店铺名
-            shopAppId: found.shop_appid,
-            productId: found.product_id
-          });
-        }
+      const res = await util.get(`market/goods/${id}`);
+      const g = res && typeof res === 'object' ? (res.data != null ? res.data : res) : null;
+      if (!g || g.id == null) return;
+
+      let detailImgs = [];
+      if (g.detail_images != null) {
+        try {
+          detailImgs = typeof g.detail_images === 'string' ? JSON.parse(g.detail_images) : g.detail_images;
+        } catch (e) {}
       }
-    } catch(e) {
-      console.log('加载推流商品详情异常', e);
+      if (!Array.isArray(detailImgs)) detailImgs = [];
+
+      const shop = g.shop && typeof g.shop === 'object' ? g.shop : {};
+      const shopName = shop.name || shop.shop_name || g.shop_name || '店铺';
+      const priceRaw = g.original_price != null ? g.original_price : g.price;
+      const payRaw = g.price != null ? g.price : priceRaw;
+      const rebateRaw = g.rebate_amount != null ? g.rebate_amount : (g.comm != null ? g.comm : 0);
+      const nested = g.goods || g.good || {};
+      const mainRaw =
+        g.main_image ||
+        g.cover_image ||
+        g.image ||
+        nested.main_image ||
+        nested.cover_image ||
+        nested.main_picture ||
+        '';
+
+      this.setData({
+        'product.name': g.name || g.title || g.goods_name || '商品',
+        'product.price': priceRaw != null ? String(priceRaw) : '',
+        'product.pay': payRaw != null ? String(payRaw) : '',
+        'product.rebate': String(rebateRaw),
+        'product.image': util.imgUrl(mainRaw || '/img/placeholders/home_cleaning.png'),
+        'product.detail_images': detailImgs.map((u) => (typeof u === 'string' ? util.imgUrl(u) : u)),
+        'product.shop': shopName,
+        shopAppId: g.shop_appid || g.shopAppId || this.data.shopAppId,
+        productId: g.product_id || g.productId || String(g.id)
+      });
+    } catch (e) {
+      console.log('加载商品详情异常', e);
+      wx.showToast({ title: '商品信息加载失败', icon: 'none' });
     }
   },
   goBack() {
@@ -114,7 +139,7 @@ Page({
     // 通知后端记录返利任务
     const app = getApp();
     const openid = app.globalData.user ? app.globalData.user.opId : wx.getStorageSync('openid');
-    const apiUrl = 'http://114.55.167.14:3000/api/reward/trigger'; // 注意修改为真实的后端地址或统一请求前缀
+    const apiUrl = `${config.imageBaseUrl.replace(/\/$/, '')}/api/reward/trigger`;
 
     wx.request({
       url: apiUrl,

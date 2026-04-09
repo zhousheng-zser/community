@@ -89,7 +89,7 @@ const images = {
   // ── 管家精选商品 ────────────────────────────────────────────────────────────
   goodsSkincare1: usp('1522335789203-aabd1fc54bc9', 500),
   goodsSkincare2: usp('1604654894610-df63bc536371', 500),
-  goodsLocal:     usp('1506807803488-c8741e10d0a5', 500),
+  goodsLocal:     '/img/placeholders/home_cleaning.png',
 
   // ── 本地好物 / 带货商品 ────────────────────────────────────────────────────────
   pushFood1:    usp('1504674900247-0877df9cc836', 400),

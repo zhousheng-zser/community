@@ -25,7 +25,7 @@
     <image wx:for="{{product.detail_images}}" wx:key="*this" class="detail-img" src="{{item}}" mode="widthFix"></image>
   </block>
   <block wx:else>
-    <image class="detail-img" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" mode="widthFix"></image>
+    <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
   </block>
 
   <view class="bottom-bar">
