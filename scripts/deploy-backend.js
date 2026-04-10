@@ -6,7 +6,7 @@
  *   npm run deploy:backend
  *
  * 可选环境变量：
- *   DEPLOY_HOST          默认 8.140.204.254
+ *   DEPLOY_HOST          默认 jshsp1.eds-tech.cn
  *   DEPLOY_USER          默认 root
  *   REMOTE_BACKEND_DIR   默认 /root/community-backend/backend
  *   DEPLOY_RESTART_CMD   非空则在远端执行（如 pm2 restart all 或 pm2 restart community-api）
@@ -17,7 +17,7 @@ const path = require('path');
 const { Client } = require('ssh2');
 const SftpClient = require('ssh2-sftp-client');
 
-const host = process.env.DEPLOY_HOST || '8.140.204.254';
+const host = process.env.DEPLOY_HOST || 'jshsp1.eds-tech.cn';
 const username = process.env.DEPLOY_USER || 'root';
 const password = process.env.DEPLOY_SSH_PASSWORD || '';
 const remoteDir = (process.env.REMOTE_BACKEND_DIR || '/root/community-backend/backend').replace(/\/$/, '');

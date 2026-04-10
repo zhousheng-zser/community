@@ -7,7 +7,7 @@
 const axios = require('axios');
 
 // 配置区
-const BASE_URL = 'http://8.140.204.254:3000/api/v1';
+const BASE_URL = 'https://jshsp1.eds-tech.cn/api/v1';
 
 // [重要] 如果模拟登录失败（因为需要真实微信 code），请手动从小程序开发者工具的 Storage 中复制 token 填入此处
 const MANUAL_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwib3BlbmlkIjoib3IwVmYzUmxWTG96VExLVWhScVYwbjlfZUFsNCIsImlhdCI6MTc3MzI4OTYyMiwiZXhwIjoxNzczODk0NDIyfQ.6Y22Xy-KjHBbz-11oyzR9uS3o1amVSyRs3KCmIX6PLc';
