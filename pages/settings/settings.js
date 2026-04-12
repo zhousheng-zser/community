@@ -10,7 +10,7 @@ Page({
   comingSoon() { wx.showToast({ title: '敬请期待', icon: 'none' }); },
   changePwd() { wx.showToast({ title: '请通过微信安全中心修改密码', icon: 'none', duration: 2000 }); },
   changePhone() { wx.showToast({ title: '如需修改手机号请联系客服', icon: 'none', duration: 2000 }); },
-  aboutUs() { wx.showToast({ title: '家事速配 v2.0.1', icon: 'none' }); },
+  aboutUs() { wx.showToast({ title: '九州社区 v2.0.1', icon: 'none' }); },
   cancelAccount() {
     wx.showModal({ title: '注销账号', content: '账号注销后数据无法恢复，确认注销？', confirmText: '联系客服', success(res) {
       if (res.confirm) wx.showToast({ title: '请联系平台客服处理', icon: 'none', duration: 2000 });

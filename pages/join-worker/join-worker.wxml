@@ -176,7 +176,7 @@
       <view class="agree-check {{agreed?'checked':''}}" bindtap="toggleAgree">
         <text wx:if="{{agreed}}" class="check-mark">✓</text>
       </view>
-      <text class="agree-text">已阅读同意 <text class="agree-link">《家事速配技工入驻协议》</text></text>
+      <text class="agree-text">已阅读同意 <text class="agree-link">《九州社区技工入驻协议》</text></text>
     </view>
     <view class="submit-btn {{submitting?'disabled':''}}" bindtap="submit">
       {{submitting ? '提交中...' : '发布审核'}}

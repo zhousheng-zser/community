@@ -160,7 +160,7 @@
       <view class="agree-check {{agreed?'checked':''}}" bindtap="toggleAgree">
         <text wx:if="{{agreed}}" class="check-mark">✓</text>
       </view>
-      <text class="agree-text">已阅读并同意 <text class="agree-link">《家事速配服务商服务协议》</text></text>
+      <text class="agree-text">已阅读并同意 <text class="agree-link">《九州社区服务商服务协议》</text></text>
     </view>
     <view class="btn-row">
       <view class="save-btn" bindtap="saveDraft">保存</view>

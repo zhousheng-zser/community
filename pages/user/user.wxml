@@ -100,10 +100,10 @@
     </view>
   </view>
 
-  <!-- 加入家事速配 -->
+  <!-- 加入九州社区 -->
   <view class="card">
     <view class="card-head">
-      <text class="card-title">加入家事速配</text>
+      <text class="card-title">加入九州社区</text>
     </view>
     <view class="join-grid">
       <block wx:for="{{joinMenus}}" wx:key="name">

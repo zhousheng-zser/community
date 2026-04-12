@@ -8,7 +8,7 @@
     <view class="row" bindtap="comingSoon"><text class="row-label">谁可以看我的发布</text><text class="arrow">›</text></view>
     <view class="row" bindtap="comingSoon"><text class="row-label">谁可以看我的回复</text><text class="arrow">›</text></view>
     <view class="row" bindtap="comingSoon"><text class="row-label">通知设置</text><text class="arrow">›</text></view>
-    <view class="row" bindtap="aboutUs"><text class="row-label">关于家事速配</text><text class="row-value">2.0.1</text><text class="arrow">›</text></view>
+    <view class="row" bindtap="aboutUs"><text class="row-label">关于九州社区</text><text class="row-value">2.0.1</text><text class="arrow">›</text></view>
     <view class="row" bindtap="comingSoon"><text class="row-label">消费者权益保障措施说明</text><text class="arrow">›</text></view>
     <view class="row" bindtap="cancelAccount"><text class="row-label cancel-text">注销账号</text><text class="arrow">›</text></view>
   </view>
