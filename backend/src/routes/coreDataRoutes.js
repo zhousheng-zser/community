@@ -1,0 +1,21 @@
+const express = require('express');
+const router = express.Router();
+const optionalAuth = require('../middlewares/optionalAuthMiddleware');
+const ctrl = require('../controllers/coreDataController');
+
+router.get('/banners', ctrl.getBanners);
+router.get('/categories', ctrl.getCategories);
+router.get('/community/hot', optionalAuth, ctrl.getCommunityHot);
+router.get('/services/hot', ctrl.getHotServices);
+router.get('/services', ctrl.listServices);
+router.get('/categories/:categoryId/services', ctrl.getServicesByCategory);
+router.get('/services/:id', ctrl.getServiceDetail);
+router.get('/service-groups/:group', ctrl.getServiceGroup);
+router.get('/workers', ctrl.getWorkers);
+router.get('/workers/:id', ctrl.getWorkerDetail);
+router.get('/service-providers', ctrl.getServiceProviders);
+router.get('/service-providers/:id', ctrl.getServiceProviderDetail);
+router.get('/goods/featured', ctrl.getFeaturedGoods);
+router.get('/goods/:id', ctrl.getGoodDetail);
+
+module.exports = router;

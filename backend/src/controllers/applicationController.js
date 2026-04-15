@@ -1,0 +1,107 @@
+const { WorkerApplication, ServiceProviderApplication, MarketApplication } = require('../models');
+
+function handleDbError(res, e, label) {
+    const msg = e && (e.original && e.original.message || e.message) || String(e);
+    console.error(`${label}:`, msg, e && e.original || '');
+    const isDev = process.env.NODE_ENV !== 'production';
+    const body = { error: '提交失败', ...(isDev && { errMsg: msg }) };
+    if (msg && /doesn't exist|Unknown column/i.test(msg)) {
+        body.hint = '若为表/字段不存在，请执行数据库迁移：cd backend && npx sequelize-cli db:migrate';
+    }
+    return res.status(500).json(body);
+}
+
+// 技工入驻申请 POST /api/v1/worker/apply
+exports.workerApply = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        const userId = req.user.id;
+        const { name, phone, industry, education, city, resume, id_card_url, work_photo_url, certificate_url } = req.body;
+        if (!name || !phone || !industry || !id_card_url) {
+            return res.status(400).json({ error: '请填写必填项：name、phone、industry、id_card_url' });
+        }
+        const row = await WorkerApplication.create({
+            user_id: userId,
+            name,
+            phone,
+            industry,
+            education: education || null,
+            city: city || null,
+            resume: resume || null,
+            id_card_url,
+            work_photo_url: work_photo_url || null,
+            certificate_url: Array.isArray(certificate_url) ? certificate_url : null,
+            status: 'pending'
+        });
+        res.status(201).json({ code: 0, msg: '申请提交成功，请等待运营审核', data: { application_id: row.id, status: row.status } });
+    } catch (e) {
+        return handleDbError(res, e, '技工入驻申请失败');
+    }
+};
+
+// 服务商入驻申请 POST /api/v1/service-provider/apply
+exports.serviceProviderApply = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        const userId = req.user.id;
+        const { shop_name, contact_name, phone, license_url, shop_front_url, environment_url, id_card_url, certificate_url } = req.body;
+        if (!shop_name || !contact_name || !phone || !license_url || !id_card_url) {
+            return res.status(400).json({ error: '请填写必填项：shop_name、contact_name、phone、license_url、id_card_url' });
+        }
+        const row = await ServiceProviderApplication.create({
+            user_id: userId,
+            shop_name,
+            contact_name,
+            phone,
+            license_url,
+            shop_front_url: shop_front_url || null,
+            environment_url: Array.isArray(environment_url) ? environment_url : null,
+            id_card_url,
+            certificate_url: Array.isArray(certificate_url) ? certificate_url : null,
+            status: 'pending'
+        });
+        res.status(201).json({ code: 0, msg: '申请提交成功' });
+    } catch (e) {
+        return handleDbError(res, e, '服务商入驻申请失败');
+    }
+};
+
+// 集市商家入驻申请 POST /api/v1/market/apply
+exports.marketApply = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        const userId = req.user.id;
+        const {
+            shop_name, contact_name, phone, category, address, description,
+            promoter_id, credit_code, legal_person, place_photo_url, license_url, community_id
+        } = req.body;
+        if (!contact_name || !phone || !shop_name || !category || !address) {
+            return res.status(400).json({ error: '请填写必填项：shop_name、contact_name、phone、category、address' });
+        }
+        await MarketApplication.create({
+            user_id: userId,
+            contact_name,
+            phone,
+            shop_name,
+            category,
+            address,
+            description: description || null,
+            promoter_id: promoter_id || null,
+            credit_code: credit_code || null,
+            legal_person: legal_person || null,
+            place_photo_url: Array.isArray(place_photo_url) ? place_photo_url : null,
+            license_url: license_url || null,
+            community_id: community_id || null,
+            status: 'pending'
+        });
+        res.status(201).json({ code: 0, msg: '申请提交成功', data: null });
+    } catch (e) {
+        return handleDbError(res, e, '集市入驻申请失败');
+    }
+};

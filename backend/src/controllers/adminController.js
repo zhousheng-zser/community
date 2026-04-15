@@ -1,0 +1,190 @@
+const { WorkerApplication, WorkerProfile, User, LiveStreamConfig, ApprovalRecord } = require('../models');
+const { logAdminAction } = require('./adminAuditHelper');
+
+async function writeApproval(bizType, bizId, fromStatus, toStatus, operator, note) {
+    try {
+        await ApprovalRecord.create({
+            biz_type: bizType,
+            biz_id: String(bizId),
+            from_status: fromStatus || null,
+            to_status: toStatus,
+            operator,
+            note: note || null
+        });
+    } catch (_e) {}
+}
+
+exports.getWorkerApplications = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+        const offset = (page - 1) * limit;
+        const status = req.query.status;
+        const where = status ? { status } : {};
+        const { rows, count } = await WorkerApplication.findAndCountAll({
+            where,
+            offset,
+            limit,
+            order: [['created_at', 'DESC']],
+            include: [{ model: User, as: 'user', attributes: ['id', 'nickname', 'avatar_url', 'phone'] }]
+        });
+        res.json({ message: 'ok', total: count, page, limit, data: rows });
+    } catch (e) {
+        console.error('getWorkerApplications:', e);
+        res.status(500).json({ error: '加载技工申请失败，请稍后重试' });
+    }
+};
+
+exports.updateWorkerApplication = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const { status, note } = req.body || {};
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ error: 'status 须为 approved 或 rejected' });
+        }
+        const row = await WorkerApplication.findByPk(id);
+        if (!row) return res.status(404).json({ error: '申请不存在' });
+        const fromStatus = row.status;
+        row.status = status;
+        await row.save();
+        const user = await User.findByPk(row.user_id);
+        if (status === 'approved') {
+            await WorkerProfile.upsert({
+                user_id: row.user_id,
+                application_id: row.id,
+                real_name: row.name,
+                phone: row.phone,
+                industry: row.industry,
+                education: row.education || null,
+                city: row.city || null,
+                resume: row.resume || null,
+                id_card_url: row.id_card_url,
+                work_photo_url: row.work_photo_url || null,
+                certificate_url: row.certificate_url || null,
+                status: 'active'
+            });
+            if (user) {
+                user.role = 'worker';
+                if (!user.phone && row.phone) user.phone = row.phone;
+                if (!user.nickname && row.name) user.nickname = row.name;
+                await user.save();
+            }
+        } else if (fromStatus === 'approved') {
+            const profile = await WorkerProfile.findOne({ where: { application_id: row.id } });
+            if (profile) await profile.update({ status: 'inactive' });
+            if (user) {
+                const activeCount = await WorkerProfile.count({
+                    where: { user_id: row.user_id, status: 'active' }
+                });
+                if (activeCount === 0 && user.role === 'worker') {
+                    user.role = 'user';
+                    await user.save();
+                }
+            }
+        }
+        await writeApproval(
+            'worker_application',
+            row.id,
+            fromStatus,
+            status,
+            (req.admin && req.admin.sub) || 'admin',
+            note
+        );
+        await logAdminAction(req, 'update_worker_application', 'worker_application', row.id, {
+            fromStatus,
+            toStatus: status,
+            note: note || ''
+        });
+        res.json({ message: 'ok', data: row });
+    } catch (e) {
+        console.error('updateWorkerApplication:', e);
+        res.status(500).json({ error: '更新申请失败，请稍后重试' });
+    }
+};
+
+const liveStreamFields = [
+    'category',
+    'title',
+    'avatar_url',
+    'brand_logo',
+    'cover_image',
+    'rebate_info',
+    'promoters_count',
+    'hot_goods',
+    'finder_username',
+    'feed_id',
+    'is_active',
+    'sort_order'
+];
+
+exports.listLiveStreams = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const offset = (page - 1) * limit;
+        const category = req.query.category;
+        const where = category ? { category } : {};
+        const { rows, count } = await LiveStreamConfig.findAndCountAll({
+            where,
+            offset,
+            limit,
+            order: [['sort_order', 'DESC'], ['created_at', 'DESC']]
+        });
+        res.json({ message: 'ok', total: count, page, limit, data: rows });
+    } catch (e) {
+        console.error('listLiveStreams:', e);
+        res.status(500).json({ error: '加载直播配置失败' });
+    }
+};
+
+exports.createLiveStream = async (req, res) => {
+    try {
+        const body = {};
+        liveStreamFields.forEach((f) => {
+            if (req.body[f] !== undefined) body[f] = req.body[f];
+        });
+        if (!body.title || !body.finder_username) {
+            return res.status(400).json({ error: 'title 与 finder_username 必填' });
+        }
+        if (body.hot_goods !== undefined && !Array.isArray(body.hot_goods)) {
+            body.hot_goods = body.hot_goods ? [body.hot_goods] : null;
+        }
+        const row = await LiveStreamConfig.create(body);
+        res.status(201).json({ message: 'ok', data: row });
+    } catch (e) {
+        console.error('createLiveStream:', e);
+        res.status(500).json({ error: '创建直播配置失败' });
+    }
+};
+
+exports.updateLiveStream = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const row = await LiveStreamConfig.findByPk(id);
+        if (!row) return res.status(404).json({ error: '记录不存在' });
+        liveStreamFields.forEach((f) => {
+            if (req.body[f] !== undefined) row[f] = req.body[f];
+        });
+        if (req.body.hot_goods !== undefined && !Array.isArray(req.body.hot_goods)) {
+            row.hot_goods = req.body.hot_goods ? [req.body.hot_goods] : null;
+        }
+        await row.save();
+        res.json({ message: 'ok', data: row });
+    } catch (e) {
+        console.error('updateLiveStream:', e);
+        res.status(500).json({ error: '更新直播配置失败' });
+    }
+};
+
+exports.deleteLiveStream = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const row = await LiveStreamConfig.findByPk(id);
+        if (!row) return res.status(404).json({ error: '记录不存在' });
+        await row.destroy();
+        res.json({ message: 'ok' });
+    } catch (e) {
+        console.error('deleteLiveStream:', e);
+        res.status(500).json({ error: '删除直播配置失败' });
+    }
+};
