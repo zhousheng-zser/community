@@ -94,7 +94,7 @@ page {
 .tab-item.active {
   background: #E63535;
   color: #FFF;
-  box-shadow: 0 4rpx 8rpx rgba(230, 53, 53, 0.3);
+  box-shadow: 0 4rpx 8rpx rgba(255, 122, 0, 0.3);
 }
 
 /* 瀑布流商品列表 */

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "代取",
+    "icon": "/img/home_icons2/pickup.png",
+    "emoji": "📦",
+    "bgColor": "#ede8ff",
+    "recomm_type": "take",
+    "url": "/pages/recomm/recomm?type=take"
+  },
+  {
+    "name": "接送小孩",
+    "icon": "/img/home_icons2/child_pickup.png",
+    "emoji": "🚗",
+    "bgColor": "#e0f3ff",
+    "recomm_type": "child",
+    "url": "/pages/recomm/recomm?type=child"
+  },
+  {
+    "name": "陪诊",
+    "icon": "/img/home_icons2/escort.png",
+    "emoji": "🏥",
+    "bgColor": "#ffe0e0",
+    "recomm_type": "escort",
+    "url": "/pages/recomm/recomm?type=escort"
+  },
+  {
+    "name": "代扔垃圾",
+    "icon": "/img/home_icons2/trash_proxy.png",
+    "emoji": "♻️",
+    "bgColor": "#e4ffe0",
+    "recomm_type": "trash",
+    "url": "/pages/recomm/recomm?type=trash"
+  },
+  {
+    "name": "宠物喂养",
+    "icon": "/img/home_icons2/pet_feed.png",
+    "emoji": "🐾",
+    "bgColor": "#fff5e0",
+    "recomm_type": "pet",
+    "url": "/pages/recomm/recomm?type=pet"
+  }
+]

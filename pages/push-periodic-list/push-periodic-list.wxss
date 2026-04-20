@@ -219,7 +219,7 @@ page {
 }
 
 .price-wrap {
-  color: #ff4d3d;
+  color: #FF7700;
   font-weight: 800;
   margin-bottom: 12rpx;
 }
@@ -235,7 +235,7 @@ page {
 .action-row {
   display: flex;
   align-items: center;
-  border: 2rpx solid #ff4d3d;
+  border: 2rpx solid #FF7700;
   border-radius: 8rpx;
   overflow: hidden; /* 切割两侧不同颜色 */
 }
@@ -250,7 +250,7 @@ page {
 }
 
 .buy-btn {
-  background: #ff4d3d;
+  background: #FF7700;
   color: #fff;
   font-size: 24rpx;
   padding: 6rpx 20rpx;

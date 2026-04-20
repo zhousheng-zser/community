@@ -1,5 +1,9 @@
 <view class="container">
-  
+  <view class="chat-order-bar" wx:if="{{orderNo}}">
+    <text class="chat-order-no">订单 {{orderNo}}</text>
+    <text class="chat-order-link" bindtap="goOrderDetail">查看订单</text>
+  </view>
+
   <scroll-view class="chat-area" scroll-y="true" scroll-into-view="{{scrollIntoView}}" scroll-with-animation>
     <view class="msg-wrapper" wx:for="{{history}}" wx:key="id" id="msg_{{item.id}}">
       
@@ -28,6 +32,10 @@
     </view>
     <!-- 垫底空白防止被输入框遮挡 -->
     <view style="height: 120rpx;"></view>
+  </scroll-view>
+
+  <scroll-view class="emoji-bar" scroll-x="true" show-scrollbar="{{false}}" wx:if="{{emojis.length}}">
+    <text class="emoji-cell" wx:for="{{emojis}}" wx:key="*this" data-e="{{item}}" bindtap="insertEmoji">{{item}}</text>
   </scroll-view>
 
   <view class="input-area">

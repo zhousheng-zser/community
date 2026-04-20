@@ -1,0 +1,146 @@
+<view class="detail-wrap">
+  <view class="mock-banner" wx:if="{{isMock}}">演示模式 · 数据为虚构，不请求后端</view>
+  <scroll-view class="detail-scroll" scroll-y="true" show-scrollbar="{{false}}">
+    <view class="detail-hero worker-gradient">
+      <view class="detail-hero-inner">
+        <view class="detail-pill pill--detail">{{order.statusText || '—'}}</view>
+        <text class="detail-hero-title">{{order.title}}</text>
+        <view class="detail-no-row">
+          <text class="detail-hero-no">订单号 {{order.orderNo}}</text>
+          <text class="detail-copy" bindtap="copyOrderNo">复制</text>
+        </view>
+        <text class="detail-amount" wx:if="{{order.amountText}}">订单金额 ¥{{order.amountText}}</text>
+      </view>
+    </view>
+
+    <view class="detail-sheet">
+      <!-- 1. 预约信息 -->
+      <view class="sheet-section">
+        <view class="sheet-head">
+          <text class="sheet-icon">◆</text>
+          <text class="sheet-title">预约与服务</text>
+        </view>
+        <view class="sheet-body">
+          <view class="kv" wx:if="{{order.bookTime}}">
+            <text class="k">预约时间</text>
+            <text class="v">{{order.bookTime}}</text>
+          </view>
+          <view class="kv">
+            <text class="k">服务项目</text>
+            <text class="v">{{order.title}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 2. 客户与联系：一键联系 + 地址 + 导航 -->
+      <view class="sheet-section">
+        <view class="sheet-head">
+          <text class="sheet-icon">📞</text>
+          <text class="sheet-title">客户与上门地址</text>
+        </view>
+        <view class="sheet-body">
+          <view class="kv" wx:if="{{order.contactName}}">
+            <text class="k">联系人</text>
+            <text class="v">{{order.contactName}}</text>
+          </view>
+          <view class="kv">
+            <text class="k">手机</text>
+            <text class="v">{{order.phoneDisplay || '—'}}</text>
+          </view>
+          <button
+            class="call-big"
+            bindtap="callUser"
+            wx:if="{{order.phoneRaw}}"
+          >一键联系用户</button>
+          <view class="addr-block">
+            <text class="addr-label">客户地址（导航目的地）</text>
+            <text class="addr-text">{{order.address || '暂无地址'}}</text>
+          </view>
+          <view class="btn-row-2">
+            <button class="sheet-btn ghost" bindtap="copyAddress">复制地址</button>
+            <button class="sheet-btn primary" bindtap="openNav">导航到客户地址</button>
+          </view>
+          <button
+            class="sheet-btn block ghost chat-customer-btn"
+            bindtap="openCustomerChat"
+            wx:if="{{order.customerUserId}}"
+          >与客户会话（文字/图片）</button>
+          <text class="hint-txt">无经纬度时可在「导航」中选点，或使用复制地址到第三方地图</text>
+        </view>
+      </view>
+
+      <!-- 3. 服务过程：打卡、前后照片、加项加价 -->
+      <view class="sheet-section sheet-serve" wx:if="{{showServeBlock}}">
+        <view class="sheet-head">
+          <text class="sheet-icon">▣</text>
+          <text class="sheet-title">服务过程</text>
+        </view>
+        <view class="sheet-body">
+          <text class="serve-hint">到达客户附近后请先完成定位打卡，再开始作业；作业前后请拍照留证。</text>
+
+          <view class="serve-item">
+            <view class="serve-item-head">
+              <text class="serve-item-title">上门定位打卡</text>
+              <text class="serve-item-tag" wx:if="{{checkInDisplay}}">已打卡</text>
+            </view>
+            <text class="serve-item-desc" wx:if="{{checkInDisplay}}">{{checkInDisplay}}</text>
+            <button class="sheet-btn block primary" bindtap="checkIn" disabled="{{checking}}">
+              {{checking ? '定位中…' : '上门定位打卡'}}
+            </button>
+          </view>
+
+          <view class="serve-item">
+            <text class="serve-item-title">服务前后照片留证</text>
+            <text class="serve-item-desc">建议上传作业前现场、作业后效果，最多各 3 张</text>
+            <view class="btn-row-2">
+              <button class="sheet-btn ghost" bindtap="chooseBefore">上传服务前照片</button>
+              <button class="sheet-btn ghost" bindtap="chooseAfter">上传服务后照片</button>
+            </view>
+            <view class="photo-strip" wx:if="{{beforeUrls.length || afterUrls.length}}">
+              <text class="photo-label" wx:if="{{beforeUrls.length}}">服务前</text>
+              <view class="photo-grid-inline">
+                <block wx:for="{{beforeUrls}}" wx:for-index="idx" wx:key="*this">
+                  <image
+                    class="ph2"
+                    src="{{item}}"
+                    mode="aspectFill"
+                    data-kind="before"
+                    data-index="{{idx}}"
+                    bindtap="previewPhoto"
+                  ></image>
+                </block>
+              </view>
+              <text class="photo-label" wx:if="{{afterUrls.length}}">服务后</text>
+              <view class="photo-grid-inline">
+                <block wx:for="{{afterUrls}}" wx:for-index="idx" wx:key="*this">
+                  <image
+                    class="ph2"
+                    src="{{item}}"
+                    mode="aspectFill"
+                    data-kind="after"
+                    data-index="{{idx}}"
+                    bindtap="previewPhoto"
+                  ></image>
+                </block>
+              </view>
+            </view>
+          </view>
+
+          <view class="serve-item">
+            <text class="serve-item-title">现场加项 / 加价申请</text>
+            <text class="serve-item-desc">增加项目或金额需用户或平台确认后生效</text>
+            <button class="addon-btn" bindtap="applyAddon">提交加项加价申请</button>
+          </view>
+        </view>
+      </view>
+
+      <view class="detail-spacer"></view>
+    </view>
+  </scroll-view>
+
+  <view class="detail-footer safe-bottom" wx:if="{{canAccept || canReject || canComplete}}">
+    <button class="foot-btn danger" bindtap="doReject" wx:if="{{canReject}}">拒单</button>
+    <button class="foot-btn primary" bindtap="doAccept" wx:if="{{canAccept}}">接单</button>
+    <button class="foot-btn primary full" bindtap="doComplete" wx:if="{{canComplete}}">确认服务完成</button>
+  </view>
+</view>

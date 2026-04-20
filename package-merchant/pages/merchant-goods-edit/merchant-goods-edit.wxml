@@ -1,0 +1,103 @@
+<view class="portal-page edit-page">
+  <view class="portal-top merchant-gradient" style="padding-bottom: 24rpx;">
+    <text class="portal-title">编辑商品资料</text>
+    <text class="portal-sub">主图、售价、库存与文字说明；保存后用户在店铺中可见</text>
+  </view>
+
+  <block wx:if="{{loading}}">
+    <view class="loading-box">加载中…</view>
+  </block>
+
+  <block wx:else>
+    <view class="portal-card edit-card">
+      <view class="field">
+        <text class="field-label">商品名称</text>
+        <input
+          class="field-input"
+          placeholder="请输入名称"
+          value="{{title}}"
+          maxlength="80"
+          bindinput="onTitleInput"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">主图</text>
+        <view class="img-row">
+          <image
+            class="goods-cover"
+            src="{{coverDisplay}}"
+            mode="aspectFill"
+            bindtap="previewCover"
+          ></image>
+          <view class="img-actions">
+            <button class="sheet-btn ghost mini-pad" size="mini" bindtap="chooseCover">上传图片</button>
+            <button
+              class="sheet-btn ghost mini-pad danger-text"
+              size="mini"
+              wx:if="{{mainImagePath}}"
+              bindtap="clearCover"
+            >移除</button>
+          </view>
+        </view>
+        <text class="field-hint">支持相册或拍照，将上传至服务器</text>
+      </view>
+
+      <view class="field">
+        <text class="field-label">售价（元）</text>
+        <input
+          class="field-input"
+          type="digit"
+          placeholder="如 29.90"
+          value="{{priceInput}}"
+          bindinput="onPriceInput"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">库存数量</text>
+        <view class="step-row">
+          <view class="step-btn" bindtap="stockMinus">−</view>
+          <input
+            class="step-input"
+            type="number"
+            value="{{stock}}"
+            bindinput="onStockInput"
+          />
+          <view class="step-btn" bindtap="stockPlus">+</view>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field-label">安全库存（低库存提醒阈值）</text>
+        <input
+          class="field-input"
+          type="number"
+          placeholder="默认 5"
+          value="{{safeStock}}"
+          bindinput="onSafeInput"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">文字描述</text>
+        <textarea
+          class="field-textarea"
+          placeholder="规格、产地、使用说明等（建议完整填写）"
+          value="{{description}}"
+          maxlength="500"
+          auto-height
+          bindinput="onDescInput"
+        ></textarea>
+        <text class="field-hint">{{descLen}}/500</text>
+      </view>
+
+      <button
+        class="sheet-btn block primary save-btn"
+        loading="{{saving}}"
+        disabled="{{saving}}"
+        bindtap="save"
+      >保存</button>
+    </view>
+  </block>
+</view>

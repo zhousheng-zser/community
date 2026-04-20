@@ -4,10 +4,10 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const geo = require('../../utils/geo.js');
-const { imgUrl, pickMarketShopAvatarPath } = util;
+const { imgUrl, pickMarketShopAvatarPath, unwrapList } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
-const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
+const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 Page({
   data: {
@@ -157,6 +157,31 @@ Page({
   switchTopTab(e) {
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
+  },
+  /** Banner：link_type none | service | h5 | page */
+  onHomeBannerTap(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const list = this.data.banner || [];
+    const item = list[idx];
+    if (!item) return;
+    const t = (item.linkType || 'none').toLowerCase();
+    const val = item.linkValue != null ? String(item.linkValue).trim() : '';
+    if (t === 'none' || !val) return;
+    if (t === 'service') {
+      wx.navigateTo({ url: `/pages/service/service?id=${encodeURIComponent(val)}` });
+      return;
+    }
+    if (t === 'page') {
+      const path = val.startsWith('/') ? val : `/${val}`;
+      wx.navigateTo({ url: path });
+      return;
+    }
+    if (t === 'h5') {
+      wx.setClipboardData({
+        data: val,
+        success: () => wx.showToast({ title: '链接已复制', icon: 'none' })
+      });
+    }
   },
   /** 本地集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
   getMarketLocationCacheKey() {
@@ -420,23 +445,40 @@ Page({
   },
   async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
-    // 假数据填充，方便本地预览首页布局
-    const banner = [
-      { imageUrl: images.bannerHome },
-      { imageUrl: images.bannerSale }
+    const communityId = (app.globalData.user || {}).communityId;
+    // 假数据填充，方便本地预览首页布局；有接口时由 core/banners 覆盖
+    let banner = [
+      { id: 'local1', imageUrl: images.bannerHome, linkType: 'none', linkValue: '' },
+      { id: 'local2', imageUrl: images.bannerSale, linkType: 'none', linkValue: '' }
     ];
+    try {
+      const bRes = await util.get('core/banners', { scene: 'home' });
+      const rows = unwrapList(bRes);
+      if (rows.length > 0) {
+        const mapped = rows.map((b, idx) => ({
+          id: b.id != null ? b.id : `b${idx}`,
+          imageUrl: imgUrl(b.image_url || b.imageUrl || ''),
+          linkType: (b.link_type || b.linkType || 'none').toLowerCase(),
+          linkValue: b.link_value || b.linkValue || ''
+        })).filter((x) => !!x.imageUrl);
+        if (mapped.length > 0) banner = mapped;
+      }
+    } catch (e) {
+      console.log('core/banners 不可用，使用本地轮播', e);
+    }
 
     const mapHomeIcon = (rows) => rows.map((r) => ({ ...r, icon: imgUrl(r.icon) }));
+    // 与「直约服务商」卡片一致的暖灰底 + 橙色系点缀（无图标时 emoji 兜底仍保持同色系）
     const categoryList = mapHomeIcon([
-      { name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#ede8ff", url: "../tidy-service/tidy-service?key=tidy" },
-      { name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e0", url: "../tidy-service/tidy-service?key=urgent_fix" },
-      { name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#e0f3ff", url: "../tidy-service/tidy-service?key=appliance_clean" },
-      { name: "开荒保洁", icon: "/img/home_categories/pioneer_clean.png", emoji: "🧹", bgColor: "#e4ffe0", url: "../tidy-service/tidy-service?key=pioneer_clean" },
-      { name: "除螨服务", icon: "/img/home_categories/mite_remove.png", emoji: "🌿", bgColor: "#f0ffe0", url: "../tidy-service/tidy-service?key=mite_remove" },
-      { name: "家具养护", icon: "/img/home_categories/furniture_care.png", emoji: "🪑", bgColor: "#fff0f5", url: "../tidy-service/tidy-service?key=furniture_care" },
-      { name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff5e0", url: "../tidy-service/tidy-service?key=baby_home" },
-      { name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#e0eeff", url: "../tidy-service/tidy-service?key=house_repair" },
-      { name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffe0f5", url: "../tidy-service/tidy-service?key=beauty_home" }
+      { name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#fff4eb", url: "../tidy-service/tidy-service?key=tidy" },
+      { name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e6", url: "../tidy-service/tidy-service?key=urgent_fix" },
+      { name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#fff7ed", url: "../tidy-service/tidy-service?key=appliance_clean" },
+      { name: "开荒保洁", icon: "/img/home_categories/pioneer_clean.png", emoji: "🧹", bgColor: "#ffedd5", url: "../tidy-service/tidy-service?key=pioneer_clean" },
+      { name: "除螨服务", icon: "/img/home_categories/mite_remove.png", emoji: "🌿", bgColor: "#fff5eb", url: "../tidy-service/tidy-service?key=mite_remove" },
+      { name: "家具养护", icon: "/img/home_categories/furniture_care.png", emoji: "🪑", bgColor: "#ffeee6", url: "../tidy-service/tidy-service?key=furniture_care" },
+      { name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff8f0", url: "../tidy-service/tidy-service?key=baby_home" },
+      { name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#ffe8dc", url: "../tidy-service/tidy-service?key=house_repair" },
+      { name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffeadf", url: "../tidy-service/tidy-service?key=beauty_home" }
     ]);
     const quickActions = mapHomeIcon([
       { name: "直约服务商", icon: "/img/home_icons2/merchant_direct.png", emoji: "🏪", bgColor: "#fff0e0" },
@@ -452,54 +494,84 @@ Page({
       { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
       { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
     ]);
-    // ===== 从数据库获取热门服务（小区热卖榜）=====
+    // ===== 小区热卖榜：优先 core/community/hot，回退 core/services/hot =====
+    const hotRankFallback = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', '上新'];
+    const mapHotRows = (rows) => {
+      if (!Array.isArray(rows) || rows.length === 0) return null;
+      return rows.slice(0, 6).map((s, i) => {
+        const rawTitle = s.title || s.name || '';
+        const title = rawTitle.replace(/【.*?】/g, '').trim();
+        const it = String(s.item_type || 'service').toLowerCase();
+        return {
+          id: s.id,
+          itemType: it === 'shop' ? 'shop' : 'service',
+          name: title || '热门项',
+          price: String(s.price != null ? s.price : ''),
+          image: listImageFromHome3(
+            rawTitle,
+            s.cover_image ? imgUrl(s.cover_image) : '/img/placeholders/home_cleaning.png'
+          ),
+          rank: s.rank != null && s.rank !== '' ? String(s.rank) : (hotRankFallback[i] || '热门')
+        };
+      });
+    };
     let hotList = [
-      { id: 73, name: "局部瓷砖铺贴",     price: "229", image: listImageFromHome3("局部瓷砖铺贴【2小时】", images.svcTile), rank: "NO.1" },
-      { id: 74, name: "壁纸铺贴施工",     price: "239", image: listImageFromHome3("壁纸铺贴施工【2小时】", images.svcWall), rank: "NO.2" },
-      { id: 75, name: "厨卫漏水防水修缮", price: "299", image: listImageFromHome3("厨卫漏水防水修缮【2小时】", images.svcWaterproof), rank: "NO.3" },
-      { id: 76, name: "地板铺贴修缮",     price: "279", image: listImageFromHome3("地板铺贴修缮【2小时】", images.svcFloor), rank: "NO.4" },
-      { id: 77, name: "墙面刷新施工",     price: "259", image: listImageFromHome3("墙面刷新施工【2小时】", images.svcWall), rank: "NO.5" }
+      { id: 73, itemType: 'service', name: '局部瓷砖铺贴', price: '229', image: listImageFromHome3('局部瓷砖铺贴【2小时】', images.svcTile), rank: 'NO.1' },
+      { id: 74, itemType: 'service', name: '壁纸铺贴施工', price: '239', image: listImageFromHome3('壁纸铺贴施工【2小时】', images.svcWall), rank: 'NO.2' },
+      { id: 75, itemType: 'service', name: '厨卫漏水防水修缮', price: '299', image: listImageFromHome3('厨卫漏水防水修缮【2小时】', images.svcWaterproof), rank: 'NO.3' },
+      { id: 76, itemType: 'service', name: '地板铺贴修缮', price: '279', image: listImageFromHome3('地板铺贴修缮【2小时】', images.svcFloor), rank: 'NO.4' },
+      { id: 77, itemType: 'service', name: '墙面刷新施工', price: '259', image: listImageFromHome3('墙面刷新施工【2小时】', images.svcWall), rank: 'NO.5' }
     ];
     let goods = [
-      { id: 1, remarkC: images.hotClean,   goodsTitle: '金牌日常保洁 (2小时)',   goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
-      { id: 2, remarkC: images.svcAircon,  goodsTitle: '挂壁式空调深度清洗',     goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
-      { id: 3, remarkC: images.svcWasher,  goodsTitle: '洗衣机深度清洗',         goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
-      { id: 4, remarkC: images.svcHood,    goodsTitle: '油烟机深度清洗',         goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
+      { id: 1, remarkC: images.hotClean, goodsTitle: '金牌日常保洁 (2小时)', goodsSub: '专业团队，含客厅、卧室、厨房、卫生间清洁', price: '99.00' },
+      { id: 2, remarkC: images.svcAircon, goodsTitle: '挂壁式空调深度清洗', goodsSub: '高温蒸汽杀菌，拆洗过滤网、导风板，去除异味', price: '89.00' },
+      { id: 3, remarkC: images.svcWasher, goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
+      { id: 4, remarkC: images.svcHood, goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
     if (!config.useCuratedHomeHotList) {
+      let mappedHot = null;
       try {
-        const hotRes = await util.get('core/services/hot');
-        const hotData = Array.isArray(hotRes) ? hotRes : (hotRes.data || hotRes);
-        if (Array.isArray(hotData) && hotData.length > 0) {
-          const ranks = ["NO.1", "NO.2", "NO.3", "NO.4", "NO.5", "上新"];
-          hotList = hotData.slice(0, 6).map((s, i) => ({
-            id: s.id,
-            name: s.title.replace(/【.*?】/g, '').trim(),
-            price: String(s.price),
-            image: listImageFromHome3(
-              s.title,
-              s.cover_image ? imgUrl(s.cover_image) : '/img/placeholders/home_cleaning.png'
-            ),
-            rank: ranks[i] || "热门"
-          }));
+        const q = { limit: 10 };
+        if (communityId != null && communityId !== '') q.community_id = communityId;
+        const commRes = await util.get('core/community/hot', q);
+        const services = commRes && (commRes.services || commRes.service_list);
+        if (Array.isArray(services) && services.length > 0) {
+          mappedHot = mapHotRows(services);
+        } else {
+          const flat = unwrapList(commRes);
+          if (flat.length > 0) mappedHot = mapHotRows(flat);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.log('core/community/hot 不可用', e);
+      }
+      if (!mappedHot) {
+        try {
+          const hotQ = { limit: 10 };
+          if (communityId != null && communityId !== '') hotQ.community_id = communityId;
+          const hotRes = await util.get('core/services/hot', hotQ);
+          const hotData = unwrapList(hotRes);
+          if (hotData.length > 0) mappedHot = mapHotRows(hotData);
+        } catch (e2) {
+          console.log('core/services/hot 不可用', e2);
+        }
+      }
+      if (mappedHot) hotList = mappedHot;
     }
 
     const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
     const mapMerchantList = () => goods.map((item) => ({
       id: item.id,
       name: item.goodsTitle,
-      sub: "服务" + item.id + "单",
+      sub: '服务' + item.id + '单',
       image: imgUrl(item.remarkC || '/img/placeholders/home_cleaning.png'),
-      url: "../merchant-detail/merchant-detail?id=" + item.id
+      url: '../service/service?id=' + item.id
     }));
     let merchantList = mapMerchantList();
     let workerList = [
-      { id: 1, name: "何志", orders: "服务0单", avatar: workerAvatarUrl(1) },
-      { id: 2, name: "余静", orders: "服务1单", avatar: workerAvatarUrl(2) },
-      { id: 3, name: "邓长超", orders: "服务0单", avatar: workerAvatarUrl(3) }
-    ];
+      { id: 1, name: '何志', service_count: 0 },
+      { id: 2, name: '余静', service_count: 1 },
+      { id: 3, name: '邓长超', service_count: 0 }
+    ].map(mapWorkerForHomeCard);
     let marketList = [
       { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
       { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
@@ -520,13 +592,13 @@ Page({
 
     // ===== 从数据库获取服务商品（直约服务商）=====
     try {
-      const svcRes = await util.get('core/services/hot');
-      const svcData = Array.isArray(svcRes) ? svcRes : (svcRes.data || svcRes);
-      if (Array.isArray(svcData) && svcData.length > 0) {
-        goods = svcData.slice(0, 4).map(s => ({
+      const svcRes = await util.get('core/services/hot', { limit: 10 });
+      const svcData = unwrapList(svcRes);
+      if (svcData.length > 0) {
+        goods = svcData.slice(0, 4).map((s) => ({
           id: s.id,
           remarkC: s.cover_image,
-          goodsTitle: s.title.replace(/【.*?】/g, '').trim(),
+          goodsTitle: (s.title || '').replace(/【.*?】/g, '').trim(),
           goodsSub: s.description || '',
           price: String(Number(s.price).toFixed(2))
         }));
@@ -536,22 +608,17 @@ Page({
 
     // ===== 从数据库获取直约技工 =====
     try {
-      const wRes = await util.get('core/workers');
-      const wData = Array.isArray(wRes) ? wRes : (wRes.data || wRes);
-      if (Array.isArray(wData) && wData.length > 0) {
-        workerList = wData.slice(0, 5).map((w) => ({
-          id: w.id,
-          name: w.name || '技工',
-          orders: w.orders || '服务0单',
-          avatar: workerAvatarUrl(w.id)
-        }));
+      const wRes = await util.get('core/workers', { page: 1, limit: 20 });
+      const wData = unwrapList(wRes);
+      if (wData.length > 0) {
+        workerList = wData.slice(0, 5).map(mapWorkerForHomeCard);
       }
     } catch (e) {}
 
     // ===== 从数据库获取管家精选商品 =====
     try {
       const mRes = await util.get('core/goods/featured');
-      const mData = Array.isArray(mRes) ? mRes : (mRes.data || mRes);
+      const mData = unwrapList(mRes);
       if (Array.isArray(mData) && mData.length > 0) {
         marketList = mData.slice(0, 6).map(g => ({
           id: g.id,

@@ -2,6 +2,7 @@
 const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const { imgUrl } = util;
+const lp = require('../../utils/localPrefs.js');
 
 Page({
   data: {
@@ -9,6 +10,10 @@ Page({
     communitySearchKeyword: "",
     tabs: ["热门话题", "热门活动", "邻里互动"],
     activeTab: "热门话题", // 默认改为第一个选项卡
+    announcements: [
+      { id: 'ann_1', title: '【公告】请友善交流，禁止发布违法与低俗内容' },
+      { id: 'ann_2', title: '【提示】涉及交易请使用平台订单与聊天留痕' }
+    ],
     posts: [],
     commentPanel: {
       show: false,
@@ -23,12 +28,27 @@ Page({
   onLoad() {
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 8 });
+    this.syncAnnounceRead();
     this.fetchPosts();
+  },
+  syncAnnounceRead() {
+    const readMap = lp.getAnnounceReadIds();
+    const announcements = (this.data.announcements || []).map((a) =>
+      Object.assign({}, a, { read: !!readMap[a.id] })
+    );
+    this.setData({ announcements });
+  },
+  readAllAnnouncements() {
+    const ids = (this.data.announcements || []).map((a) => a.id);
+    lp.markAllAnnounceRead(ids);
+    this.syncAnnounceRead();
+    wx.showToast({ title: '已全部标记已读', icon: 'none' });
   },
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 1 });
     }
+    this.syncAnnounceRead();
     this.fetchPosts(); // Handle returning from details/publish views
   },
   fetchPosts() {

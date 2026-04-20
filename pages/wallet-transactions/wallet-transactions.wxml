@@ -1,0 +1,10 @@
+<view class="wt-page">
+  <view class="wt-item" wx:for="{{list}}" wx:key="id">
+    <view>
+      <text class="wt-title">{{item.title || '交易'}}</text>
+      <text class="wt-time">{{item.timeLabel || ''}}</text>
+    </view>
+    <text class="wt-amt {{item.amount && item.amount.indexOf('-')===0 ? 'out' : ''}}">{{item.amount || ''}}</text>
+  </view>
+  <view class="wt-empty" wx:if="{{!list.length}}">暂无本地记录；提现成功后会记一笔。</view>
+</view>

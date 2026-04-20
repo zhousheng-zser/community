@@ -1,6 +1,16 @@
 .container{
   background:#fff;
   min-height:100vh;
+  padding-bottom: 200rpx;
+}
+
+.mock-banner {
+  padding: 16rpx 24rpx;
+  font-size: 24rpx;
+  color: #92400e;
+  background: #fef3c7;
+  border-bottom: 1rpx solid #fde68a;
+  text-align: center;
 }
 .card{
   padding:24rpx 20rpx;
@@ -57,7 +67,7 @@
   color:#888;
 }
 .price{
-  color:#e64340;
+  color:#FF7A00;
 }
 .bottomBar{
   position:fixed;
@@ -79,13 +89,63 @@
 }
 .cancelBtn{
   flex:1;
-  background:#ff4d4f;
+  background:#FF7700;
   color:#fff;
   font-size:30rpx;
 }
 .cancelBtn.ghost{
   background:#fff;
-  color:#ff4d4f;
+  color:#FF7700;
   border:1px solid #ffccc7;
+}
+
+.order-chat-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 9;
+  padding: 16rpx 24rpx 12rpx;
+  background: #fafafa;
+  border-top: 1rpx solid #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8rpx;
+  bottom: env(safe-area-inset-bottom);
+}
+.order-chat-bar.above-pay {
+  bottom: calc(112rpx + env(safe-area-inset-bottom));
+}
+.chatOrderBtn {
+  background: #fff;
+  color: #FF7A00;
+  border: 1rpx solid #ffb366;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+}
+.chatOrderHint {
+  font-size: 22rpx;
+  color: #888;
+  text-align: center;
+}
+
+.merch-act-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  justify-content: space-between;
+}
+
+.chatOrderBtn.sm {
+  flex: 1;
+  min-width: 28%;
+  font-size: 26rpx;
+  padding: 16rpx 12rpx;
+}
+
+.chatOrderBtn.sm.ghost {
+  background: #fff;
+  color: #0d9488;
+  border-color: #99f6e4;
 }
 

@@ -1,0 +1,47 @@
+<view class="ss-page">
+  <view class="ss-bar">
+    <input
+      class="ss-input"
+      placeholder="输入商品名称"
+      value="{{keyword}}"
+      bindinput="onInput"
+      confirm-type="search"
+      bindconfirm="doSearch"
+    />
+    <text class="ss-go" bindtap="doSearch">搜索</text>
+  </view>
+
+  <block wx:if="{{!searched}}">
+    <view class="ss-section" wx:if="{{history.length}}">
+      <view class="ss-h">
+        <text>搜索历史</text>
+        <text class="ss-clear" bindtap="clearHistory">清空</text>
+      </view>
+      <view class="ss-tags">
+        <text class="ss-tag" wx:for="{{history}}" wx:key="*this" data-kw="{{item}}" bindtap="useKw">{{item}}</text>
+      </view>
+    </view>
+    <view class="ss-section">
+      <view class="ss-h"><text>猜你喜欢（最近浏览）</text></view>
+      <view class="ss-guess" wx:if="{{guess.length}}">
+        <view class="ss-gitem" wx:for="{{guess}}" wx:key="id" data-id="{{item.id}}" bindtap="goGoods">
+          <image class="ss-gimg" src="{{item.image}}" mode="aspectFill" wx:if="{{item.image}}"></image>
+          <text class="ss-gname">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="ss-empty" wx:else>暂无浏览记录，去店铺逛逛吧</view>
+    </view>
+  </block>
+
+  <view class="ss-section" wx:else>
+    <view class="ss-h"><text>搜索结果</text></view>
+    <view class="ss-res" wx:for="{{results}}" wx:key="id" data-id="{{item.id}}" bindtap="goGoods">
+      <image class="ss-rimg" src="{{item.image}}" mode="aspectFill" wx:if="{{item.image}}"></image>
+      <view>
+        <text class="ss-rname">{{item.name}}</text>
+        <text class="ss-rprice">¥{{item.price}}</text>
+      </view>
+    </view>
+    <view class="ss-empty" wx:if="{{!results.length}}">无结果，可换个关键词</view>
+  </view>
+</view>

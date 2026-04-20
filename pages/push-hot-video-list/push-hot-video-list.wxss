@@ -67,7 +67,7 @@ page {
 
 .s-num {
   font-size: 28rpx;
-  color: #ff4d3d;
+  color: #FF7700;
   font-weight: bold;
   margin-right: 12rpx;
 }
@@ -275,9 +275,9 @@ page {
 }
 
 .v-comm .c-label {
-  color: #ff4d3d;
+  color: #FF7700;
 }
 
 .v-comm .c-val {
-  color: #ff4d3d;
+  color: #FF7700;
 }

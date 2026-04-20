@@ -1,0 +1,20 @@
+[
+  {
+    "sort_order": 1,
+    "image_url": "/img/index/banner_placeholder_1.png",
+    "link_type": "none",
+    "link_value": "",
+    "frontend_was": "utils/images.js → bannerHome（本地包内图）",
+    "db_table": "Banners",
+    "db_fields": "image_url, sort_order, target_url 或扩展 link_type/link_value"
+  },
+  {
+    "sort_order": 2,
+    "image_url": "/img/index/banner_placeholder_2.png",
+    "link_type": "none",
+    "link_value": "",
+    "frontend_was": "utils/images.js → bannerSale",
+    "db_table": "Banners",
+    "db_fields": "同上"
+  }
+]

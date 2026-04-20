@@ -1,0 +1,18 @@
+<view class="al-page">
+  <view class="al-form">
+    <textarea
+      class="al-input"
+      placeholder="请描述您的诉求，提交后暂存于本机；与平台工单系统对接后将同步云端。"
+      value="{{content}}"
+      maxlength="500"
+      bindinput="onInput"
+    />
+    <button class="al-btn" bindtap="submit">提交诉求</button>
+  </view>
+  <view class="al-head">我的记录</view>
+  <view class="al-item" wx:for="{{list}}" wx:key="id">
+    <text class="al-status">{{item.status}}</text>
+    <text class="al-text">{{item.content}}</text>
+  </view>
+  <view class="al-empty" wx:if="{{!list.length}}">暂无记录</view>
+</view>

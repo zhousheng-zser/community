@@ -1,0 +1,64 @@
+@import "../../styles/portal.wxss";
+
+.order-list-card {
+  padding-bottom: 8rpx;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  margin: 12rpx 28rpx 8rpx;
+  padding: 16rpx 22rpx;
+  background: #fff;
+  border-radius: 999rpx;
+  border: 1rpx solid #e2e8f0;
+  box-shadow: 0 2rpx 12rpx rgba(15, 23, 42, 0.04);
+}
+
+.search-icon {
+  font-size: 28rpx;
+  color: #94a3b8;
+  margin-right: 12rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  min-height: 48rpx;
+}
+
+.search-clear {
+  font-size: 24rpx;
+  color: #8b6914;
+  padding: 8rpx 0 8rpx 12rpx;
+}
+
+
+.order-tabs {
+  white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  padding: 20rpx 24rpx 16rpx;
+  background: transparent;
+}
+
+.order-tab {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 14rpx 32rpx;
+  margin-right: 16rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  color: #64748b;
+  background: #fff;
+  border: 1rpx solid #e2e8f0;
+  box-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+}
+
+.order-tab.on {
+  background: linear-gradient(135deg, #6b4f2a 0%, #9a7340 100%);
+  color: #fff;
+  font-weight: 700;
+  border-color: transparent;
+  box-shadow: 0 6rpx 20rpx rgba(90, 70, 35, 0.35);
+}

@@ -1,0 +1,19 @@
+<view class="po-page">
+  <view class="po-tabs">
+    <text class="po-tab {{tab==='all'?'on':''}}" data-tab="all" bindtap="setTab">全部</text>
+    <text class="po-tab {{tab==='pending'?'on':''}}" data-tab="pending" bindtap="setTab">待结算</text>
+    <text class="po-tab {{tab==='done'?'on':''}}" data-tab="done" bindtap="setTab">已结算</text>
+  </view>
+  <view class="po-loading" wx:if="{{loading}}">加载中…</view>
+  <block wx:elif="{{list.length}}">
+    <view class="po-item" wx:for="{{list}}" wx:key="id">
+      <text class="po-title">{{item.title || item.goods_name || item.order_no || item.id}}</text>
+      <text class="po-sub">预估佣金 ¥{{item.commission || item.estimated || '0.00'}}</text>
+    </view>
+  </block>
+  <view class="po-empty" wx:else>
+    <text>暂无推客订单数据（接口未返回时可从推客收益页查看余额）</text>
+    <button class="po-btn" bindtap="goAccount">我的收益</button>
+    <button class="po-btn ghost" bindtap="goGorder">推广订单列表</button>
+  </view>
+</view>

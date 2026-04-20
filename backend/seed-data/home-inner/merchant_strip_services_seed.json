@@ -1,0 +1,34 @@
+[
+  {
+    "title": "金牌日常保洁 (2小时)",
+    "description": "专业团队，含客厅、卧室、厨房、卫生间清洁",
+    "price": 99,
+    "frontend_remarkC": "images.hotClean",
+    "cover_image": "/img/placeholders/home_cleaning.png",
+    "sales_count_hint": 999
+  },
+  {
+    "title": "挂壁式空调深度清洗",
+    "description": "高温蒸汽杀菌，拆洗过滤网、导风板，去除异味",
+    "price": 89,
+    "frontend_remarkC": "images.svcAircon",
+    "cover_image": "/img/placeholders/home_cleaning.png",
+    "sales_count_hint": 888
+  },
+  {
+    "title": "洗衣机深度清洗",
+    "description": "专业拆洗内桶，高温消毒除霉，恢复洁净如新",
+    "price": 128,
+    "frontend_remarkC": "images.svcWasher",
+    "cover_image": "/img/placeholders/home_cleaning.png",
+    "sales_count_hint": 777
+  },
+  {
+    "title": "油烟机深度清洗",
+    "description": "专业拆洗油网、风轮，高温溶油去污",
+    "price": 158,
+    "frontend_remarkC": "images.svcHood",
+    "cover_image": "/img/placeholders/home_cleaning.png",
+    "sales_count_hint": 666
+  }
+]

@@ -63,7 +63,7 @@ page {
   font-weight: 900;
   font-style: italic;
   letter-spacing: 4rpx;
-  text-shadow: 4rpx 4rpx 0 #e61a23, 0 8rpx 16rpx rgba(0,0,0,0.4);
+  text-shadow: 4rpx 4rpx 0 #EA580C, 0 8rpx 16rpx rgba(0,0,0,0.4);
 }
 
 .hero-sub-wrap {

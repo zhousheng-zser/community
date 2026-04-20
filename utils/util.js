@@ -87,15 +87,37 @@ const request = (method, url, data, contentType = 'application/json') => {
         'Authorization': token ? 'Bearer ' + token : ''
       },
       success: (res) => {
-        const data = res.data;
-        if (data.errno == 0 || res.statusCode === 200 || res.statusCode === 201) {
-          resolve(data.data || data)
-        } else {
+        const body = res.data;
+        if (res.statusCode === 401) {
+          try {
+            wx.removeStorageSync('token');
+          } catch (e) {}
           reject({
-            errno: data.errno || res.statusCode,
-            errmsg: data.errmsg || data.error
-          })
+            errno: 401,
+            errmsg: (body && body.errmsg) || '请先登录'
+          });
+          return;
         }
+        const hasErrno = body != null && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'errno');
+        const errnoNum = hasErrno ? Number(body.errno) : NaN;
+        if (hasErrno && errnoNum !== 0) {
+          reject({
+            errno: body.errno,
+            errmsg: body.errmsg || body.message || body.error || '请求失败'
+          });
+          return;
+        }
+        const ok =
+          (hasErrno && errnoNum === 0) ||
+          (!hasErrno && (res.statusCode === 200 || res.statusCode === 201));
+        if (!ok) {
+          reject({
+            errno: res.statusCode,
+            errmsg: (body && body.errmsg) || '请求失败'
+          });
+          return;
+        }
+        resolve(body.data !== undefined ? body.data : body);
       },
       fail: (res) => {
         wx.showToast({
@@ -116,6 +138,9 @@ const post = (url, data) => {
 }
 const put = (url, data) => {
   return request('PUT', url, data);
+}
+const patch = (url, data) => {
+  return request('PATCH', url, data);
 }
 const del = (url, query) => {
   const contentType = query ? "application/x-www-form-urlencoded" : "application/json";
@@ -138,8 +163,20 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
       },
       success: (res) => {
         const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        if (res.statusCode === 401) {
+          try {
+            wx.removeStorageSync('token');
+          } catch (e) {}
+          reject({ errno: 401, errmsg: (data && data.errmsg) || '请先登录' });
+          return;
+        }
+        const hasErrno = data != null && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'errno');
+        if (hasErrno && Number(data.errno) !== 0) {
+          reject({ errno: data.errno, errmsg: data.errmsg || '上传失败' });
+          return;
+        }
         if (res.statusCode === 200 || res.statusCode === 201) {
-          resolve(data.data || data)
+          resolve(data.data !== undefined ? data.data : data)
         } else {
           reject(data)
         }
@@ -544,11 +581,21 @@ const ensureUserCoordsForShop = () => new Promise((resolve) => {
   });
 });
 
+/** 解析 { list } 或裸数组（core/workers、service-orders/my、goods/featured 等） */
+const unwrapList = (res) => {
+  if (res == null) return [];
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.list)) return res.list;
+  if (Array.isArray(res.items)) return res.items;
+  return [];
+};
+
 module.exports = {
   formatTime,
   get,
   post,
   put,
+  patch,
   del,
   uploadFile,
   goodsStateTabel,
@@ -563,5 +610,6 @@ module.exports = {
   filterShopProductsByDistance,
   normalizeShopProductRow,
   buildShopGoodsQuery,
-  ensureUserCoordsForShop
+  ensureUserCoordsForShop,
+  unwrapList
 }

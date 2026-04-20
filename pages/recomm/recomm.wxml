@@ -36,7 +36,7 @@
       <text class="pick-btn">📍</text>
     </view>
 
-    <!-- 第二地址（仅代取有收货地址） -->
+    <!-- 第二地址（与代取一致：双地址类服务均有） -->
     <view class="input-item" wx:if="{{activeTabConfig.secondLabel}}" bindtap="goPickAddr" data-field="to">
       <view class="label-dot green">{{activeTabConfig.secondLabel}}</view>
       <view class="addr-nav-wrap">

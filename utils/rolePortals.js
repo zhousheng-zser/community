@@ -1,0 +1,113 @@
+/**
+ * 单小程序多身份：技工端 / 商家端分包路由与角色解析（与后端字段可渐进对齐）
+ */
+
+const USER_TAB = '/pages/user/user';
+
+function normalizeRoles(user) {
+  if (!user) return ['user'];
+  if (Array.isArray(user.roles) && user.roles.length) {
+    return [...new Set(user.roles.map((r) => String(r).trim()).filter(Boolean))];
+  }
+  const r = user.role;
+  if (r == null || r === '') return ['user'];
+  if (typeof r === 'string' && r.indexOf(',') !== -1) {
+    return [...new Set(r.split(',').map((s) => s.trim()).filter(Boolean))];
+  }
+  return [String(r)];
+}
+
+function hasRole(user, role) {
+  return normalizeRoles(user).indexOf(role) !== -1;
+}
+
+/** 是否具备技工工作台能力：显式角色 或 审核通过状态 */
+function canUseWorkerPortal(user) {
+  if (!user) return false;
+  if (hasRole(user, 'worker') || hasRole(user, 'admin')) return true;
+  const st = user.worker_status || user.workerStatus;
+  if (st === 'approved' || st === 1 || st === 'approved_worker') return true;
+  return false;
+}
+
+/** 是否具备商家工作台能力 */
+function canUseMerchantPortal(user) {
+  if (!user) return false;
+  if (hasRole(user, 'merchant') || hasRole(user, 'admin')) return true;
+  const sid = user.shop_id != null ? user.shop_id : user.shopId;
+  if (sid != null && sid !== '') return true;
+  const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
+}
+
+function mergePortalFlags(target, src) {
+  if (!target || !src || typeof src !== 'object') return target;
+  const next = Object.assign({}, target);
+  const keys = [
+    'worker_status', 'workerStatus',
+    'merchant_status', 'merchantStatus',
+    'shop_status', 'shopStatus',
+    'shop_id', 'shopId',
+    'roles', 'role'
+  ];
+  keys.forEach((k) => {
+    if (Object.prototype.hasOwnProperty.call(src, k) && src[k] !== undefined) {
+      next[k] = src[k];
+    }
+  });
+  if (src.roles != null) next.roles = src.roles;
+  return next;
+}
+
+function requireLoginToast() {
+  wx.showToast({ title: '请先登录', icon: 'none' });
+}
+
+function navigateToWorkerHome() {
+  const token = wx.getStorageSync('token');
+  if (!token) {
+    requireLoginToast();
+    return;
+  }
+  wx.navigateTo({
+    url: '/package-worker/pages/worker-home/worker-home'
+  });
+}
+
+function navigateToMerchantHome() {
+  const token = wx.getStorageSync('token');
+  if (!token) {
+    requireLoginToast();
+    return;
+  }
+  wx.navigateTo({
+    url: '/package-merchant/pages/merchant-home/merchant-home'
+  });
+}
+
+function backToUserTab() {
+  wx.switchTab({ url: USER_TAB });
+}
+
+function workerTabUrl(path) {
+  return `/package-worker/pages/${path}/${path}`;
+}
+
+function merchantTabUrl(path) {
+  return `/package-merchant/pages/${path}/${path}`;
+}
+
+module.exports = {
+  normalizeRoles,
+  hasRole,
+  canUseWorkerPortal,
+  canUseMerchantPortal,
+  mergePortalFlags,
+  navigateToWorkerHome,
+  navigateToMerchantHome,
+  backToUserTab,
+  workerTabUrl,
+  merchantTabUrl,
+  USER_TAB
+};

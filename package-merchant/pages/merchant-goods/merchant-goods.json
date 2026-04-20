@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "商品与库存",
+  "navigationBarBackgroundColor": "#7a5c28",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true
+}

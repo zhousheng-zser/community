@@ -1,6 +1,7 @@
 // pages/order-confrim/order-confrim.js
 const app = getApp();
 const util = require('../../utils/util.js');
+const { fetchDefaultOrderAddressFill } = require('../../utils/defaultServiceAddress.js');
 
 Page({
   data: {
@@ -24,6 +25,30 @@ Page({
     const product = { name, sub, price, image };
     const totalPrice = (Number(price) * qty).toFixed(2).replace(/\.00$/, '');
     this.setData({ product, qty, totalPrice });
+    this.prefillDefaultAddress();
+  },
+
+  async prefillDefaultAddress() {
+    try {
+      const patch = await fetchDefaultOrderAddressFill(util);
+      if (!patch) return;
+      const cur = this.data;
+      const next = {};
+      if (!cur.serviceAddr && patch.serviceAddr) next.serviceAddr = patch.serviceAddr;
+      if (!cur.doorNum && patch.doorNum) next.doorNum = patch.doorNum;
+      if (!cur.contactName && patch.contactName) next.contactName = patch.contactName;
+      if (!cur.contactPhone && patch.contactPhone) next.contactPhone = patch.contactPhone;
+      if (!cur.contactName || !cur.contactPhone) {
+        const u = app.globalData.user || {};
+        if (!cur.contactName && u.userName) next.contactName = u.userName;
+        if (!cur.contactPhone && u.userMobile) {
+          const p = String(u.userMobile).replace(/\D/g, '').slice(0, 11);
+          if (p.length === 11) next.contactPhone = p;
+        }
+      }
+      if (patch.contactGender) next.contactGender = patch.contactGender;
+      if (Object.keys(next).length) this.setData(next);
+    } catch (e) {}
   },
 
   onOcInput(e) {
@@ -57,16 +82,17 @@ Page({
   },
 
   submitOrder() {
-    const { serviceAddr, contactName, contactPhone, product, qty } = this.data;
+    const { serviceAddr, doorNum, contactName, contactPhone, product, qty } = this.data;
     if (!serviceAddr) return wx.showToast({ title: '请选择服务地址', icon: 'none' });
     if (!contactName) return wx.showToast({ title: '请填写联系人', icon: 'none' });
     if (!contactPhone || contactPhone.length !== 11) return wx.showToast({ title: '请填写正确的联系电话', icon: 'none' });
 
+    const fullAddress = [serviceAddr, doorNum].filter(Boolean).join(' ').trim() || serviceAddr;
     wx.showLoading({ title: '提交中...' });
     const userId = (app.globalData.user || {}).id;
     util.post('api/order/save', {
       userId,
-      address: serviceAddr,
+      address: fullAddress,
       orderUser: contactName,
       userTele: contactPhone,
       goodsName: product.name,

@@ -1,16 +1,11 @@
+const { SERVICE_TABS, getTabByKey, getSubmitBlockReason } = require('../../utils/recommConfig.js');
+
 Page({
   data: {
     navTopPadding: 20,
-    serviceTabs: [
-      { key: "take",   text: "代取",     label: "取", placeholder: "填写取货地址",       secondLabel: "收", secondPlaceholder: "填写收货地址" },
-      { key: "child",  text: "接送小孩", label: "服", placeholder: "填写接送服务地址",   secondLabel: "",   secondPlaceholder: "" },
-      { key: "escort", text: "陪诊",     label: "服", placeholder: "填写需陪诊服务地址", secondLabel: "",   secondPlaceholder: "" },
-      { key: "study",  text: "陪读",     label: "服", placeholder: "填写需陪读服务地址", secondLabel: "",   secondPlaceholder: "" },
-      { key: "trash",  text: "代扔垃圾", label: "服", placeholder: "填写上门服务地址",   secondLabel: "",   secondPlaceholder: "" },
-      { key: "pet",    text: "宠物喂养", label: "服", placeholder: "填写宠物服务地址",   secondLabel: "",   secondPlaceholder: "" }
-    ],
-    activeServiceTab: "take",
-    activeTabConfig: { key: "take", text: "代取", label: "取", placeholder: "填写取货地址", secondLabel: "收", secondPlaceholder: "填写收货地址" },
+    serviceTabs: SERVICE_TABS,
+    activeServiceTab: 'take',
+    activeTabConfig: getTabByKey('take'),
     // 当前 tab 表单（WXML 只访问这个，不用动态 key）
     currentForm: { from: '', to: '', remark: '' },
     // 各 tab 表单缓存
@@ -24,10 +19,10 @@ Page({
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
     if (options.type) {
-      const tab = this.data.serviceTabs.find(t => t.key === options.type);
+      const tab = getTabByKey(options.type);
       this.setData({
-        activeServiceTab: options.type,
-        activeTabConfig: tab || this.data.activeTabConfig
+        activeServiceTab: tab.key,
+        activeTabConfig: tab
       });
     }
   },
@@ -40,7 +35,7 @@ Page({
     });
     // 读取目标 tab 缓存
     const form = cache[key] || { from: '', to: '', remark: '' };
-    const tab = this.data.serviceTabs.find(t => t.key === key);
+    const tab = getTabByKey(key);
     this.setData({
       activeServiceTab: key,
       activeTabConfig: tab,
@@ -62,11 +57,9 @@ Page({
 
   doSubmit() {
     const { currentForm, activeTabConfig } = this.data;
-    if (!currentForm.from) {
-      return wx.showToast({ title: '请填写' + activeTabConfig.label + '地址', icon: 'none' });
-    }
-    if (activeTabConfig.secondLabel && !currentForm.to) {
-      return wx.showToast({ title: '请填写' + activeTabConfig.secondLabel + '地址', icon: 'none' });
+    const block = getSubmitBlockReason(activeTabConfig, currentForm);
+    if (block) {
+      return wx.showToast({ title: block, icon: 'none' });
     }
     wx.showToast({ title: '发布成功！', icon: 'success' });
     this.setData({ currentForm: { from: '', to: '', remark: '' } });

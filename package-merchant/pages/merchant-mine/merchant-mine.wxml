@@ -1,0 +1,76 @@
+<view class="portal-page">
+  <view class="mm-profile merchant-gradient">
+    <image class="mm-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+    <text class="mm-name">{{displayName}}</text>
+    <text class="mm-sub">商家端 · 与用户端同一账号</text>
+  </view>
+
+  <view class="portal-card">
+    <view class="card-title">经营</view>
+    <view class="mine-block">
+      <navigator class="mine-row" url="/package-merchant/pages/merchant-goods/merchant-goods">
+        <text class="mine-label">商品与库存管理</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/package-merchant/pages/merchant-orders/merchant-orders">
+        <text class="mine-label">店铺订单</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/market-order-list/market-order-list">
+        <text class="mine-label">我的集市订单（买家视角）</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="portal-card">
+    <view class="card-title">账户</view>
+    <view class="mine-block">
+      <navigator class="mine-row" url="/pages/join-market/join-market">
+        <text class="mine-label">店铺入驻与资质（信息·营业·配送）</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/market-shop/market-shop">
+        <text class="mine-label">店铺预览（集市）</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/account/account">
+        <text class="mine-label">资金与提现</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/message/message">
+        <text class="mine-label">消息通知</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/feedback/feedback">
+        <text class="mine-label">客服反馈</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/settings/settings">
+        <text class="mine-label">设置</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-tabbar pt-bar-4">
+    <view class="pt-item" bindtap="goHome">
+      <image class="pt-ico" src="/img/home-0.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goService">
+      <image class="pt-ico" src="/img/other_services/platform_service.png" mode="aspectFit"></image>
+      <text class="pt-text-nowrap">客服与售后</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/user-1.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

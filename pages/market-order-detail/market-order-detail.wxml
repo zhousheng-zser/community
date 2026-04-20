@@ -1,4 +1,5 @@
 <view class="container">
+  <view class="mock-banner" wx:if="{{isMock}}">演示订单 · 数据为虚构，不请求后端</view>
   <view class="card head">
     <view class="row">
       <text class="label">订单号</text>
@@ -57,6 +58,19 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <view class="order-chat-bar merchant-acts {{order_status === 'pending_payment' ? 'above-pay' : ''}}" wx:if="{{isMerchantOrder}}">
+    <view class="merch-act-row">
+      <button class="chatOrderBtn sm" bindtap="openChatBuyer">联系买家</button>
+      <button class="chatOrderBtn sm" bindtap="openChatRider">联系骑手</button>
+      <button class="chatOrderBtn sm ghost" bindtap="openRiderMapPage">骑手位置</button>
+    </view>
+    <text class="chatOrderHint">买卖家 / 骑手会话 · 支持文字与图片</text>
+  </view>
+  <view class="order-chat-bar {{order_status === 'pending_payment' ? 'above-pay' : ''}}" wx:else>
+    <button class="chatOrderBtn" bindtap="openOrderChat">联系商家</button>
+    <text class="chatOrderHint">本单专属会话 · 支持文字与图片</text>
   </view>
 
   <view class="bottomBar" wx:if="{{order_status === 'pending_payment'}}">

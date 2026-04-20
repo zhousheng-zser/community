@@ -1,0 +1,15 @@
+<view class="ns-page">
+  <text class="ns-tip">以下为本地偏好；实际推送仍受微信订阅消息与系统权限影响。</text>
+  <view class="ns-row">
+    <text>订单与履约消息</text>
+    <switch checked="{{order}}" data-field="order" bindchange="toggle" />
+  </view>
+  <view class="ns-row">
+    <text>系统公告与活动</text>
+    <switch checked="{{system}}" data-field="system" bindchange="toggle" />
+  </view>
+  <view class="ns-row">
+    <text>营销与优惠推荐</text>
+    <switch checked="{{marketing}}" data-field="marketing" bindchange="toggle" />
+  </view>
+</view>

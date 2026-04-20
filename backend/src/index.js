@@ -29,6 +29,12 @@ async function bootstrap() {
     console.log(
       `Benefit: GET /api/v1/benefit/display  JD goods: /api/v1/jd/benefit/goods  PDD: /api/v1/pdd/benefit/goods`
     );
+    console.log(
+      `Worker portal: GET /api/v1/worker/service-orders (Bearer)  详见 backend/src/routes/workerPortal.js`
+    );
+    console.log(
+      `Merchant goods: GET /api/v1/market/merchant/goods (Bearer)  详见 backend/src/routes/marketMerchantGoods.js`
+    );
   });
 }
 

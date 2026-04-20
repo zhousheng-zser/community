@@ -37,6 +37,8 @@
     "pages/activity-list/activity-list",
     "pages/user-code/user-code",
     "pages/book-my/book-my",
+    "pages/service-orders-my/service-orders-my",
+    "pages/neighbor-assist-orders-my/neighbor-assist-orders-my",
     "pages/goods-confrim/goods-confrim",
     "pages/book-detail/book-detail",
     "pages/my-posts/my-posts",
@@ -58,18 +60,56 @@
     "pages/address/address",
     "pages/about/about"
     ,"pages/market-order-detail/market-order-detail",
-    "pages/market-order-list/market-order-list"
+    "pages/market-order-list/market-order-list",
+    "pages/rider-location/rider-location",
+    "pages/privacy-publish/privacy-publish",
+    "pages/privacy-reply/privacy-reply",
+    "pages/notification-settings/notification-settings",
+    "pages/benefit-orders/benefit-orders",
+    "pages/promoter-orders/promoter-orders",
+    "pages/combo-orders/combo-orders",
+    "pages/appeal-list/appeal-list",
+    "pages/activity-manage/activity-manage",
+    "pages/community-steward/community-steward",
+    "pages/platform-kefu/platform-kefu",
+    "pages/wallet-transactions/wallet-transactions",
+    "pages/shopping-search/shopping-search",
+    "pages/consumer-rights/consumer-rights"
+  ],
+  "subPackages": [
+    {
+      "root": "package-worker",
+      "name": "worker",
+      "pages": [
+        "pages/worker-home/worker-home",
+        "pages/worker-orders/worker-orders",
+        "pages/worker-order-detail/worker-order-detail",
+        "pages/worker-mine/worker-mine"
+      ]
+    },
+    {
+      "root": "package-merchant",
+      "name": "merchant",
+      "pages": [
+        "pages/merchant-home/merchant-home",
+        "pages/merchant-service/merchant-service",
+        "pages/merchant-goods/merchant-goods",
+        "pages/merchant-goods-edit/merchant-goods-edit",
+        "pages/merchant-orders/merchant-orders",
+        "pages/merchant-mine/merchant-mine"
+      ]
+    }
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#e64340",
+    "navigationBarBackgroundColor": "#FF7A00",
     "navigationBarTitleText": "社区服务",
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
     "custom": true,
     "color": "#8d8d8d",
-    "selectedColor": "#e64340",
+    "selectedColor": "#FF7A00",
     "backgroundColor": "#fff",
     "list": [
       {

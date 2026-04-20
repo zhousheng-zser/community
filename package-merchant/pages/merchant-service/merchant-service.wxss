@@ -1,0 +1,23 @@
+@import "../merchant-home/merchant-home.wxss";
+
+.ms-hero {
+  padding-bottom: 32rpx !important;
+}
+
+.ms-card {
+  margin-top: 8rpx;
+}
+
+.ms-hint {
+  margin: 12rpx 28rpx 0;
+  padding: 18rpx 22rpx;
+  background: #faf6f0;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8dfd0;
+}
+
+.ms-hint-line {
+  font-size: 24rpx;
+  color: #78716c;
+  line-height: 1.55;
+}

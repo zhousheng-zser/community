@@ -1,10 +1,12 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const lp = require('../../utils/localPrefs.js');
 
 Page({
     data: {
+        activeTab: 'chat',
+        systemNotices: [],
         conversations: [],
-        // 左滑相关的变量
         startX: 0,
         startY: 0
     },
@@ -13,14 +15,54 @@ Page({
         if (typeof this.getTabBar === 'function' && this.getTabBar()) {
             this.getTabBar().setData({ selected: 3 });
         }
+        lp.seedSystemIfEmpty();
         this.fetchConversations();
+        this.loadSystemNotices();
     },
 
-    // 获取消息列表
+    switchTab(e) {
+        const tab = e.currentTarget.dataset.tab;
+        this.setData({ activeTab: tab });
+        if (tab === 'sys') this.loadSystemNotices();
+    },
+
+    loadSystemNotices() {
+        const systemNotices = lp.getSystemNotices().map((x) =>
+            Object.assign({}, x, {
+                timeLabel: x.time ? String(x.time).slice(0, 19).replace('T', ' ') : ''
+            })
+        );
+        this.setData({ systemNotices });
+    },
+
+    markAllSysRead() {
+        lp.markAllSystemRead();
+        this.loadSystemNotices();
+        wx.showToast({ title: '已标记已读', icon: 'none' });
+    },
+
+    openSys(e) {
+        const id = e.currentTarget.dataset.id;
+        lp.markSystemRead(id);
+        this.loadSystemNotices();
+        const row = (this.data.systemNotices || []).find((x) => String(x.id) === String(id));
+        if (row && row.content) {
+            wx.showModal({ title: row.title || '通知', content: row.content, showCancel: false });
+        }
+    },
+
+    // 获取消息列表（商家端带 shop_id 时只拉取该店关联的订单会话）
     fetchConversations() {
-        util.get("messages/conversations").then(res => {
-            // 动态给每条记录加上一个位移变量，用来控制左滑删除动效
-            const formattedList = res.map(item => ({
+        const u = app.globalData.user || {};
+        const q = {};
+        if (u.shop_id != null && u.shop_id !== '') {
+            q.shop_id = u.shop_id;
+        } else if (u.shopId != null && u.shopId !== '') {
+            q.shop_id = u.shopId;
+        }
+        util.get("messages/conversations", q).then(res => {
+            const list = Array.isArray(res) ? res : [];
+            const formattedList = list.map(item => ({
                 ...item,
                 isTouchMove: false
             }));
@@ -96,18 +138,33 @@ Page({
         });
 
         // 调用后端软删除接口
-        util.delete(`messages/conversations/${convId}`).then(() => {
+        const u = app.globalData.user || {};
+        const delQuery = {};
+        if (u.shop_id != null && u.shop_id !== '') delQuery.shop_id = u.shop_id;
+        else if (u.shopId != null && u.shopId !== '') delQuery.shop_id = u.shopId;
+        util.del(`messages/conversations/${convId}`, delQuery).then(() => {
         }).catch(() => {
             wx.showToast({ title: '删除状态同步失败', icon: 'none' });
         });
     },
 
-    // 进入对话详情
+    // 进入对话详情（订单会话：带 order_no）
     goToChat(e) {
         let item = e.currentTarget.dataset.item;
-        // 传递房间和对方信息，这里暂不复杂化，只传 ID
+        const name = item.peerUser
+            ? item.peerUser.nickname
+            : (item.peer_id == 0 ? '系统消息' : '会话');
+        const title = item.title || name;
+        const q = [
+            `conversationId=${item.conversation_id}`,
+            `peerId=${item.peer_id || ''}`,
+            `name=${encodeURIComponent(title)}`
+        ];
+        if (item.order_no) {
+            q.push(`orderNo=${encodeURIComponent(item.order_no)}`);
+        }
         wx.navigateTo({
-            url: `/pages/chat/chat?conversationId=${item.conversation_id}&peerId=${item.peer_id}&name=${item.peerUser ? item.peerUser.nickname : (item.peer_id == 0 ? '系统消息' : '...')}`
+            url: `/pages/chat/chat?${q.join('&')}`
         });
     }
 })

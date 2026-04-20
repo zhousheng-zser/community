@@ -1,0 +1,136 @@
+<view class="portal-page">
+  <view class="portal-top merchant-gradient" style="padding-bottom: 28rpx;">
+    <text class="portal-title">商品与库存</text>
+    <text class="portal-sub" wx:if="{{shelfMode === 'up'}}">待上架：已下架商品，打开开关即可上架</text>
+    <text class="portal-sub" wx:elif="{{shelfMode === 'down'}}">在售商品：关闭开关即可下架</text>
+    <text class="portal-sub" wx:else>搜索 · 排序 · 低库存筛选 · 补货入库</text>
+  </view>
+
+  <view class="goods-shop-banner" wx:if="{{shopBannerText}}">
+    <text class="goods-shop-banner-txt">{{shopBannerText}}</text>
+  </view>
+  <view class="goods-shop-warn" wx:if="{{shopWarnText}}">
+    <text class="goods-shop-warn-txt">{{shopWarnText}}</text>
+  </view>
+
+  <view class="goods-shelf-banner" wx:if="{{shelfMode}}">
+    <text class="goods-shelf-banner-txt">
+      {{shelfMode === 'up' ? '以下仅展示已下架 SKU，可在右侧开关上架' : '以下仅展示在售 SKU，可在右侧开关下架'}}
+    </text>
+    <text class="goods-shelf-clear" bindtap="clearShelfMode">查看全部</text>
+  </view>
+
+  <view class="goods-banner" wx:if="{{summaryText}}">
+    <text class="goods-banner-icon">i</text>
+    <text class="goods-banner-txt">{{summaryText}}</text>
+  </view>
+
+  <view class="mg-toolbar">
+    <view class="search-bar mg-search">
+      <text class="search-icon">⌕</text>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="搜索商品名称或 ID"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+      />
+      <text class="search-clear" wx:if="{{keyword}}" bindtap="clearSearch">清除</text>
+    </view>
+    <view class="mg-filters">
+      <view class="chip {{onlyLow ? 'on' : ''}}" bindtap="toggleOnlyLow">仅看低库存</view>
+      <view class="chip {{sortMode === 'sales' ? 'on' : ''}}" data-mode="sales" bindtap="setSort">按销量</view>
+      <view class="chip {{sortMode === 'stock' ? 'on' : ''}}" data-mode="stock" bindtap="setSort">按库存</view>
+    </view>
+  </view>
+
+  <view class="portal-card goods-list-wrap">
+    <view class="card-title">商品列表</view>
+    <block wx:if="{{loading}}">
+      <view class="loading-box">加载中…</view>
+    </block>
+    <block wx:elif="{{list.length}}">
+      <block wx:for="{{list}}" wx:key="id">
+        <view class="goods-card {{item.lowStock ? 'goods-card-warn' : ''}}">
+          <image
+            class="goods-thumb"
+            src="{{item.hasImage ? item.mainImage : '/img/market_icons/supermarket.png'}}"
+            mode="aspectFill"
+          ></image>
+          <view class="goods-card-main">
+            <view class="goods-card-head">
+              <text class="goods-card-title">{{item.title}}</text>
+              <text class="goods-badge {{item.onShelf ? 'on' : 'off'}}">{{item.onShelf ? '在售' : '已下架'}}</text>
+            </view>
+            <view class="goods-price-desc">
+              <text class="goods-price-tag">{{item.priceText}}</text>
+              <text class="goods-desc-snippet" wx:if="{{item.descShort}}">{{item.descShort}}</text>
+            </view>
+            <view class="goods-metrics">
+              <view class="metric">
+                <text class="metric-val">{{item.sales}}</text>
+                <text class="metric-lab">销量</text>
+              </view>
+              <view class="metric">
+                <text class="metric-val {{item.lowStock ? 'warn' : ''}}">{{item.stock}}</text>
+                <text class="metric-lab">库存</text>
+              </view>
+              <view class="metric" wx:if="{{item.lowStock}}">
+                <text class="metric-tag">低于安全值 {{item.safe}}</text>
+              </view>
+            </view>
+            <view class="goods-actions-row">
+              <button
+                class="edit-mini"
+                size="mini"
+                data-id="{{item.id}}"
+                bindtap="goEdit"
+              >编辑资料</button>
+              <button
+                class="restock-mini"
+                size="mini"
+                data-id="{{item.id}}"
+                data-title="{{item.title}}"
+                bindtap="openRestock"
+                wx:if="{{item.lowStock}}"
+              >补货入库</button>
+            </view>
+          </view>
+          <view class="goods-switch-wrap">
+            <switch
+              checked="{{item.onShelf}}"
+              data-id="{{item.id}}"
+              data-on="{{item.onShelf}}"
+              bindchange="onShelfChange"
+              color="#9a7340"
+            />
+          </view>
+        </view>
+      </block>
+    </block>
+    <view class="empty-wrap" wx:else>
+      <image class="empty-icon" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
+      <view class="empty-title">暂无商品</view>
+      <view class="empty-tip">{{emptyTip}}</view>
+    </view>
+  </view>
+
+  <view class="portal-tabbar pt-bar-4">
+    <view class="pt-item" bindtap="goHome">
+      <image class="pt-ico" src="/img/home-0.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goService">
+      <image class="pt-ico" src="/img/other_services/platform_service.png" mode="aspectFit"></image>
+      <text class="pt-text-nowrap">客服与售后</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item" bindtap="goMine">
+      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

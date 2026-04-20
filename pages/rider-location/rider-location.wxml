@@ -1,0 +1,19 @@
+<view class="rl-page">
+  <view class="rl-head">
+    <text class="rl-order">订单 {{orderNo}}</text>
+    <text class="rl-rider" wx:if="{{riderName}}">{{riderName}}</text>
+    <text class="rl-time" wx:if="{{updatedAt}}">更新 {{updatedAt}}</text>
+  </view>
+  <map
+    class="rl-map"
+    latitude="{{latitude}}"
+    longitude="{{longitude}}"
+    markers="{{markers}}"
+    show-location
+    scale="15"
+  ></map>
+  <view class="rl-foot">
+    <button class="rl-btn" bindtap="loadLoc" loading="{{loading}}">刷新位置</button>
+    <text class="rl-tip">演示数据：实际由配送端上报经纬度</text>
+  </view>
+</view>

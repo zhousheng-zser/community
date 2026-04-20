@@ -78,3 +78,11 @@ border-radius:6rpx;
 .red {
   color: #f7504a;
 }
+
+.wt-link {
+  display: block;
+  text-align: center;
+  margin: 32rpx auto 48rpx;
+  font-size: 28rpx;
+  color: #479bd6;
+}

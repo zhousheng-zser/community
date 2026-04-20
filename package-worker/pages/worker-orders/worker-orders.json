@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "技工订单",
+  "navigationBarBackgroundColor": "#7a5c28",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true
+}

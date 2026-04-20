@@ -1,6 +1,7 @@
 // pages/account/account.js
 const app=getApp();
 const util = require('../../utils/util.js');
+const lp = require('../../utils/localPrefs.js');
 Page({
 
   /**
@@ -41,6 +42,11 @@ Page({
       userId
     }).then((data) => {
       if (data==0){
+        lp.pushWalletTransaction({
+          title: '提现申请',
+          amount: '-' + String(availAcount),
+          type: 'withdraw'
+        });
         that.getInfo();
       }
     })

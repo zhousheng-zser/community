@@ -22,16 +22,17 @@ const config = {
         '京东联盟',
         '拼多多',
         '流量联盟',
+        'chat',
     ],
 
     // 本地集市店铺列表：默认筛选半径（公里），与 GET market/shops 的 radius_km 及后端配置对齐（产品约定 X=5）
     marketShopRadiusKm: 5,
 
     /**
-     * 首页「小区热卖榜」：为 true 时始终用 pages/index 内写死的示例列表，不请求 core/services/hot 覆盖。
-     * 需要完全跟随后端热门接口时改为 false。
+     * 首页「小区热卖榜」：false 时请求 core/community/hot（可带 community_id），失败则回退 core/services/hot；
+     * true 时仅用本地示例列表（仅开发预览）。
      */
-    useCuratedHomeHotList: true,
+    useCuratedHomeHotList: false,
 
     /**
      * 惠民卡 · 多平台流量联盟

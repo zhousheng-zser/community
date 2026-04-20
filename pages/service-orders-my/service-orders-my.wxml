@@ -1,0 +1,19 @@
+<view class="page">
+  <navigator class="legacy-link" url="../book-my/book-my">查看历史预约单（旧版）›</navigator>
+  <view wx:if="{{loading && list.length === 0}}" class="hint">加载中…</view>
+  <view wx:elif="{{list.length === 0}}" class="empty">{{emptyTip}}</view>
+  <view wx:else class="list">
+    <view class="card" wx:for="{{list}}" wx:key="id">
+      <view class="row-top">
+        <text class="title">{{item.title}}</text>
+        <text class="status">{{item.statusText}}</text>
+      </view>
+      <view class="row-meta" wx:if="{{item.time}}">
+        <text class="meta">{{item.time}}</text>
+      </view>
+      <view class="row-meta" wx:if="{{item.amount != null && item.amount !== ''}}">
+        <text class="amount">￥{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+</view>

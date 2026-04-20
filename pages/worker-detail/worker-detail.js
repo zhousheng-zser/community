@@ -1,8 +1,9 @@
 const util = require('../../utils/util.js');
-const { imgUrl } = util;
+const { unwrapList } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
+const { pickWorkerAvatar } = require('../../utils/workerApiMap.js');
 
 const mockWorkers = [
   {
@@ -73,9 +74,9 @@ Page({
     } catch (e) {}
 
     try {
-      const list = await util.get('core/workers');
-      const arr = Array.isArray(list) ? list : (list && list.data) || [];
-      const found = arr.find(x => Number(x.id) === Number(id));
+      const list = await util.get('core/workers', { page: 1, limit: 50 });
+      const arr = unwrapList(list);
+      const found = arr.find((x) => Number(x.id) === Number(id));
       const normalized = this.normalizeWorker(found);
       if (normalized) return normalized;
     } catch (e) {}
@@ -102,7 +103,7 @@ Page({
       serviceCount: Number(w.serviceCount || w.service_count || w.orders || 0) || 0,
       exp: Number(w.exp || w.work_years || w.workExp || 0) || 0,
       desc: w.desc || w.resume || "",
-      avatar: workerAvatarUrl(w.id),
+      avatar: pickWorkerAvatar(w),
       tags: Array.isArray(w.tags) ? w.tags : []
     };
   },

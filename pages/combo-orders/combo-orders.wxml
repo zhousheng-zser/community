@@ -1,0 +1,4 @@
+<view class="co-page">
+  <text class="co-tip">{{tip}}</text>
+  <button class="co-btn" bindtap="goMarket">去首页逛逛</button>
+</view>

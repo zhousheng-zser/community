@@ -242,6 +242,19 @@ Page({
         return false;
       }
 
+      try {
+        const shopName = wx.getStorageSync('local_checkout_shop_name') || '';
+        await util.post('messages/order-conversation/ensure', {
+          order_no: orderNo,
+          shop_id: shopId,
+          shop_name: shopName,
+          buyer_name: userName,
+          channel: 'shop_buyer'
+        });
+      } catch (e) {
+        console.warn('order-conversation/ensure', e);
+      }
+
       // 下单成功后继续：发起支付（勿在此处 showToast，避免与真机 wx.requestPayment 冲突）
       await marketPay.startMarketPaymentFlow(orderNo);
       return true;

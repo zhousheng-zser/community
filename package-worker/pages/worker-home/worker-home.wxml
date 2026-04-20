@@ -1,0 +1,144 @@
+<view class="portal-page">
+  <view class="portal-top worker-gradient hero-worker">
+    <view class="hero-row">
+      <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="hero-text">
+        <text class="hero-greet">{{greeting}}，{{displayName}}</text>
+        <text class="portal-sub hero-sub">{{workerOk ? '今日也要好好服务邻居' : '完成入驻即可接单赚钱'}}</text>
+      </view>
+    </view>
+    <text class="portal-title hero-title">技工工作台</text>
+  </view>
+
+  <view class="portal-banner {{workerOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">
+    {{bannerText}}
+  </view>
+
+  <view class="stat-board" wx:if="{{stats}}">
+    <view class="stat-cell stat-tap" bindtap="goOrders" data-tab="pending_accept">
+      <text class="stat-num">{{stats.pending_accept}}</text>
+      <text class="stat-label">待接单</text>
+    </view>
+    <view class="stat-cell" bindtap="goOrders" data-tab="pending_visit">
+      <text class="stat-num">{{stats.pending_visit}}</text>
+      <text class="stat-label">待上门</text>
+    </view>
+    <view class="stat-cell" bindtap="goOrders" data-tab="in_service">
+      <text class="stat-num">{{stats.in_service}}</text>
+      <text class="stat-label">服务中</text>
+    </view>
+    <view class="stat-cell" bindtap="goOrders" data-tab="done">
+      <text class="stat-num">{{stats.done}}</text>
+      <text class="stat-label">已完成</text>
+    </view>
+  </view>
+  <view class="stat-hint" wx:if="{{stats && stats.pending_accept > 0}}">
+    <text class="hint-dot"></text>您有待接订单，请及时处理
+  </view>
+
+  <view class="demo-order-row" bindtap="goMockDetail">
+    <text class="demo-order-label">演示订单 · 预览打卡与导航</text>
+    <text class="demo-order-go">进入 ›</text>
+  </view>
+
+  <view class="income-strip" bindtap="goAccount" wx:if="{{loggedIn}}">
+    <view class="income-left">
+      <text class="income-label">可提现余额（元）</text>
+      <text class="income-val">{{balanceText || '加载中…'}}</text>
+    </view>
+    <text class="income-go">去提现 ›</text>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-card">
+    <view class="card-title">常用功能</view>
+    <view class="grid-2">
+      <view class="grid-btn" bindtap="goOrders">
+        <view class="grid-btn-icon">
+          <image src="/img/my_orders/service_order.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">订单管理</text>
+          <text class="grid-btn-desc">全状态 · 详情履约</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goJoin" wx:if="{{!workerOk}}">
+        <view class="grid-btn-icon">
+          <image src="/img/join_services/worker_join.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">技工入驻</text>
+          <text class="grid-btn-desc">实名与资质审核</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goMine" wx:else>
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/settings.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">我的工作台</text>
+          <text class="grid-btn-desc">接单开关与设置</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goAccount">
+        <view class="grid-btn-icon">
+          <image src="/img/local_goods_icons/money.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">收益与提现</text>
+          <text class="grid-btn-desc">佣金与余额</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goMessage">
+        <view class="grid-btn-icon">
+          <image src="/img/home_icons2/coupon.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">消息通知</text>
+          <text class="grid-btn-desc">订单与系统提醒</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goFeedback">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">客服反馈</text>
+          <text class="grid-btn-desc">问题与建议</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goAbout">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/about_us.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">服务规范</text>
+          <text class="grid-btn-desc">关于与说明</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="portal-tabbar">
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/home-1.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item" bindtap="goMine">
+      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

@@ -81,6 +81,7 @@
 </view>
 
 <!-- 底部支付栏 -->
+<view class="oc-pay-note">微信小程序内仅支持微信支付；支付宝等请使用平台其它渠道。</view>
 <view class="oc-bottom-bar">
   <view class="oc-total">
     <text class="oc-total-label">待支付</text>

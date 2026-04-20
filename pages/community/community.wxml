@@ -24,6 +24,13 @@
       <text class="func-icon">◔</text>
       <text class="func-icon">⊕</text>
           </view>
+
+    <view class="announce-strip" wx:if="{{announcements.length}}">
+      <scroll-view class="announce-scroll" scroll-x="true" show-scrollbar="{{false}}">
+        <text class="announce-item {{item.read ? 'read' : ''}}" wx:for="{{announcements}}" wx:key="id">{{item.title}}</text>
+      </scroll-view>
+      <text class="announce-readall" bindtap="readAllAnnouncements">一键已读</text>
+    </view>
           
     <view class="tab-row">
       <view class="tab-list">

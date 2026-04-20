@@ -1,6 +1,7 @@
 // pages/service/service.js
 const app = getApp();
 const util = require('../../utils/util.js');
+const lp = require('../../utils/localPrefs.js');
 Page({
 
   /**
@@ -21,7 +22,15 @@ Page({
       console.log(data);
       this.setData({
         good: data
-      })
+      });
+      if (data && data.id) {
+        lp.addRecentGood({
+          id: data.id,
+          name: data.title || data.name,
+          image: data.image || data.cover,
+          price: data.price
+        });
+      }
     })
     const { userMobile: tel, session_key } = app.globalData.user;
     if (tel) {

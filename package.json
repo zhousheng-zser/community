@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "test:recomm": "node tests/recomm-tabs.test.js",
     "deploy:backend": "node scripts/deploy-backend.js",
     "fetch:pdd-benefit-images": "node scripts/fetch-pdd-benefit-images.js",
     "sync:pdd-benefit-images": "node scripts/sync-pdd-benefit-images-from-local.js",

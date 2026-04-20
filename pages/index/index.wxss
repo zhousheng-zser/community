@@ -9,7 +9,7 @@
 .top-wrap {
   position: relative;
   z-index: 10;
-  background: linear-gradient(180deg, #f6362b 0%, #ef3025 100%);
+  background: linear-gradient(180deg, #FF9F43 0%, #FF7A00 100%);
   padding: 18rpx 20rpx 26rpx;
   color: #fff;
 }
@@ -166,6 +166,30 @@
   margin-top: 10rpx;
 }
 
+/* 首页「整理收纳」…「上门美业」：与「直约服务商」merchant-item 一致的暖灰底、圆角缩略图、橙描边 */
+.panel-grid .service-grid .service-item .svc-icon-wrap.svc-home-cat {
+  width: 92rpx;
+  height: 92rpx;
+  border-radius: 12rpx;
+  background: #f9f9f9;
+  border: 2rpx solid rgba(255, 122, 0, 0.22);
+  box-shadow: 0 2rpx 10rpx rgba(255, 122, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.panel-grid .service-grid .service-item .svc-icon-wrap.svc-home-cat .svc-icon-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10rpx;
+}
+
+.panel-grid .service-grid .service-item .svc-home-cat-label {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #212121;
+  margin-top: 12rpx;
+}
+
 .quick-nav {
   display: flex;
   border-top: 1rpx solid #f1f1f1;
@@ -282,8 +306,8 @@
   margin-left: 10rpx;
   padding: 5rpx 12rpx;
   border-radius: 999rpx;
-  background: #ffefeb;
-  color: #f44336;
+  background: #FFF4E8;
+  color: #F97316;
   font-size: 18rpx;
 }
 
@@ -326,7 +350,7 @@
   left: 6rpx;
   padding: 2rpx 8rpx;
   border-radius: 8rpx;
-  background: rgba(239, 50, 37, 0.9);
+  background: rgba(255, 122, 0, 0.9);
   color: #fff;
   font-size: 18rpx;
 }
@@ -342,7 +366,7 @@
   display: block;
   margin-top: 6rpx;
   font-size: 20rpx;
-  color: #f44336;
+  color: #F97316;
 }
 
 .hot-filter-row {
@@ -461,7 +485,7 @@
   display: block;
   margin-top: 6rpx;
   font-size: 24rpx;
-  color: #f44336;
+  color: #F97316;
 }
 
 .fake-tabbar-space {
@@ -476,13 +500,13 @@
   width: 110rpx;
   height: 110rpx;
   border-radius: 55rpx;
-  background: linear-gradient(180deg, #ff6d5e 0%, #f33d30 100%);
+  background: linear-gradient(180deg, #FFB366 0%, #FF8A3D 100%);
   color: #fff;
   font-size: 24rpx;
   text-align: center;
   line-height: 110rpx;
   z-index: 99;
-  box-shadow: 0 8rpx 20rpx rgba(244, 67, 54, 0.4);
+  box-shadow: 0 8rpx 20rpx rgba(255, 122, 0, 0.38);
 }
 
 .modal {
@@ -643,7 +667,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  border: 4rpx solid #ffe9e9;
+  border: 4rpx solid #FFE8D6;
 }
 
 .jt-promo-left image, .jt-promo-right image {
@@ -654,7 +678,7 @@
 }
 
 .jt-promo-left .tag, .jt-promo-right .tag {
-  background: linear-gradient(90deg, #ff7e70, #ff4d3d);
+  background: linear-gradient(90deg, #FFB380, #FF7700);
   color: #fff;
   font-size: 22rpx;
   padding: 4rpx 16rpx;
@@ -666,13 +690,13 @@
 
 .jt-promo-mid {
   flex: 2;
-  background: linear-gradient(135deg, #fff0ed, #ffdfd6);
+  background: linear-gradient(135deg, #FFF5EB, #FFECD9);
   border-radius: 16rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 4rpx solid #ffcec5;
+  border: 4rpx solid #FFD4B8;
 }
 
 .jt-promo-mid .title {
@@ -686,7 +710,7 @@
   margin-top: 8rpx;
   font-size: 22rpx;
   color: #fff;
-  background: #ff5f4e;
+  background: #FF934A;
   padding: 4rpx 20rpx;
   border-radius: 999rpx;
 }
@@ -759,7 +783,7 @@
 }
 
 .rebate-tag {
-  background: linear-gradient(90deg, #ff7e70, #ff4c3b);
+  background: linear-gradient(90deg, #FFB380, #FF7700);
   color: #fff;
   font-size: 16rpx; /* 字体改小一点适应窄列 */
   padding: 4rpx 8rpx;
@@ -774,7 +798,7 @@
 }
 
 .jt-daily-news .price-row {
-  color: #ff4d3d;
+  color: #FF7700;
   padding: 8rpx 6rpx;
   display: flex;
   align-items: baseline;
@@ -839,8 +863,8 @@
 
 .jt-top-sales .info .rebate-tag {
   display: inline-block;
-  background: #ffeeec;
-  color: #ff4d3d;
+  background: #FFF0E6;
+  color: #FF7700;
   margin-top: 10rpx;
   border-radius: 4rpx;
   padding: 4rpx 8rpx;
@@ -881,7 +905,7 @@
 }
 
 .feed-tabs .tab.active {
-  color: #ff4d3d;
+  color: #FF7700;
   font-weight: 700;
 }
 
@@ -894,7 +918,7 @@
   width: 40rpx;
   height: 6rpx;
   border-radius: 4rpx;
-  background: #ff4d3d;
+  background: #FF7700;
 }
 
 .feed-goods-list {
@@ -907,7 +931,7 @@
 .f-card {
   background: #fff;
   border-radius: 16rpx;
-  border: 2rpx solid #ffebea;
+  border: 2rpx solid #FFE8D6;
   padding: 16rpx;
   display: flex;
 }
@@ -938,7 +962,7 @@
 }
 
 .f-price {
-  color: #ff4d3d;
+  color: #FF7700;
   font-size: 32rpx;
   font-weight: 700;
   display: flex;
@@ -963,7 +987,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2rpx solid #ff4d3d;
+  border: 2rpx solid #FF7700;
   border-radius: 30rpx;
   overflow: hidden;
 }
@@ -972,12 +996,12 @@
   flex: 1;
   text-align: center;
   font-size: 22rpx;
-  color: #ff4d3d;
+  color: #FF7700;
   padding: 8rpx 0;
 }
 
 .f-action .btn {
-  background: #ff4d3d;
+  background: #FF7700;
   color: #fff;
   font-size: 22rpx;
   padding: 8rpx 24rpx;
@@ -1065,7 +1089,7 @@
   justify-content: flex-start;
   align-items: center;
   padding: 20rpx;
-  background: linear-gradient(90deg, #ff755f 0%, #ff503f 100%);
+  background: linear-gradient(90deg, #FFB088 0%, #FF7700 100%);
   color: #fff;
 }
 
@@ -1093,7 +1117,7 @@
 .fuka-banner-bg {
   width: 100%;
   height: 200rpx;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7272a 50%, #c8001e 100%);
+  background: linear-gradient(135deg, #ff6b35 0%, #FF7A00 50%, #C2410C 100%);
   border-radius: 16rpx;
   display: flex;
   flex-direction: column;
@@ -1165,9 +1189,9 @@
 }
 
 .fuka-filter-tabs .tab.active {
-  color: #f44336;
+  color: #F97316;
   font-weight: 700;
-  border-bottom-color: #f44336;
+  border-bottom-color: #F97316;
 }
 
 .fuka-goods-grid {
@@ -1215,7 +1239,7 @@
 .fuka-goods-item .price {
   display: block;
   margin-top: 6rpx;
-  color: #f44336;
+  color: #F97316;
 }
 
 .fuka-goods-item .jd-price-hint {
@@ -1237,7 +1261,7 @@
   margin-top: 0;
   font-size: 26rpx;
   font-weight: 700;
-  color: #e02e24;
+  color: #EA580C;
 }
 
 .fuka-goods-item .pdd-orig {
@@ -1279,7 +1303,7 @@
 .benefit-alliance-tab.active {
   color: #fff;
   font-weight: 700;
-  background: linear-gradient(90deg, #f44336 0%, #e53935 100%);
+  background: linear-gradient(90deg, #F97316 0%, #FB923C 100%);
   border-color: transparent;
 }
 
@@ -1322,11 +1346,11 @@
 }
 
 .benefit-hero-mask-pdd {
-  background: linear-gradient(180deg, transparent 0%, rgba(224, 64, 43, 0.75) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 122, 0, 0.72) 100%);
 }
 
 .benefit-hero-mask--light.benefit-hero-mask-pdd {
-  background: linear-gradient(180deg, rgba(224, 64, 43, 0.12) 0%, rgba(224, 64, 43, 0.55) 100%);
+  background: linear-gradient(180deg, rgba(255, 122, 0, 0.12) 0%, rgba(255, 122, 0, 0.5) 100%);
 }
 
 .benefit-hero-title {
@@ -1343,7 +1367,7 @@
 }
 
 .benefit-cta-pdd {
-  background: linear-gradient(90deg, #e02e24 0%, #c8161d 100%);
+  background: linear-gradient(90deg, #EA580C 0%, #B45309 100%);
 }
 
 .market-top-cats {
@@ -1386,7 +1410,7 @@
 }
 
 .market-title-row .near {
-  color: #ef3e2f;
+  color: #EA580C;
   font-size: 34rpx;
   font-weight: 800;
   margin-right: 16rpx;
@@ -1408,7 +1432,7 @@
 }
 .market-filter-row .market-filter.active {
   color: #fff;
-  background: #e64340;
+  background: #FF7A00;
   font-weight: 600;
 }
 
@@ -1461,7 +1485,7 @@
 
 .shop-head .badge {
   font-size: 20rpx;
-  background: #f44336;
+  background: #F97316;
   color: #fff;
   border-radius: 8rpx;
   padding: 4rpx 10rpx;
@@ -1515,7 +1539,7 @@
 .shop-goods-item .g-price {
   display: block;
   margin-top: 6rpx;
-  color: #f44336;
+  color: #F97316;
   font-size: 26rpx;
   font-weight: bold;
 }

@@ -1,0 +1,69 @@
+<view class="portal-page">
+  <view class="wm-profile worker-gradient">
+    <image class="wm-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+    <text class="wm-name">{{displayName}}</text>
+    <text class="wm-sub">技工端 · 与用户端同一账号</text>
+  </view>
+
+  <view class="portal-card wm-switch-card">
+    <view class="card-title">接单设置</view>
+    <view class="switch-row">
+      <view class="switch-info">
+        <text class="switch-title">接收新订单派单</text>
+        <text class="switch-desc">关闭后不再接收新派单，已接订单仍需完成</text>
+      </view>
+      <switch checked="{{acceptOn}}" bindchange="onAcceptChange" color="#9a7340"></switch>
+    </view>
+  </view>
+
+  <view class="portal-card">
+    <view class="card-title">账户与服务</view>
+    <view class="mine-block">
+      <navigator class="mine-row" url="/pages/join-worker/join-worker">
+        <text class="mine-label">实名入驻与资质</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/address/address">
+        <text class="mine-label">地址管理（服务区域参考）</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/account/account">
+        <text class="mine-label">收益统计与提现</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/message/message">
+        <text class="mine-label">消息通知</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/feedback/feedback">
+        <text class="mine-label">客服反馈</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/about/about">
+        <text class="mine-label">服务规范与关于</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+      <navigator class="mine-row" url="/pages/settings/settings">
+        <text class="mine-label">设置</text>
+        <text class="mine-arrow">›</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-tabbar">
+    <view class="pt-item" bindtap="goHome">
+      <image class="pt-ico" src="/img/home-0.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/user-1.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

@@ -3,6 +3,9 @@ const express = require('express');
 const cors = require('cors');
 const mountBenefitAllianceRoutes = require('./mountBenefitAlliance');
 const adminRouter = require('./routes/admin');
+const workerPortalRouter = require('./routes/workerPortal');
+const marketMerchantGoodsRouter = require('./routes/marketMerchantGoods');
+const messagesRouter = require('./routes/messagesRoutes');
 const { login } = require('./controllers/adminAuthController');
 
 const app = express();
@@ -23,6 +26,10 @@ app.post('/api/v1/auth/admin/login', login);
 
 mountBenefitAllianceRoutes(app);
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/worker', workerPortalRouter);
+app.use('/api/v1/market/merchant', marketMerchantGoodsRouter);
+app.use('/api/v1/market/shop', marketMerchantGoodsRouter);
+app.use('/api/v1/messages', messagesRouter);
 
 app.use((req, res) => {
   res.status(404).json({ errno: 404, errmsg: 'not found' });

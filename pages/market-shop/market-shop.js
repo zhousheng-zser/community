@@ -466,9 +466,17 @@ Page({
     wx.setStorageSync('local_checkout_goods', cartItems);
     wx.setStorageSync('local_checkout_totle', this.data.totalAmount);
     wx.setStorageSync('local_checkout_shop_id', this.data.currentShopId || (this.data.shop && this.data.shop.id));
+    wx.setStorageSync('local_checkout_shop_name', (this.data.shop && this.data.shop.name) || '');
     
     // 跳转到结算页
     wx.navigateTo({ url: '../goods-confrim/goods-confrim?from=local' });
+  },
+
+  goSearch() {
+    const sid = this.data.currentShopId || 0;
+    wx.navigateTo({
+      url: `/pages/shopping-search/shopping-search?shopId=${sid}`
+    });
   },
 
   // 商品详情

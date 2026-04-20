@@ -135,7 +135,7 @@
 
 .shop-notice .tag {
   background: #fff0f0;
-  color: #ff4d4f;
+  color: #FF7700;
   font-size: 18rpx;
   padding: 2rpx 8rpx;
   border-radius: 6rpx;
@@ -181,7 +181,7 @@
   transform: translateX(-50%);
   width: 40rpx;
   height: 6rpx;
-  background: #ff4d4f;
+  background: #FF7700;
   border-radius: 4rpx;
 }
 
@@ -220,7 +220,7 @@
   transform: translateY(-50%);
   width: 8rpx;
   height: 30rpx;
-  background: #ff4d4f;
+  background: #FF7700;
   border-radius: 0 4rpx 4rpx 0;
 }
 
@@ -305,7 +305,7 @@
 
 .prices .price {
   font-size: 32rpx;
-  color: #ff4d4f;
+  color: #FF7700;
   font-weight: bold;
 }
 
@@ -340,7 +340,7 @@
 }
 
 .step-btn.plus {
-  background: #ff4d4f;
+  background: #FF7700;
   color: #fff;
 }
 
@@ -483,7 +483,7 @@
 }
 
 .cart-icon-wrap.active {
-  background: #ff4d4f;
+  background: #FF7700;
 }
 
 .cart-icon {
@@ -494,7 +494,7 @@
   position: absolute;
   top: -10rpx;
   right: -10rpx;
-  background: #ff4d4f;
+  background: #FF7700;
   color: #fff;
   font-size: 20rpx;
   padding: 2rpx 10rpx;
@@ -542,7 +542,7 @@
 }
 
 .settle.active {
-  background: #ff4d4f;
+  background: #FF7700;
   color: #fff;
 }
 
@@ -622,7 +622,7 @@
 
 .c-price {
   font-size: 32rpx;
-  color: #ff4d4f;
+  color: #FF7700;
   font-weight: bold;
   margin: 0 40rpx;
 }

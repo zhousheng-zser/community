@@ -1,5 +1,23 @@
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
 const { sequelize, Sequelize } = require("./src/models");
+
+function loadServiceGroupsExtra() {
+    const p = path.join(__dirname, "seed-data", "home-inner", "service_groups_extra.json");
+    if (!fs.existsSync(p)) {
+        console.warn("[seed] optional missing:", p);
+        return {};
+    }
+    try {
+        const raw = JSON.parse(fs.readFileSync(p, "utf8"));
+        console.log("[seed] merged service_groups_extra.json keys:", Object.keys(raw).join(", "));
+        return raw;
+    } catch (e) {
+        console.warn("[seed] parse service_groups_extra failed:", e.message);
+        return {};
+    }
+}
 
 async function main() {
     try {
@@ -69,7 +87,8 @@ async function main() {
                     { cat: "上门美瞳", title: "上门美瞳搭配服务【1小时】", price: 159, img: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=300&q=80" },
                     { cat: "上门美发", title: "上门美发造型服务【1小时】", price: 189, img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&q=80" }
                 ]
-            }
+            },
+            ...loadServiceGroupsExtra()
         };
 
         const t = await sequelize.transaction();
@@ -105,16 +124,25 @@ async function main() {
                         "SELECT id FROM Services WHERE title=? AND category_id=? LIMIT 1",
                         { replacements: [svc.title, catId], type: Sequelize.QueryTypes.SELECT, transaction: t }
                     );
+                    const sc = svc.sales_count_hint != null ? Number(svc.sales_count_hint) : null;
                     if (existing.length > 0) {
-                        await sequelize.query(
-                            "UPDATE Services SET price=?, cover_image=?, updatedAt=NOW() WHERE id=?",
-                            { replacements: [svc.price, svc.img, existing[0].id], transaction: t }
-                        );
+                        if (sc != null && !Number.isNaN(sc)) {
+                            await sequelize.query(
+                                "UPDATE Services SET price=?, cover_image=?, sales_count=?, updatedAt=NOW() WHERE id=?",
+                                { replacements: [svc.price, svc.img, sc, existing[0].id], transaction: t }
+                            );
+                        } else {
+                            await sequelize.query(
+                                "UPDATE Services SET price=?, cover_image=?, updatedAt=NOW() WHERE id=?",
+                                { replacements: [svc.price, svc.img, existing[0].id], transaction: t }
+                            );
+                        }
                         console.log("Updated service: " + svc.title);
                     } else {
+                        const initialSales = sc != null && !Number.isNaN(sc) ? sc : 0;
                         await sequelize.query(
-                            "INSERT INTO Services (category_id, title, description, price, cover_image, sales_count, createdAt, updatedAt) VALUES (?,?,?,?,?,0,NOW(),NOW())",
-                            { replacements: [catId, svc.title, svc.title, svc.price, svc.img], transaction: t }
+                            "INSERT INTO Services (category_id, title, description, price, cover_image, sales_count, createdAt, updatedAt) VALUES (?,?,?,?,?,?,NOW(),NOW())",
+                            { replacements: [catId, svc.title, svc.title, svc.price, svc.img, initialSales], transaction: t }
                         );
                         console.log("Inserted service: " + svc.title);
                     }

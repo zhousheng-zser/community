@@ -2,7 +2,7 @@
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
     <text class="back" bindtap="goBack">〈</text>
     <view class="top-actions">
-      <text class="icon" style="margin-right: 180rpx;">🔍</text>
+      <text class="icon" style="margin-right: 180rpx;" bindtap="goSearch">🔍</text>
     </view>
   </view>
 

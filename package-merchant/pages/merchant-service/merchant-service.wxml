@@ -1,0 +1,68 @@
+<view class="portal-page">
+  <view class="portal-top merchant-gradient ms-hero">
+    <text class="portal-title">客服与售后</text>
+    <text class="portal-sub">每笔订单自动建立买卖家会话（文字/图片）；与消息列表、订单详情联动</text>
+  </view>
+
+  <view class="ms-hint">
+    <text class="ms-hint-line">客户下单后会自动创建本订单专属会话；商家与客户在「消息」中沟通，支持文字与图片，类似外卖/团购中的商家聊天。</text>
+  </view>
+
+  <view class="portal-card ms-card">
+    <view class="mh-link-list">
+      <view class="mh-link-item" bindtap="goMerchantAfterSale">
+        <image class="mh-link-ico" src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+        <view class="mh-link-main">
+          <text class="mh-link-title">店铺订单 · 售后/退单</text>
+          <text class="mh-link-desc">商家处理退款、退货与协商，与店铺订单/售后状态同步</text>
+        </view>
+        <text class="mh-link-arrow">›</text>
+      </view>
+      <view class="mh-link-item" bindtap="goMessage">
+        <image class="mh-link-ico" src="/img/other_services/platform_service.png" mode="aspectFit"></image>
+        <view class="mh-link-main">
+          <text class="mh-link-title">消息 · 订单会话</text>
+          <text class="mh-link-desc">按订单维度的买卖家聊天，含文字与图片</text>
+        </view>
+        <text class="mh-link-arrow">›</text>
+      </view>
+      <view class="mh-link-item" bindtap="goMarketOrdersBuyer">
+        <image class="mh-link-ico" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
+        <view class="mh-link-main">
+          <text class="mh-link-title">客户侧订单与退单</text>
+          <text class="mh-link-desc">买家取消、退款进度（同一账号下的集市订单）</text>
+        </view>
+        <text class="mh-link-arrow">›</text>
+      </view>
+      <view class="mh-link-item" bindtap="goFeedback">
+        <image class="mh-link-ico" src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
+        <view class="mh-link-main">
+          <text class="mh-link-title">客服工单与平台协调</text>
+          <text class="mh-link-desc">投诉建议、需平台介入时提交工单</text>
+        </view>
+        <text class="mh-link-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-tabbar pt-bar-4">
+    <view class="pt-item" bindtap="goHome">
+      <image class="pt-ico" src="/img/home-0.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
+      <text class="pt-text-nowrap">客服与售后</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item" bindtap="goMine">
+      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

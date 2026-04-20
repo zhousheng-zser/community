@@ -1,0 +1,9 @@
+<view class="cs-page">
+  <text class="cs-tip">如需物业/社区协助，可先留言反馈；紧急情况请致电管家热线。</text>
+  <view class="cs-phone-row">
+    <text>管家热线</text>
+    <text class="cs-phone" bindtap="copyPhone">{{phone}}</text>
+  </view>
+  <button class="cs-btn" open-type="contact">微信在线客服</button>
+  <button class="cs-btn ghost" bindtap="goFeedback">意见反馈</button>
+</view>

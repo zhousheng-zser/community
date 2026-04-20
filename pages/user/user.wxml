@@ -1,7 +1,6 @@
 <!--pages/user/user.wxml-->
 <view class="mine-page">
 
-  <!-- 顶部渐变头部 -->
   <view class="mine-header" style="padding-top: {{navTop}}px;">
     <view class="header-row">
       <navigator url="../user-edit/user-edit" class="avatar-wrap">
@@ -14,39 +13,52 @@
         <view class="role-badge">{{roleLabel}}</view>
       </view>
       <navigator class="qr-btn" url="../user-code/user-code">
-        <text class="qr-icon">📷</text>
+        <view class="qr-icon-wrap">
+          <image class="qr-icon-img" src="/img/icon-qrcode.png" mode="aspectFit"></image>
+        </view>
         <text class="qr-text">邀请码</text>
       </navigator>
     </view>
 
     <view class="header-stats">
       <view class="hstat">
+        <view class="hstat-icon-wrap">
+          <image class="hstat-icon-img" src="/img/home_icons2/points.png" mode="aspectFit"></image>
+        </view>
         <text class="hstat-num">{{points}}</text>
         <text class="hstat-label">积分</text>
       </view>
       <view class="hstat-divider"></view>
       <navigator class="hstat" url="../coupons-my/coupons-my">
+        <view class="hstat-icon-wrap">
+          <image class="hstat-icon-img" src="/img/home_icons2/coupon.png" mode="aspectFit"></image>
+        </view>
         <text class="hstat-num">{{couponCount}}</text>
         <text class="hstat-label">优惠券</text>
       </navigator>
       <view class="hstat-divider"></view>
       <view class="hstat">
+        <view class="hstat-icon-wrap">
+          <image class="hstat-icon-img" src="/img/market_icons/star.png" mode="aspectFit"></image>
+        </view>
         <text class="hstat-num">0</text>
         <text class="hstat-label">收藏</text>
       </view>
       <view class="hstat-divider"></view>
       <view class="hstat">
+        <view class="hstat-icon-wrap">
+          <image class="hstat-icon-img" src="/img/home_icons2/pickup.png" mode="aspectFit"></image>
+        </view>
         <text class="hstat-num">0</text>
         <text class="hstat-label">足迹</text>
       </view>
     </view>
   </view>
 
-  <!-- 收益/钱包卡片 -->
   <navigator class="wallet-card" url="../account/account">
     <view class="wallet-left">
       <view class="wallet-icon-bg">
-        <text class="wallet-icon-emoji">💰</text>
+        <image class="wallet-icon-img" src="/img/local_goods_icons/money.png" mode="aspectFit"></image>
       </view>
       <view class="wallet-text">
         <text class="wallet-label">可提现余额</text>
@@ -59,27 +71,52 @@
     </view>
   </navigator>
 
-  <!-- 我的订单 -->
+  <view class="card" wx:if="{{loggedIn}}">
+    <view class="card-head">
+      <text class="card-title">工作台</text>
+      <text class="card-more muted">技工 / 商家</text>
+    </view>
+    <view class="portal-grid">
+      <view class="portal-item" bindtap="goWorkerPortal">
+        <view class="portal-icon-wrap worker-tone">
+          <image class="portal-icon-img" src="/img/join_services/worker_join.png" mode="aspectFit"></image>
+        </view>
+        <text class="portal-name">技工工作台</text>
+        <text class="portal-sub">接单与服务</text>
+      </view>
+      <view class="portal-item" bindtap="goMerchantPortal">
+        <view class="portal-icon-wrap merchant-tone">
+          <image class="portal-icon-img" src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+        </view>
+        <text class="portal-name">商家工作台</text>
+        <text class="portal-sub">店铺与订单</text>
+      </view>
+    </view>
+  </view>
+
   <view class="card">
     <view class="card-head">
       <text class="card-title">我的订单</text>
-      <navigator class="card-more" url="../book-my/book-my">全部订单 ›</navigator>
+      <navigator class="card-more" url="../service-orders-my/service-orders-my">全部订单 ›</navigator>
     </view>
     <view class="menu-grid">
       <block wx:for="{{orderMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="menu-item" url="{{item.url}}">
-          <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="menu-icon-wrap">
+            <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="menu-name">{{item.name}}</text>
         </navigator>
         <view wx:else class="menu-item" bindtap="showToastWait">
-          <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="menu-icon-wrap">
+            <image class="menu-icon-img" src="/img/my_orders/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="menu-name">{{item.name}}</text>
         </view>
       </block>
     </view>
   </view>
 
-  <!-- 我的社区 -->
   <view class="card">
     <view class="card-head">
       <text class="card-title">我的社区</text>
@@ -87,12 +124,16 @@
     <view class="list-menu">
       <block wx:for="{{communityMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
-          <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="list-icon-wrap">
+            <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </navigator>
         <view wx:else class="list-item" bindtap="showToastWait">
-          <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="list-icon-wrap">
+            <image class="list-icon-img" src="/img/my_community/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </view>
@@ -108,12 +149,16 @@
     <view class="join-grid">
       <block wx:for="{{joinMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="join-item" url="{{item.url}}">
-          <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="join-icon-wrap">
+            <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </navigator>
         <view wx:else class="join-item" bindtap="showToastWait">
-          <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="join-icon-wrap">
+            <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </view>
@@ -121,7 +166,6 @@
     </view>
   </view>
 
-  <!-- 其他服务 -->
   <view class="card">
     <view class="card-head">
       <text class="card-title">其他服务</text>
@@ -129,12 +173,16 @@
     <view class="list-menu">
       <block wx:for="{{serviceMenus}}" wx:key="name">
         <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
-          <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="list-icon-wrap">
+            <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </navigator>
         <view wx:else class="list-item" bindtap="showToastWait">
-          <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          <view class="list-icon-wrap">
+            <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </view>

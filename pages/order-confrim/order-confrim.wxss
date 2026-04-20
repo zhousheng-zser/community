@@ -152,7 +152,20 @@ page { background: #f5f0e8; }
   box-sizing: border-box;
 }
 
-.oc-spacer { height: 140rpx; }
+.oc-spacer { height: 180rpx; }
+
+.oc-pay-note {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 120rpx;
+  padding: 14rpx 28rpx;
+  font-size: 22rpx;
+  color: #78716c;
+  background: #fffbeb;
+  border-top: 1rpx solid #fde68a;
+  z-index: 99;
+}
 
 /* 底部支付栏 */
 .oc-bottom-bar {
