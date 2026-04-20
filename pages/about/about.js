@@ -3,7 +3,7 @@ Page({
   data: {
     features: [
       { name: '首页生活服务', desc: '家政清洁、家修急事、家电清洗等服务快速触达', emoji: '🏠', bg: 'linear-gradient(135deg,#dff0ff,#c8e4ff)' },
-      { name: '本地好物', desc: '每日上新、热销榜单与模块化推荐，支持商品详情查看', emoji: '🛍️', bg: 'linear-gradient(135deg,#ffe5ea,#ffd3dc)' },
+      { name: '本地商城', desc: '每日上新、热销榜单与模块化推荐，支持商品详情查看', emoji: '🛍️', bg: 'linear-gradient(135deg,#ffe5ea,#ffd3dc)' },
       { name: '本地集市', desc: '按定位展示附近店铺与商品，支持距离优先与综合排序', emoji: '📍', bg: 'linear-gradient(135deg,#fff0d7,#ffe2bd)' },
       { name: '惠民卡联盟', desc: '聚合京东、拼多多等联盟商品入口，便于分享与转化', emoji: '🎫', bg: 'linear-gradient(135deg,#dff7ef,#c9f0e0)' },
       { name: '社区互动', desc: '支持帖子、活动与个人中心管理，连接邻里生活场景', emoji: '🤝', bg: 'linear-gradient(135deg,#f3e7ff,#e6d5ff)' }

@@ -91,7 +91,7 @@ const request = (method, url, data, contentType = 'application/json') => {
         if (res.statusCode === 401) {
           try {
             wx.removeStorageSync('token');
-          } catch (e) {}
+          } catch (e) { }
           reject({
             errno: 401,
             errmsg: (body && body.errmsg) || '请先登录'
@@ -166,7 +166,7 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
         if (res.statusCode === 401) {
           try {
             wx.removeStorageSync('token');
-          } catch (e) {}
+          } catch (e) { }
           reject({ errno: 401, errmsg: (data && data.errmsg) || '请先登录' });
           return;
         }
@@ -546,7 +546,7 @@ const normalizeShopProductRow = (item, idx = 0) => {
 };
 
 /**
- * 列表页请求公共参数：与首页本地好物一致，带 5km 半径语义。
+ * 列表页请求公共参数：与首页本地商城一致，带 5km 半径语义。
  */
 const buildShopGoodsQuery = (extra = {}) => {
   const q = { ...extra };

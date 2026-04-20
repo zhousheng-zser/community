@@ -40,7 +40,7 @@
   <view class="main-content">
     
     <block wx:if="{{isSidebarLayout}}">
-      <!-- 本地好物甄选专区：左右分栏结构 -->
+      <!-- 本地商城甄选专区：左右分栏结构 -->
       <view class="sidebar-layout">
         <!-- 左侧一级导航 -->
         <scroll-view class="sidebar-left" scroll-y="true">

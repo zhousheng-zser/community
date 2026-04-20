@@ -25,7 +25,7 @@ Page({
             {
                 title: "新人入门",
                 items: [
-                    { id: 3, title: "如何注册本地好物平台", tag: "新人入门", image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&q=80" },
+                    { id: 3, title: "如何注册本地商城平台", tag: "新人入门", image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=300&q=80" },
                     { id: 4, title: "如何分享商品", tag: "新人入门", image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=300&q=80" }
                 ]
             },

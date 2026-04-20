@@ -21,7 +21,7 @@ Page({
     const titles = {
       "1": "爆款专区",
       "2": "礼物专区",
-      "3": "本地好物甄选",
+      "3": "本地商城甄选",
       "4": "高佣专区"
     };
     const zoneId = String(options.id || "1");
@@ -60,7 +60,7 @@ Page({
       const subCategories = Array.isArray(payload.sub_categories)
         ? payload.sub_categories
         : (Array.isArray(payload.gift_sub_categories) ? payload.gift_sub_categories : []);
-        
+
       // 兼容：对礼物专区的子分类无图片情况直接从本地原型图拦截替换
       subCategories.forEach(sub => {
         if (sub.name === '送长辈') {

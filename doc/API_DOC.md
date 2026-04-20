@@ -40,8 +40,8 @@
 | 4    | 2026-06-12     | 前端 → 后端                   | 帖子表增加 `category`、评论表增加 `image_urls`，评论接口支持图文。       | 迁移、`Comment` 模型、`POST /api/v1/posts/:postId/comment` | 已完成（全链路跑通） |
 | 5    | 2026-06-12     | 前端 → 后端                   | 基础用户交互：我的关注、我参与的活动、地址 CRUD、意见反馈。             | `GET /api/v1/user/follows`、`GET /api/v1/activities/my`、`/user/addresses`、`POST /api/v1/feedback/submit` | 已完成   |
 | 6    | 2026-06-12     | 前端 → 后端                   | 管理后台：技工入驻申请列表与审批接口预留。                               | `GET /api/v1/admin/worker-applications`、`PUT /api/v1/admin/worker-applications/:id` | 已完成   |
-| 7    | 2026-03-15     | 前端 → 后端                   | 首页本地好物：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
-| 8    | 2026-03-15     | 前端 → 后端                   | 首页本地好物：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
+| 7    | 2026-03-15     | 前端 → 后端                   | 首页本地商城：微信小店推流商品库及“购买每单返”回调接口。 | 表 `rewards`、表 `shop_products`、`POST /api/v1/reward/trigger`、管理端 `shop-products` CRUD、`GET /api/v1/shop-products` | 已完成   |
+| 8    | 2026-03-15     | 前端 → 后端                   | 首页本地商城：新增“视频号直播间”管理下发需求（含主播头像与爆品图）。 | 表 `live_streams`（含 `avatar_url`）、`GET /api/v1/lives/active`、管理端 CRUD | 已完成   |
 | 9    | 2026-03-15     | 用户 → 架构师                 | 产品与直播运营位结构再完善：增加商品图片及多维价格标识、主播头像等 | `API接口文档.md` 9, 10节扩充 | 文档已更新 |
 | 10   | 2026-03-17     | 前端 → 后端                   | 本地集市一期：店铺/商品/购物车/下单/支付回调，完整交易闭环子系统。 | `market_*` 7表、`/api/v1/market/**` | 已完成（MVP闭环） |
 | 11   | 2026-03-17     | 前端 → 后端                   | 收货地址：地图选点经纬度落库；本地集市：**GPS 成功**时与**最近一条**收货地址 &lt;1km 吸附该条坐标；**GPS 失败**时用默认地址坐标；与店铺 5km 半径区分。 | `user/addresses` 扩展字段、纪要第 8 次 | 待后端对齐 |
@@ -470,7 +470,7 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 > [!IMPORTANT]
 > **前端已完成 `<store-product>` 组件接入及相关页面的改造。现向后端提出完整的建表与接口需求：**
 
-由于前端在“本地好物”商品详情页点击购买时，不再走自有的订单支付体系，而是直接拉起微信官方的 `<store-product>` 微信小店组件完成闭环交易。我们需要后端做好 **返佣记录的登记** 以及 **接收微信小店服务端成功支付的回调监听**。
+由于前端在“本地商城”商品详情页点击购买时，不再走自有的订单支付体系，而是直接拉起微信官方的 `<store-product>` 微信小店组件完成闭环交易。我们需要后端做好 **返佣记录的登记** 以及 **接收微信小店服务端成功支付的回调监听**。
 
 <details>
 <summary>展开查看：返利记录表 Sql 结构建议</summary>
@@ -507,7 +507,7 @@ CREATE TABLE `shop_products` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_category` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前端展示用: 本地好物商品推广信息管理表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='前端展示用: 本地商城商品推广信息管理表';
 ```
 </details>
 
@@ -553,7 +553,7 @@ CREATE TABLE `shop_products` (
 
 ---
 
-### 10. 本地好物-视频号直播推流管理 (待研发)
+### 10. 本地商城-视频号直播推流管理 (待研发)
 
 > [!IMPORTANT]  
 > **需求背景与原理说明**：
@@ -593,7 +593,7 @@ CREATE TABLE `live_streams` (
 
 2. **小程序端拉取接口**：`GET /api/v1/lives/active`
    - **查询参数**：`?category=热推直播间` (选填)
-   - 前端通过此接口向后端请求在“本地好物”展示的活跃直播源。若传了 `category` 按照对应条件检索，如“当地特产直播间”。
+   - 前端通过此接口向后端请求在“本地商城”展示的活跃直播源。若传了 `category` 按照对应条件检索，如“当地特产直播间”。
    - 须返回按照 `sort_order` 排好序的活跃项目列表。前端除了需要 `finder_username` 用于跳转外，还需要后端下发展示元素如：`promoters_count` (推广人数)、`rebate_info` (返佣比例)、`brand_logo` 和 `hot_goods` (爆品JSON)。
 
 ---

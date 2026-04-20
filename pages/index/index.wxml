@@ -25,7 +25,7 @@
     </view>
   </view>
 
-  <view wx:if="{{activeTab === '本地好物'}}" class="jiatui-wrapper">
+  <view wx:if="{{activeTab === '本地商城'}}" class="jiatui-wrapper">
     <!-- 模块一：顶级海报轮播区 -->
     <view class="jt-hero">
       <swiper class="jt-hero-swiper" autoplay="true" indicator-dots="true" indicator-active-color="#fff" circular="true">

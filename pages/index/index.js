@@ -24,7 +24,7 @@ Page({
     pageSize: 10,
     topTabs: [
       { text: "惠民卡" },
-      { text: "本地好物" },
+      { text: "本地商城" },
       { text: "首页" },
       { text: "本地集市" }
     ],
@@ -112,7 +112,7 @@ Page({
     that.init();
     app.save(parentOpId, that.init.bind(that));
   },
-  onShow: function() {
+  onShow: function () {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 });
     }
@@ -120,7 +120,7 @@ Page({
     if (app.globalData && app.globalData.targetIndexTab) {
       this.setData({ activeTab: app.globalData.targetIndexTab });
       app.globalData.targetIndexTab = ""; // 消费后清空
-      
+
       // 强制将页面滚动回最顶部
       wx.pageScrollTo({
         scrollTop: 0,
@@ -575,7 +575,7 @@ Page({
     let marketList = [
       { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
       { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
-      { id: 2003, name: "当地特产一键速达", price: "99",  image: images.goodsLocal }
+      { id: 2003, name: "当地特产一键速达", price: "99", image: images.goodsLocal }
     ];
     // 首屏先渲染「首页」tab：避免 init 末尾才 setData 时，长时间无任何图片与列表（后续接口在后台继续跑）
     this.setData({
@@ -603,7 +603,7 @@ Page({
           price: String(Number(s.price).toFixed(2))
         }));
       }
-    } catch (e) {}
+    } catch (e) { }
     merchantList = mapMerchantList();
 
     // ===== 从数据库获取直约技工 =====
@@ -613,7 +613,7 @@ Page({
       if (wData.length > 0) {
         workerList = wData.slice(0, 5).map(mapWorkerForHomeCard);
       }
-    } catch (e) {}
+    } catch (e) { }
 
     // ===== 从数据库获取管家精选商品 =====
     try {
@@ -627,9 +627,9 @@ Page({
           image: imgUrl(g.mainPicture || g.cover_image || g.image || '/img/placeholders/home_cleaning.png')
         }));
       }
-    } catch (e) {}
+    } catch (e) { }
     // ======================================
-    // 本地好物：仅展示真实商品（无兜底商品）
+    // 本地商城：仅展示真实商品（无兜底商品）
     // ======================================
 
     // 模块一：顶级海报轮播图
@@ -642,13 +642,13 @@ Page({
     const pushCategories = mapHomeIcon([
       { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/pages/push-goods-list/push-goods-list?id=1" },
       { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/pages/push-goods-list/push-goods-list?id=2" },
-      { name: "本地好物甄选", icon: "/img/local_goods_icons/star.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "本地商城甄选", icon: "/img/local_goods_icons/star.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
       { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/pages/push-goods-list/push-goods-list?id=4" }
     ]);
 
     // 模块三：导购窗
     const pushPromoCards = {
-      left:  { title: "品牌好货", image: images.goodsSkincare1 },
+      left: { title: "品牌好货", image: images.goodsSkincare1 },
       right: { title: "秋冬好物", image: images.pushFashion1 }
     };
 
@@ -677,7 +677,7 @@ Page({
       feedPageByTab = moduleGoods.feedPageByTab;
       feedHasMoreByTab = moduleGoods.feedHasMoreByTab;
     } catch (e) {
-      console.log("本地好物模块真实商品加载失败", e);
+      console.log("本地商城模块真实商品加载失败", e);
     }
     const fukaLocalList = [
       { name: "天天买菜", emoji: "🥦", bgColor: "#e4ffe0" },
@@ -701,14 +701,14 @@ Page({
     ];
     const fukaTopicCards = [
       { title: "低价福利专区", price: "19.9专区", image: images.pushDaily1 },
-      { title: "精选生活好物", price: "9.9专区",  image: images.goodsSkincare2 }
+      { title: "精选生活好物", price: "9.9专区", image: images.goodsSkincare2 }
     ];
     const fukaFilterTabs = ["精选", "拼多多", "京东"];
     const fukaGoods = [
       { id: 3001, name: "正宗大凉山核桃", price: "36.8", image: images.pushFood1 },
-      { id: 3002, name: "近视眼镜",       price: "79.9", image: images.pushDaily2 },
-      { id: 3003, name: "冻干草莓",       price: "39.9", image: images.pushFood2 },
-      { id: 3004, name: "黄冰糖",         price: "29.9", image: images.pushFood1 }
+      { id: 3002, name: "近视眼镜", price: "79.9", image: images.pushDaily2 },
+      { id: 3003, name: "冻干草莓", price: "39.9", image: images.pushFood2 },
+      { id: 3004, name: "黄冰糖", price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = mapHomeIcon([
       { name: "母婴生活馆", code: "AAAA", icon: "/img/market_icons/baby.png", url: "../market-banner/market-banner?title=母婴生活馆" },
@@ -1100,7 +1100,7 @@ Page({
 
   // ---- 小程序级：触底加载更多 ----
   async onReachBottom() {
-    if (this.data.activeTab !== '本地好物') return;
+    if (this.data.activeTab !== '本地商城') return;
     if (this.data.isLoadingMore) return;
     const activeFeedTab = this.data.activeFeedTab;
     if (!activeFeedTab) return;
