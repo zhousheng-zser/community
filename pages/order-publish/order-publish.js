@@ -201,10 +201,23 @@ Page({
         const url = result.url || result.filePath || result;
         if (url) imageUrls.push(url);
       }
-      await util.post('orders/publish', {
-        category: activeCategory, address: form.address,
-        time: form.time, content: form.content, images: imageUrls
-      });
+      try {
+        await util.post('neighbor-assist/orders', {
+          category: activeCategory,
+          address: form.address,
+          time: form.time,
+          content: form.content,
+          images: imageUrls
+        });
+      } catch (e1) {
+        await util.post('orders/publish', {
+          category: activeCategory,
+          address: form.address,
+          time: form.time,
+          content: form.content,
+          images: imageUrls
+        });
+      }
       wx.showToast({ title: '发布成功', icon: 'success' });
       this.setData({ form: { address: '', time: '', content: '', images: [] }, agreed: false, canSubmit: false, submitting: false });
       this.loadRecentList();

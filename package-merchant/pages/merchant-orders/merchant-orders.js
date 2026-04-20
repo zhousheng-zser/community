@@ -4,6 +4,7 @@ const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
 const merchantOrderUi = require('../../../utils/merchantOrderUi.js');
 const merchantOrderMock = require('../../../utils/merchantOrderMock.js');
+const workerOrderUi = require('../../../utils/workerOrderUi.js');
 
 Page({
   data: {
@@ -15,7 +16,10 @@ Page({
     loading: false,
     emptyTip: '暂无店铺订单',
     summaryLine: '',
-    isMock: false
+    isMock: false,
+    directServiceScene: false,
+    pageHeroTitle: '店铺订单',
+    pageHeroSub: '搜索筛选 · 分状态查看 · 点击卡片处理订单'
   },
 
   onLoad(options) {
@@ -23,8 +27,19 @@ Page({
       this._isMockPage = true;
       this.setData({ isMock: true });
     }
+    if (options && options.scene === 'direct_service') {
+      this._directServiceScene = true;
+      this.setData({
+        directServiceScene: true,
+        tabs: workerOrderUi.TAB_DEF,
+        tabKey: 'all',
+        emptyTip: '暂无直约服务订单',
+        pageHeroTitle: '直约服务订单',
+        pageHeroSub: '到家打包单 · 接单后与用户消息同步'
+      });
+    }
     const tab = options && options.tab;
-    const allowed = (merchantOrderUi.TAB_DEF || []).map((t) => t.key);
+    const allowed = (this.data.tabs || []).map((t) => t.key);
     if (tab && allowed.indexOf(tab) !== -1) {
       this.setData({ tabKey: tab });
     }
@@ -55,14 +70,19 @@ Page({
   },
 
   applyList() {
-    const { fullList, tabKey, keyword } = this.data;
-    let base = merchantOrderUi.filterByTab(fullList, tabKey);
-    base = merchantOrderUi.filterByKeyword(base, keyword);
+    const { fullList, tabKey, keyword, directServiceScene } = this.data;
+    let base = directServiceScene
+      ? workerOrderUi.filterByTab(fullList, tabKey)
+      : merchantOrderUi.filterByTab(fullList, tabKey);
+    base = directServiceScene
+      ? this._filterDirectKeyword(base, keyword)
+      : merchantOrderUi.filterByKeyword(base, keyword);
     let emptyTip = '当前分类暂无订单';
     const k = (keyword || '').trim();
     if (k && !base.length) emptyTip = '未找到匹配的订单';
     else if (!k && tabKey !== 'all' && !base.length) emptyTip = '当前分类暂无订单';
-    else if (!k && tabKey === 'all' && !base.length) emptyTip = '暂无店铺订单';
+    else if (!k && tabKey === 'all' && !base.length)
+      emptyTip = directServiceScene ? '暂无直约服务订单' : '暂无店铺订单';
     const tabLabel = (this.data.tabs || []).find((t) => t.key === tabKey);
     const tabName = tabLabel ? tabLabel.label : '全部';
     const summaryLine =
@@ -76,8 +96,26 @@ Page({
 
   noop() {},
 
+  _filterDirectKeyword(list, keyword) {
+    const k = (keyword || '').trim().toLowerCase();
+    if (!k) return list;
+    return list.filter((it) => {
+      const title = String(it.title || '').toLowerCase();
+      const no = String(it.orderNo != null ? it.orderNo : '');
+      const st = String(it.statusText || '').toLowerCase();
+      return title.includes(k) || no.toLowerCase().includes(k) || st.includes(k);
+    });
+  },
+
   openDetail(e) {
+    const id = e.currentTarget.dataset.id;
     const no = e.currentTarget.dataset.no;
+    if (this._directServiceScene && id != null && id !== '') {
+      wx.navigateTo({
+        url: `/package-worker/pages/worker-order-detail/worker-order-detail?id=${encodeURIComponent(id)}&portal=merchant`
+      });
+      return;
+    }
     if (no == null || no === '') return;
     const mock = (this.data.isMock || this._isMockPage) ? '&mock=1' : '';
     wx.navigateTo({
@@ -162,6 +200,41 @@ Page({
     });
   },
 
+  _enrichDirectServiceRow(o) {
+    const w = workerOrderUi.enrichOrderItem(o);
+    const orderNo = o.order_no || o.orderNo || o.id;
+    const rawAmt = o.pay_amount != null ? o.pay_amount : o.amount;
+    let amount = '';
+    if (rawAmt != null && rawAmt !== '') {
+      const n = parseFloat(String(rawAmt), 10);
+      amount = Number.isFinite(n) ? n.toFixed(2) : String(rawAmt);
+    }
+    const time = o.created_at || o.createdAt || '';
+    const timeDisplay =
+      time && String(time).length > 19
+        ? String(time).slice(0, 16).replace('T', ' ')
+        : String(time || '').replace('T', ' ');
+    const buyerHint =
+      o.contact_name || (o.user && (o.user.userName || o.user.nickName)) || '';
+    const buyerUserId = o.user_id != null ? o.user_id : o.buyer_user_id;
+    return {
+      id: o.id,
+      orderNo,
+      statusText: w.statusText,
+      title: w.title,
+      time,
+      timeDisplay: timeDisplay || '—',
+      bucket: w.bucket,
+      amount,
+      qtyText: '',
+      buyerHint,
+      buyerUserId,
+      riderUserId: null,
+      riderName: '',
+      raw: o
+    };
+  },
+
   async load() {
     if (this.data.isMock || this._isMockPage) {
       if (!this.data.isMock) this.setData({ isMock: true });
@@ -179,6 +252,23 @@ Page({
     }
     this.setData({ loading: true, summaryLine: '' });
     try {
+      if (this._directServiceScene) {
+        let res;
+        try {
+          res = await util.get('merchant/service-orders', { page: 1, limit: 100 });
+        } catch (e1) {
+          if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
+            res = { list: [] };
+          } else {
+            throw e1;
+          }
+        }
+        const raw = unwrapList(res);
+        const fullList = raw.map((o) => this._enrichDirectServiceRow(o));
+        this.setData({ fullList, loading: false });
+        this.applyList();
+        return;
+      }
       let res;
       try {
         res = await util.get('market/merchant/orders', { page: 1, limit: 100 });
@@ -200,9 +290,11 @@ Page({
     } catch (e) {
       this.setData({ loading: false });
       const errno = e && Number(e.errno);
-      let emptyTip = '暂无店铺订单';
+      let emptyTip = this._directServiceScene ? '暂无直约服务订单' : '暂无店铺订单';
       if (errno === 404 || errno === 501) {
-        emptyTip = '商家订单接口待后端上线，可先使用用户端「集市订单」查看';
+        emptyTip = this._directServiceScene
+          ? '直约服务订单接口待后端上线'
+          : '商家订单接口待后端上线，可先使用用户端「集市订单」查看';
       } else if (errno === 401) {
         emptyTip = '登录已过期，请从用户端重新登录';
       } else if (errno === 403) {

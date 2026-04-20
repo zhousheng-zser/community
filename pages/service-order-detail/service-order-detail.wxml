@@ -1,0 +1,33 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="hint">加载中…</view>
+  <block wx:else>
+    <view class="hero">
+      <text class="status-pill">{{order.statusText}}</text>
+      <text class="title">{{order.title}}</text>
+      <text class="no">单号 {{order.orderNo}}</text>
+      <text class="line" wx:if="{{order.groupLabel}}">业务线：{{order.groupLabel}}</text>
+    </view>
+    <view class="card">
+      <text class="label">金额</text>
+      <text class="val">￥{{order.amountText}}</text>
+    </view>
+    <view class="card" wx:if="{{order.address}}">
+      <text class="label">服务地址</text>
+      <text class="val multiline">{{order.address}}</text>
+    </view>
+    <button wx:if="{{order.needUserConfirm}}" class="btn primary" bindtap="confirmOrderComplete">确认订单完成</button>
+    <button class="btn primary" bindtap="openChat">与服务商沟通（文字/图片）</button>
+    <button class="btn ghost" bindtap="openComplaint">投诉 / 售后</button>
+  </block>
+
+  <view class="modal-mask" wx:if="{{complaintShow}}" catchtouchmove="true">
+    <view class="modal-box">
+      <text class="modal-title">投诉说明</text>
+      <textarea class="modal-ta" placeholder="请描述问题" value="{{complaintText}}" bindinput="onComplaintInput" maxlength="500" />
+      <view class="modal-actions">
+        <button class="modal-btn ghost" bindtap="closeComplaint">取消</button>
+        <button class="modal-btn primary" bindtap="submitComplaint">提交</button>
+      </view>
+    </view>
+  </view>
+</view>

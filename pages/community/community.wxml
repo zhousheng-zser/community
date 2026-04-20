@@ -45,6 +45,18 @@
     </view>
   </view>
 
+  <view class="assist-block" wx:if="{{activeTab === '邻里互动' && assistCards.length}}">
+    <view class="assist-head">邻里帮帮 · 来自本小区</view>
+    <view class="assist-card" wx:for="{{assistCards}}" wx:key="id" bindtap="goAssistDetail" data-id="{{item.id}}">
+      <text class="assist-tag">帮帮</text>
+      <view class="assist-main">
+        <text class="assist-summary">{{item.summary}}</text>
+        <text class="assist-status">{{item.status}}</text>
+      </view>
+      <text class="assist-arrow">›</text>
+    </view>
+  </view>
+
   <view class="post-list" wx:if="{{posts.length > 0}}">
     <view class="post-card" wx:for="{{posts}}" wx:key="id">
       <view class="user-row">

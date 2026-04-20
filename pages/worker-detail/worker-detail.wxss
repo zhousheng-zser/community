@@ -64,6 +64,14 @@ page {
   font-size: 20rpx;
 }
 
+.main-dir {
+  display: block;
+  margin-top: 8rpx;
+  color: #ea580c;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
 .meta,
 .desc {
   display: block;
@@ -106,6 +114,55 @@ page {
   text-align: center;
   color: #b0b0b0;
   padding: 40rpx 0;
+}
+
+.review-list {
+  margin-top: 12rpx;
+}
+
+.review-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+}
+
+.review-author {
+  color: #333;
+  font-weight: 600;
+}
+
+.review-score {
+  color: #f59e0b;
+}
+
+.review-content {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #555;
+  line-height: 1.4;
+}
+
+.review-time {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 20rpx;
+  color: #aaa;
+}
+
+.goods-head {
+  font-size: 24rpx;
+  color: #888;
+  margin-bottom: 12rpx;
 }
 
 .goods-item {

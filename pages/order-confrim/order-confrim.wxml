@@ -40,7 +40,17 @@
   </view>
 
   <!-- 商品卡片 -->
-  <view class="oc-card oc-prod-card">
+  <view class="oc-card oc-prod-card" wx:if="{{bundleMode}}">
+    <view class="oc-bundle-head">
+      <text class="oc-prod-name">{{product.name}}</text>
+      <text class="oc-prod-sub">{{product.sub}}</text>
+    </view>
+    <view class="oc-bundle-line" wx:for="{{bundleLines}}" wx:key="index">
+      <text class="oc-bl-title">{{item.title}}</text>
+      <text class="oc-bl-meta">×{{item.qty}} ￥{{item.price}}</text>
+    </view>
+  </view>
+  <view class="oc-card oc-prod-card" wx:else>
     <image class="oc-prod-img" src="{{product.image}}" mode="aspectFill"></image>
     <view class="oc-prod-info">
       <text class="oc-prod-name">{{product.name}}</text>

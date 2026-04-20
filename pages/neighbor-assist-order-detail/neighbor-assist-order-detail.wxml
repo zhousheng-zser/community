@@ -1,0 +1,126 @@
+<view class="detail-wrap">
+  <view class="mock-banner" wx:if="{{isMock}}">演示模式 · 后端未返回时使用本地示例</view>
+  <scroll-view class="detail-scroll" scroll-y="true">
+    <view class="detail-hero na-gradient">
+      <view class="detail-hero-inner">
+        <view class="detail-pill">{{order.statusText || '—'}}</view>
+        <text class="detail-hero-title">{{order.title}}</text>
+        <view class="detail-no-row">
+          <text class="detail-hero-no">单号 {{order.orderNo}}</text>
+          <text class="detail-copy" bindtap="copyOrderNo">复制</text>
+        </view>
+        <text class="detail-amount" wx:if="{{order.rewardText}}">悬赏 ¥{{order.rewardText}}</text>
+      </view>
+    </view>
+
+    <view class="detail-sheet">
+      <view class="sheet-section">
+        <view class="sheet-head"><text class="sheet-title">需求信息</text></view>
+        <view class="sheet-body">
+          <view class="kv" wx:if="{{order.category}}"><text class="k">类型</text><text class="v">{{order.category}}</text></view>
+          <view class="kv" wx:if="{{order.serviceTime}}"><text class="k">期望时间</text><text class="v">{{order.serviceTime}}</text></view>
+          <view class="kv"><text class="k">描述</text><text class="v multiline">{{order.desc || '—'}}</text></view>
+        </view>
+      </view>
+
+      <view class="sheet-section">
+        <view class="sheet-head"><text class="sheet-title">地址</text></view>
+        <view class="sheet-body">
+          <text class="addr-text">{{order.address || '—'}}</text>
+          <view class="btn-row-2">
+            <button class="sheet-btn ghost" bindtap="copyAddress">复制地址</button>
+            <button class="sheet-btn primary" bindtap="openNav">路线规划</button>
+          </view>
+        </view>
+      </view>
+
+      <view class="sheet-section" wx:if="{{order.peerName}}">
+        <view class="sheet-head"><text class="sheet-title">{{peerLabel}}</text></view>
+        <view class="sheet-body">
+          <view class="kv"><text class="k">称呼</text><text class="v">{{order.peerName}}</text></view>
+          <view class="kv"><text class="k">手机</text><text class="v">{{order.peerPhoneDisplay || '—'}}</text></view>
+          <button class="call-big" bindtap="callPeer" wx:if="{{order.peerPhoneRaw}}">拨打电话</button>
+        </view>
+      </view>
+
+      <view class="sheet-section" wx:if="{{myRole === 'helper' && showServeBlock}}">
+        <view class="sheet-head"><text class="sheet-title">服务执行（接单方）</text></view>
+        <view class="sheet-body">
+          <text class="serve-hint">到达服务地点附近后请先打卡，完成后提交「服务完成」等待发布人确认。</text>
+          <view class="serve-item">
+            <text class="serve-item-title">到场打卡</text>
+            <text class="serve-item-desc" wx:if="{{checkInDisplay}}">{{checkInDisplay}}</text>
+            <button class="sheet-btn block primary" bindtap="checkIn" disabled="{{checking}}" loading="{{checking}}">
+              {{checking ? '定位中…' : '到场打卡'}}
+            </button>
+          </view>
+          <button
+            class="sheet-btn block ghost"
+            bindtap="completeService"
+            disabled="{{!canCompleteService}}"
+            wx:if="{{bucket === 'in_service'}}"
+          >提交服务完成</button>
+        </view>
+      </view>
+
+      <view class="sheet-section" wx:if="{{myRole === 'publisher'}}">
+        <view class="sheet-head"><text class="sheet-title">发布人操作</text></view>
+        <view class="sheet-body">
+          <button
+            class="sheet-btn block primary"
+            bindtap="confirmDone"
+            wx:if="{{bucket === 'pending_confirm'}}"
+          >确认订单完成</button>
+          <button
+            class="sheet-btn block ghost"
+            bindtap="goReview"
+            wx:if="{{bucket === 'completed' && !reviewed}}"
+          >去评价</button>
+          <button class="sheet-btn block ghost" bindtap="openComplaint">投诉 / 纠纷</button>
+        </view>
+      </view>
+
+      <view class="sheet-section">
+        <view class="sheet-head"><text class="sheet-title">沟通</text></view>
+        <view class="sheet-body">
+          <button class="sheet-btn block primary chat-btn" bindtap="openChat">文字 / 语音聊天</button>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-bar" wx:if="{{(myRole === 'helper' && bucket === 'pending_accept') || canAcceptOrder}}">
+    <button class="bar-btn primary" bindtap="acceptOrder">接单</button>
+  </view>
+
+  <view class="modal-mask" wx:if="{{complaintShow}}" catchtouchmove="noop">
+    <view class="modal-box">
+      <text class="modal-title">投诉 / 纠纷</text>
+      <textarea class="modal-ta" placeholder="请描述问题" value="{{complaintText}}" bindinput="onComplaintInput" maxlength="500" />
+      <view class="modal-actions">
+        <button class="modal-btn ghost" bindtap="closeComplaint">取消</button>
+        <button class="modal-btn primary" bindtap="submitComplaint">提交</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal-mask" wx:if="{{reviewShow}}" catchtouchmove="noop">
+    <view class="modal-box">
+      <text class="modal-title">评价接单邻居</text>
+      <view class="star-row">
+        <text
+          wx:for="{{[1,2,3,4,5]}}"
+          wx:key="*this"
+          class="star {{reviewScore >= item ? 'on' : ''}}"
+          bindtap="setReviewScore"
+          data-score="{{item}}"
+        >★</text>
+      </view>
+      <textarea class="modal-ta" placeholder="选填评价内容" value="{{reviewText}}" bindinput="onReviewText" maxlength="300" />
+      <view class="modal-actions">
+        <button class="modal-btn ghost" bindtap="closeReview">取消</button>
+        <button class="modal-btn primary" bindtap="submitReview">提交</button>
+      </view>
+    </view>
+  </view>
+</view>

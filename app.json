@@ -18,6 +18,7 @@
     "pages/user-edit/user-edit",
     "pages/order-detail/order-detail",
     "pages/order-confrim/order-confrim",
+    "pages/service-provider-shop/service-provider-shop",
     "pages/service/service",
     "pages/push-channel/push-channel",
     "pages/push-goods-list/push-goods-list",
@@ -38,7 +39,9 @@
     "pages/user-code/user-code",
     "pages/book-my/book-my",
     "pages/service-orders-my/service-orders-my",
+    "pages/service-order-detail/service-order-detail",
     "pages/neighbor-assist-orders-my/neighbor-assist-orders-my",
+    "pages/neighbor-assist-order-detail/neighbor-assist-order-detail",
     "pages/goods-confrim/goods-confrim",
     "pages/book-detail/book-detail",
     "pages/my-posts/my-posts",
@@ -141,6 +144,9 @@
   "permission": {
     "scope.userLocation": {
       "desc": "用于本地集市按距离展示附近店铺；选择服务地址时获取位置"
+    },
+    "scope.record": {
+      "desc": "用于帮帮/会话中录制并发送语音消息"
     }
   },
   "requiredPrivateInfos": [

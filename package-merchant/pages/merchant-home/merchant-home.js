@@ -151,6 +151,12 @@ Page({
     wx.redirectTo({ url: rp.merchantTabUrl('merchant-orders') });
   },
 
+  goDirectServiceOrders() {
+    wx.navigateTo({
+      url: '/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service'
+    });
+  },
+
   goMine() {
     wx.redirectTo({ url: rp.merchantTabUrl('merchant-mine') });
   },

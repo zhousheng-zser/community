@@ -99,6 +99,8 @@ Page({
       wx.showToast({ title: '缺少订单', icon: 'none' });
       return;
     }
+    this._portal = options.portal === 'merchant' ? 'merchant' : 'worker';
+    this._apiPrefix = this._portal === 'merchant' ? 'merchant/service-orders' : 'worker/service-orders';
     this.setData({ id: String(id) });
   },
 
@@ -173,8 +175,9 @@ Page({
     wx.showNavigationBarLoading();
     try {
       let raw;
+      const prefix = this._apiPrefix || 'worker/service-orders';
       try {
-        raw = await util.get(`worker/service-orders/${id}`);
+        raw = await util.get(`${prefix}/${id}`);
       } catch (e1) {
         if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
           raw = await util.get(`service-orders/${id}`);
@@ -286,7 +289,8 @@ Page({
           return;
         }
         const { id } = this.data;
-        this.postAction(`worker/service-orders/${id}/check-in`, {
+        const prefix = this._apiPrefix || 'worker/service-orders';
+        this.postAction(`${prefix}/${id}/check-in`, {
           latitude: loc.latitude,
           longitude: loc.longitude,
           accuracy: loc.accuracy
@@ -353,11 +357,8 @@ Page({
         const { id } = this.data;
         const next = (this.data[key] || []).concat(urls);
         this.setData({ [key]: next });
-        await this.postAction(
-          `worker/service-orders/${id}/evidence`,
-          { kind, urls },
-          { skipReload: true }
-        );
+        const prefix = this._apiPrefix || 'worker/service-orders';
+        await this.postAction(`${prefix}/${id}/evidence`, { kind, urls }, { skipReload: true });
       }
     });
   },
@@ -375,7 +376,8 @@ Page({
           wx.showToast({ title: '请填写加项说明与金额诉求', icon: 'none' });
           return;
         }
-        this.postAction(`worker/service-orders/${id}/addon-request`, {
+        const prefix = this._apiPrefix || 'worker/service-orders';
+        this.postAction(`${prefix}/${id}/addon-request`, {
           remark,
           content: remark
         });
@@ -385,7 +387,8 @@ Page({
 
   doAccept() {
     const { id } = this.data;
-    this.postAction(`worker/service-orders/${id}/accept`, {});
+    const prefix = this._apiPrefix || 'worker/service-orders';
+    this.postAction(`${prefix}/${id}/accept`, {});
   },
 
   doReject() {
@@ -395,7 +398,9 @@ Page({
       success: (res) => {
         if (res.confirm) {
           const { id } = this.data;
-          this.postAction(`worker/service-orders/${id}/reject`, { reason: '技工拒单' });
+          const prefix = this._apiPrefix || 'worker/service-orders';
+          const reason = this._portal === 'merchant' ? '服务商拒单' : '技工拒单';
+          this.postAction(`${prefix}/${id}/reject`, { reason });
         }
       }
     });
@@ -408,7 +413,10 @@ Page({
       content: '确认已完成全部约定服务？提交后订单将进入完成流程。',
       confirmText: '确认完成',
       success: (r) => {
-        if (r.confirm) this.postAction(`worker/service-orders/${id}/complete`, {});
+        if (r.confirm) {
+          const prefix = this._apiPrefix || 'worker/service-orders';
+          this.postAction(`${prefix}/${id}/complete`, {});
+        }
       }
     });
   },
@@ -433,13 +441,23 @@ Page({
     }
     wx.showLoading({ title: '打开会话', mask: true });
     try {
-      const res = await util.post('messages/order-conversation/ensure', {
-        order_no: orderNo,
-        channel: 'worker_customer',
-        worker_user_id: uid,
-        customer_user_id: customerId,
-        buyer_name: order.contactName || ''
-      });
+      const isMerchant = this._portal === 'merchant';
+      const body = isMerchant
+        ? {
+            order_no: orderNo,
+            channel: 'merchant_customer',
+            merchant_user_id: uid,
+            customer_user_id: customerId,
+            buyer_name: order.contactName || ''
+          }
+        : {
+            order_no: orderNo,
+            channel: 'worker_customer',
+            worker_user_id: uid,
+            customer_user_id: customerId,
+            buyer_name: order.contactName || ''
+          };
+      const res = await util.post('messages/order-conversation/ensure', body);
       wx.hideLoading();
       const data = res && res.data !== undefined ? res.data : res;
       const cid = data && data.conversation_id;

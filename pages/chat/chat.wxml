@@ -1,6 +1,6 @@
 <view class="container">
-  <view class="chat-order-bar" wx:if="{{orderNo}}">
-    <text class="chat-order-no">订单 {{orderNo}}</text>
+  <view class="chat-order-bar" wx:if="{{orderNo || orderId}}">
+    <text class="chat-order-no">订单 {{orderNo || orderId}}</text>
     <text class="chat-order-link" bindtap="goOrderDetail">查看订单</text>
   </view>
 
@@ -16,6 +16,7 @@
         <view class="bubble left-bubble">
           <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
           <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
+          <view class="audio-bubble" wx:if="{{item.msg_type === 'audio'}}" bindtap="playAudio" data-url="{{item.content}}">▶ 语音</view>
         </view>
       </view>
 
@@ -24,6 +25,7 @@
         <view class="bubble right-bubble">
           <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>
           <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
+          <view class="audio-bubble" wx:if="{{item.msg_type === 'audio'}}" bindtap="playAudio" data-url="{{item.content}}">▶ 语音</view>
         </view>
         <image class="avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"></image>
         <!-- 实际项目中获取自己的真实头像，这里用固定占位 -->
@@ -40,6 +42,7 @@
 
   <view class="input-area">
     <image class="icon plus" src="https://img.icons8.com/ios-glyphs/60/999999/plus-math.png" bindtap="sendImage" mode="aspectFit"></image>
+    <view class="voice-hold" catchtouchstart="onVoiceTouchStart" catchtouchend="onVoiceTouchEnd">按住说话</view>
     <input class="input-box" value="{{inputText}}" bindinput="onInput" placeholder="发消息..." confirm-type="send" bindconfirm="sendText" />
     <view class="send-btn" bindtap="sendText">发送</view>
   </view>

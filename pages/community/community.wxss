@@ -549,3 +549,58 @@ page {
   background: linear-gradient(90deg, #f64e4e, #ff8a65);
   color: #fff;
 }
+
+.assist-block {
+  margin: 0 24rpx 24rpx;
+}
+
+.assist-head {
+  font-size: 26rpx;
+  color: #64748b;
+  margin-bottom: 16rpx;
+}
+
+.assist-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+
+.assist-tag {
+  font-size: 22rpx;
+  color: #fff;
+  background: #ff7a00;
+  padding: 6rpx 14rpx;
+  border-radius: 8rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+
+.assist-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.assist-summary {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  line-height: 1.4;
+}
+
+.assist-status {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.assist-arrow {
+  font-size: 40rpx;
+  color: #cbd5e1;
+  flex-shrink: 0;
+}

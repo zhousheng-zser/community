@@ -4,10 +4,10 @@
       <image class="mh-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
       <view class="mh-text">
         <text class="mh-greet">{{greeting}}，{{displayName}}</text>
-        <text class="portal-sub mh-sub">{{merchantOk ? '管理店铺商品与买家订单' : '完成入驻即可经营店铺'}}</text>
+        <text class="portal-sub mh-sub">{{merchantOk ? '直约到家 · 店铺商品与订单' : '完成入驻即可经营店铺与直约服务'}}</text>
       </view>
     </view>
-    <text class="portal-title mh-title">商家工作台</text>
+    <text class="portal-title mh-title">服务商工作台</text>
   </view>
 
   <view class="portal-banner {{merchantOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">
@@ -70,6 +70,16 @@
         <view class="grid-btn-main">
           <text class="grid-btn-title">店铺订单</text>
           <text class="grid-btn-desc">买家下单同步</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goDirectServiceOrders">
+        <view class="grid-btn-icon">
+          <image src="/img/home_icons2/merchant_direct.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">直约服务订单</text>
+          <text class="grid-btn-desc">到家打包单 · 接单打卡</text>
         </view>
         <text class="grid-btn-arrow">›</text>
       </view>

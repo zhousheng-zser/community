@@ -3,7 +3,7 @@
   <view wx:if="{{loading && list.length === 0}}" class="hint">加载中…</view>
   <view wx:elif="{{list.length === 0}}" class="empty">{{emptyTip}}</view>
   <view wx:else class="list">
-    <view class="card" wx:for="{{list}}" wx:key="id">
+    <view class="card" wx:for="{{list}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}" data-orderno="{{item.orderNo}}">
       <view class="row-top">
         <text class="title">{{item.title}}</text>
         <text class="status">{{item.statusText}}</text>
