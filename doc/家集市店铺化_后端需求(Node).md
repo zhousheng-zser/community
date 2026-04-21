@@ -136,7 +136,7 @@ CREATE TABLE `market_orders` (
   KEY `idx_user_ctime` (`user_id`,`created_at`),
   KEY `idx_shop_ctime` (`shop_id`,`created_at`),
   KEY `idx_status` (`order_status`,`pay_status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市订单主表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地购物订单主表';
 
 -- 6) 订单明细（下单快照）
 CREATE TABLE `market_order_items` (
@@ -154,7 +154,7 @@ CREATE TABLE `market_order_items` (
   PRIMARY KEY (`id`),
   KEY `idx_order_id` (`order_id`),
   KEY `idx_order_no` (`order_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地集市订单明细';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='本地购物订单明细';
 
 -- 7) 支付流水表
 CREATE TABLE `market_pay_transactions` (

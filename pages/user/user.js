@@ -14,7 +14,7 @@ Page({
     orderMenus: [
       { name: "到家订单", icon: "service_order", url: "../service-orders-my/service-orders-my" },
       { name: "一键发布", icon: "quick_publish", url: "../order-publish/order-publish" },
-      { name: "集市订单", icon: "market_order", url: "../market-order-list/market-order-list" },
+      { name: "购物订单", icon: "market_order", url: "../market-order-list/market-order-list" },
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
       { name: "惠民卡订单", icon: "benefit_card_order", url: "../benefit-orders/benefit-orders" },
       { name: "推客订单", icon: "promoter_order", url: "../promoter-orders/promoter-orders" },

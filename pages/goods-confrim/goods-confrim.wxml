@@ -1,67 +1,75 @@
-<!--pages/good-confrim/good-confrim.wxml-->
-<view class='container'>
-  <view class='choose' bindtap='chooseAddress'>
-    <image class='icon' src='/img/icon-dzgl.png'></image>
-    <view wx:if="{{address}}" class='address'>
-      <view class='text-bold'>
-        <text class='name'>{{address.name}}</text>
-        <text>{{address.tel}}</text>
-      </view>
-      <view class='info'>
-        <text>{{address.detail}}</text>
-      </view>
-    </view>
-    <view wx:else class='address'>请选择服务地址</view>
-    <image class='icon arrow' src='/img/arrow-right.png'></image>
+<view class="container">
+
+  <!-- 配送模式选择 -->
+  <view class="delivery-mode">
+    <view class="mode-item {{deliveryType === 'express' ? 'active' : ''}}" bindtap="switchDelivery" data-type="express">配送到家</view>
+    <view class="mode-item {{deliveryType === 'pickup' ? 'active' : ''}}" bindtap="switchDelivery" data-type="pickup">门店自取</view>
   </view>
-  <view class='list'>
-    <view class='item' wx:for="{{list}}">
-      <image class='img' src='{{item.goodsPictureUrl}}' mode='scaleToFill'></image>
-      <view class='info'>
-        <text class='name'>{{item.goodsName}}</text>
-        <text class='desc'>{{item.goodsBrief}}</text>
-        <view class='price'>
-          <text class='text-red'>￥{{item.goodsRealPrice}}</text>
-          <text class='num'>X{{item.goodsNum}}</text>
+
+  <!-- 动态地址/门店区 -->
+  <view class="choose-address" bindtap="chooseAddress" wx:if="{{deliveryType === 'express'}}">
+    <view class="icon-wrap">📍</view>
+    <view class="addr-info" wx:if="{{address}}">
+      <view class="text-bold">
+        <text class="name">{{address.name}}</text>
+        <text class="tel">{{address.phone}}</text>
+      </view>
+      <view class="desc">{{address.province}}{{address.city}}{{address.district}} {{address.detail}}</view>
+    </view>
+    <view class="addr-info empty" wx:else>点击选择收货地址</view>
+    <view class="arrow">›</view>
+  </view>
+
+  <view class="choose-address pickup-view" wx:if="{{deliveryType === 'pickup'}}">
+    <view class="icon-wrap">🏪</view>
+    <view class="addr-info">
+      <view class="text-bold">自提门店：{{shopInfo.name || '社区精选商店'}}</view>
+      <view class="desc">{{shopInfo.address || '地址加载中...'}}</view>
+    </view>
+  </view>
+
+  <!-- 结算商品列表 -->
+  <view class="card goods-list">
+    <view class="shop-title">📦 订单清单</view>
+    <view class="goods-item" wx:for="{{items}}" wx:key="skuId">
+      <image class="g-img" src="{{item.image}}" mode="aspectFill"></image>
+      <view class="g-info">
+        <text class="g-name">{{item.name}}</text>
+        <text class="g-sku" wx:if="{{item.specsText}}">{{item.specsText}}</text>
+        <view class="line">
+          <text class="g-price">￥{{item.price}}</text>
+          <text class="g-num">x{{item.quantity}}</text>
         </view>
       </view>
     </view>
   </view>
-  <view class='coupon'> 
-    <text>优惠券</text>
-    <picker wx:if="{{canuseCoupons.length>0}}" class='status' bindchange="bindPickerChange" range="{{array}}">
-      <view class="picker">{{canuseCoupons[couponIndex].couponName}}</view>
-      <image class='icon' src='/img/arrow-right.png'></image>
-    </picker>
-    <view wx:else>
-      <view class="picker">无可用</view>
-      <image class='icon' src='/img/arrow-right.png'></image>
+
+  <!-- 金额与附加选项 -->
+  <view class="card extras">
+    <view class="extra-row">
+      <text class="label">商品总额</text>
+      <text class="val">￥{{goodsAmount}}</text>
+    </view>
+    <view class="extra-row">
+      <text class="label">运费</text>
+      <text class="val">+￥{{deliveryFee}}</text>
+    </view>
+    <view class="extra-row">
+      <text class="label">优惠抵扣</text>
+      <text class="val text-red">-￥{{discountAmount}}</text>
+    </view>
+    <view class="extra-row input-row">
+      <text class="label">订单备注</text>
+      <input class="msg-input" placeholder="有什么要求可以向商家留言" value="{{remark}}" bindinput="onRemarkInput"/>
     </view>
   </view>
-  <view class='money-wrap'>
-    <view class='row'>
-      <text>商品金额</text>
-      <text class='color-red'>￥{{totle}}</text>
-    </view>
-    <view class='row'>
-      <text>优惠金额</text>
-      <text class='color-red'>- ￥{{discountMoney}}</text>
-    </view>
-    <view class='row'>
-      <text>运费</text>
-      <text class='color-red'>+ ￥0.00</text>
-    </view>
-  </view>
+
 </view>
 
-<form report-submit="true" bindsubmit="submitOrder">
-<view class="pay-wrap">
-  <view class='left'>
-    <text class='totle'>实付款：￥{{realPayMoney}}</text>
+<view class="bottom-bar">
+  <view class="bar-left">
+    <text>实付款：</text>
+    <text class="total-price">￥{{payableAmount}}</text>
   </view>
-  <view class='right' >
-    <!-- <text>提交订单</text> -->
-    <button form-type='submit'>提交订单</button>
-  </view>
+  <button class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="submitOrder">提交订单</button>
 </view>
-</form>

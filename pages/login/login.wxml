@@ -1,0 +1,31 @@
+<view class="login-wrapper">
+  <view class="login-header">
+    <text class="title">欢迎使用社区服务</text>
+    <text class="subtitle">请登录后继续体验优质社区服务</text>
+  </view>
+
+  <view class="login-form">
+    <view class="input-group">
+      <image class="input-icon" src="/img/icon-phone.png" mode="aspectFit"></image>
+      <input type="number" class="input-field" placeholder="请输入手机号码" bindinput="onPhoneInput" value="{{phone}}" />
+    </view>
+    <view class="input-group">
+      <image class="input-icon" src="/img/icon-lock.png" mode="aspectFit"></image>
+      <input type="password" class="input-field" placeholder="请输入密码" bindinput="onPasswordInput" value="{{password}}" />
+    </view>
+
+    <button class="primary-btn login-btn" bindtap="doLogin">登录</button>
+    <button class="wechat-btn" open-type="getPhoneNumber" bindgetphonenumber="quickLogin">
+      <image class="wechat-icon" src="/img/icon-wechat.png" mode="aspectFit"></image>微信快捷登录
+    </button>
+  </view>
+
+  <view class="action-row">
+    <navigator url="/pages/register/register" class="action-link">新用户注册</navigator>
+    <navigator url="/pages/forget-password/forget-password" class="action-link">忘记密码?</navigator>
+  </view>
+
+  <view class="guest-wrap">
+    <text class="guest-text" bindtap="goHome">随便逛逛</text>
+  </view>
+</view>

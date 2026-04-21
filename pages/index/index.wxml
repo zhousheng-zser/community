@@ -11,17 +11,16 @@
         <text class="loc-icon">📍</text>
         <text class="loc-text">{{currentCity}}</text>
       </view>
-      <view class="search-input">
+      <view class="search-input" bindtap="goSearch">
         <icon type="search" size="13" color="#999" />
         <input
           class="search-field"
+          disabled="true"
           placeholder="{{activeTab === '本地集市' ? '搜索商家、商品' : activeTab === '惠民卡' ? '请输入商品名称或领券活动' : '搜索上门服务、技工、商家'}}"
           value="{{homeSearchKeyword}}"
-          bindinput="onHomeSearchInput"
-          confirm-type="search"
         />
       </view>
-      <view class="search-btn">搜索</view>
+      <view class="search-btn" bindtap="goSearch">搜索</view>
     </view>
   </view>
 

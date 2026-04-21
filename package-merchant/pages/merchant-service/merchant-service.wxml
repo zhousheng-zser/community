@@ -30,7 +30,7 @@
         <image class="mh-link-ico" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
         <view class="mh-link-main">
           <text class="mh-link-title">客户侧订单与退单</text>
-          <text class="mh-link-desc">买家取消、退款进度（同一账号下的集市订单）</text>
+          <text class="mh-link-desc">买家取消、退款进度（同一账号下的购物订单）</text>
         </view>
         <text class="mh-link-arrow">›</text>
       </view>

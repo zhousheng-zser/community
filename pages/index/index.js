@@ -404,6 +404,14 @@ Page({
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
   },
+  goSearch() {
+    const isMall = this.data.activeTab === '本地商城';
+    // 当跳转到搜索页面时，携带关键字以及标识是否商城
+    const kw = this.data.homeSearchKeyword || '';
+    wx.navigateTo({
+      url: `/pages/shopping-search/shopping-search?kw=${encodeURIComponent(kw)}&isMall=${isMall}`
+    });
+  },
   /** 用户主动选点：覆盖自动定位逻辑，本地集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
   handleLocationTap() {
     wx.chooseLocation({
@@ -711,16 +719,16 @@ Page({
       { id: 3004, name: "黄冰糖", price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = mapHomeIcon([
-      { name: "母婴生活馆", code: "AAAA", icon: "/img/market_icons/baby.png", url: "../market-banner/market-banner?title=母婴生活馆" },
-      { name: "家庭服务", code: "AAAB", icon: "/img/market_icons/home.png", url: "../market-banner/market-banner?title=家庭服务" },
-      { name: "超市便利", code: "AAAC", icon: "/img/market_icons/supermarket.png", url: "../market-banner/market-banner?title=超市便利" },
-      { name: "美食外卖", code: "AAAD", icon: "/img/market_icons/food.png", url: "../market-banner/market-banner?title=美食外卖" },
-      { name: "看病买药", code: "AAAE", icon: "/img/market_icons/medicine.png", url: "../market-banner/market-banner?title=看病买药" },
-      { name: "鲜花礼品", code: "AAAF", icon: "/img/market_icons/gift.png", url: "../market-banner/market-banner?title=鲜花礼品" },
-      { name: "水果蔬菜", code: "AAAG", icon: "/img/market_icons/fruit.png", url: "../market-banner/market-banner?title=水果蔬菜" },
-      { name: "服装首饰", code: "AAAH", icon: "/img/market_icons/clothes.png", url: "../market-banner/market-banner?title=服装首饰" },
-      { name: "电子数码", code: "AAAI", icon: "/img/market_icons/tech.png", url: "../market-banner/market-banner?title=电子数码" },
-      { name: "本地玩乐", code: "AAAJ", icon: "/img/market_icons/fun.png", url: "../market-banner/market-banner?title=本地玩乐" }
+      { name: "食品生鲜", code: "食品生鲜", icon: "/img/market_icons/food.png" },
+      { name: "美妆洗护", code: "美妆洗护", icon: "/img/market_icons/star.png" },
+      { name: "居家百货", code: "居家百货", icon: "/img/market_icons/supermarket.png" },
+      { name: "服装箱包", code: "服装箱包", icon: "/img/market_icons/clothes.png" },
+      { name: "母婴系列", code: "母婴系列", icon: "/img/market_icons/baby.png" },
+      { name: "家用电器", code: "家用电器", icon: "/img/market_icons/home.png" },
+      { name: "数码产品", code: "数码产品", icon: "/img/market_icons/tech.png" },
+      { name: "珠宝饰品", code: "珠宝饰品", icon: "/img/market_icons/money.png" },
+      { name: "旅游出行", code: "旅游出行", icon: "/img/market_icons/fun.png" },
+      { name: "传统工艺", code: "传统工艺", icon: "/img/market_icons/gift.png" }
     ]);
     const allMarketShops = [];
 

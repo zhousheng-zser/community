@@ -1,8 +1,13 @@
 <view class="ss-page">
+  <!-- 顶栏搜索框区域 -->
   <view class="ss-bar">
+    <!-- 切换全局搜索模式：商品 vs 店铺 -->
+    <view class="ss-mode-switch" bindtap="toggleSearchMode">
+      <text>{{searchMode === 'goods' ? '商品' : '店铺'}} ▼</text>
+    </view>
     <input
       class="ss-input"
-      placeholder="输入商品名称"
+      placeholder="输入搜索关键字"
       value="{{keyword}}"
       bindinput="onInput"
       confirm-type="search"
@@ -11,6 +16,7 @@
     <text class="ss-go" bindtap="doSearch">搜索</text>
   </view>
 
+  <!-- 搜索历史与猜你喜欢板块（未发起正式查询展示） -->
   <block wx:if="{{!searched}}">
     <view class="ss-section" wx:if="{{history.length}}">
       <view class="ss-h">
@@ -21,6 +27,7 @@
         <text class="ss-tag" wx:for="{{history}}" wx:key="*this" data-kw="{{item}}" bindtap="useKw">{{item}}</text>
       </view>
     </view>
+    
     <view class="ss-section">
       <view class="ss-h"><text>猜你喜欢（最近浏览）</text></view>
       <view class="ss-guess" wx:if="{{guess.length}}">
@@ -33,15 +40,56 @@
     </view>
   </block>
 
-  <view class="ss-section" wx:else>
-    <view class="ss-h"><text>搜索结果</text></view>
-    <view class="ss-res" wx:for="{{results}}" wx:key="id" data-id="{{item.id}}" bindtap="goGoods">
-      <image class="ss-rimg" src="{{item.image}}" mode="aspectFill" wx:if="{{item.image}}"></image>
-      <view>
-        <text class="ss-rname">{{item.name}}</text>
-        <text class="ss-rprice">¥{{item.price}}</text>
+  <!-- 正式搜索结果聚合板块 -->
+  <block wx:else>
+    <!-- 若是商品搜索，展示四重过滤控制条：智能排序、好评、低价、高销量 -->
+    <view class="ss-filter-row" wx:if="{{searchMode === 'goods'}}">
+      <text class="ss-filter-item {{activeSort === 'smart' ? 'active' : ''}}" bindtap="switchSort" data-key="smart">综合排序</text>
+      <text class="ss-filter-item {{activeSort === 'rating' ? 'active' : ''}}" bindtap="switchSort" data-key="rating">好评优先</text>
+      <text class="ss-filter-item {{activeSort === 'price_asc' ? 'active' : ''}}" bindtap="switchSort" data-key="price_asc">价格最低</text>
+      <text class="ss-filter-item {{activeSort === 'sales' ? 'active' : ''}}" bindtap="switchSort" data-key="sales">销量最高</text>
+    </view>
+    
+    <!-- 商品列表组件 -->
+    <view class="ss-goods-list" wx:if="{{searchMode === 'goods' && results.length > 0}}">
+      <view class="ss-goods-card" wx:for="{{results}}" wx:key="id" data-id="{{item.id}}" bindtap="goGoods">
+        <image class="g-img" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="g-body">
+          <text class="g-name">{{item.name}}</text>
+          <view class="g-meta">
+            <view class="g-prices">
+              <text class="sale-price">¥{{item.price}}</text>
+              <text class="orig-price" wx:if="{{item.origPrice}}">¥{{item.origPrice}}</text>
+            </view>
+            <text class="g-sales">已售{{item.sales || 0}}</text>
+          </view>
+        </view>
       </view>
     </view>
-    <view class="ss-empty" wx:if="{{!results.length}}">无结果，可换个关键词</view>
-  </view>
+
+    <!-- 商店搜索列表组件 -->
+    <view class="ss-shop-list" wx:if="{{searchMode === 'shop' && results.length > 0}}">
+      <view class="ss-shop-card" wx:for="{{results}}" wx:key="id" data-id="{{item.id}}" bindtap="goShop">
+        <view class="shop-head">
+          <image class="shop-avatar" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="shop-info">
+            <text class="shop-name">{{item.name}}</text>
+            <view class="shop-tags">
+              <text class="tag">{{item.type || '优选商家'}}</text>
+              <text class="followers">{{item.followers || 0}}人关注</text>
+            </view>
+          </view>
+          <view class="btn-enter">进店</view>
+        </view>
+        <view class="shop-goods-preview">
+          <image src="{{g.image}}" wx:for="{{item.goods}}" wx:for-item="g" wx:key="id" wx:if="{{index < 3}}" mode="aspectFill"></image>
+        </view>
+      </view>
+    </view>
+
+    <!-- 通用空箱状态显示区 -->
+    <view class="ss-empty" wx:if="{{results.length === 0}}">
+      很抱歉，没有找到相关的大橘，换个词试试吧~
+    </view>
+  </block>
 </view>

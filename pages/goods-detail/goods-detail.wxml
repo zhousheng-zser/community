@@ -1,28 +1,142 @@
-<!--pages/service/service.wxml-->
-<view class='container'>
-  <image class='topimg' src='{{good.mainPicture}}' mode='widthFix'></image>
-  <view class='baseinfo'>
-    <text class='name'>{{good.goodsName}}</text>
-    <text class='desc'>{{good.goodsBrief}}</text>
-    <view class='price' wx:if="{{good.goodsRealPrice}}">
-      <text class='text-red'>{{good.goodsRealPrice}}</text>
-      <text wx:if="{{good.priceUnit}}">{{good.priceUnit}}</text>
+<view class="container {{skuPopup.show || cartPopup.show ? 'no-scroll' : ''}}">
+
+  <!-- 顶部主图轮播 -->
+  <swiper class="goods-swiper" indicator-dots="true" autoplay="true" circular="true">
+    <swiper-item wx:for="{{goods.main_images}}" wx:key="*this">
+      <image src="{{item}}" class="swiper-img" mode="aspectFill"></image>
+    </swiper-item>
+  </swiper>
+
+  <!-- 商品基础信息 -->
+  <view class="info-card">
+    <view class="price-row">
+      <text class="price-symbol">￥</text>
+      <text class="price-num">{{goods.price_range}}</text>
+      <text class="sales-num">已售 {{goods.sales}}件</text>
+    </view>
+    <view class="goods-name">{{goods.name}}</view>
+  </view>
+
+  <!-- 规格选择入口 -->
+  <view class="card sku-entry" bindtap="openSkuPopup" wx:if="{{goods.sku_tree && goods.sku_tree.length > 0}}">
+    <text class="sku-label">选择规格</text>
+    <text class="sku-val">{{selectedSku ? selectedSku.specs.join(' / ') : '请选择 商品规格'}}</text>
+    <text class="arrow">›</text>
+  </view>
+
+  <!-- 商家卡片 -->
+  <view class="card shop-card" bindtap="goShop">
+    <view class="shop-header">
+      <view class="shop-icon">🏪</view>
+      <view class="shop-name">{{goods.shopName}}</view>
+    </view>
+    <view class="shop-entry">进入店铺 ›</view>
+  </view>
+
+  <!-- 商品图文详情 -->
+  <view class="card detail-card">
+    <view class="detail-title">商品详情</view>
+    <view class="detail-content">
+      <rich-text nodes="{{goods.desc_html}}"></rich-text>
     </view>
   </view>
-  <view class='section'>
-    <text class='title'>服务介绍：</text>
-    <rich-text nodes="{{good.goodsDesc}}"></rich-text>
-    <!-- <view class='content'>{{good.goodsDesc}}</view> -->
+
+  <!-- 底部占位 -->
+  <view class="bottom-space"></view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar">
+    <view class="bar-left">
+      <view class="kefu-btn" bindtap="callMerchant">
+        <text class="icon">📞</text>
+        <text class="text">客服</text>
+      </view>
+      <view class="cart-btn" bindtap="toggleCartDrawer">
+        <text class="icon">🛒</text>
+        <text class="text">购物车</text>
+        <text class="badge" wx:if="{{cartTotalNum > 0}}">{{cartTotalNum}}</text>
+      </view>
+    </view>
+    <view class="bar-right">
+      <button class="add-cart" bindtap="openSkuPopup" data-type="cart">加入购物车</button>
+      <button class="buy-now" bindtap="openSkuPopup" data-type="buy">直接购买</button>
+    </view>
   </view>
-  <view class='btn-wrap'>
-  <navigator class='cart' url='../goods-cart/goods-cart'>
-  <view class='icon-wrap'>
-  <image class='icon' src='/img/mycart.png'></image>
-  <text wx:if="{{goodsNum>0}}" class='num'>{{goodsNum}}</text>
+
+  <!-- ================= SKU 半屏弹窗 ================= -->
+  <view class="mask" wx:if="{{skuPopup.show}}" bindtap="closeSkuPopup"></view>
+  <view class="sku-popup {{skuPopup.show ? 'show' : ''}}">
+    <view class="sku-popup-head">
+      <image class="sku-cover" src="{{selectedSku.image || goods.main_images[0]}}" mode="aspectFill"></image>
+      <view class="sku-price-info">
+        <text class="sku-price">￥{{selectedSku ? selectedSku.price : goods.price_range}}</text>
+        <text class="sku-stock" wx:if="{{selectedSku}}">库存: {{selectedSku.stock}}件</text>
+        <text class="sku-select-msg">已选：{{selectedSku ? selectedSku.specs.join(' / ') : '...'}}</text>
+      </view>
+      <view class="sku-close" bindtap="closeSkuPopup">✕</view>
+    </view>
+    
+    <scroll-view class="sku-popup-body" scroll-y>
+      <!-- 动态规格树 -->
+      <view class="sku-group" wx:for="{{goods.sku_tree}}" wx:for-index="gIdx" wx:for-item="group" wx:key="group">
+        <view class="sku-group-title">{{group.group}}</view>
+        <view class="sku-items">
+          <text 
+            class="sku-item {{item === selectedSpecs[gIdx] ? 'active' : ''}}" 
+            wx:for="{{group.items}}" wx:key="*this"
+            bindtap="selectSpec" data-gidx="{{gIdx}}" data-val="{{item}}"
+          >{{item}}</text>
+        </view>
+      </view>
+      <!-- 数量步进器 -->
+      <view class="sku-qty-row">
+        <text class="qty-label">购买数量</text>
+        <view class="stepper">
+          <text class="step-btn {{skuPopup.qty <= 1 ? 'disabled' : ''}}" bindtap="stepMinus">-</text>
+          <input class="step-input" type="number" value="{{skuPopup.qty}}" bindinput="onQtyInput"/>
+          <text class="step-btn" bindtap="stepPlus">+</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="sku-popup-foot">
+      <button class="confirm-btn" bindtap="confirmSku">确定</button>
+    </view>
   </view>
-  <text class='text'>购物车</text>
-  </navigator>
-  <button wx:if="{{tel}}" bindtap='addCart'>加入购物车</button>
-  <button wx:else open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">加入购物车</button>
+
+  <!-- ================= 门店私有购物车抽屉 ================= -->
+  <view class="mask" wx:if="{{cartPopup.show}}" bindtap="toggleCartDrawer" style="z-index: 100;"></view>
+  <view class="cart-drawer {{cartPopup.show ? 'show' : ''}}">
+    <view class="cart-drawer-head">
+      <view class="cart-drawer-title">已选商品 <text class="desc">({{goods.shopName}})</text></view>
+      <view class="cart-drawer-clear" bindtap="clearCart">
+        <text>🗑 清空购物车</text>
+      </view>
+    </view>
+    <scroll-view class="cart-drawer-body" scroll-y>
+      <view class="cart-empty" wx:if="{{cartItems.length === 0}}">购物车还是空的，快去挑选吧~</view>
+      <view class="cart-item" wx:for="{{cartItems}}" wx:key="cartIndex">
+        <view class="citem-info">
+          <text class="citem-name">{{item.name}}</text>
+          <text class="citem-sku">{{item.specsText}}</text>
+          <text class="citem-price">￥{{item.price}}</text>
+        </view>
+        <view class="stepper mini">
+          <text class="step-btn" bindtap="cartMinus" data-idx="{{index}}">-</text>
+          <text class="step-val">{{item.quantity}}</text>
+          <text class="step-btn" bindtap="cartPlus" data-idx="{{index}}">+</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="cart-drawer-foot" wx:if="{{cartItems.length > 0}}">
+      <view class="cfoot-left">
+        <text class="cfoot-symbol">￥</text>
+        <text class="cfoot-price">{{cartTotalPrice}}</text>
+      </view>
+      <view class="cfoot-right" bindtap="checkoutCart">
+        去结算
+      </view>
+    </view>
   </view>
+
 </view>

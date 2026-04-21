@@ -1,81 +1,107 @@
 <view class="container">
-  <view class="mock-banner" wx:if="{{isMock}}">演示订单 · 数据为虚构，不请求后端</view>
-  <view class="card head">
-    <view class="row">
-      <text class="label">订单号</text>
-      <text class="value">{{orderNo}}</text>
-    </view>
-    <view class="row">
-      <text class="label">订单状态</text>
-      <text class="value">{{order_status || '-'}}</text>
-    </view>
-    <view class="row">
-      <text class="label">支付状态</text>
-      <text class="value">{{pay_status || '-'}}</text>
+  <!-- 状态头部 -->
+  <view class="status-head">
+    <view class="st-main">
+      <text class="st-text">{{statusText}}</text>
+      <!-- 可以根据状态添加辅标题 -->
     </view>
   </view>
 
-  <view class="card">
-    <view class="row">
-      <text class="label">应付金额</text>
-      <text class="value">￥{{payable_amount || '0.00'}}</text>
+  <!-- 待收货/待评价展示物流缩略 -->
+  <view class="card logistics-preview" wx:if="{{status === 'pending_receipt' || status === 'pending_review'}}" bindtap="viewLogistics">
+    <view class="log-icon">🚚</view>
+    <view class="log-info">
+      <text class="log-desc">您的订单已到达【社区集散中心】</text>
+      <text class="log-time">2026-11-11 12:30:00</text>
     </view>
-    <view class="row">
-      <text class="label">商品金额</text>
-      <text class="value">￥{{goods_amount || '0.00'}}</text>
-    </view>
-    <view class="row">
-      <text class="label">运费</text>
-      <text class="value">￥{{delivery_fee || '0.00'}}</text>
-    </view>
+    <text class="arrow">></text>
   </view>
 
   <view class="card">
     <text class="sectionTitle">收货信息</text>
     <view class="row">
       <text class="label">收货人</text>
-      <text class="value">{{receiver_name || '-'}}</text>
+      <text class="value">{{receiver_name || '-'}} {{receiver_phone || ''}}</text>
     </view>
     <view class="row">
-      <text class="label">手机号</text>
-      <text class="value">{{receiver_phone || '-'}}</text>
-    </view>
-    <view class="row">
-      <text class="label">地址</text>
+      <text class="label">收货地址</text>
       <text class="value">{{receiver_address || '-'}}</text>
     </view>
   </view>
 
-  <view class="card">
-    <text class="sectionTitle">订单明细</text>
+  <view class="card goods-card">
+    <view class="shop-title" bindtap="contactMerchant">
+      <text>🏪 {{shopName || '平台严选商家'}}</text>
+      <text class="arrow">联系商家 ></text>
+    </view>
     <view class="item" wx:for="{{items}}" wx:key="id">
-      <image class="img" mode="aspectFill" src="{{itemImage(item)}}"></image>
+      <image class="img" mode="aspectFill" src="{{item.image}}"></image>
       <view class="info">
-        <text class="name">{{item.goods_name_snapshot || item.goodsNameSnapshot || item.name || '-'}}</text>
+        <text class="name">{{item.name}}</text>
         <view class="line">
+          <text class="price">￥{{item.price}}</text>
           <text class="muted">x{{item.quantity}}</text>
-          <text class="price">￥{{item.amount}}</text>
         </view>
       </view>
+      <!-- 若是待发货以上，可单件商品售后 -->
+      <view class="item-actions" wx:if="{{status !== 'pending_payment'}}">
+        <button class="after-sale-btn" bindtap="applyRefund" data-goodsid="{{item.id}}" wx:if="{{status === 'pending_shipment' || status === 'pending_review'}}">申请售后</button>
+      </view>
+    </view>
+
+    <view class="fee-row"><text>商品金额</text><text>￥{{goodsAmount}}</text></view>
+    <view class="fee-row"><text>运费</text><text>+￥{{deliveryFee}}</text></view>
+    <view class="fee-row"><text>优惠抵扣</text><text class="discount">-￥{{discountAmount}}</text></view>
+    <view class="fee-row total"><text>实付款</text><text class="sum-price">￥{{payableAmount}}</text></view>
+  </view>
+
+  <view class="card">
+    <text class="sectionTitle">订单信息</text>
+    <view class="row">
+      <text class="label">订单编号</text>
+      <text class="value copy" bindtap="copyOrderNo">{{orderNo}} <text class="copy-btn">复制</text></text>
+    </view>
+    <view class="row">
+      <text class="label">下单时间</text>
+      <text class="value">{{createdAt || '-'}}</text>
+    </view>
+    <view class="row" wx:if="{{payTime}}">
+      <text class="label">支付时间</text>
+      <text class="value">{{payTime}}</text>
+    </view>
+    <view class="row" wx:if="{{deliveryTime}}">
+      <text class="label">发货时间</text>
+      <text class="value">{{deliveryTime}}</text>
     </view>
   </view>
 
-  <view class="order-chat-bar merchant-acts {{order_status === 'pending_payment' ? 'above-pay' : ''}}" wx:if="{{isMerchantOrder}}">
-    <view class="merch-act-row">
-      <button class="chatOrderBtn sm" bindtap="openChatBuyer">联系买家</button>
-      <button class="chatOrderBtn sm" bindtap="openChatRider">联系骑手</button>
-      <button class="chatOrderBtn sm ghost" bindtap="openRiderMapPage">骑手位置</button>
-    </view>
-    <text class="chatOrderHint">买卖家 / 骑手会话 · 支持文字与图片</text>
-  </view>
-  <view class="order-chat-bar {{order_status === 'pending_payment' ? 'above-pay' : ''}}" wx:else>
-    <button class="chatOrderBtn" bindtap="openOrderChat">联系商家</button>
-    <text class="chatOrderHint">本单专属会话 · 支持文字与图片</text>
-  </view>
+  <view class="bottomBar">
+    <block wx:if="{{status === 'pending_payment'}}">
+      <button class="cancelBtn ghost" bindtap="cancelOrder">取消订单</button>
+      <button class="payBtn primary" bindtap="payNow">立即支付</button>
+    </block>
 
-  <view class="bottomBar" wx:if="{{order_status === 'pending_payment'}}">
-    <button class="payBtn" bindtap="payNow">立即支付</button>
-    <button class="cancelBtn ghost" bindtap="cancelOrder">取消订单</button>
+    <block wx:if="{{status === 'pending_shipment'}}">
+      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="ghost" bindtap="applyRefund">申请退款</button>
+    </block>
+
+    <block wx:if="{{status === 'pending_receipt'}}">
+      <button class="ghost" bindtap="viewLogistics">查看物流</button>
+      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="primary" bindtap="confirmReceipt">确认收货</button>
+    </block>
+
+    <block wx:if="{{status === 'pending_review'}}">
+      <button class="ghost" bindtap="deleteOrder">删除订单</button>
+      <button class="ghost" bindtap="viewLogistics">查看物流</button>
+      <button class="primary" bindtap="goRate">去评价</button>
+    </block>
+
+    <block wx:if="{{status === 'after_sales'}}">
+      <button class="ghost" bindtap="contactCustomerService">联系客服</button>
+      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="ghost" wx:if="{{refundStatus==='pending'}}" bindtap="cancelRefund">取消售后</button>
+    </block>
   </view>
 </view>
-

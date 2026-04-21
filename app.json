@@ -74,7 +74,10 @@
     "pages/platform-kefu/platform-kefu",
     "pages/wallet-transactions/wallet-transactions",
     "pages/shopping-search/shopping-search",
-    "pages/consumer-rights/consumer-rights"
+    "pages/consumer-rights/consumer-rights",
+    "pages/login/login",
+    "pages/register/register",
+    "pages/forget-password/forget-password"
   ],
   "subPackages": [
     {

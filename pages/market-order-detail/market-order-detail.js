@@ -1,304 +1,167 @@
-const app = getApp();
 const util = require('../../utils/util.js');
-const marketPay = require('../../utils/marketPay.js');
-const merchantOrderMock = require('../../utils/merchantOrderMock.js');
+
+const STATUS_MAP = {
+  pending_payment: { text: '待付款', class: 'primary' },
+  pending_shipment: { text: '待发货', class: 'primary' },
+  pending_receipt: { text: '待收货', class: 'primary' },
+  pending_review: { text: '待评价', class: 'primary' },
+  after_sales: { text: '售后中', class: 'done' },
+  refund_pending: { text: '待退款', class: 'primary' },
+  refund_rejected: { text: '拒绝退款', class: 'cancel' },
+  refund_success: { text: '退款成功', class: 'done' }
+};
 
 Page({
   data: {
     orderNo: '',
-    order: null,
+    status: '',
+    statusText: '',
+    shopName: '',
     items: [],
-    autoRefreshTimer: null,
-    autoRefreshTimes: 0,
-    isMock: false,
-    shopIdForChat: null,
-    shopNameForChat: '',
-    fromMerchant: false,
-    isMerchantOrder: false
+    
+    // 金额信息
+    goodsAmount: '0.00',
+    deliveryFee: '0.00',
+    discountAmount: '0.00',
+    payableAmount: '0.00',
+
+    // 订单时序信息
+    createdAt: '',
+    payTime: '',
+    deliveryTime: '',
+
+    // 物流/收货信息
+    receiver_name: '',
+    receiver_phone: '',
+    receiver_address: '',
+
+    // 其他
+    refundStatus: ''
   },
 
   onLoad(options) {
-    const orderNo = options.orderNo || options.order_no || '';
-    const isMock =
-      (options && options.mock === '1') || merchantOrderMock.isDemoOrderNo(orderNo);
-    const fromMerchant = options && options.from === 'merchant';
-    this.setData({ orderNo, isMock, fromMerchant });
-    this.loadOrder(orderNo, isMock);
-    if (!isMock) {
-      this.startAutoRefresh(orderNo);
-    }
-    this.refreshMerchantFlag();
-  },
-
-  onShow() {
-    this.refreshMerchantFlag();
-  },
-
-  refreshMerchantFlag() {
-    const u = app.globalData.user || {};
-    const isMerchantOrder =
-      !!this.data.fromMerchant || !!(u.shop_id || u.shopId);
-    this.setData({ isMerchantOrder });
-  },
-
-  onUnload() {
-    const timer = this.data.autoRefreshTimer;
-    if (timer) {
-      clearTimeout(timer);
+    if (options.orderNo) {
+      this.setData({ orderNo: options.orderNo });
+      this.loadOrderDetail();
     }
   },
 
-  async loadOrder(orderNo, isMockFlag) {
-    if (!orderNo) return;
-    const isMock = isMockFlag !== undefined ? isMockFlag : this.data.isMock;
-    if (isMock) {
-      const data = merchantOrderMock.getMockDetailData(orderNo);
-      const order = data.order;
-      const items = data.items || [];
-      const normalizedOrder = {
-        order_status: order.order_status || order.orderStatus || '',
-        pay_status: order.pay_status || order.payStatus || '',
-        goods_amount: order.goods_amount,
-        delivery_fee: order.delivery_fee,
-        discount_amount: order.discount_amount,
-        payable_amount: order.payable_amount,
-        receiver_name: order.receiver_name,
-        receiver_phone: order.receiver_phone,
-        receiver_address: order.receiver_address
-      };
-      this.setData({
-        order,
-        items,
-        shopIdForChat: order.shop_id != null ? order.shop_id : order.shopId,
-        shopNameForChat: order.shop_name || order.shopName || '',
-        ...normalizedOrder
-      });
-      return normalizedOrder;
-    }
+  async loadOrderDetail() {
+    wx.showLoading({ title: '加载中...' });
     try {
-      const res = await util.get(`market/orders/${orderNo}`);
-      const data = res && res.data ? res.data : res;
-      const order = (data && data.order) ? data.order : data;
-      const items = (data && Array.isArray(data.items)) ? data.items : [];
-
-      // 统一字段名，避免前端模板里写过多兜底
-      const normalizedOrder = {
-        order_status: order.order_status || order.orderStatus || '',
-        pay_status: order.pay_status || order.payStatus || '',
-        goods_amount: order.goods_amount,
-        delivery_fee: order.delivery_fee,
-        discount_amount: order.discount_amount,
-        payable_amount: order.payable_amount,
-        receiver_name: order.receiver_name,
-        receiver_phone: order.receiver_phone,
-        receiver_address: order.receiver_address
-      };
-
-      this.setData({
-        order,
-        items,
-        shopIdForChat: order.shop_id != null ? order.shop_id : order.shopId,
-        shopNameForChat: order.shop_name || order.shopName || '',
-        ...normalizedOrder
-      });
-
-      return normalizedOrder;
+      const res = await util.get('api/market/order/detail', { order_no: this.data.orderNo });
+      wx.hideLoading();
+      this.normalizeDetail(res.data || res);
     } catch (e) {
-      wx.showToast({ title: '订单加载失败', icon: 'none' });
-      return null;
+      wx.hideLoading();
+      this.mockLoad();
     }
   },
 
-  async startAutoRefresh(orderNo) {
-    // 避免用户触发回调稍晚导致“已支付但页面还显示 unpaid”
-    const maxTimes = 20;
-    const intervalMs = 2000;
-    let count = 0;
+  normalizeDetail(o) {
+    const statusObj = STATUS_MAP[o.status] || { text: o.status || '未知订单状态' };
+    this.setData({
+      status: o.status,
+      statusText: o.refundStatus ? STATUS_MAP[o.refundStatus].text : statusObj.text,
+      shopName: o.shopName || o.shop_name || '社区精选商家',
+      
+      goodsAmount: String(o.goods_amount || '0.00'),
+      deliveryFee: String(o.delivery_fee || '0.00'),
+      discountAmount: String(o.discount_amount || '0.00'),
+      payableAmount: String(o.payable_amount || o.amount || '0.00'),
 
-    const tick = async () => {
-      count += 1;
-      const normalized = await this.loadOrder(orderNo);
-      const orderStatus = normalized && normalized.order_status;
-      const payStatus = normalized && normalized.pay_status;
+      createdAt: o.created_at || '2026-01-01 12:00:00',
+      payTime: o.pay_time || '',
+      deliveryTime: o.delivery_time || '',
 
-      if (orderStatus === 'paid' && payStatus === 'paid') {
-        return;
-      }
+      receiver_name: o.receiver_name || '张三',
+      receiver_phone: o.receiver_phone || '13888888888',
+      receiver_address: o.receiver_address || '浙江省杭州市西湖区某某小区 1幢1单元101',
 
-      if (count >= maxTimes) {
-        return;
-      }
-      const timer = setTimeout(tick, intervalMs);
-      this.setData({ autoRefreshTimer: timer, autoRefreshTimes: count });
-    };
+      refundStatus: o.refundStatus || o.refund_status,
 
-    tick();
-  },
-
-  itemImage(item) {
-    return item.goods_image_snapshot || item.goodsImageSnapshot || item.image || '';
-  },
-
-  /** 待支付订单：再次调起微信支付（与确认页共用 marketPay，避免无入口） */
-  async payNow() {
-    if (this.data.isMock) {
-      wx.showToast({ title: '演示模式：不发起真实支付', icon: 'none' });
-      return;
-    }
-    const { orderNo } = this.data;
-    if (!orderNo) return;
-    await marketPay.startMarketPaymentFlow(orderNo, {
-      redirectToDetail: false,
-      onPaid: () => this.loadOrder(orderNo)
+      items: (o.goods || []).map(g => ({
+        id: g.id,
+        name: g.name || g.goods_name,
+        price: String(g.price || '0.00'),
+        quantity: g.quantity || 1,
+        image: g.image || g.main_image || '/img/placeholders/home_cleaning.png'
+      }))
     });
   },
 
-  /** 买家联系商家；商家端请用 openChatBuyer */
-  async openOrderChat() {
-    const { orderNo, order, isMock, shopIdForChat, shopNameForChat, isMerchantOrder } = this.data;
-    if (!orderNo) return;
-    const shopId = shopIdForChat != null ? shopIdForChat : (order && (order.shop_id || order.shopId)) || 1;
-    const shopName = shopNameForChat || (order && (order.shop_name || order.shopName)) || '';
-    wx.showLoading({ title: '打开会话', mask: true });
-    try {
-      const payload = {
-        order_no: orderNo,
-        shop_id: shopId,
-        shop_name: shopName,
-        buyer_name: (order && order.receiver_name) || '',
-        channel: 'shop_buyer'
-      };
-      if (isMerchantOrder && order) {
-        const bid = order.buyer_user_id || order.buyer_id;
-        if (bid != null) payload.buyer_user_id = bid;
-      }
-      const res = await util.post('messages/order-conversation/ensure', payload);
-      wx.hideLoading();
-      const data = res && res.data !== undefined ? res.data : res;
-      const cid = data && data.conversation_id;
-      if (!cid) {
-        wx.showToast({ title: '无法建立会话', icon: 'none' });
-        return;
-      }
-      const title = shopName || '商家';
-      wx.navigateTo({
-        url: `/pages/chat/chat?conversationId=${cid}&name=${encodeURIComponent(title)}&orderNo=${encodeURIComponent(orderNo)}`
-      });
-    } catch (e) {
-      wx.hideLoading();
-      if (isMock) {
-        wx.showToast({ title: '演示环境需连接消息服务', icon: 'none' });
-      } else {
-        wx.showToast({ title: '暂无法打开会话', icon: 'none' });
-      }
-    }
-  },
-
-  async openChatBuyer() {
-    const { orderNo, order, isMock, shopIdForChat, shopNameForChat } = this.data;
-    if (!orderNo) return;
-    const shopId = shopIdForChat != null ? shopIdForChat : (order && (order.shop_id || order.shopId));
-    if (!shopId) {
-      wx.showToast({ title: '缺少店铺信息', icon: 'none' });
-      return;
-    }
-    const shopName = shopNameForChat || (order && (order.shop_name || order.shopName)) || '';
-    const bid = order && (order.buyer_user_id || order.buyer_id);
-    if (!bid) {
-      wx.showToast({ title: '缺少买家信息', icon: 'none' });
-      return;
-    }
-    wx.showLoading({ title: '打开会话', mask: true });
-    try {
-      const res = await util.post('messages/order-conversation/ensure', {
-        order_no: orderNo,
-        shop_id: shopId,
-        shop_name: shopName,
-        channel: 'shop_buyer',
-        buyer_user_id: bid,
-        buyer_name: (order && order.receiver_name) || ''
-      });
-      wx.hideLoading();
-      const data = res && res.data !== undefined ? res.data : res;
-      const cid = data && data.conversation_id;
-      if (!cid) {
-        wx.showToast({ title: '无法建立会话', icon: 'none' });
-        return;
-      }
-      wx.navigateTo({
-        url: `/pages/chat/chat?conversationId=${cid}&name=${encodeURIComponent('买家')}&orderNo=${encodeURIComponent(orderNo)}`
-      });
-    } catch (e) {
-      wx.hideLoading();
-      if (isMock) wx.showToast({ title: '演示环境需连接消息服务', icon: 'none' });
-      else wx.showToast({ title: '暂无法打开会话', icon: 'none' });
-    }
-  },
-
-  async openChatRider() {
-    const { orderNo, order, isMock, shopIdForChat, shopNameForChat } = this.data;
-    if (!orderNo) return;
-    const shopId = shopIdForChat != null ? shopIdForChat : (order && (order.shop_id || order.shopId));
-    const rid = order && (order.rider_user_id || order.delivery_user_id);
-    const rname = (order && order.rider_name) || '骑手';
-    if (!shopId || !rid) {
-      wx.showToast({ title: '暂无骑手信息', icon: 'none' });
-      return;
-    }
-    const shopName = shopNameForChat || (order && (order.shop_name || order.shopName)) || '';
-    wx.showLoading({ title: '打开会话', mask: true });
-    try {
-      const res = await util.post('messages/order-conversation/ensure', {
-        order_no: orderNo,
-        shop_id: shopId,
-        shop_name: shopName,
-        channel: 'shop_rider',
-        rider_user_id: rid,
-        rider_name: rname
-      });
-      wx.hideLoading();
-      const data = res && res.data !== undefined ? res.data : res;
-      const cid = data && data.conversation_id;
-      if (!cid) {
-        wx.showToast({ title: '无法建立会话', icon: 'none' });
-        return;
-      }
-      wx.navigateTo({
-        url: `/pages/chat/chat?conversationId=${cid}&name=${encodeURIComponent(rname)}&orderNo=${encodeURIComponent(orderNo)}`
-      });
-    } catch (e) {
-      wx.hideLoading();
-      if (isMock) wx.showToast({ title: '演示环境需连接消息服务', icon: 'none' });
-      else wx.showToast({ title: '暂无法打开会话', icon: 'none' });
-    }
-  },
-
-  openRiderMapPage() {
-    const { orderNo, order, shopIdForChat } = this.data;
-    const shopId = shopIdForChat != null ? shopIdForChat : (order && (order.shop_id || order.shopId));
-    if (!orderNo) return;
-    wx.navigateTo({
-      url: `/pages/rider-location/rider-location?orderNo=${encodeURIComponent(orderNo)}&shopId=${shopId != null ? encodeURIComponent(shopId) : ''}`
+  mockLoad() {
+    this.normalizeDetail({
+      orderNo: this.data.orderNo,
+      status: 'pending_receipt',
+      shopName: '测试演示店铺',
+      goods_amount: '129.00',
+      delivery_fee: '10.00',
+      discount_amount: '5.00',
+      payable_amount: '134.00',
+      created_at: '2026-11-10 10:00:00',
+      pay_time: '2026-11-10 10:05:00',
+      delivery_time: '2026-11-11 08:00:00',
+      goods: [
+        { id: 101, name: '演示测试商品(洗发水)', price: '129.00', quantity: 1 }
+      ]
     });
   },
 
-  async cancelOrder() {
-    if (this.data.isMock) {
-      wx.showToast({ title: '演示模式：未请求接口', icon: 'none' });
-      return;
-    }
-    const { orderNo } = this.data;
-    if (!orderNo) return;
-    wx.showLoading({ title: '取消中...', mask: true });
-    try {
-      await util.post(`market/orders/${orderNo}/cancel`, {});
-      wx.hideLoading();
-      wx.showToast({ title: '取消成功', icon: 'none' });
-      await this.loadOrder(orderNo);
-    } catch (e) {
-      wx.hideLoading();
-      wx.showToast({ title: '取消失败', icon: 'none' });
-    }
+  copyOrderNo() {
+    wx.setClipboardData({
+      data: this.data.orderNo,
+      success: () => wx.showToast({ title: '单号已复制', icon: 'none' })
+    });
+  },
+
+  // ---- 动作区 ----
+  cancelOrder() {
+    wx.showModal({
+      title: '取消订单', content: '确定取消吗？',
+      success: (res) => { if(res.confirm) wx.showToast({ title: '已取消', icon: 'none' }); }
+    });
+  },
+  payNow() {
+    wx.showToast({ title: '调起微信支付', icon: 'none' });
+  },
+
+  applyRefund(e) {
+    // 可能是局部退款也可能是整单退款
+    const goodsId = e.currentTarget.dataset.goodsid;
+    wx.navigateTo({ url: `/pages/after-sale-apply/after-sale-apply?orderNo=${this.data.orderNo}&goodsId=${goodsId || ''}` });
+  },
+  contactMerchant() {
+    wx.showToast({ title: '拨打商家电话: 13800000000', icon: 'none' });
+  },
+  
+  viewLogistics() {
+    wx.navigateTo({ url: `/pages/order-logistics/order-logistics?orderNo=${this.data.orderNo}` });
+  },
+  confirmReceipt() {
+    wx.showModal({
+      title: '确认收货', content: '确认收到所有商品了吗？',
+      success: (res) => { if(res.confirm) wx.showToast({ title: '已确认收货' }); }
+    });
+  },
+
+  deleteOrder() {
+    wx.showModal({
+      title: '删除订单', content: '不可恢复，确定删除？',
+      success: (res) => { if(res.confirm) wx.navigateBack(); }
+    });
+  },
+  goRate() {
+    wx.showToast({ title: '打分评价页在建中', icon: 'none' });
+  },
+
+  contactCustomerService() {
+    wx.showToast({ title: '唤起官方在线客服', icon: 'none' });
+  },
+  cancelRefund() {
+    wx.showModal({
+      title: '取消售后', content: '确定放弃售后申请吗？',
+      success: (res) => { if(res.confirm) wx.showToast({ title: '已撤销', icon:'none' }); }
+    });
   }
 });
-

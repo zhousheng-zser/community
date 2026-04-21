@@ -17,7 +17,7 @@
         <text class="mine-arrow">›</text>
       </navigator>
       <navigator class="mine-row" url="/pages/market-order-list/market-order-list">
-        <text class="mine-label">我的集市订单（买家视角）</text>
+        <text class="mine-label">我的购物订单（买家视角）</text>
         <text class="mine-arrow">›</text>
       </navigator>
     </view>

@@ -74,7 +74,7 @@ Page({
     this.setData({ list: base, emptyTip, summaryLine });
   },
 
-  noop() {},
+  noop() { },
 
   openDetail(e) {
     const no = e.currentTarget.dataset.no;
@@ -202,7 +202,7 @@ Page({
       const errno = e && Number(e.errno);
       let emptyTip = '暂无店铺订单';
       if (errno === 404 || errno === 501) {
-        emptyTip = '商家订单接口待后端上线，可先使用用户端「集市订单」查看';
+        emptyTip = '商家订单接口待后端上线，可先使用用户端「购物订单」查看';
       } else if (errno === 401) {
         emptyTip = '登录已过期，请从用户端重新登录';
       } else if (errno === 403) {
