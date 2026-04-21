@@ -19,7 +19,8 @@ App({
   },
   globalData: {
     userInfo: null,
-    user: null
+    user: null,
+    communityTargetTab: ''
   },
   // 核心登录保存函数
   save(parentOpenid, callback) {

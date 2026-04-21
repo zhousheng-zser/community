@@ -1,0 +1,35 @@
+<view class="sps-page">
+  <view class="sps-head" wx:if="{{providerName}}">
+    <text class="sps-title">{{providerName}}</text>
+    <text class="sps-sub">勾选一项或多项服务打包下单</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="sps-loading">加载中…</view>
+
+  <block wx:else>
+    <view wx:for="{{groups}}" wx:for-item="grp" wx:key="group_key" class="sps-group">
+      <text class="sps-group-title">{{grp.group_label || grp.group_key}}</text>
+      <view class="sps-line" wx:for="{{grp.items}}" wx:for-item="line" wx:key="service_id">
+        <image class="sps-cover" src="{{line.cover}}" mode="aspectFill"></image>
+        <view class="sps-mid">
+          <text class="sps-line-title">{{line.title}}</text>
+          <text class="sps-line-price">￥{{line.priceText}}</text>
+        </view>
+        <view class="sps-qty">
+          <view class="sps-qb" data-gk="{{grp.group_key}}" data-sid="{{line.service_id}}" bindtap="decLine">−</view>
+          <text class="sps-qn">{{cart[line.cartKey] || 0}}</text>
+          <view class="sps-qb" data-gk="{{grp.group_key}}" data-sid="{{line.service_id}}" bindtap="incLine">+</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!groups.length}}" class="sps-empty">暂无服务目录，请稍后再试</view>
+  </block>
+
+  <view class="sps-spacer"></view>
+</view>
+
+<view class="sps-bar">
+  <view class="sps-total">合计 ￥{{totalText}}</view>
+  <view class="sps-go" bindtap="checkout">去结算</view>
+</view>

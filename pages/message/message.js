@@ -148,9 +148,22 @@ Page({
         });
     },
 
-    // 进入对话详情（订单会话：带 order_no）
+    // 进入对话详情（订单会话：带 order_no）；到家服务单可先进详情再沟通
     goToChat(e) {
         let item = e.currentTarget.dataset.item;
+        if (item.service_order_id != null && item.service_order_id !== '') {
+            wx.navigateTo({
+                url: `/pages/service-order-detail/service-order-detail?id=${item.service_order_id}`
+            });
+            return;
+        }
+        const t = item.title || '';
+        if (item.order_no && t.indexOf('[到家]') === 0) {
+            wx.navigateTo({
+                url: `/pages/service-order-detail/service-order-detail?orderNo=${encodeURIComponent(item.order_no)}`
+            });
+            return;
+        }
         const name = item.peerUser
             ? item.peerUser.nickname
             : (item.peer_id == 0 ? '系统消息' : '会话');

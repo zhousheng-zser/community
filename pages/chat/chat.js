@@ -6,6 +6,8 @@ Page({
     conversationId: null,
     peerId: null,
     orderNo: '',
+    orderId: '',
+    orderScene: '',
     myUserId: null,
     history: [],
     inputText: '',
@@ -33,6 +35,8 @@ Page({
       conversationId: options.conversationId,
       peerId: options.peerId,
       orderNo: options.orderNo ? decodeURIComponent(options.orderNo) : '',
+      orderId: options.orderId ? String(options.orderId) : '',
+      orderScene: options.orderScene ? String(options.orderScene) : '',
       myUserId: uid,
       shopIdForApi
     });
@@ -54,7 +58,12 @@ Page({
         const raw = Array.isArray(res) ? res : [];
         const history = raw.map((m) => {
           const row = Object.assign({}, m);
-          if (row.msg_type === 'image' && row.content) {
+          const mt = row.msg_type || row.msgType;
+          row.msg_type = mt;
+          if (mt === 'image' && row.content) {
+            row.content = util.imgUrl(row.content);
+          }
+          if (mt === 'audio' && row.content) {
             row.content = util.imgUrl(row.content);
           }
           return row;
@@ -147,11 +156,75 @@ Page({
   },
 
   goOrderDetail() {
-    const no = this.data.orderNo;
-    if (!no) return;
+    const { orderScene, orderId, orderNo } = this.data;
+    if (orderScene === 'neighbor_assist' && orderId) {
+      wx.navigateTo({
+        url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${encodeURIComponent(orderId)}`
+      });
+      return;
+    }
+    if (orderScene === 'service_home' && orderNo) {
+      wx.navigateTo({
+        url: `/pages/service-order-detail/service-order-detail?orderNo=${encodeURIComponent(orderNo)}`
+      });
+      return;
+    }
+    if (!orderNo) return;
     wx.navigateTo({
-      url: `/pages/market-order-detail/market-order-detail?orderNo=${encodeURIComponent(no)}`
+      url: `/pages/market-order-detail/market-order-detail?orderNo=${encodeURIComponent(orderNo)}`
     });
+  },
+
+  onVoiceTouchStart() {
+    if (!this._recorder) {
+      this._recorder = wx.getRecorderManager();
+      this._recorder.onStop((res) => {
+        const p = res.tempFilePath;
+        if (!p || res.duration < 300) {
+          if (res.duration < 300) wx.showToast({ title: '录音太短', icon: 'none' });
+          return;
+        }
+        wx.showLoading({ title: '发送中', mask: true });
+        const formData = { type: 'audio' };
+        if (this.data.shopIdForApi != null) formData.shop_id = String(this.data.shopIdForApi);
+        util
+          .uploadFile('messages/upload', p, 'file', formData)
+          .then((data) => {
+            let path = data.url || data.path;
+            if (!path) throw new Error('no url');
+            const displayUrl = util.imgUrl(path);
+            const payload = {
+              conversationId: this.data.conversationId,
+              content: displayUrl,
+              msgType: 'audio'
+            };
+            if (this.data.shopIdForApi != null) payload.shop_id = this.data.shopIdForApi;
+            return util.post('messages/send', payload);
+          })
+          .then(() => {
+            wx.hideLoading();
+            this.fetchHistory();
+          })
+          .catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '语音发送失败', icon: 'none' });
+          });
+      });
+    }
+    this._recorder.start({ format: 'mp3', duration: 60000 });
+  },
+
+  onVoiceTouchEnd() {
+    if (this._recorder) this._recorder.stop();
+  },
+
+  playAudio(e) {
+    const url = e.currentTarget.dataset.url;
+    if (!url) return;
+    if (!this.innerAudio) this.innerAudio = wx.createInnerAudioContext();
+    this.innerAudio.stop();
+    this.innerAudio.src = url;
+    this.innerAudio.play();
   },
 
   scrollToBottom() {

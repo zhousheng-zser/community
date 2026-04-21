@@ -272,6 +272,60 @@
         <text class="go">GO ></text>
       </view>
     </block>
+
+    <block wx:elif="{{activeBenefitAlliance === 'kfc'}}">
+      <view class="card benefit-brand-hero benefit-brand-hero--kfc">
+        <text class="benefit-brand-hero-title">{{benefitBrandColumns.kfc.title}}</text>
+        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.kfc.sub}}</text>
+      </view>
+      <view class="card section-card">
+        <view class="section-head">
+          <text class="title">快捷入口</text>
+        </view>
+        <view class="benefit-brand-actions">
+          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.kfc.keyword}}">复制「{{benefitBrandColumns.kfc.keyword}}」去搜索</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
+        </view>
+        <text class="benefit-brand-footnote">{{benefitBrandColumns.kfc.hint}}</text>
+      </view>
+    </block>
+
+    <block wx:elif="{{activeBenefitAlliance === 'mcd'}}">
+      <view class="card benefit-brand-hero benefit-brand-hero--mcd">
+        <text class="benefit-brand-hero-title">{{benefitBrandColumns.mcd.title}}</text>
+        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.mcd.sub}}</text>
+      </view>
+      <view class="card section-card">
+        <view class="section-head">
+          <text class="title">快捷入口</text>
+        </view>
+        <view class="benefit-brand-actions">
+          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.mcd.keyword}}">复制「{{benefitBrandColumns.mcd.keyword}}」去搜索</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
+        </view>
+        <text class="benefit-brand-footnote">{{benefitBrandColumns.mcd.hint}}</text>
+      </view>
+    </block>
+
+    <block wx:elif="{{activeBenefitAlliance === 'starbucks'}}">
+      <view class="card benefit-brand-hero benefit-brand-hero--starbucks">
+        <text class="benefit-brand-hero-title">{{benefitBrandColumns.starbucks.title}}</text>
+        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.starbucks.sub}}</text>
+      </view>
+      <view class="card section-card">
+        <view class="section-head">
+          <text class="title">快捷入口</text>
+        </view>
+        <view class="benefit-brand-actions">
+          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.starbucks.keyword}}">复制「{{benefitBrandColumns.starbucks.keyword}}」去搜索</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
+          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
+        </view>
+        <text class="benefit-brand-footnote">{{benefitBrandColumns.starbucks.hint}}</text>
+      </view>
+    </block>
   </view>
 
   <view wx:elif="{{activeTab === '本地集市'}}">
@@ -365,8 +419,19 @@
         <text class="title">邻里帮帮</text>
         <text class="assist-tag">解决身边琐事小烦恼</text>
       </view>
-      <text class="more">查看更多 ></text>
+      <text class="more" bindtap="goNeighborCommunity">查看更多 ></text>
     </view>
+    <scroll-view class="assist-marquee" scroll-x="{{true}}" show-scrollbar="{{false}}" wx:if="{{assistMarqueeList.length}}">
+      <view class="assist-marquee-inner">
+        <view
+          class="marquee-chip"
+          wx:for="{{assistMarqueeList}}"
+          wx:key="id"
+          bindtap="goAssistFromMarquee"
+          data-id="{{item.id}}"
+        >{{item.text}}</view>
+      </view>
+    </scroll-view>
     <view class="knowledge-row neighborhood-services">
       <navigator class="knowledge-item" wx:for="{{knowledgeList}}" wx:key="name" url="{{item.url}}">
         <view class="know-icon-wrap" style="background:{{item.icon ? '#ffffff' : item.bgColor}}">
@@ -421,10 +486,17 @@
     </view>
     <scroll-view class="worker-scroll" scroll-x="{{true}}">
       <view class="worker-row">
-        <navigator class="worker-item" wx:for="{{workerList}}" wx:key="id" url="../worker-detail/worker-detail?id={{item.id}}">
-          <image src="{{item.avatar}}" mode="aspectFill"></image>
-          <text class="name">{{item.name}}</text>
-          <text class="sub">{{item.orders}}</text>
+        <navigator class="worker-item worker-item--rich" wx:for="{{workerList}}" wx:key="id" url="../worker-detail/worker-detail?id={{item.id}}">
+          <image class="worker-av" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view class="worker-text">
+            <view class="worker-name-row">
+              <text class="name">{{item.name}}</text>
+              <text class="gender-label" wx:if="{{item.genderLabel}}">{{item.genderLabel}}</text>
+            </view>
+            <text class="worker-dir">主营：{{item.mainDirection}}</text>
+            <text class="worker-intro" wx:if="{{item.intro}}">{{item.intro}}</text>
+            <text class="sub">{{item.orders}}</text>
+          </view>
         </navigator>
       </view>
     </scroll-view>

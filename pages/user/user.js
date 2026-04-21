@@ -12,7 +12,7 @@ Page({
     points: 0,
     couponCount: 0,
     orderMenus: [
-      { name: "到家订单", icon: "service_order", url: "../service-orders-my/service-orders-my" },
+      { name: "服务订单", icon: "service_order", url: "../service-orders-my/service-orders-my" },
       { name: "一键发布", icon: "quick_publish", url: "../order-publish/order-publish" },
       { name: "购物订单", icon: "market_order", url: "../market-order-list/market-order-list" },
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
@@ -49,7 +49,7 @@ Page({
   },
 
   computeRoleLabel(user) {
-    const roleMap = { admin: '管理员', promoter: '推客', user: '普通用户', worker: '技工', merchant: '商家' };
+    const roleMap = { admin: '管理员', promoter: '推客', user: '普通用户', worker: '技工', merchant: '服务商' };
     const roles = rolePortals.normalizeRoles(user);
     if (roles.length <= 1) return roleMap[roles[0]] || '普通用户';
     return roles.map((r) => roleMap[r] || r).join('·');

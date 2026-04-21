@@ -206,3 +206,25 @@ page { background: #f5f0e8; }
   align-items: center;
   justify-content: center;
 }
+
+.oc-bundle-head {
+  width: 100%;
+  margin-bottom: 12rpx;
+}
+.oc-bundle-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  font-size: 26rpx;
+  color: #333;
+}
+.oc-bl-title {
+  flex: 1;
+  padding-right: 16rpx;
+}
+.oc-bl-meta {
+  flex-shrink: 0;
+  color: #e8880a;
+}

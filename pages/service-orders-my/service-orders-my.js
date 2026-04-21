@@ -5,7 +5,7 @@ Page({
   data: {
     list: [],
     loading: false,
-    emptyTip: '暂无到家订单，去首页下单吧'
+    emptyTip: '暂无服务订单，去分类服务下单吧'
   },
 
   onShow() {
@@ -38,6 +38,8 @@ Page({
       const raw = unwrapList(res);
       const list = raw.map((o) => ({
         id: o.id,
+        orderNo: o.order_no || o.orderNo || '',
+        workerUserId: o.worker_user_id != null ? o.worker_user_id : o.worker && o.worker.user_id,
         statusText: o.status_text || o.status_label || o.status || '待处理',
         title: o.service_title || o.title || (o.service && o.service.title) || '到家服务订单',
         time: o.created_at || o.createdAt || '',
@@ -46,7 +48,7 @@ Page({
       this.setData({
         list,
         loading: false,
-        emptyTip: '暂无到家订单，去首页下单吧'
+        emptyTip: '暂无服务订单，去分类服务下单吧'
       });
     } catch (e) {
       this.setData({ loading: false });
@@ -56,5 +58,14 @@ Page({
       }
       wx.showToast({ title: msg, icon: 'none' });
     }
+  },
+
+  goDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    const orderNo = e.currentTarget.dataset.orderno || '';
+    if (!id) return;
+    let url = `/pages/service-order-detail/service-order-detail?id=${id}`;
+    if (orderNo) url += `&orderNo=${encodeURIComponent(orderNo)}`;
+    wx.navigateTo({ url });
   }
 });

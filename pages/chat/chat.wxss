@@ -104,6 +104,25 @@ page {
   display: block;
 }
 
+.audio-bubble {
+  padding: 12rpx 24rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #333;
+}
+
+.voice-hold {
+  flex-shrink: 0;
+  padding: 12rpx 16rpx;
+  margin-right: 12rpx;
+  font-size: 24rpx;
+  color: #666;
+  background: #eee;
+  border-radius: 8rpx;
+  max-width: 140rpx;
+}
+
 /* 底部输入框 */
 .emoji-bar {
   flex-shrink: 0;

@@ -140,10 +140,10 @@ Page({
     return allConfigs[key] || allConfigs.tidy;
   },
 
-  onLoad() {
+  onLoad(options) {
     const sys = wx.getSystemInfoSync();
-    const options = this.options || {};
-    const key = options.key || "tidy";
+    const key = (options && options.key) || "tidy";
+    this._groupKey = key;
     const config = this.getPageConfig(key);
 
     const icons = [
@@ -234,8 +234,10 @@ Page({
   },
 
   goServiceDetail(e) {
+    const key = this._groupKey || 'tidy';
+    const sid = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: "../service/service?id=" + e.currentTarget.dataset.id
+      url: `../service/service?id=${sid}&group_key=${encodeURIComponent(key)}`
     });
   }
 });

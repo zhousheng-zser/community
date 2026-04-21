@@ -32,6 +32,7 @@ Page({
     quickActions: [],
     knowledgeList: [],
     hotList: [],
+    assistMarqueeList: [],
     hotFilters: [],
     merchantList: [],
     workerList: [],
@@ -59,8 +60,32 @@ Page({
     jdHeroSubtitle: "",
     benefitAllianceTabs: [
       { key: 'jd', name: '京东联盟' },
-      { key: 'pdd', name: '拼多多' }
+      { key: 'pdd', name: '拼多多' },
+      { key: 'kfc', name: '肯德基' },
+      { key: 'mcd', name: '麦当劳' },
+      { key: 'starbucks', name: '星巴克' }
     ],
+    /** 大牌餐饮栏目：文案与搜索关键词，SKU 可在后台/本地清单后续挂载 */
+    benefitBrandColumns: {
+      kfc: {
+        title: '肯德基',
+        sub: '炸鸡汉堡 · 先领券再下单（可配置联盟 SKU）',
+        keyword: '肯德基',
+        hint: '复制关键词到京东/拼多多 App 搜索；后续可在此挂载联盟直链商品。'
+      },
+      mcd: {
+        title: '麦当劳',
+        sub: '巨无霸 · 麦乐送 · 惠民卡入口',
+        keyword: '麦当劳',
+        hint: '复制关键词到电商平台搜索；商品以实际页面为准。'
+      },
+      starbucks: {
+        title: '星巴克',
+        sub: '咖啡星享 · 券包与周边',
+        keyword: '星巴克',
+        hint: '支持后续配置京东/拼多多联盟商品位。'
+      }
+    },
     activeBenefitAlliance: 'jd',
     pddGoods: [],
     pddBanner: '',
@@ -128,6 +153,27 @@ Page({
       });
     }
     this._maybeRefreshMarketAfterAddressChange();
+    this.refreshWorkerListForCommunity();
+  },
+
+  /** 用户资料中的 communityId（或定位选择绑定的小区）变化后，刷新「直约技工」列表 */
+  async refreshWorkerListForCommunity() {
+    const app = getApp();
+    const communityId = (app.globalData.user || {}).communityId;
+    const wq = { page: 1, limit: 20 };
+    if (communityId != null && communityId !== '') {
+      wq.community_id = communityId;
+    }
+    try {
+      const wRes = await util.get('core/workers', wq);
+      const wData = unwrapList(wRes);
+      if (wData.length > 0) {
+        const workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
+        this.setData({ workerList });
+      }
+    } catch (e) {
+      console.log('core/workers 刷新失败', e);
+    }
   },
   /** 地址页保存/编辑/删除/设默认后，清空本地集市缓存并重拉当前分类店铺 */
   _maybeRefreshMarketAfterAddressChange() {
@@ -443,6 +489,21 @@ Page({
   goPublish() {
     wx.navigateTo({ url: '../order-publish/order-publish' });
   },
+
+  goNeighborCommunity() {
+    const app = getApp();
+    if (app.globalData) app.globalData.communityTargetTab = '邻里互动';
+    wx.switchTab({ url: '/pages/community/community' });
+  },
+
+  goAssistFromMarquee(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const mock = String(id).startsWith('m') ? '&mock=1' : '';
+    wx.navigateTo({
+      url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${id}${mock}`
+    });
+  },
   goMarketShop(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: "../market-shop/market-shop?id=" + id });
@@ -614,18 +675,24 @@ Page({
     } catch (e) { }
     merchantList = mapMerchantList();
 
-    // ===== 从数据库获取直约技工 =====
+    // ===== 从数据库获取直约技工（按当前用户绑定小区过滤，与入驻小区一致）=====
     try {
-      const wRes = await util.get('core/workers', { page: 1, limit: 20 });
+      const wq = { page: 1, limit: 20 };
+      if (communityId != null && communityId !== '') {
+        wq.community_id = communityId;
+      }
+      const wRes = await util.get('core/workers', wq);
       const wData = unwrapList(wRes);
       if (wData.length > 0) {
-        workerList = wData.slice(0, 5).map(mapWorkerForHomeCard);
+        workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
       }
     } catch (e) { }
 
-    // ===== 从数据库获取管家精选商品 =====
+    // ===== 从数据库获取管家精选商品（建议按小区配置，传 community_id）=====
     try {
-      const mRes = await util.get('core/goods/featured');
+      const featuredQ = {};
+      if (communityId != null && communityId !== '') featuredQ.community_id = communityId;
+      const mRes = await util.get('core/goods/featured', featuredQ);
       const mData = unwrapList(mRes);
       if (Array.isArray(mData) && mData.length > 0) {
         marketList = mData.slice(0, 6).map(g => ({
@@ -876,6 +943,49 @@ Page({
         goodsId: first.goodsId || ''
       };
     }
+
+    try {
+      const pq = { limit: 8 };
+      if (communityId != null && communityId !== '') pq.community_id = communityId;
+      const pr = await util.get('core/service-providers', pq);
+      const plist = unwrapList(pr);
+      if (plist.length > 0) {
+        merchantList = plist.slice(0, 8).map((p) => {
+          const pid = p.id != null ? p.id : p.provider_id;
+          return {
+            id: pid,
+            name: p.name || p.shop_name || p.display_name || '服务商',
+            sub:
+              p.subtitle ||
+              p.tagline ||
+              (p.service_count != null ? `服务${p.service_count}单` : '直约到家'),
+            image: imgUrl(p.avatar_url || p.cover_image || p.logo_url || '/img/placeholders/home_cleaning.png'),
+            url: '../service-provider-shop/service-provider-shop?provider_id=' + encodeURIComponent(pid)
+          };
+        });
+      }
+    } catch (eSp) {
+      console.log('core/service-providers 不可用', eSp);
+    }
+
+    let assistMarqueeList = [];
+    try {
+      const feedRes = await util.get('neighbor-assist/orders/feed', { limit: 20 });
+      const rawFeed = unwrapList(feedRes);
+      assistMarqueeList = rawFeed
+        .map((x, i) => ({
+          id: x.id != null ? x.id : `f${i}`,
+          text: String(x.content || x.title || x.summary || '').slice(0, 36)
+        }))
+        .filter((x) => x.text);
+    } catch (eFeed) {
+      assistMarqueeList = [
+        { id: 'm1', text: '代取快递：菜鸟驿站 → 3 栋' },
+        { id: 'm2', text: '老人陪诊：市医院上午' },
+        { id: 'm3', text: '临时遛狗 30 分钟' }
+      ];
+    }
+
     this.setData({
       banner,
       goods,
@@ -919,6 +1029,7 @@ Page({
       pddHeroTitle,
       pddHeroSubtitle,
       pddEntry,
+      assistMarqueeList,
       marketTopCats,
       marketFilters: [
         { key: 'comprehensive', label: '综合排序' },
@@ -979,6 +1090,15 @@ Page({
     const key = e.currentTarget.dataset.key;
     if (!key || key === this.data.activeBenefitAlliance) return;
     this.setData({ activeBenefitAlliance: key });
+  },
+
+  copyBrandKeyword(e) {
+    const kw = e.currentTarget.dataset.keyword ? String(e.currentTarget.dataset.keyword).trim() : '';
+    if (!kw) return;
+    wx.setClipboardData({
+      data: kw,
+      success: () => wx.showToast({ title: '已复制「' + kw + '」', icon: 'none' })
+    });
   },
 
   copyBenefitLink(url, toastTitle) {

@@ -15,6 +15,7 @@ Page({
       { id: 'ann_2', title: '【提示】涉及交易请使用平台订单与聊天留痕' }
     ],
     posts: [],
+    assistCards: [],
     commentPanel: {
       show: false,
       postId: null,
@@ -25,9 +26,12 @@ Page({
       keyboardHeight: 0
     }
   },
-  onLoad() {
+  onLoad(options) {
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 8 });
+    if (options && options.tab) {
+      this.setData({ activeTab: decodeURIComponent(options.tab) });
+    }
     this.syncAnnounceRead();
     this.fetchPosts();
   },
@@ -47,6 +51,11 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 1 });
+    }
+    const app = getApp();
+    if (app.globalData && app.globalData.communityTargetTab) {
+      this.setData({ activeTab: app.globalData.communityTargetTab });
+      app.globalData.communityTargetTab = '';
     }
     this.syncAnnounceRead();
     this.fetchPosts(); // Handle returning from details/publish views
@@ -93,12 +102,50 @@ Page({
 
         console.log(`[社区] 成功加载 ${processedPosts.length} 条动态`);
         this.setData({ posts: processedPosts });
+        if (this.data.activeTab === '邻里互动') {
+          this.fetchAssistFeed();
+        }
       })
       .catch(err => {
         console.error("加载社区失败", err);
         wx.showToast({ title: '加载失败', icon: 'none' });
+        if (this.data.activeTab === '邻里互动') {
+          this.fetchAssistFeed();
+        }
       });
   },
+  fetchAssistFeed() {
+    util
+      .get('neighbor-assist/orders/public', { page: 1, limit: 12 })
+      .then((res) => {
+        const list = res.list || res.items || res.data || res;
+        const arr = Array.isArray(list) ? list : [];
+        const assistCards = arr.map((x) => ({
+          id: x.id,
+          summary: (x.content || x.title || x.summary || '邻里帮帮').slice(0, 48),
+          status: x.status_text || x.status || ''
+        }));
+        this.setData({ assistCards });
+      })
+      .catch(() => {
+        this.setData({
+          assistCards: [
+            { id: 'demo1', summary: '【演示】代取快递：菜鸟至 3 栋', status: '待接单' },
+            { id: 'demo2', summary: '【演示】帮忙遛狗 30 分钟', status: '待接单' }
+          ]
+        });
+      });
+  },
+
+  goAssistDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const mock = String(id).indexOf('demo') === 0 ? '&mock=1' : '';
+    wx.navigateTo({
+      url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${id}${mock}`
+    });
+  },
+
   goPublish() {
     wx.navigateTo({ url: '../order-publish/order-publish' });
   },
@@ -132,6 +179,9 @@ Page({
       posts: [] // Clear immediately for better UX
     }, () => {
       this.fetchPosts();
+      if (this.data.activeTab === '邻里互动') {
+        this.fetchAssistFeed();
+      }
     });
   },
 

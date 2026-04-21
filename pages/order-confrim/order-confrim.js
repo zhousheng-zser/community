@@ -12,11 +12,48 @@ Page({
     contactPhone: '',
     remark: '',
     qty: 1,
+    workerId: '',
+    serviceId: '',
+    groupKey: '',
     product: { name: '', sub: '', price: '0', image: '' },
     totalPrice: '0',
+    bundleMode: false,
+    bundleLines: [],
+    spProviderId: ''
   },
 
   onLoad(options) {
+    if (options.mode === 'sp_bundle') {
+      const raw = wx.getStorageSync('sp_bundle_checkout') || {};
+      const items = raw.items || [];
+      const providerId = String(raw.provider_id || options.provider_id || '');
+      const providerName = raw.provider_name || '服务商';
+      let total = 0;
+      items.forEach((it) => {
+        total += Number(it.price || 0) * Number(it.qty || 1);
+      });
+      const sub = items.map((it) => `${it.title}×${it.qty}`).join('；');
+      const product = {
+        name: `${providerName} · 打包服务`,
+        sub: sub || '所选服务',
+        price: total.toFixed(2),
+        image: '/img/placeholders/home_cleaning.png'
+      };
+      const totalPrice = total.toFixed(2).replace(/\.00$/, '');
+      this.setData({
+        bundleMode: true,
+        spProviderId: providerId,
+        bundleLines: items,
+        product,
+        qty: 1,
+        totalPrice,
+        workerId: '',
+        serviceId: '',
+        groupKey: ''
+      });
+      this.prefillDefaultAddress();
+      return;
+    }
     const name = decodeURIComponent(options.name || '');
     const price = options.price || '0';
     const image = decodeURIComponent(options.image || '');
@@ -24,7 +61,10 @@ Page({
     const sub = decodeURIComponent(options.sub || name);
     const product = { name, sub, price, image };
     const totalPrice = (Number(price) * qty).toFixed(2).replace(/\.00$/, '');
-    this.setData({ product, qty, totalPrice });
+    const workerId = options.workerId != null && options.workerId !== '' ? String(options.workerId) : '';
+    const serviceId = options.serviceId != null && options.serviceId !== '' ? String(options.serviceId) : '';
+    const groupKey = options.groupKey ? decodeURIComponent(options.groupKey) : '';
+    this.setData({ product, qty, totalPrice, workerId, serviceId, groupKey });
     this.prefillDefaultAddress();
   },
 
@@ -76,13 +116,27 @@ Page({
   },
 
   _updateTotal(qty) {
+    if (this.data.bundleMode) return;
     const q = qty !== undefined ? qty : this.data.qty;
     const totalPrice = (Number(this.data.product.price) * q).toFixed(2).replace(/\.00$/, '');
     this.setData({ qty: q, totalPrice });
   },
 
   submitOrder() {
-    const { serviceAddr, doorNum, contactName, contactPhone, product, qty } = this.data;
+    const {
+      serviceAddr,
+      doorNum,
+      contactName,
+      contactPhone,
+      product,
+      qty,
+      workerId,
+      serviceId,
+      groupKey,
+      bundleMode,
+      bundleLines,
+      spProviderId
+    } = this.data;
     if (!serviceAddr) return wx.showToast({ title: '请选择服务地址', icon: 'none' });
     if (!contactName) return wx.showToast({ title: '请填写联系人', icon: 'none' });
     if (!contactPhone || contactPhone.length !== 11) return wx.showToast({ title: '请填写正确的联系电话', icon: 'none' });
@@ -90,15 +144,70 @@ Page({
     const fullAddress = [serviceAddr, doorNum].filter(Boolean).join(' ').trim() || serviceAddr;
     wx.showLoading({ title: '提交中...' });
     const userId = (app.globalData.user || {}).id;
-    util.post('api/order/save', {
-      userId,
-      address: fullAddress,
-      orderUser: contactName,
-      userTele: contactPhone,
-      goodsName: product.name,
-      goodsPrice: product.price,
-      orderState: 1
-    }).then((data) => {
+
+    if (bundleMode) {
+      const body = {
+        address: fullAddress,
+        contact_name: contactName,
+        contact_phone: contactPhone,
+        remark: this.data.remark || '',
+        provider_id: Number(spProviderId),
+        items: (bundleLines || []).map((it) => ({
+          service_id: Number(it.service_id),
+          group_key: it.group_key || '',
+          qty: Number(it.qty) || 1,
+          title: it.title
+        }))
+      };
+      if (userId) body.user_id = userId;
+      util
+        .post('service-orders/bundle', body)
+        .then((data) => {
+          wx.hideLoading();
+          const oid = data && (data.id || (data.order && data.order.id));
+          if (oid) {
+            wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + oid });
+          } else {
+            wx.showToast({ title: '下单成功', icon: 'success' });
+            setTimeout(() => wx.navigateBack(), 1500);
+          }
+        })
+        .catch(() => {
+          wx.hideLoading();
+          wx.showToast({ title: '下单失败或服务未上线', icon: 'none' });
+        });
+      return;
+    }
+
+    const tryServiceOrder = () => {
+      const body = {
+        address: fullAddress,
+        contact_name: contactName,
+        contact_phone: contactPhone,
+        goods_name: product.name,
+        goods_price: product.price,
+        qty,
+        remark: this.data.remark || ''
+      };
+      if (userId) body.user_id = userId;
+      if (workerId) body.worker_id = Number(workerId);
+      if (serviceId) body.service_id = Number(serviceId);
+      if (groupKey) body.group_key = groupKey;
+      return util.post('service-orders', body);
+    };
+
+    const fallbackLegacy = () =>
+      util.post('api/order/save', {
+        userId,
+        address: fullAddress,
+        orderUser: contactName,
+        userTele: contactPhone,
+        goodsName: product.name,
+        goodsPrice: product.price,
+        orderState: 1
+      });
+
+    const doneOk = (data) => {
       wx.hideLoading();
       if (data && data.id) {
         wx.redirectTo({ url: '../order-detail/order-detail?id=' + data.id });
@@ -106,10 +215,18 @@ Page({
         wx.showToast({ title: '下单成功', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 1500);
       }
-    }).catch(() => {
-      wx.hideLoading();
-      wx.showToast({ title: '下单成功', icon: 'success' });
-      setTimeout(() => wx.navigateBack(), 1500);
-    });
+    };
+
+    tryServiceOrder()
+      .then((data) => doneOk(data))
+      .catch(() => {
+        fallbackLegacy()
+          .then((data) => doneOk(data))
+          .catch(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '下单成功', icon: 'success' });
+            setTimeout(() => wx.navigateBack(), 1500);
+          });
+      });
   },
 });

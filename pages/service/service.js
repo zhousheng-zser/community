@@ -8,6 +8,8 @@ Page({
   data: {
     navTopPadding: 20,
     serviceId: 1,
+    workerId: null,
+    groupKey: '',
     service: {},
     specs: [],
     detailImages: [],
@@ -17,7 +19,16 @@ Page({
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
     const id = Number(options.id || 1);
-    this.setData({ serviceId: id });
+    const workerId =
+      options.worker_id != null && options.worker_id !== ''
+        ? Number(options.worker_id)
+        : null;
+    const groupKey = options.group_key ? decodeURIComponent(options.group_key) : '';
+    this.setData({
+      serviceId: id,
+      workerId: Number.isFinite(workerId) ? workerId : null,
+      groupKey
+    });
 
     const tagSets = {
       default: ['无额外收费', '未服务随时退', '不满意重服务'],
@@ -82,9 +93,14 @@ Page({
       price = m ? m[0] : '0';
     }
     const image = svc.banner || '';
-    wx.navigateTo({
-      url: `../order-confrim/order-confrim?name=${encodeURIComponent(name)}&sub=${encodeURIComponent(sub)}&price=${encodeURIComponent(price)}&image=${encodeURIComponent(image)}`
-    });
+    let url = `../order-confrim/order-confrim?name=${encodeURIComponent(name)}&sub=${encodeURIComponent(sub)}&price=${encodeURIComponent(price)}&image=${encodeURIComponent(image)}&serviceId=${this.data.serviceId}`;
+    if (this.data.workerId != null) {
+      url += `&workerId=${this.data.workerId}`;
+    }
+    if (this.data.groupKey) {
+      url += `&groupKey=${encodeURIComponent(this.data.groupKey)}`;
+    }
+    wx.navigateTo({ url });
   },
   goBack() {
     const pages = getCurrentPages();

@@ -1,8 +1,8 @@
 <view class="portal-page mo-page">
   <view class="mo-mock-banner" wx:if="{{isMock}}">演示模式 · 订单为虚构，不请求后端</view>
   <view class="portal-top merchant-gradient mo-hero">
-    <text class="portal-title">店铺订单</text>
-    <text class="portal-sub">搜索筛选 · 分状态查看 · 点击卡片处理订单</text>
+    <text class="portal-title">{{pageHeroTitle}}</text>
+    <text class="portal-sub">{{pageHeroSub}}</text>
   </view>
 
   <view class="mo-summary-strip" wx:if="{{!loading && fullList.length}}">
@@ -54,6 +54,7 @@
       <block wx:for="{{list}}" wx:key="id">
         <view
           class="m-order-card m-order-card--{{item.bucket}}"
+          data-id="{{item.id}}"
           data-no="{{item.orderNo}}"
           bindtap="openDetail"
         >
@@ -81,7 +82,7 @@
                 <text class="m-order-arrow">›</text>
               </view>
             </view>
-            <view class="m-order-actions" catchtap="noop">
+            <view class="m-order-actions" wx:if="{{!directServiceScene}}" catchtap="noop">
               <view
                 class="m-act"
                 data-no="{{item.orderNo}}"
