@@ -9,7 +9,7 @@ page {
 
 /* ===== 顶部渐变头部 ===== */
 .mine-header {
-  background: linear-gradient(180deg, #1890FF 0%, #3ca0ff 100%);
+  background: linear-gradient(180deg, #FF7A00 0%, #FF9E3D 100%);
   padding: 24rpx 28rpx 0;
   border-radius: 0 0 40rpx 40rpx;
   position: relative;
@@ -166,7 +166,7 @@ page {
   z-index: 2;
   border-radius: 24rpx;
   padding: 32rpx 28rpx;
-  box-shadow: 0 8rpx 24rpx rgba(24,144,255,0.08);
+  box-shadow: 0 8rpx 24rpx rgba(255,122,0,0.08);
 }
 
 .wallet-left {
@@ -213,7 +213,7 @@ page {
   display: block;
   font-size: 44rpx;
   font-weight: 700;
-  color: #1890FF;
+  color: #FF7A00;
 }
 
 .wallet-withdraw-btn {
@@ -221,7 +221,7 @@ page {
   margin-top: 8rpx;
   padding: 8rpx 24rpx;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, #1890FF, #4db3ff);
+  background: linear-gradient(90deg, #FF7A00, #FFA033);
   color: #fff;
   font-size: 22rpx;
 }
@@ -420,7 +420,7 @@ page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 4rpx 16rpx rgba(24,144,255,0.04);
+  box-shadow: 0 4rpx 16rpx rgba(255,122,0,0.04);
 }
 
 .join-icon-wrap {
