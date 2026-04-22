@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dirToProcess = path.join(__dirname);
-const remoteUrl = 'https://jshsp1.eds-tech.cn/img/';
+const remoteUrl = 'https://114.55.167.14:3000/img/';
 
 function walk(dir, callback) {
   fs.readdir(dir, (err, list) => {

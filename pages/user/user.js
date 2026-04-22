@@ -63,6 +63,12 @@ Page({
     rolePortals.navigateToMerchantHome();
   },
 
+  goToLogin() {
+    if (!this.data.loggedIn) {
+      wx.navigateTo({ url: '../login/login' });
+    }
+  },
+
   onLoad() {
     const sys = wx.getSystemInfoSync();
     this.setData({ navTop: (sys.statusBarHeight || 20) + 10 });

@@ -21,7 +21,7 @@ Page({
       return;
     }
     wx.showLoading({ title: '发送中' });
-    util.post('api/auth/sms/send', { phone, type: 'forget_password' }).then(() => {
+    util.post('auth/sms/send', { phone, type: 'reset' }).then(() => {
       wx.hideLoading();
       wx.showToast({ title: '发送成功' });
       this.setData({ smsCount: 60 });
@@ -51,7 +51,7 @@ Page({
     }
 
     wx.showLoading({ title: '提交中' });
-    util.post('api/auth/password_reset', {
+    util.post('auth/reset_password', {
       phone,
       code,
       new_password: password

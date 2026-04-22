@@ -17,7 +17,7 @@ const path = require('path');
 const { Client } = require('ssh2');
 const SftpClient = require('ssh2-sftp-client');
 
-const host = process.env.DEPLOY_HOST || 'jshsp1.eds-tech.cn';
+const host = process.env.DEPLOY_HOST || '114.55.167.14';
 const username = process.env.DEPLOY_USER || 'root';
 const password = process.env.DEPLOY_SSH_PASSWORD || '';
 const remoteDir = (process.env.REMOTE_BACKEND_DIR || '/root/community-backend/backend').replace(/\/$/, '');

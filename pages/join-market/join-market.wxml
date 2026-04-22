@@ -32,7 +32,7 @@
     </view>
     <view class="form-row">
       <text class="form-label">推广员</text>
-      <input class="form-input" placeholder="请输入推广员编码（选填）" value="{{form.promoter}}" bindinput="onInput" data-key="promoter"/>
+      <input class="form-input" placeholder="请输入推广员姓名（选填）" value="{{form.promoter}}" bindinput="onInput" data-key="promoter"/>
     </view>
   </view>
 

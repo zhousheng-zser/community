@@ -72,26 +72,29 @@ Page({
     });
   },
 
-  calcPrices() {
-    let sum = 0;
-    this.data.items.forEach(it => {
-      sum += it.quantity * parseFloat(it.price || 0);
-    });
-
-    let delivery = this.data.deliveryType === 'express' ? 5.00 : 0.00;
-    // 假设满50免运费
-    if (sum >= 50) delivery = 0;
-
-    let discount = 0; // 暂无优惠券逻辑
-
-    let pay = sum + delivery - discount;
-
-    this.setData({
-      goodsAmount: sum.toFixed(2),
-      deliveryFee: delivery.toFixed(2),
-      discountAmount: discount.toFixed(2),
-      payableAmount: pay.toFixed(2)
-    });
+  async calcPrices() {
+    // 组装预结算报文
+    const payload = {
+      shop_id: this.data.shopId,
+      delivery_mode: this.data.deliveryType,
+      items: this.data.items.map(it => ({
+        goods_id: it.goodsId,
+        sku_id: it.skuId,
+        quantity: it.quantity
+      }))
+    };
+    try {
+      const res = await util.post('market/orders/preview', payload);
+      const data = res || {};
+      this.setData({
+        goodsAmount: typeof data.goods_amount !== 'undefined' ? Number(data.goods_amount).toFixed(2) : '0.00',
+        deliveryFee: typeof data.delivery_fee !== 'undefined' ? Number(data.delivery_fee).toFixed(2) : '0.00',
+        discountAmount: typeof data.discount_amount !== 'undefined' ? Number(data.discount_amount).toFixed(2) : '0.00',
+        payableAmount: typeof data.payable_amount !== 'undefined' ? Number(data.payable_amount).toFixed(2) : '0.00'
+      });
+    } catch (err) {
+      wx.showToast({ title: '无法获取预结算信息', icon: 'none' });
+    }
   },
 
   onRemarkInput(e) {
@@ -122,25 +125,31 @@ Page({
     };
 
     try {
-      // 此处对接真实的创单API : POST /api/market/order/create
-      // const res = await util.post('api/market/order/create', payload);
-      
-      // MOCK延时模拟接口返回
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const mockOrderNo = 'ODR' + new Date().getTime();
+      // 真实创单API
+      const res = await util.post('market/order/create', payload);
+      const orderNo = res.orderNo || res.order_no;
 
-      // 提交成功，此时如果要清理购物车
+      if (!orderNo) throw new Error('创建订单失败，未返回单号');
+
+      // 因为联调阶段，可以通过 mock-success 接口直接模拟支付成功
+      // 先获取支付参数 (仅作展示或将来真实调用wx.requestPayment)
+      await util.post('market/payments/create', { order_no: orderNo }).catch(()=>{});
+      
+      // 模拟支付成功
+      await util.post('market/payments/mock-success', { order_no: orderNo });
+
+      // 提交成功，清理购物车
       if (this.data.fromUrl === 'cart') {
         wx.removeStorageSync(`cart_${this.data.shopId}`);
       }
       wx.removeStorageSync('temp_checkout_items');
 
       wx.hideLoading();
-      wx.showToast({ title: '下单成功', icon: 'success' });
+      wx.showToast({ title: '支付成功', icon: 'success' });
       
-      // 下单成功后跳转去支付流或者订单详情
+      // 下单并支付成功后跳转订单详情
       setTimeout(() => {
-        wx.redirectTo({ url: `/pages/market-order-detail/market-order-detail?orderNo=${mockOrderNo}` });
+        wx.redirectTo({ url: `/pages/market-order-detail/market-order-detail?orderNo=${orderNo}` });
       }, 1500);
 
     } catch (e) {

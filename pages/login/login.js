@@ -20,7 +20,7 @@ Page({
       return;
     }
     wx.showLoading({ title: '登录中' });
-    util.post("api/auth/login_password", { phone, password }).then(data => {
+    util.post("auth/login_password", { phone, password }).then(data => {
       wx.hideLoading();
       this.handleLoginSuccess(data);
     }).catch(err => {
@@ -29,15 +29,22 @@ Page({
     });
   },
   quickLogin(e) {
+    console.log('getPhoneNumber 返回结果:', e.detail);
     if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-      wx.showToast({ title: '已取消授权', icon: 'none' });
+      let msg = '已取消授权';
+      if (e.detail.errMsg.includes('no permission')) {
+        msg = '当前小程序无获取手机号权限(必须为企业认证账号)';
+      } else if (e.detail.errMsg !== 'getPhoneNumber:fail user deny') {
+        msg = '失败: ' + e.detail.errMsg;
+      }
+      wx.showToast({ title: msg, icon: 'none', duration: 3000 });
       return;
     }
     wx.showLoading({ title: '快捷登录中' });
     // 微信快捷登录
     wx.login({
       success: res => {
-        util.post("api/auth/login_quick", {
+        util.post("auth/login_quick", {
           code: res.code, // wx.login 拿到的 code，或者直接传 phone_code
           phone_code: e.detail.code
         }).then(data => {
@@ -51,6 +58,7 @@ Page({
     });
   },
   handleLoginSuccess(data) {
+    wx.removeStorageSync('manual_logged_out');
     wx.setStorageSync('token', data.token);
     const u = data.user || {};
     app.globalData.user = rolePortals.mergePortalFlags({

@@ -233,9 +233,9 @@ const booksStateTabel = (state) => {
   return result;
 }
 const goodsStateTabel = (state) => {
-  var result = [];
+  var result = {};
   switch (state) {
-    case "1":
+    case "pending_payment":
       result = {
         name: "待付款",
         icon: "/img/order/orderdetail-1.png",
@@ -244,49 +244,67 @@ const goodsStateTabel = (state) => {
         btn: "去支付"
       }
       break;
-    case "2":
+    case "pending_accept":
       result = {
-        name: "待发货",
+        name: "待接单",
         icon: "/img/order/orderdetail-1.png",
-        title: "已付款待发货",
-        desc: "已付款待发货",
+        title: "买家已付款",
+        desc: "等待商家接单",
         btn: ""
       }
       break;
-    case "3":
+    case "pending_service":
       result = {
-        name: "已发货",
+        name: "备货中",
+        icon: "/img/order/orderdetail-1.png",
+        title: "商家已接单",
+        desc: "商家备货/出餐中",
+        btn: ""
+      }
+      break;
+    case "pending_receipt":
+      result = {
+        name: "待收货",
         icon: "/img/order/orderdetail-1.png",
         title: "已发货",
-        desc: "已发货，等待确认收货",
+        desc: "配送中，等待确认收货",
         btn: "确认收货"
       }
       break;
-    case "4":
+    case "completed":
       result = {
-        name: "已收货",
+        name: "已完成",
         icon: "/img/order/orderdetail-1.png",
         title: "订单完成",
         desc: "您可对本次服务进行评价",
         btn: "评价"
       }
       break;
-    case "7":
+    case "cancelled":
       result = {
         name: "已取消",
         icon: "/img/order/orderdetail-2.png",
         title: "订单关闭",
-        desc: "",
+        desc: "订单已取消",
+        btn: ""
+      }
+      break;
+    case "refunded":
+      result = {
+        name: "已退款",
+        icon: "/img/order/orderdetail-2.png",
+        title: "订单关闭",
+        desc: "订单已退款",
         btn: ""
       }
       break;
     default:
       result = {
-        name: "已完成",
+        name: "未知状态",
         icon: "/img/order/orderdetail-2.png",
-        title: "订单已完成",
+        title: "未知状态",
         desc: "",
-        btn: "评价"
+        btn: ""
       }
   }
   return result;

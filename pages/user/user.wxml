@@ -3,14 +3,14 @@
 
   <view class="mine-header" style="padding-top: {{navTop}}px;">
     <view class="header-row">
-      <navigator url="../user-edit/user-edit" class="avatar-wrap">
+      <navigator url="{{loggedIn ? '../user-edit/user-edit' : '../login/login'}}" class="avatar-wrap">
         <image class="avatar" src="{{user.userPhoto || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'}}" mode="aspectFill"></image>
-        <view class="avatar-edit">编辑</view>
+        <view class="avatar-edit">{{loggedIn ? '编辑' : '登录'}}</view>
       </navigator>
-      <view class="header-info">
-        <text class="header-name">{{user.userName || '微信用户'}}</text>
-        <text class="header-mobile">{{user.tel || '点击完善信息'}}</text>
-        <view class="role-badge">{{roleLabel}}</view>
+      <view class="header-info" bindtap="goToLogin">
+        <text class="header-name">{{loggedIn ? (user.userName || '微信用户') : '点击登录/注册'}}</text>
+        <text class="header-mobile">{{loggedIn ? (user.tel || '点击完善信息') : '登录后享受更多特权'}}</text>
+        <view class="role-badge" wx:if="{{loggedIn}}">{{roleLabel}}</view>
       </view>
       <navigator class="qr-btn" url="../user-code/user-code">
         <view class="qr-icon-wrap">

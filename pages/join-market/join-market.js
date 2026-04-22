@@ -5,7 +5,7 @@ Page({
   data: {
     agreed: false,
     submitting: false,
-    categoryList: ['餐饮美食', '生鲜果蔬', '超市便利', '美妆护肤', '服装配饰', '数码家电', '母婴用品', '其他'],
+    categoryList: ['食品生鲜', '美妆洗护', '居家百货', '服装箱包', '母婴系列', '家用电器', '数码产品', '珠宝饰品', '旅游出行', '传统工艺'],
     categoryIndex: -1,
     communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
     communityIndex: -1,
@@ -93,6 +93,10 @@ Page({
       if (form.bizLicense) licenseUrl = await uploadIfNeeded(form.bizLicense);
 
       wx.showLoading({ title: '提交数据中...', mask: true });
+      
+      let logoUrl = form.signboard ? await uploadIfNeeded(form.signboard) : '';
+      let backgroundUrl = form.indoor ? await uploadIfNeeded(form.indoor) : '';
+      
       let payload = {
         contact_name: form.contact, 
         phone: form.phone, 
@@ -100,12 +104,14 @@ Page({
         category: form.category, 
         address: form.address,
         description: form.intro || '', 
-        promoter_id: form.promoter || '',
+        promoter_name: form.promoter || '',
         credit_code: form.creditCode || '', 
         legal_person: form.legalPerson || '', 
-        // community_id: form.community === '...' ? // 社区暂不处理除非有id
-        place_photo_url: placePhotoUrl,
-        license_url: licenseUrl
+        entity_name: form.bizName || '',
+        logo_url: logoUrl,
+        background_url: backgroundUrl,
+        license_url: licenseUrl,
+        place_photo_url: placePhotoUrl
       };
 
       Object.keys(payload).forEach(key => {
@@ -114,7 +120,7 @@ Page({
         }
       });
 
-      await util.post('market/apply', payload);
+      await util.post('market/merchant/apply', payload);
       wx.hideLoading();
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);

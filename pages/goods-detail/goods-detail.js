@@ -45,7 +45,7 @@ Page({
   async loadGoodsDetail() {
     wx.showLoading({ title: '加载中' });
     try {
-      const res = await util.get('api/market/goods/detail', { id: this.data.goodsId });
+      const res = await util.get('market/goods/detail', { id: this.data.goodsId });
       wx.hideLoading();
       this.processGoodsData(res.data || res);
     } catch (err) {

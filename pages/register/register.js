@@ -48,7 +48,7 @@ Page({
       return;
     }
     wx.showLoading({ title: '发送中' });
-    util.post('api/auth/sms/send', { phone, type: 'register' }).then(() => {
+    util.post('auth/sms/send', { phone, type: 'register' }).then(() => {
       wx.hideLoading();
       wx.showToast({ title: '发送成功' });
       this.setData({ smsCount: 60 });
@@ -91,7 +91,7 @@ Page({
     }
 
     wx.showLoading({ title: '注册中' });
-    util.post('api/auth/register', {
+    util.post('auth/register', {
       phone,
       code,
       password,

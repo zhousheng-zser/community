@@ -24,6 +24,11 @@ App({
   },
   // 核心登录保存函数
   save(parentOpenid, callback) {
+    if (wx.getStorageSync('manual_logged_out')) {
+      if (callback) { callback(); }
+      return;
+    }
+
     wx.showLoading({
       title: '正在登录'
     });
