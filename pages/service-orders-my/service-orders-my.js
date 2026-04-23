@@ -1,5 +1,6 @@
 const util = require('../../utils/util.js');
 const { unwrapList } = util;
+const api = require('../../api/index.js');
 
 Page({
   data: {
@@ -27,10 +28,10 @@ Page({
     try {
       let res;
       try {
-        res = await util.get('service-orders/my', { page: 1, limit: 50 });
+        res = await api.serviceOrder.getMyList({ page: 1, limit: 50 });
       } catch (e1) {
         if (e1 && Number(e1.errno) === 404) {
-          res = await util.get('orders/my', { page: 1, limit: 50 });
+          res = await api.serviceOrder.getMyList({ page: 1, limit: 50 });
         } else {
           throw e1;
         }

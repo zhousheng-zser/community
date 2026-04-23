@@ -1,6 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
+const api = require('../../api/index.js');
 
 Page({
   data: {
@@ -20,7 +21,7 @@ Page({
       return;
     }
     wx.showLoading({ title: '登录中' });
-    util.post("auth/login_password", { phone, password }).then(data => {
+    api.auth.accountLogin({ phone, password }).then(data => {
       wx.hideLoading();
       this.handleLoginSuccess(data);
     }).catch(err => {
@@ -41,11 +42,10 @@ Page({
       return;
     }
     wx.showLoading({ title: '快捷登录中' });
-    // 微信快捷登录
     wx.login({
       success: res => {
         util.post("auth/login_quick", {
-          code: res.code, // wx.login 拿到的 code，或者直接传 phone_code
+          code: res.code,
           phone_code: e.detail.code
         }).then(data => {
           wx.hideLoading();
@@ -85,8 +85,6 @@ Page({
     }, u);
     wx.showToast({ title: '登录成功' });
     setTimeout(() => {
-      // 通过跳转或者reLaunch回之前的网页
-      // wx.navigateBack(); 或者回首页
       wx.reLaunch({ url: '/pages/index/index' });
     }, 1500);
   },

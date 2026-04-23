@@ -2,6 +2,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
+const api = require('../../api/index.js');
 
 Page({
   data: {
@@ -67,6 +68,10 @@ Page({
     rolePortals.navigateToMerchantHome();
   },
 
+  goMarketPortal() {
+    rolePortals.navigateToMarketHome();
+  },
+
   goToLogin() {
     if (!this.data.loggedIn) {
       wx.navigateTo({ url: '../login/login' });
@@ -108,7 +113,7 @@ Page({
 
   // 从服务端拉取用户完整资料（含余额）
   getProfile() {
-    util.get('user/profile').then((data) => {
+    api.user.getUserProfile().then((data) => {
       const balance = parseFloat(data.balance || 0).toFixed(2);
       const cid = data.community_id != null ? data.community_id : data.communityId;
       if (app.globalData.user) {

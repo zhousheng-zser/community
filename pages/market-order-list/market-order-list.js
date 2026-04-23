@@ -1,4 +1,5 @@
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 
 const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
@@ -53,13 +54,14 @@ Page({
     
     let queryStatus = this.data.activeTab === 'all' ? '' : this.data.activeTab;
     try {
-      const res = await util.get('api/market/orders', { status: queryStatus, page: 1, page_size: 50 });
-      const rawList = res.list || (res.data && res.data.list) || [];
+      const params = { page: 1, page_size: 50 };
+      if (queryStatus) params.status = queryStatus;
+      const res = await api.market.getOrderList(params);
+      const rawList = res.list || (res.data && res.data.list) || res || [];
       const list = rawList.map(this.normalizeOrder);
       this.setData({ list, loading: false });
     } catch (e) {
       this.setData({ loading: false });
-      // 无接口时回退至演示数据
       this.mockLoad(queryStatus);
     }
   },

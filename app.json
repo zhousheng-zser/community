@@ -104,6 +104,13 @@
         "pages/merchant-orders/merchant-orders",
         "pages/merchant-mine/merchant-mine"
       ]
+    },
+    {
+      "root": "package-market",
+      "name": "market",
+      "pages": [
+        "pages/market-home/market-home"
+      ]
     }
   ],
   "window": {
