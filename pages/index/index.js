@@ -4,6 +4,7 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const geo = require('../../utils/geo.js');
+const api = require('../../api/index.js');
 const { imgUrl, pickMarketShopAvatarPath, unwrapList } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
@@ -165,9 +166,8 @@ Page({
       wq.community_id = communityId;
     }
     try {
-      const wRes = await util.get('core/workers', wq);
-      const wData = unwrapList(wRes);
-      if (wData.length > 0) {
+      const wData = await api.core.getWorkerList(wq);
+      if (wData && wData.length > 0) {
         const workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
         this.setData({ workerList });
       }
@@ -280,7 +280,7 @@ Page({
   /** 拉取收货地址（接口优先，失败用本地缓存），供「1km 吸附」 */
   async loadUserAddressesForSnap() {
     try {
-      const res = await util.get('user/addresses');
+      const res = await api.user.getAddressList();
       return Array.isArray(res) ? res : (res.list || []);
     } catch (e) {
       return wx.getStorageSync('address_list') || [];
@@ -392,7 +392,7 @@ Page({
         return;
       }
       const query = this.buildMarketShopsQuery({ category: cat, page: 1, page_size: 30 });
-      const marketRes = await util.get('market/shops', query);
+      const marketRes = await api.market.getShopList(query);
       wx.hideLoading();
       const list = Array.isArray(marketRes)
         ? marketRes

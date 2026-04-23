@@ -98,8 +98,21 @@ const request = (method, url, data, contentType = 'application/json') => {
           });
           return;
         }
+        // 兼容两种响应格式：errno（旧）和 code（新后端文档标准）
         const hasErrno = body != null && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'errno');
+        const hasCode = body != null && typeof body === 'object' && Object.prototype.hasOwnProperty.call(body, 'code');
         const errnoNum = hasErrno ? Number(body.errno) : NaN;
+        const codeNum = hasCode ? Number(body.code) : NaN;
+        
+        // 优先检查 code 字段（新后端标准）
+        if (hasCode && codeNum !== 0) {
+          reject({
+            errno: body.code,
+            errmsg: body.message || body.errmsg || body.error || '请求失败'
+          });
+          return;
+        }
+        // 兼容 errno 字段（旧格式）
         if (hasErrno && errnoNum !== 0) {
           reject({
             errno: body.errno,
@@ -108,8 +121,9 @@ const request = (method, url, data, contentType = 'application/json') => {
           return;
         }
         const ok =
+          (hasCode && codeNum === 0) ||
           (hasErrno && errnoNum === 0) ||
-          (!hasErrno && (res.statusCode === 200 || res.statusCode === 201));
+          (!hasCode && !hasErrno && (res.statusCode === 200 || res.statusCode === 201));
         if (!ok) {
           reject({
             errno: res.statusCode,

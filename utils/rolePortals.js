@@ -41,6 +41,17 @@ function canUseMerchantPortal(user) {
   return false;
 }
 
+/** 是否具备集市商家工作台能力 */
+function canUseMarketPortal(user) {
+  if (!user) return false;
+  if (hasRole(user, 'market_merchant') || hasRole(user, 'merchant') || hasRole(user, 'admin')) return true;
+  const sid = user.shop_id != null ? user.shop_id : user.shopId;
+  if (sid != null && sid !== '') return true;
+  const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
+}
+
 function mergePortalFlags(target, src) {
   if (!target || !src || typeof src !== 'object') return target;
   const next = Object.assign({}, target);
@@ -86,6 +97,17 @@ function navigateToMerchantHome() {
   });
 }
 
+function navigateToMarketHome() {
+  const token = wx.getStorageSync('token');
+  if (!token) {
+    requireLoginToast();
+    return;
+  }
+  wx.navigateTo({
+    url: '/package-market/pages/market-home/market-home'
+  });
+}
+
 function backToUserTab() {
   wx.switchTab({ url: USER_TAB });
 }
@@ -98,16 +120,23 @@ function merchantTabUrl(path) {
   return `/package-merchant/pages/${path}/${path}`;
 }
 
+function marketTabUrl(path) {
+  return `/package-market/pages/${path}/${path}`;
+}
+
 module.exports = {
   normalizeRoles,
   hasRole,
   canUseWorkerPortal,
   canUseMerchantPortal,
+  canUseMarketPortal,
   mergePortalFlags,
   navigateToWorkerHome,
   navigateToMerchantHome,
+  navigateToMarketHome,
   backToUserTab,
   workerTabUrl,
   merchantTabUrl,
+  marketTabUrl,
   USER_TAB
 };

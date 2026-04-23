@@ -1,6 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const lp = require('../../utils/localPrefs.js');
+const api = require('../../api/index.js');
 
 Page({
     data: {
@@ -60,7 +61,7 @@ Page({
         } else if (u.shopId != null && u.shopId !== '') {
             q.shop_id = u.shopId;
         }
-        util.get("messages/conversations", q).then(res => {
+        api.message.getConversationList(q).then(res => {
             const list = Array.isArray(res) ? res : [];
             const formattedList = list.map(item => ({
                 ...item,
@@ -138,11 +139,7 @@ Page({
         });
 
         // 调用后端软删除接口
-        const u = app.globalData.user || {};
-        const delQuery = {};
-        if (u.shop_id != null && u.shop_id !== '') delQuery.shop_id = u.shop_id;
-        else if (u.shopId != null && u.shopId !== '') delQuery.shop_id = u.shopId;
-        util.del(`messages/conversations/${convId}`, delQuery).then(() => {
+        api.message.deleteConversation(convId).then(() => {
         }).catch(() => {
             wx.showToast({ title: '删除状态同步失败', icon: 'none' });
         });

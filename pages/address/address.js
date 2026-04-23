@@ -1,6 +1,7 @@
 // pages/address/address.js
 const util = require('../../utils/util.js');
 const geo = require('../../utils/geo.js');
+const api = require('../../api/index.js');
 
 /** 通知首页本地集市：地址有变，需重算定位并刷新分类店铺 */
 function notifyHomeMarketAddressChanged() {
@@ -87,7 +88,7 @@ Page({
   async loadAddresses() {
     this.setData({ loading: true });
     try {
-      const res = await util.get('user/addresses');
+      const res = await api.user.getAddressList();
       const list = this._normalizeAddressList(Array.isArray(res) ? res : (res.list || []));
       this.setData({ list, loading: false });
     } catch (e) {
