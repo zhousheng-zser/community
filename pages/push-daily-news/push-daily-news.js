@@ -1,20 +1,37 @@
+const util = require('../../utils/util.js');
+
 Page({
     data: {
         navTopPadding: 20,
-        goodsList: [
-            { id: 1, name: "子初紫草多效舒缓膏清凉温和棒状紫草膏婴幼儿童适用30g", price: "19.00", comm: "2.43", image: "/img/placeholders/home_cleaning.png", tag: "30g" },
-            { id: 2, name: "【3年苗】带苞发货 蓝莓苗盆栽 阳台盆栽地栽绿植花卉w", price: "39.90", comm: "13.53", image: "/img/placeholders/home_repair.png", tag: "当年结果 基地现挖" },
-            { id: 3, name: "十月结晶婴幼儿酵素洗衣液宝宝专用洗衣液天然皂液...", price: "15.90", comm: "2.04", image: "/img/placeholders/home_cleaning.png", tag: "酵素去污 深层洁净" },
-            { id: 4, name: "子初蛋黄油倍护霜保湿秋冬面霜植萃舒缓按压泵大罐家庭装", price: "99.00", comm: "22.18", image: "/img/placeholders/home_cleaning.png", tag: "多效倍护" }
-        ]
+        goodsList: [],   // 纯真实接口数据，无兜底假商品
+        loading: true
     },
     onLoad(options) {
         const sys = wx.getSystemInfoSync();
-        this.setData({
-            navTopPadding: (sys.statusBarHeight || 20) + 6
-        });
+        this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
+        this.loadDailyNews();
+    },
+    async loadDailyNews() {
+        try {
+            await util.ensureUserCoordsForShop();
+            const q = util.buildShopGoodsQuery({ distance_km: 5 });
+            const res = await util.get('local-goods-home/modules', q);
+            const payload = res && typeof res === 'object' ? (res.data || res) : {};
+            const rawList = payload.daily_news || payload.dailyNews || [];
+            const filtered = util.filterShopProductsByDistance(rawList, 5);
+            const goodsList = filtered.map((it, i) => util.normalizeShopProductRow(it, i));
+            this.setData({ goodsList, loading: false });
+        } catch (e) {
+            console.log('每日上新加载失败', e);
+            this.setData({ goodsList: [], loading: false });
+        }
     },
     goBack() {
-        wx.navigateBack({ delta: 1 });
+        const pages = getCurrentPages();
+        if (pages.length > 1) {
+            wx.navigateBack({ delta: 1 });
+            return;
+        }
+        wx.switchTab({ url: '/pages/index/index' });
     }
 });

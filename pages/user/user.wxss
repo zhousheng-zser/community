@@ -299,6 +299,10 @@ page {
   background: #fff4e6;
 }
 
+.portal-icon-wrap.market-tone {
+  background: #e6fffb;
+}
+
 .portal-icon-img {
   width: 48rpx;
   height: 48rpx;

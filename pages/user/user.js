@@ -59,7 +59,11 @@ Page({
     rolePortals.navigateToWorkerHome();
   },
 
-  goMerchantPortal() {
+  goServiceProviderPortal() {
+    wx.showToast({ title: '服务商版即将上线', icon: 'none' });
+  },
+
+  goMarketPortal() {
     rolePortals.navigateToMerchantHome();
   },
 

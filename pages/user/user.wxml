@@ -74,7 +74,7 @@
   <view class="card" wx:if="{{loggedIn}}">
     <view class="card-head">
       <text class="card-title">工作台</text>
-      <text class="card-more muted">技工 / 服务商</text>
+      <text class="card-more muted">技工 / 服务商 / 集市</text>
     </view>
     <view class="portal-grid">
       <view class="portal-item" bindtap="goWorkerPortal">
@@ -84,12 +84,19 @@
         <text class="portal-name">技工工作台</text>
         <text class="portal-sub">接单与服务</text>
       </view>
-      <view class="portal-item" bindtap="goMerchantPortal">
+      <view class="portal-item" bindtap="goServiceProviderPortal">
         <view class="portal-icon-wrap merchant-tone">
-          <image class="portal-icon-img" src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+          <image class="portal-icon-img" src="/img/join_services/service_provider.png" mode="aspectFit"></image>
         </view>
         <text class="portal-name">服务商工作台</text>
         <text class="portal-sub">直约到家与店铺</text>
+      </view>
+      <view class="portal-item" bindtap="goMarketPortal">
+        <view class="portal-icon-wrap market-tone">
+          <image class="portal-icon-img" src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+        </view>
+        <text class="portal-name">集市商家工作台</text>
+        <text class="portal-sub">商品与订单</text>
       </view>
     </view>
   </view>

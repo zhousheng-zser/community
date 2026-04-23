@@ -73,16 +73,7 @@
         </view>
         <text class="grid-btn-arrow">›</text>
       </view>
-      <view class="grid-btn" bindtap="goDirectServiceOrders">
-        <view class="grid-btn-icon">
-          <image src="/img/home_icons2/merchant_direct.png" mode="aspectFit"></image>
-        </view>
-        <view class="grid-btn-main">
-          <text class="grid-btn-title">直约服务订单</text>
-          <text class="grid-btn-desc">到家打包单 · 接单打卡</text>
-        </view>
-        <text class="grid-btn-arrow">›</text>
-      </view>
+
       <view class="grid-btn" bindtap="goMine">
         <view class="grid-btn-icon">
           <image src="/img/other_services/settings.png" mode="aspectFit"></image>

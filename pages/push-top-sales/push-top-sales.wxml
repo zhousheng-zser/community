@@ -20,31 +20,30 @@
 
   <!-- 单列商品流 -->
   <view class="goods-list">
-    <navigator class="good-card" wx:for="{{topList}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-      <!-- 左侧主图 -->
-      <view class="img-box">
-        <!-- 排行榜角标: 第1页特殊金底，后续深底 -->
-        <view class="rank-tag {{index === 0 ? 'rank-first' : 'rank-other'}}">
-          <text class="lbl">TOP</text>
-          <text class="num">{{item.rank}}</text>
+    <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
+    <view wx:elif="{{topList.length === 0}}" class="empty-tip">暂无榜单商品</view>
+    <block wx:else>
+      <navigator class="good-card" wx:for="{{topList}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
+        <view class="img-box">
+          <view class="rank-tag {{index === 0 ? 'rank-first' : 'rank-other'}}">
+            <text class="lbl">TOP</text>
+            <text class="num">{{item.rank}}</text>
+          </view>
+          <image src="{{item.image}}" class="cover" mode="aspectFill"></image>
+          <view wx:if="{{item.tag}}" class="tag-label-btm">{{item.tag}}</view>
         </view>
-        <image src="{{item.image}}" class="cover" mode="aspectFill"></image>
-        <view wx:if="{{item.tag}}" class="tag-label-btm">{{item.tag}}</view>
-      </view>
-      
-      <!-- 右侧信息区 -->
-      <view class="info-box">
-        <view class="title-row">
-          <text class="jd-icon">jd</text>
-          <text class="name">{{item.name}}</text>
+        <view class="info-box">
+          <view class="title-row">
+            <text class="jd-icon">jd</text>
+            <text class="name">{{item.name}}</text>
+          </view>
+          <view class="share-tag">分享赚/购买返￥{{item.comm}}</view>
+          <view class="bottom-row">
+            <text class="price">￥{{item.price}}</text>
+            <view class="buy-btn">去购买</view>
+          </view>
         </view>
-        <view class="share-tag">分享赚/购买返￥{{item.comm}}</view>
-        
-        <view class="bottom-row">
-          <text class="price">￥{{item.price}}</text>
-          <view class="buy-btn">去购买</view>
-        </view>
-      </view>
-    </navigator>
+      </navigator>
+    </block>
   </view>
 </view>

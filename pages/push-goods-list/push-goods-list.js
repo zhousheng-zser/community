@@ -36,7 +36,21 @@ Page({
       zoneId,
       isGiftZone,
       isSidebarLayout,
-      isHighCommLayout
+      isHighCommLayout,
+      // 礼物专区：本地兜底子分类，后端有返回时覆盖
+      subCategories: isGiftZone ? [
+        { name: '送长辈', image: '/img/gifts/for_elders.png' },
+        { name: '送朋友', image: '/img/gifts/for_friends.png' },
+        { name: '送同事', image: '/img/gifts/for_colleagues.png' },
+        { name: '送伴侣', image: '/img/gifts/for_partner.png' }
+      ] : [],
+      // 商城籁选：本地兜底左侧类目，后端有返回时覆盖
+      sidebarCategories: isSidebarLayout ? [
+        '食品生鲜', '家居百货', '美妆洗护',
+        '服装箱包', '数码配件', '母婴系列',
+        '传统工艺', '其他'
+      ] : [],
+      activeSidebarCategory: isSidebarLayout ? '食品生鲜' : ''
     });
 
     this.loadZoneProducts(zoneId, {});
@@ -61,14 +75,6 @@ Page({
         ? payload.sub_categories
         : (Array.isArray(payload.gift_sub_categories) ? payload.gift_sub_categories : []);
 
-      // 兼容：对礼物专区的子分类无图片情况直接从本地原型图拦截替换
-      subCategories.forEach(sub => {
-        if (sub.name === '送长辈') {
-          sub.image = '/img/gifts/for_elders.png';
-        } else if (sub.name === '送朋友') {
-          sub.image = '/img/gifts/for_friends.png';
-        }
-      });
 
       const sidebarCategories = Array.isArray(payload.sidebar_categories)
         ? payload.sidebar_categories
@@ -78,9 +84,20 @@ Page({
         goods,
         loading: false
       };
+      // 接口返回了子分类才覆盖本地兜底，否则保持 onLoad 设置的默认值
       if (subCategories.length > 0) {
+        // 图片补全：接口未返图时用本地占位
+        subCategories.forEach(sub => {
+          if (!sub.image || sub.image === '') {
+            if (sub.name === '送长辈') sub.image = '/img/gifts/for_elders.png';
+            else if (sub.name === '送朋友') sub.image = '/img/gifts/for_friends.png';
+            else if (sub.name === '送同事') sub.image = '/img/gifts/for_colleagues.png';
+            else if (sub.name === '送伴侣') sub.image = '/img/gifts/for_partner.png';
+          }
+        });
         patch.subCategories = subCategories;
       }
+      // 左侧类目：接口有返回才覆盖本地兜底
       if (sidebarCategories.length > 0) {
         patch.sidebarCategories = sidebarCategories;
         patch.activeSidebarCategory = sidebarCategories[0];

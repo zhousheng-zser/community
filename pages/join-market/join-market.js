@@ -10,7 +10,8 @@ Page({
     communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
     communityIndex: -1,
     form: {
-      contact: '', phone: '', shopName: '', category: '', address: '杭州市滨江区网商路100号 (临时填充)',
+      contact: '', phone: '', shopName: '', category: '', address: '',
+      lat: 0, lng: 0,
       intro: '', promoter: '', creditCode: '', bizName: '', legalPerson: '',
       signboard: '', indoor: '', bizLicense: '', community: ''
     }
@@ -31,6 +32,31 @@ Page({
   toggleAgree() { this.setData({ agreed: !this.data.agreed }); },
 
   comingSoon() { wx.showToast({ title: '敬请期待', icon: 'none' }); },
+
+  chooseAddress() {
+    wx.chooseLocation({
+      success: (res) => {
+        // res.name: 地点名称, res.address: 详细地址, res.latitude/longitude: 经纬度
+        const addressStr = res.address ? res.address : res.name;
+        this.setData({
+          'form.address': addressStr,
+          'form.lat': res.latitude,
+          'form.lng': res.longitude
+        });
+      },
+      fail: (err) => {
+        // 用户取消或权限拒绝时不弹提示
+        if (err.errMsg && err.errMsg.indexOf('auth deny') !== -1) {
+          wx.showModal({
+            title: '需要位置权限',
+            content: '选择店铺地址需要开启位置权限，请在设置中允许',
+            confirmText: '去设置',
+            success: (r) => { if (r.confirm) wx.openSetting(); }
+          });
+        }
+      }
+    });
+  },
 
   onCategoryChange(e) {
     const idx = e.detail.value;
@@ -103,6 +129,8 @@ Page({
         shop_name: form.shopName,
         category: form.category, 
         address: form.address,
+        latitude: form.lat || undefined,
+        longitude: form.lng || undefined,
         description: form.intro || '', 
         promoter_name: form.promoter || '',
         credit_code: form.creditCode || '', 

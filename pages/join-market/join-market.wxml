@@ -21,10 +21,12 @@
         <text class="form-arrow">›</text>
       </view>
     </picker>
-    <view class="form-row" bindtap="comingSoon">
+    <view class="form-row" bindtap="chooseAddress">
       <text class="form-label required">详细地址</text>
-      <text class="{{form.address?'form-value':'form-placeholder'}}">{{form.address || '请输入商家地址'}}</text>
-      <text class="form-arrow">›</text>
+      <text class="{{form.address?'form-value':'form-placeholder'}}">
+        {{form.address || '点击在地图上选择店铺位置'}}
+      </text>
+      <text class="form-arrow">📍</text>
     </view>
     <view class="form-row">
       <text class="form-label required">商家简介</text>
