@@ -288,3 +288,10 @@ page {
   font-size: 24rpx;
   padding: 40rpx 0;
 }
+
+.empty-tip {
+  text-align: center;
+  color: #aaa;
+  font-size: 28rpx;
+  padding: 80rpx 0;
+}

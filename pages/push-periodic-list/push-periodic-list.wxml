@@ -6,7 +6,7 @@
       <view class="back-btn" bindtap="goBack">
         <text class="arrow">〈</text>
       </view>
-      <view class="right-icon">•••</view>
+
     </view>
     
     <!-- 背部巨大字号或图形修饰物 -->
@@ -27,42 +27,37 @@
 
   <!-- 往下延伸的商品列表容器 -->
   <view class="list-container">
-    <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="card-item" wx:for="{{goodsList}}" wx:key="id">
-      
-      <!-- 左上角的榜单标识小红签 -->
-      <view class="badge">{{listType}}</view>
-      
-      <view class="main-info">
-        <!-- 左侧封面照 -->
-        <image class="cover" src="{{item.image}}" mode="aspectFill"></image>
-        
-        <!-- 右侧商品名及操作 -->
-        <view class="details">
-          <view class="g-title">{{item.title}}</view>
-          
-          <view class="g-bottom">
-            <view class="price-wrap">
-              <text class="p-sign">￥</text>
-              <text class="p-val">{{item.price}}</text>
-            </view>
-            <view class="action-row">
-              <view class="comm-box">分享赚/购买返￥{{item.comm}}</view>
-              <view class="buy-btn">去购买</view>
+    <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
+    <view wx:elif="{{goodsList.length === 0}}" class="empty-tip">暂无商品数据</view>
+    <block wx:else>
+      <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="card-item" wx:for="{{goodsList}}" wx:key="id">
+        <!-- 左上角的榜单标识小红签 -->
+        <view class="badge">{{listType}}</view>
+        <view class="main-info">
+          <!-- 左侧封面照 -->
+          <image class="cover" src="{{item.image}}" mode="aspectFill"></image>
+          <!-- 右侧商品名及操作 -->
+          <view class="details">
+            <view class="g-title">{{item.title}}</view>
+            <view class="g-bottom">
+              <view class="price-wrap">
+                <text class="p-sign">￥</text>
+                <text class="p-val">{{item.price}}</text>
+              </view>
+              <view class="action-row">
+                <view class="comm-box">分享赚/购买返￥{{item.comm}}</view>
+                <view class="buy-btn">去购买</view>
+              </view>
             </view>
           </view>
         </view>
-      </view>
-
-      <!-- 仅在含有推荐理由（周/月排行）时渲染底部虚线插块 -->
-      <view class="reason-row" wx:if="{{item.reason}}">
-        <text class="thumb">👍</text> 
-        <text class="r-label">推荐理由：</text> 
-        <text class="r-cont">{{item.reason}}</text>
-      </view>
-
-    </navigator>
-    
-    <!-- 简易到底提示 -->
-    <view class="loading-nomore">没有更多数据了</view>
+        <!-- 推荐理由（若有） -->
+        <view class="reason-row" wx:if="{{item.reason}}">
+          <text class="thumb">👍</text>
+          <text class="r-label">推荐理由：</text>
+          <text class="r-cont">{{item.reason}}</text>
+        </view>
+      </navigator>
+    </block>
   </view>
 </view>
