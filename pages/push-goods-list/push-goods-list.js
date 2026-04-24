@@ -98,9 +98,12 @@ Page({
         patch.subCategories = subCategories;
       }
       // 左侧类目：接口有返回才覆盖本地兜底
+      // 注意：只在初次加载时设置默认选中，点击类目后不覆盖用户的选择
       if (sidebarCategories.length > 0) {
         patch.sidebarCategories = sidebarCategories;
-        patch.activeSidebarCategory = sidebarCategories[0];
+        if (!extra.sidebar_category) {
+          patch.activeSidebarCategory = sidebarCategories[0];
+        }
       }
       this.setData(patch);
     } catch (e) {

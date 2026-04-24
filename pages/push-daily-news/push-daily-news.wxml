@@ -4,7 +4,7 @@
     <view class="back-btn" bindtap="goBack">
       <text class="arrow">〈</text>
     </view>
-    <view class="right-icon">•••</view>
+
   </view>
   
   <view class="header-title">

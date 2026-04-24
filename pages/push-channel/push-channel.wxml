@@ -7,7 +7,7 @@
         <text class="text">{{pageTitle}}</text>
       </view>
     </view>
-    <view class="right-icon">•••</view>
+
   </view>
 
   <!-- 分类选项卡 -->
