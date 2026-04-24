@@ -475,7 +475,7 @@ ADD COLUMN `image_urls` json DEFAULT NULL COMMENT '评论所附带的图片数�
 > - 管理端 `/api/v1/admin/shop-products` CRUD
 > - 相关模型：`shop_products`、`rewards`
 
-当前首页“本地好物”统一改为从 **本地集市真实商品** 获取，见下方 **12. 本地集市 Market** 章节与 `local-goods-home` 接口说明。
+当前首页“本地商城”统一改为从 **本地集市真实商品** 获取，见下方 **12. 本地集市 Market** 章节与 `local-goods-home` 接口说明。
 
 ---
 
@@ -528,7 +528,7 @@ CREATE TABLE `live_streams` (
 
 > 本地集市为独立 `market` 领域，交易逻辑不混入 `core`。所有接口返回统一结构：`{ code, msg, data }`。
 
-#### 12.0 首页本地好物聚合（集市商品来源）
+#### 12.0 首页本地商城聚合（集市商品来源）
 
 - **首页模块聚合**：`GET /api/v1/local-goods-home/modules`
   - Query：`user_lat`、`user_lng`、`distance_km`（默认 5）

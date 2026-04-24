@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { Op } = require('sequelize');
 const {
     MarketOrder,
@@ -5,14 +6,22 @@ const {
     MarketPayTransaction,
     MarketShop,
     MarketGood,
+    MarketGoodSku,
     MarketApplication,
     MarketShopReview,
     ServiceProviderApplication,
     ServiceProviderProfile,
+    ServiceProviderPortalAccount,
     User,
-    ApprovalRecord
+    ApprovalRecord,
+    sequelize
 } = require('../models');
+const { refreshPriceRangeForGood } = require('../utils/marketSku');
 const { logAdminAction } = require('./adminAuditHelper');
+
+function hashSpPortalPassword(raw) {
+    return crypto.createHash('sha256').update(String(raw)).digest('hex');
+}
 
 function genShopNo() {
     const r = Math.floor(Math.random() * 900000) + 100000;
@@ -23,12 +32,11 @@ function genGoodsNo(shopId) {
 }
 
 const ORDER_STATUS_ACTIONS = {
-    accept: { from: ['paid'], to: 'delivering' },
-    reject: { from: ['paid'], to: 'cancelled' },
-    prepare: { from: ['paid', 'delivering'], to: 'delivering' },
-    deliver: { from: ['delivering'], to: 'delivering' },
-    complete: { from: ['delivering'], to: 'completed' },
-    close: { from: ['pending_payment', 'cancelled'], to: 'closed' }
+    accept: { from: ['pending_accept'], to: 'pending_service' },
+    reject: { from: ['pending_accept'], to: 'cancelled' },
+    dispatch: { from: ['pending_service'], to: 'pending_receipt' },
+    complete: { from: ['pending_receipt'], to: 'completed' },
+    close: { from: ['pending_payment'], to: 'cancelled' }
 };
 
 async function writeApproval(bizType, bizId, fromStatus, toStatus, operator, note) {
@@ -73,7 +81,9 @@ exports.listOrders = async (req, res) => {
 
 exports.listOrderFulfillment = async (req, res) => {
     try {
-        const statuses = req.query.statuses ? String(req.query.statuses).split(',') : ['paid', 'delivering'];
+        const statuses = req.query.statuses
+            ? String(req.query.statuses).split(',')
+            : ['pending_accept', 'pending_service', 'pending_receipt'];
         const page = parseInt(req.query.page, 10) || 1;
         const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
         const offset = (page - 1) * limit;
@@ -219,8 +229,90 @@ exports.updateShop = async (req, res) => {
     }
 };
 
+exports.deleteShopCascade = async (req, res) => {
+    const tx = await sequelize.transaction();
+    try {
+        const shopId = parseInt(req.params.id, 10);
+        if (!Number.isInteger(shopId) || shopId <= 0) {
+            await tx.rollback();
+            return res.status(400).json({ error: '无效店铺 ID' });
+        }
+
+        const adminPassword = req.body && req.body.admin_password !== undefined
+            ? String(req.body.admin_password)
+            : '';
+        const expectedPassword = String(process.env.ADMIN_PASSWORD || '').trim();
+        if (!expectedPassword) {
+            await tx.rollback();
+            return res.status(503).json({ error: '服务端未配置 ADMIN_PASSWORD，无法执行删除' });
+        }
+        if (!adminPassword || adminPassword !== expectedPassword) {
+            await tx.rollback();
+            return res.status(401).json({ error: '管理员密码错误' });
+        }
+
+        const row = await MarketShop.findByPk(shopId, { transaction: tx });
+        if (!row) {
+            await tx.rollback();
+            return res.status(404).json({ error: '店铺不存在' });
+        }
+
+        const orderCount = await MarketOrder.count({ where: { shop_id: shopId }, transaction: tx });
+        if (orderCount > 0) {
+            await tx.rollback();
+            return res.status(400).json({ error: '该店铺存在订单，禁止直接删除' });
+        }
+
+        const goodsRows = await MarketGood.findAll({
+            where: { shop_id: shopId },
+            attributes: ['id'],
+            transaction: tx
+        });
+        const goodsIds = goodsRows.map(item => item.id);
+
+        if (goodsIds.length > 0) {
+            await MarketGoodSku.destroy({
+                where: { goods_id: { [Op.in]: goodsIds } },
+                transaction: tx
+            });
+            await MarketGood.destroy({
+                where: { id: { [Op.in]: goodsIds } },
+                transaction: tx
+            });
+        }
+
+        await row.destroy({ transaction: tx });
+        await tx.commit();
+
+        await logAdminAction(req, 'delete_shop_cascade', 'market_shop', shopId, {
+            goods_deleted: goodsIds.length
+        });
+        return res.json({
+            message: '删除成功',
+            data: { shop_id: shopId, goods_deleted: goodsIds.length }
+        });
+    } catch (e) {
+        await tx.rollback();
+        console.error('admin deleteShopCascade:', e);
+        return res.status(500).json({ error: '删除失败' });
+    }
+};
+
 // ---------- 商品 ----------
-const goodWritableFields = ['category_key', 'name', 'description', 'main_image', 'images', 'price', 'origin_price', 'stock', 'status', 'sort_order'];
+const goodWritableFields = [
+    'category_key',
+    'name',
+    'description',
+    'main_image',
+    'images',
+    'price',
+    'origin_price',
+    'stock',
+    'status',
+    'sort_order',
+    'price_range',
+    'desc_html'
+];
 exports.listGoods = async (req, res) => {
     try {
         const shopId = req.query.shop_id;
@@ -246,6 +338,14 @@ exports.createGood = async (req, res) => {
         const body = { shop_id: b.shop_id, goods_no: genGoodsNo(b.shop_id), category_key: b.category_key, name: b.name, price: b.price };
         goodWritableFields.forEach(f => { if (b[f] !== undefined && !['category_key', 'name', 'price'].includes(f)) body[f] = b[f]; });
         const row = await MarketGood.create(body);
+        await MarketGoodSku.create({
+            goods_id: row.id,
+            specs: [],
+            price: row.price,
+            stock: row.stock != null ? row.stock : 0,
+            status: 'active'
+        });
+        await refreshPriceRangeForGood(row.id, null);
         await logAdminAction(req, 'create_good', 'market_good', row.id, body);
         res.status(201).json({ message: '创建成功', data: row });
     } catch (e) {
@@ -260,6 +360,16 @@ exports.updateGood = async (req, res) => {
         const b = req.body || {};
         goodWritableFields.forEach(f => { if (b[f] !== undefined) row[f] = b[f]; });
         await row.save();
+        const skuCount = await MarketGoodSku.count({ where: { goods_id: row.id, status: 'active' } });
+        if (skuCount === 1) {
+            const sku = await MarketGoodSku.findOne({ where: { goods_id: row.id, status: 'active' } });
+            if (sku) {
+                if (b.price !== undefined) sku.price = row.price;
+                if (b.stock !== undefined) sku.stock = row.stock;
+                await sku.save();
+                await refreshPriceRangeForGood(row.id, null);
+            }
+        }
         await logAdminAction(req, 'update_good', 'market_good', row.id, b);
         res.json({ message: '更新成功', data: row });
     } catch (e) {
@@ -347,7 +457,7 @@ exports.listServiceProviderApplications = async (req, res) => {
 };
 exports.updateServiceProviderApplication = async (req, res) => {
     try {
-        const { status, note } = req.body || {};
+        const { status, note, community_id } = req.body || {};
         if (!['approved', 'rejected'].includes(status)) return res.status(400).json({ error: 'status 须为 approved 或 rejected' });
         const row = await ServiceProviderApplication.findByPk(req.params.id);
         if (!row) return res.status(404).json({ error: '申请不存在' });
@@ -355,6 +465,7 @@ exports.updateServiceProviderApplication = async (req, res) => {
         row.status = status;
         await row.save();
         if (status === 'approved') {
+            const commId = community_id != null && community_id !== '' ? parseInt(community_id, 10) : null;
             await ServiceProviderProfile.upsert({
                 user_id: row.user_id,
                 application_id: row.id,
@@ -366,6 +477,7 @@ exports.updateServiceProviderApplication = async (req, res) => {
                 environment_url: row.environment_url || null,
                 id_card_url: row.id_card_url,
                 certificate_url: row.certificate_url || null,
+                community_id: Number.isFinite(commId) ? commId : null,
                 status: 'active'
             });
             const user = await User.findByPk(row.user_id);
@@ -383,6 +495,38 @@ exports.updateServiceProviderApplication = async (req, res) => {
     } catch (e) {
         console.error('admin updateServiceProviderApplication:', e);
         res.status(500).json({ error: '更新服务商申请失败' });
+    }
+};
+
+/** POST body: profile_id, username, password — 为已审核服务商开通运行中台登录 */
+exports.createServiceProviderPortalAccount = async (req, res) => {
+    try {
+        const { profile_id, username, password } = req.body || {};
+        const pid = parseInt(profile_id, 10);
+        if (!pid || !username || !password) {
+            return res.status(400).json({ error: '请提供 profile_id、username、password' });
+        }
+        const prof = await ServiceProviderProfile.findByPk(pid);
+        if (!prof || prof.status !== 'active') {
+            return res.status(404).json({ error: '服务商档案不存在或未激活' });
+        }
+        const un = String(username).trim();
+        const dup = await ServiceProviderPortalAccount.findOne({ where: { username: un } });
+        if (dup) return res.status(400).json({ error: '用户名已存在' });
+        const dupProf = await ServiceProviderPortalAccount.findOne({ where: { profile_id: pid } });
+        if (dupProf) return res.status(400).json({ error: '该服务商已开通门户账号' });
+        await ServiceProviderPortalAccount.create({
+            profile_id: pid,
+            username: un,
+            password_hash: hashSpPortalPassword(password),
+            status: 'active',
+            role: 'owner'
+        });
+        await logAdminAction(req, 'create_service_provider_portal_account', 'service_provider_profile', pid, { username: un });
+        res.json({ message: 'ok' });
+    } catch (e) {
+        console.error('admin createServiceProviderPortalAccount:', e);
+        res.status(500).json({ error: '创建失败' });
     }
 };
 

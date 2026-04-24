@@ -12,10 +12,10 @@ router.get('/categories/:categoryId/services', ctrl.getServicesByCategory);
 router.get('/services/:id', ctrl.getServiceDetail);
 router.get('/service-groups/:group', ctrl.getServiceGroup);
 router.get('/workers', ctrl.getWorkers);
+router.get('/workers/:id/services', ctrl.getWorkerServices);
+router.get('/workers/:id/reviews', ctrl.getWorkerReviews);
 router.get('/workers/:id', ctrl.getWorkerDetail);
 router.get('/service-providers', ctrl.getServiceProviders);
+router.get('/service-providers/:id/catalog', ctrl.getServiceProviderCatalog);
 router.get('/service-providers/:id', ctrl.getServiceProviderDetail);
-router.get('/goods/featured', ctrl.getFeaturedGoods);
-router.get('/goods/:id', ctrl.getGoodDetail);
-
 module.exports = router;

@@ -1,17 +1,17 @@
 'use strict';
 
-// 首页 10 个分类：前端展示名 <-> 稳定编码（用于 DB 存储/查询）
+// 首页/入驻 10 个大类：中文展示名 <-> 稳定编码（用于 DB 存储/查询）
 const MARKET_CATEGORY_MAPPINGS = [
-  { code: 'AAAA', name: '母婴生活馆' },
-  { code: 'AAAB', name: '家庭服务' },
-  { code: 'AAAC', name: '超市便利' },
-  { code: 'AAAD', name: '美食外卖' },
-  { code: 'AAAE', name: '看病买药' },
-  { code: 'AAAF', name: '鲜花礼品' },
-  { code: 'AAAG', name: '水果蔬菜' },
-  { code: 'AAAH', name: '服装首饰' },
-  { code: 'AAAI', name: '电子数码' },
-  { code: 'AAAJ', name: '本地玩乐' }
+  { code: 'AAAA', name: '食品生鲜' },
+  { code: 'AAAB', name: '美妆洗护' },
+  { code: 'AAAC', name: '居家百货' },
+  { code: 'AAAD', name: '服装箱包' },
+  { code: 'AAAE', name: '母婴系列' },
+  { code: 'AAAF', name: '家用电器' },
+  { code: 'AAAG', name: '数码产品' },
+  { code: 'AAAH', name: '珠宝饰品' },
+  { code: 'AAAI', name: '旅游出行' },
+  { code: 'AAAJ', name: '传统工艺' }
 ];
 
 const CATEGORY_NAME_TO_CODE = Object.fromEntries(

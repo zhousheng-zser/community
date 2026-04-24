@@ -7,6 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       ServiceOrder.belongsTo(models.User, { foreignKey: 'user_id', as: 'buyer' });
       ServiceOrder.belongsTo(models.Service, { foreignKey: 'service_id', as: 'service' });
       ServiceOrder.belongsTo(models.User, { foreignKey: 'assigned_worker_id', as: 'assignedWorker' });
+      ServiceOrder.hasMany(models.ServiceOrderReview, { foreignKey: 'order_id', as: 'reviews' });
+      ServiceOrder.hasMany(models.ServiceOrderComplaint, { foreignKey: 'order_id', as: 'complaints' });
     }
   }
   ServiceOrder.init({
@@ -23,7 +25,14 @@ module.exports = (sequelize, DataTypes) => {
     pay_status: { type: DataTypes.STRING(32), allowNull: false, defaultValue: 'unpaid' },
     assigned_worker_id: { type: DataTypes.INTEGER, allowNull: true },
     dispatch_at: { type: DataTypes.DATE, allowNull: true },
-    dispatch_by: { type: DataTypes.INTEGER, allowNull: true }
+    dispatch_by: { type: DataTypes.INTEGER, allowNull: true },
+    fulfillment_meta: { type: DataTypes.JSON, allowNull: true },
+    order_no: { type: DataTypes.STRING(32), allowNull: true },
+    contact_name: { type: DataTypes.STRING(64), allowNull: true },
+    contact_phone: { type: DataTypes.STRING(20), allowNull: true },
+    goods_name: { type: DataTypes.STRING(200), allowNull: true },
+    qty: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
+    provider_user_id: { type: DataTypes.INTEGER, allowNull: true }
   }, {
     sequelize,
     modelName: 'ServiceOrder',

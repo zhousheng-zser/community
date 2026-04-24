@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
     id_card_url: DataTypes.STRING(255),
     work_photo_url: DataTypes.STRING(255),
     certificate_url: DataTypes.JSON,
+    community_id: DataTypes.INTEGER,
+    gender: DataTypes.STRING(8),
+    main_direction: DataTypes.STRING(120),
     status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'active' }
   }, {
     sequelize,

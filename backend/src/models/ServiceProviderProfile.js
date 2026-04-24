@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     environment_url: DataTypes.JSON,
     id_card_url: DataTypes.STRING(255),
     certificate_url: DataTypes.JSON,
+    community_id: DataTypes.INTEGER,
     status: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'active' }
   }, {
     sequelize,

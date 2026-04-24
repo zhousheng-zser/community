@@ -2,11 +2,14 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class MarketGood extends Model {
-    static associate(models) {}
+    static associate(models) {
+      MarketGood.hasMany(models.MarketGoodSku, { foreignKey: 'goods_id', as: 'skus' });
+      MarketGood.belongsTo(models.MarketShop, { foreignKey: 'shop_id', as: 'shop' });
+    }
   }
   MarketGood.init({
     goods_no: { type: DataTypes.STRING(32), allowNull: false },
-    shop_id: { type: DataTypes.BIGINT, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     category_key: { type: DataTypes.STRING(50), allowNull: false },
     name: { type: DataTypes.STRING(150), allowNull: false },
     description: DataTypes.STRING(255),
@@ -15,9 +18,12 @@ module.exports = (sequelize, DataTypes) => {
     price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     origin_price: DataTypes.DECIMAL(10, 2),
     stock: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    safe_stock: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     sold_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     status: { type: DataTypes.ENUM('on_sale', 'off_sale'), allowNull: false, defaultValue: 'on_sale' },
-    sort_order: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
+    sort_order: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+    price_range: { type: DataTypes.STRING(64), allowNull: true },
+    desc_html: { type: DataTypes.TEXT, allowNull: true }
   }, {
     sequelize,
     modelName: 'MarketGood',

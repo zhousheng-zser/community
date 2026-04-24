@@ -6,6 +6,12 @@ const ctrl = require('../controllers/neighborAssistController');
 router.use(authMiddleware);
 router.post('/orders', ctrl.create);
 router.get('/orders/my', ctrl.myList);
+router.get('/orders/pool', ctrl.pool);
 router.post('/orders/:id/pay', ctrl.mockPay);
+router.post('/orders/:id/grab', ctrl.grab);
+router.post('/orders/:id/cancel', ctrl.cancel);
+router.post('/orders/:id/accept', ctrl.accept);
+router.post('/orders/:id/reject', ctrl.reject);
+router.post('/orders/:id/complete', ctrl.complete);
 
 module.exports = router;

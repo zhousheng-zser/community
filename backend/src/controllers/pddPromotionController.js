@@ -1,10 +1,12 @@
 /**
  * 惠民卡 / 多多进宝：推广链接（H5 + 拼多多小程序路径）
- * 演示商品 id 走本地映射；真实环境可配置 PDD_* 环境变量并传 goods_sign 转链。
+ * 优先读库 pdd_benefit_goods；其次演示映射；可配置 PDD_* 走开放平台转链。
  */
 
 const crypto = require('crypto');
 const axios = require('axios');
+const { Op } = require('sequelize');
+const { PddBenefitGood } = require('../models');
 
 const PDD_ROUTER = 'https://gw-api.pinduoduo.com/api/router';
 
@@ -29,7 +31,7 @@ const DEMO_SPREAD = {
 };
 
 function ok(res, data) {
-  res.json({ code: 0, message: 'ok', data });
+  res.json({ errno: 0, data });
 }
 
 function pddSign(params, clientSecret) {
@@ -83,11 +85,29 @@ async function callPddRouter(businessParams) {
 exports.getSpreadUrl = async (req, res) => {
   try {
     const goodsId = req.query.goods_id;
-    const scene = req.query.scene || '';
+    const scene = req.query.scene || 'benefit_card';
     const goodsSign = req.query.goods_sign;
 
     if (!goodsId && !goodsSign) {
-      return res.status(400).json({ code: 400, message: '缺少 goods_id 或 goods_sign' });
+      return res.status(400).json({ errno: 400, errmsg: '缺少 goods_id 或 goods_sign' });
+    }
+
+    if (goodsId) {
+      const row = await PddBenefitGood.findOne({
+        where: {
+          scene,
+          status: 1,
+          [Op.or]: [{ goods_id: String(goodsId) }, { link_key: String(goodsId) }]
+        }
+      });
+      if (row) {
+        return ok(res, {
+          spreadUrl: row.spread_url,
+          miniPath: row.mini_path || '',
+          scene,
+          goodsId
+        });
+      }
     }
 
     if (goodsId && DEMO_SPREAD[goodsId]) {
@@ -106,8 +126,8 @@ exports.getSpreadUrl = async (req, res) => {
         const body = result.data;
         if (body.error_response) {
           return res.status(502).json({
-            code: 502,
-            message: body.error_response.error_msg || '拼多多接口错误',
+            errno: 502,
+            errmsg: body.error_response.error_msg || '拼多多接口错误',
             details: body.error_response
           });
         }
@@ -127,17 +147,17 @@ exports.getSpreadUrl = async (req, res) => {
 
     if (goodsId) {
       return res.status(404).json({
-        code: 404,
-        message: '未找到该商品的推广映射，请配置联盟转链或检查 goods_id'
+        errno: 404,
+        errmsg: '未找到该商品的推广映射，请配置联盟转链或检查 goods_id'
       });
     }
 
     return res.status(400).json({
-      code: 400,
-      message: '未配置 PDD_PID、PDD_ACCESS_TOKEN 等或缺少演示 goods_id，无法生成推广链接'
+      errno: 400,
+      errmsg: '未配置 PDD_PID、PDD_ACCESS_TOKEN 等或缺少演示 goods_id，无法生成推广链接'
     });
   } catch (e) {
     console.error('[pdd promotion spread-url]', e.message);
-    return res.status(500).json({ code: 500, message: '服务异常', details: e.message });
+    return res.status(500).json({ errno: 500, errmsg: '服务异常', details: e.message });
   }
 };

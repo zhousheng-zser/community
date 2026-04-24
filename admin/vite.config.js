@@ -4,10 +4,12 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '')
-    const apiTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:3000'
+    // 与 backend/.env 中 PORT 一致（常见 3001）；勿默认 3000，否则易对上 nginx 的 HTTPS 纯端口而返回 400
+    const apiTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:3001'
     return {
         plugins: [vue()],
         server: {
+            host: true, // 监听 0.0.0.0，否则仅本机可访问，公网 IP:5173 会失败
             port: 5173,
             open: true,
             proxy: {

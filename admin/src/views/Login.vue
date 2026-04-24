@@ -59,9 +59,7 @@ const handleLogin = async () => {
   if (!form.value.username) {
     return ElMessage.warning('账号不可为空')
   }
-  if (!form.value.password) {
-    return ElMessage.warning('请输入密码')
-  }
+  // 开发环境（非 production）后端默认不校验密码；生产环境校验。此处不拦截空密码
   loading.value = true
   try {
     const res = await request.post('/auth/admin/login', {

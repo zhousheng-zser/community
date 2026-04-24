@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Service.belongsTo(models.Category, { foreignKey: 'category_id', as: 'category' });
-      Service.hasMany(models.Order, { foreignKey: 'service_id', as: 'orders' });
       Service.hasMany(models.ServiceOrder, { foreignKey: 'service_id', as: 'serviceOrders' });
     }
   }

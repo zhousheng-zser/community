@@ -4,18 +4,27 @@
 # Build
 **/dist/
 admin/dist/
+**/dist-ssr/
 
 # Env & secrets
 .env
 .env.*
 !.env.example
+*.local
 
 # Logs & local junk
 **/logs/
 *.log
+*.pid
+*.pid.lock
 nohup.out
 seed_err*.log
 **/.well-known/
+
+# Runtime uploads (do not version control)
+backend/data/uploads/images/
+backend/uploads/
+backend/uploads
 
 # OS / IDE
 .DS_Store

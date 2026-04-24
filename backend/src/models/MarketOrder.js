@@ -9,12 +9,14 @@ module.exports = (sequelize, DataTypes) => {
   }
   MarketOrder.init({
     order_no: { type: DataTypes.STRING(40), allowNull: false },
-    user_id: { type: DataTypes.BIGINT, allowNull: false },
-    shop_id: { type: DataTypes.BIGINT, allowNull: false },
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     order_status: {
-      type: DataTypes.ENUM('pending_payment', 'paid', 'delivering', 'completed', 'cancelled', 'closed'),
+      type: DataTypes.STRING(32),
       allowNull: false,
-      defaultValue: 'pending_payment'
+      defaultValue: 'pending_payment',
+      comment:
+        'pending_payment|pending_accept|pending_service|pending_receipt|completed|cancelled|refunded'
     },
     pay_status: {
       type: DataTypes.ENUM('unpaid', 'paid', 'refund_pending', 'refunded', 'pay_failed'),
@@ -33,7 +35,13 @@ module.exports = (sequelize, DataTypes) => {
     paid_at: DataTypes.DATE,
     cancelled_at: DataTypes.DATE,
     expired_at: DataTypes.DATE,
-    community_id: { type: DataTypes.BIGINT, allowNull: true }
+    community_id: { type: DataTypes.INTEGER, allowNull: true },
+    delivery_mode: {
+      type: DataTypes.STRING(16),
+      allowNull: false,
+      defaultValue: 'express',
+      comment: 'express|pickup'
+    }
   }, {
     sequelize,
     modelName: 'MarketOrder',

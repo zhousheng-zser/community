@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany(models.Post, { foreignKey: 'user_id', as: 'posts' });
       User.hasMany(models.Comment, { foreignKey: 'user_id', as: 'comments' });
       User.hasMany(models.Like, { foreignKey: 'user_id', as: 'likes' });
-      User.hasMany(models.Order, { foreignKey: 'user_id', as: 'orders' });
     }
   }
   User.init({
@@ -27,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
     wx_id: DataTypes.STRING,
     role: DataTypes.STRING,      // user, promoter, admin
     balance: DataTypes.DECIMAL(10, 2),
-    community_id: DataTypes.INTEGER
+    community_id: DataTypes.INTEGER,
+    token_version: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 }
   }, {
     sequelize,
     modelName: 'User',

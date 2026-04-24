@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     legal_person: DataTypes.STRING(50),
     place_photo_url: DataTypes.JSON,
     license_url: DataTypes.STRING(255),
+    logo_url: DataTypes.STRING(512),
+    background_url: DataTypes.STRING(512),
+    entity_name: DataTypes.STRING(200),
+    promoter_name: DataTypes.STRING(100),
     community_id: DataTypes.INTEGER,
     status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' }
   }, {

@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {}
   }
   MarketShopCategory.init({
-    shop_id: { type: DataTypes.BIGINT, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
     category_key: { type: DataTypes.STRING(50), allowNull: false },
     category_name: { type: DataTypes.STRING(50), allowNull: false },
     sort_order: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },

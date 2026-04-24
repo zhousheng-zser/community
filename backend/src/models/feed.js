@@ -6,7 +6,6 @@ module.exports = (sequelize, DataTypes) => {
     class Feed extends Model {
         static associate(models) {
             Feed.belongsTo(models.User, { foreignKey: 'author_id', as: 'author' });
-            Feed.belongsTo(models.Good, { foreignKey: 'related_goods_id', as: 'related_goods' });
         }
     }
     Feed.init({
