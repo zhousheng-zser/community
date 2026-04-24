@@ -25,8 +25,8 @@
 
   <!-- 瀑布流商品列表 -->
   <view class="goods-grid">
-    <navigator class="good" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-      <image class="cover" src="{{item.image}}" mode="aspectFill"></image>
+    <navigator class="good" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+      <image wx:if="{{item.image}}" class="cover" src="{{item.image}}" mode="aspectFill"></image>
       <view class="info-box">
         <text class="name">{{item.name}}</text>
         <text class="share-tag">{{item.shareTag}}</text>

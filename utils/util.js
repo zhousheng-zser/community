@@ -570,8 +570,21 @@ const normalizeShopProductRow = (item, idx = 0) => {
   const id = item.id || item.goods_id || idx;
   const name = item.name || item.title || item.goods_name || '商品';
   const raw = pickShopProductCoverRaw(item);
-  const image = imgUrl(raw || '/img/placeholders/home_cleaning.png');
+  const image = raw ? imgUrl(raw) : '';
   const priceRaw = item.pay_price != null ? item.pay_price : (item.price != null ? item.price : item.goods_price);
+  const shop = item.shop && typeof item.shop === 'object' ? item.shop : {};
+  const store = item.store && typeof item.store === 'object' ? item.store : {};
+  const merchant = item.merchant && typeof item.merchant === 'object' ? item.merchant : {};
+  const shopId =
+    item.shop_id || item.shopId ||
+    item.store_id || item.storeId ||
+    item.market_shop_id || item.marketShopId ||
+    item.merchant_id || item.merchantId ||
+    shop.id || shop.shop_id || shop.shopId ||
+    store.id || store.shop_id || store.shopId ||
+    merchant.id || merchant.shop_id || merchant.shopId ||
+    '';
+  const detailUrl = `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(id))}&shopId=${encodeURIComponent(String(shopId))}&image=${encodeURIComponent(image)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`;
   const commRaw = item.rebate_amount != null ? item.rebate_amount : (item.comm != null ? item.comm : 0);
   const commStr = String(commRaw != null ? commRaw : 0);
   const shareFromApi = item.share_tag || item.shareTag;
@@ -579,6 +592,7 @@ const normalizeShopProductRow = (item, idx = 0) => {
     id,
     name,
     image,
+    detailUrl,
     price: String(priceRaw != null ? priceRaw : ''),
     comm: commStr,
     tag: item.tag || '',

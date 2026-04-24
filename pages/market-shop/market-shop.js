@@ -45,8 +45,8 @@ Page({
       currentShopId: id,
       shop: {
         name: '加载中…',
-        cover: imgUrl('/img/placeholders/home_cleaning.png'),
-        logo: imgUrl('/img/placeholders/home_cleaning.png'),
+        cover: '',
+        logo: '',
         scoreText: '—',
         soldCount: '—',
         deliveryType: '—',
@@ -116,7 +116,7 @@ Page({
       sold: it.sold || meta.sold || '',
       price: priceStr,
       oldPrice: oldPriceStr,
-      image: imgUrl(it.main_image || it.image || meta.image || '/img/placeholders/home_cleaning.png'),
+      image: it.main_image || it.image ? imgUrl(it.main_image || it.image) : (meta.image || ''),
       quantity: Number(it.quantity || 0)
     };
   },
@@ -133,7 +133,8 @@ Page({
         sold: `已售${Number(g.sold_count || 0)}`,
         price: String(g.price || 0),
         oldPrice: String(g.origin_price || g.old_price || g.price || 0),
-        image: imgUrl(g.main_image || g.image || '/img/placeholders/home_cleaning.png')
+        image: g.main_image || g.image ? imgUrl(g.main_image || g.image) : '',
+        detailUrl: `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(g.id || g.goods_id))}&shopId=${encodeURIComponent(String(this.data.currentShopId || ''))}&image=${encodeURIComponent(g.main_image || g.image ? imgUrl(g.main_image || g.image) : '')}&name=${encodeURIComponent(g.name || g.goods_name || '')}&price=${encodeURIComponent(String(g.price || ''))}`
       });
     });
 
@@ -174,8 +175,8 @@ Page({
       const firstCategoryKey = goodsGroupList[0] ? goodsGroupList[0].key : '';
       const shop = {
         id: shopData.id,
-        cover: imgUrl(shopData.cover_url || shopData.cover || '/img/placeholders/home_cleaning.png'),
-        logo: imgUrl(pickMarketShopAvatarPath(shopData) || '/img/placeholders/home_cleaning.png'),
+        cover: shopData.cover_url || shopData.cover ? imgUrl(shopData.cover_url || shopData.cover) : '',
+        logo: pickMarketShopAvatarPath(shopData) ? imgUrl(pickMarketShopAvatarPath(shopData)) : '',
         name: shopData.name || shopData.shop_name || '社区店铺',
         scoreText: String(shopData.rating || '4.8'),
         soldCount: String(shopData.sold_count || 0),
@@ -184,9 +185,9 @@ Page({
         notice: shopData.notice || '欢迎光临',
         phone: shopData.contact_phone || '',
         shopAddress: shopData.address || '',
-        facadeImage: imgUrl(shopData.facade_image || '/img/placeholders/home_cleaning.png'),
-        interiorImage: imgUrl(shopData.interior_image || '/img/placeholders/home_cleaning.png'),
-        licenseImage: imgUrl(shopData.license_image || '/img/placeholders/home_cleaning.png')
+        facadeImage: shopData.facade_image ? imgUrl(shopData.facade_image) : '',
+        interiorImage: shopData.interior_image ? imgUrl(shopData.interior_image) : '',
+        licenseImage: shopData.license_image ? imgUrl(shopData.license_image) : ''
       };
 
       this.setData({
@@ -482,9 +483,12 @@ Page({
   // 商品详情
   goProductDetail(e) {
     const id = e.currentTarget.dataset.id;
+    const image = e.currentTarget.dataset.image || '';
+    const name = e.currentTarget.dataset.name || '';
+    const price = e.currentTarget.dataset.price || '';
     const shopId = this.data.shop.id;
     wx.navigateTo({
-      url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + shopId
+      url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + shopId + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price)
     });
   }
 });

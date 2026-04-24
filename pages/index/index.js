@@ -427,7 +427,7 @@ Page({
       id: g.id || g.goods_id || (idx + 1),
       name: g.name || g.goods_name || '精选商品',
       price: String(g.price || g.goods_price || '0'),
-      image: imgUrl(g.main_image || g.image || '/img/placeholders/home_cleaning.png')
+      image: g.main_image || g.image ? imgUrl(g.main_image || g.image) : ''
     }));
     const soldCount = Number(item.sold_count || 0);
     const deliveryText = item.delivery_desc
@@ -483,6 +483,7 @@ Page({
         });
         const cat = this.data.activeMarketCat;
         this.switchMarketCategory({ currentTarget: { dataset: { code: cat } } }, true);
+        this.refreshLocalGoodsModulesForLocation();
       },
       fail: () => {
         wx.showToast({
@@ -540,7 +541,11 @@ Page({
   },
   goMarketGoods(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id });
+    const image = e.currentTarget.dataset.image || '';
+    const name = e.currentTarget.dataset.name || '';
+    const price = e.currentTarget.dataset.price || '';
+    const shopId = e.currentTarget.dataset.shopId || '';
+    wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + encodeURIComponent(shopId) + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price) });
   },
   async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
@@ -625,7 +630,7 @@ Page({
           price: String(s.price != null ? s.price : ''),
           image: listImageFromHome3(
             rawTitle,
-            s.cover_image ? imgUrl(s.cover_image) : '/img/placeholders/home_cleaning.png'
+            s.cover_image ? imgUrl(s.cover_image) : ''
           ),
           rank: s.rank != null && s.rank !== '' ? String(s.rank) : (hotRankFallback[i] || '热门')
         };
@@ -679,7 +684,7 @@ Page({
       id: item.id,
       name: item.goodsTitle,
       sub: '服务' + item.id + '单',
-      image: imgUrl(item.remarkC || '/img/placeholders/home_cleaning.png'),
+      image: item.remarkC ? imgUrl(item.remarkC) : '',
       url: '../service/service?id=' + item.id
     }));
     let merchantList = mapMerchantList();
@@ -747,7 +752,7 @@ Page({
           id: g.id,
           name: g.goodsTitle || g.title || g.name || '精选商品',
           price: String(g.goodsRealPrice || g.price || ''),
-          image: imgUrl(g.mainPicture || g.cover_image || g.image || '/img/placeholders/home_cleaning.png')
+          image: g.mainPicture || g.cover_image || g.image ? imgUrl(g.mainPicture || g.cover_image || g.image) : ''
         }));
       }
     } catch (e) { }
@@ -903,7 +908,7 @@ Page({
         if (L.jdGoods && L.jdGoods.length > 0) {
           jdGoods = L.jdGoods.map((x) => ({
             ...x,
-            image: imgUrl(x.image || '/img/placeholders/home_cleaning.png')
+            image: x.image ? imgUrl(x.image) : ''
           }));
           jdEntry = L.jdEntry;
           jdHeroTitle = L.jdHeroTitle;
@@ -913,7 +918,7 @@ Page({
         if (L.pddGoods && L.pddGoods.length > 0) {
           pddGoods = L.pddGoods.map((x) => ({
             ...x,
-            image: imgUrl(x.image || '/img/placeholders/home_cleaning.png')
+            image: x.image ? imgUrl(x.image) : ''
           }));
           pddEntry = L.pddEntry;
           pddHeroTitle = L.pddHeroTitle;
@@ -1009,7 +1014,7 @@ Page({
               p.subtitle ||
               p.tagline ||
               (p.service_count != null ? `服务${p.service_count}单` : '直约到家'),
-            image: imgUrl(p.avatar_url || p.cover_image || p.logo_url || '/img/placeholders/home_cleaning.png'),
+            image: p.avatar_url || p.cover_image || p.logo_url ? imgUrl(p.avatar_url || p.cover_image || p.logo_url) : '',
             url: '../service-provider-shop/service-provider-shop?provider_id=' + encodeURIComponent(pid)
           };
         });
@@ -1340,7 +1345,7 @@ Page({
     };
   },
   normalizeModuleList(list, extra = {}) {
-    const arr = Array.isArray(list) ? list : [];
+    const arr = Array.isArray(list) ? list : this.pickModuleGoodsList(list);
     return util.filterShopProductsByDistance(arr, 5).map((item, idx) => this.normalizeModuleGoods(item, idx, extra));
   },
   pickModuleGoodsList(module) {
@@ -1348,19 +1353,48 @@ Page({
     const candidates = [
       module.goods_list,
       module.goodsList,
+      module.goods,
       module.products,
+      module.product_list,
+      module.productList,
       module.items,
       module.list,
+      module.rows,
+      module.records,
+      module.result,
       module.data && module.data.goods_list,
       module.data && module.data.goodsList,
+      module.data && module.data.goods,
       module.data && module.data.products,
+      module.data && module.data.product_list,
+      module.data && module.data.productList,
       module.data && module.data.items,
-      module.data && module.data.list
+      module.data && module.data.list,
+      module.data && module.data.rows,
+      module.data && module.data.records,
+      module.data && module.data.result
     ];
     for (let i = 0; i < candidates.length; i++) {
       if (Array.isArray(candidates[i])) return candidates[i];
     }
     return [];
+  },
+  normalizeModuleGroups(groups) {
+    if (Array.isArray(groups)) return groups;
+    if (!groups || typeof groups !== 'object') return [];
+    return Object.keys(groups).map((key) => {
+      const value = groups[key];
+      if (Array.isArray(value)) {
+        return { module_name: key, goods_list: value };
+      }
+      if (value && typeof value === 'object') {
+        return {
+          module_name: value.module_name || value.name || value.title || key,
+          ...value
+        };
+      }
+      return { module_name: key, goods_list: [] };
+    });
   },
   unwrapLocalGoodsPayload(res) {
     let payload = res && typeof res === 'object' ? res : {};
@@ -1386,7 +1420,7 @@ Page({
 
     const pushPeriodicTabs = [];
     const pushPeriodicGoodsDict = {};
-    (Array.isArray(rawPeriodic) ? rawPeriodic : []).forEach((m, idx) => {
+    this.normalizeModuleGroups(rawPeriodic).forEach((m, idx) => {
       const tab = m.module_name || m.name || m.title || `周期模块${idx + 1}`;
       const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
       pushPeriodicTabs.push(tab);
@@ -1400,7 +1434,7 @@ Page({
     const pushFeedGoodsDict = {};
     const feedPageByTab = {};
     const feedHasMoreByTab = {};
-    (Array.isArray(rawFeed) ? rawFeed : []).forEach((m) => {
+    this.normalizeModuleGroups(rawFeed).forEach((m) => {
       const tab = m.module_name || m.name || m.title;
       if (!tab) return;
       const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
@@ -1411,6 +1445,15 @@ Page({
     });
     const activeFeedTab = pushFeedTabs.find((tab) => (pushFeedGoodsDict[tab] || []).length > 0) || pushFeedTabs[0] || "";
     const pushFeedGoods = activeFeedTab ? [...(pushFeedGoodsDict[activeFeedTab] || [])] : [];
+
+    console.log('local-goods-home/modules parsed', {
+      daily: pushDailyNews.length,
+      top: pushTopSales.length,
+      periodicTabs: pushPeriodicTabs,
+      periodicCounts: pushPeriodicTabs.map((tab) => (pushPeriodicGoodsDict[tab] || []).length),
+      feedTabs: pushFeedTabs,
+      feedCounts: pushFeedTabs.map((tab) => (pushFeedGoodsDict[tab] || []).length)
+    });
 
     return {
       pushDailyNews,
@@ -1426,6 +1469,28 @@ Page({
       feedPageByTab,
       feedHasMoreByTab
     };
+  },
+  async refreshLocalGoodsModulesForLocation() {
+    try {
+      const moduleGoods = await this.loadLocalGoodsModules();
+      this.setData({
+        pushDailyNews: moduleGoods.pushDailyNews,
+        pushTopSales: moduleGoods.pushTopSales,
+        pushPeriodicTabs: moduleGoods.pushPeriodicTabs,
+        pushPeriodicGoodsDict: moduleGoods.pushPeriodicGoodsDict,
+        pushPeriodicGoods: moduleGoods.pushPeriodicGoods,
+        activePeriodicTabIndex: moduleGoods.activePeriodicTabIndex,
+        pushFeedTabs: moduleGoods.pushFeedTabs,
+        pushFeedGoodsDict: moduleGoods.pushFeedGoodsDict,
+        pushFeedGoods: moduleGoods.pushFeedGoods,
+        activeFeedTab: moduleGoods.activeFeedTab,
+        feedPageByTab: moduleGoods.feedPageByTab,
+        feedHasMoreByTab: moduleGoods.feedHasMoreByTab,
+        isLoadingMore: false
+      });
+    } catch (e) {
+      console.log('local-goods-home/modules refresh after location failed', e);
+    }
   },
   async loadMoreFeedGoods(tabName) {
     const currentPage = Number((this.data.feedPageByTab || {})[tabName] || 1);

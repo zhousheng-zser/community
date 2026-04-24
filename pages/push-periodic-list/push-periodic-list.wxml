@@ -30,12 +30,12 @@
     <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
     <view wx:elif="{{goodsList.length === 0}}" class="empty-tip">暂无商品数据</view>
     <block wx:else>
-      <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="card-item" wx:for="{{goodsList}}" wx:key="id">
+      <navigator url="{{item.detailUrl}}" class="card-item" wx:for="{{goodsList}}" wx:key="id">
         <!-- 左上角的榜单标识小红签 -->
         <view class="badge">{{listType}}</view>
         <view class="main-info">
           <!-- 左侧封面照 -->
-          <image class="cover" src="{{item.image}}" mode="aspectFill"></image>
+          <image wx:if="{{item.image}}" class="cover" src="{{item.image}}" mode="aspectFill"></image>
           <!-- 右侧商品名及操作 -->
           <view class="details">
             <view class="g-title">{{item.title}}</view>

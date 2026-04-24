@@ -76,8 +76,8 @@
           <image class="head-icon" src="/img/index/ticon1.png"></image>
         </navigator>
         <view class="grid">
-          <navigator class="news-item" wx:for="{{pushDailyNews}}" wx:if="{{index < 4}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-            <image src="{{item.image}}" mode="aspectFill"></image>
+          <navigator class="news-item" wx:for="{{pushDailyNews}}" wx:if="{{index < 4}}" wx:key="id" url="{{item.detailUrl}}">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
             <view class="rebate-tag">返佣金￥{{item.comm}}</view>
             <view class="price-row">
               <text class="yen">￥</text>
@@ -94,12 +94,12 @@
           <image class="head-icon" src="/img/index/ticon2.png"></image>
         </navigator>
         <view class="list">
-          <navigator class="top-item" wx:for="{{pushTopSales}}" wx:if="{{index < 3}}" wx:key="rank" url="../push-product-detail/push-product-detail?id={{item.id}}">
+          <navigator class="top-item" wx:for="{{pushTopSales}}" wx:if="{{index < 3}}" wx:key="rank" url="{{item.detailUrl}}">
             <view class="rank-badge">
               <text class="top">TOP</text>
               <text class="num">{{item.rank}}</text>
             </view>
-            <image src="{{item.image}}" mode="aspectFill"></image>
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
             <view class="info">
               <text class="name">{{item.name}}</text>
               <view class="rebate-tag-inline">
@@ -121,8 +121,8 @@
         
         <!-- 模块八短列表：基于 periodic items -->
         <view class="feed-goods-list">
-          <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="f-card" wx:for="{{pushPeriodicGoods}}" wx:key="id">
-            <image src="{{item.image}}" mode="aspectFill"></image>
+          <navigator url="{{item.detailUrl}}" class="f-card" wx:for="{{pushPeriodicGoods}}" wx:key="id">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
             <view class="f-info">
               <text class="f-title">{{item.title}}</text>
               <view class="f-price">
@@ -154,8 +154,8 @@
       </scroll-view>
 
       <view class="feed-goods-list">
-        <navigator url="/pages/push-product-detail/push-product-detail?id={{item.id}}" class="f-card" wx:for="{{pushFeedGoods}}" wx:key="id">
-          <image src="{{item.image}}" mode="aspectFill"></image>
+        <navigator url="{{item.detailUrl}}" class="f-card" wx:for="{{pushFeedGoods}}" wx:key="id">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
           <view class="f-info">
             <text class="f-title">{{item.title}}</text>
             <view class="f-price">
@@ -356,27 +356,27 @@
       <text class="market-empty-text">附近暂无商家</text>
     </view>
     <view class="market-shop-list">
-      <view class="card market-shop-card" wx:for="{{marketShops}}" wx:key="id" bindtap="goMarketShop" data-id="{{item.id}}">
-        <image wx:if="{{item.coverUrl}}" class="shop-list-cover" src="{{item.coverUrl}}" mode="aspectFill" />
+      <view class="card market-shop-card" wx:for="{{marketShops}}" wx:for-item="shop" wx:key="id" bindtap="goMarketShop" data-id="{{shop.id}}">
+        <image wx:if="{{shop.coverUrl}}" class="shop-list-cover" src="{{shop.coverUrl}}" mode="aspectFill" />
         <view class="shop-card-body">
         <view class="shop-head">
-          <text class="name">{{item.name}}</text>
-          <text class="badge">{{item.badge}}</text>
+          <text class="name">{{shop.name}}</text>
+          <text class="badge">{{shop.badge}}</text>
         </view>
-        <view class="shop-rating-row" wx:if="{{item.ratingText}}">
-          <text class="rating-text">{{item.ratingText}}</text>
+        <view class="shop-rating-row" wx:if="{{shop.ratingText}}">
+          <text class="rating-text">{{shop.ratingText}}</text>
         </view>
         <view class="shop-meta">
-          <text>{{item.delivery}}</text>
-          <text class="distance" wx:if="{{item.distanceLabel}}">{{item.distanceLabel}}</text>
-          <text class="sold">{{item.sold}}</text>
+          <text>{{shop.delivery}}</text>
+          <text class="distance" wx:if="{{shop.distanceLabel}}">{{shop.distanceLabel}}</text>
+          <text class="sold">{{shop.sold}}</text>
         </view>
         <scroll-view class="shop-goods-scroll" scroll-x="{{true}}">
           <view class="shop-goods-row">
-            <view class="shop-goods-item" wx:for="{{item.goods}}" wx:key="id" catchtap="goMarketGoods" data-id="{{item.id}}">
-              <image src="{{item.image}}" mode="aspectFill"></image>
+            <view class="shop-goods-item" wx:for="{{shop.goods}}" wx:key="id" catchtap="goMarketGoods" data-id="{{item.id}}" data-shop-id="{{shop.id}}" data-image="{{item.image}}" data-name="{{item.name}}" data-price="{{item.price}}">
+              <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
               <text class="g-name">{{item.name}}</text>
-              <text class="g-price">￥{{item.price}}</text>
+              <text class="g-price">&#165;{{item.price}}</text>
             </view>
           </view>
         </scroll-view>

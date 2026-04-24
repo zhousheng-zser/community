@@ -53,8 +53,8 @@
         
         <!-- 右侧商品列表 -->
         <scroll-view class="sidebar-right" scroll-y="true">
-          <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-            <image src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
+          <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
             <view class="list-info">
               <text class="list-name">{{item.name}}</text>
               <view class="list-tags">
@@ -80,8 +80,8 @@
       <view class="high-comm-notice">下单后，可在我的订单查看“返佣金额”</view>
       
       <view class="high-comm-layout">
-        <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-          <image src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
+        <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
           <view class="list-info">
             <text class="list-name">{{item.name}}</text>
             <view class="list-tags">
@@ -114,7 +114,7 @@
             data-name="{{item.name}}"
             bindtap="handleGiftSubTap"
           >
-            <image src="{{item.image}}" mode="aspectFill"></image>
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
             <text>{{item.name}}</text>
           </view>
         </view>
@@ -131,8 +131,8 @@
 
       <!-- 瀑布流网格 -->
       <view class="grid">
-        <navigator class="item" wx:for="{{goods}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
-          <image src="{{item.image}}" mode="aspectFill" class="cover-img"></image>
+        <navigator class="item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="cover-img"></image>
           <view class="info-wrap">
             <text class="name">{{item.name}}</text>
             <view class="price-row">

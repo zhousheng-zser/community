@@ -72,9 +72,9 @@
       <view class="goods-group" wx:for="{{goodsGroupList}}" wx:for-item="group" wx:key="id" id="{{group.id}}">
         <view class="group-title">{{group.name}}</view>
         <view class="goods-item" wx:for="{{group.items}}" wx:for-item="item" wx:key="id">
-          <image src="{{item.image}}" mode="aspectFill" data-id="{{item.id}}" bindtap="goProductDetail"></image>
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" data-id="{{item.id}}" data-image="{{item.image}}" data-name="{{item.name}}" data-price="{{item.price}}" bindtap="goProductDetail"></image>
           <view class="goods-main">
-            <text class="name" data-id="{{item.id}}" bindtap="goProductDetail">{{item.name}}</text>
+            <text class="name" data-id="{{item.id}}" data-image="{{item.image}}" data-name="{{item.name}}" data-price="{{item.price}}" bindtap="goProductDetail">{{item.name}}</text>
             <text class="desc">{{item.desc}}</text>
             <text class="sold">{{item.sold}}</text>
             <view class="price-row">

@@ -18,9 +18,9 @@
     <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
     <view wx:elif="{{goodsList.length === 0}}" class="empty-tip">暂无上新商品</view>
     <block wx:else>
-      <navigator class="good-card" wx:for="{{goodsList}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
+      <navigator class="good-card" wx:for="{{goodsList}}" wx:key="id" url="{{item.detailUrl}}">
         <view class="img-box">
-          <image src="{{item.image}}" class="cover" mode="aspectFill"></image>
+          <image wx:if="{{item.image}}" src="{{item.image}}" class="cover" mode="aspectFill"></image>
           <view wx:if="{{item.tag}}" class="tag-label">{{item.tag}}</view>
         </view>
         <view class="info-box">

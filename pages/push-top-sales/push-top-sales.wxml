@@ -23,13 +23,13 @@
     <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
     <view wx:elif="{{topList.length === 0}}" class="empty-tip">暂无榜单商品</view>
     <block wx:else>
-      <navigator class="good-card" wx:for="{{topList}}" wx:key="id" url="../push-product-detail/push-product-detail?id={{item.id}}">
+      <navigator class="good-card" wx:for="{{topList}}" wx:key="id" url="{{item.detailUrl}}">
         <view class="img-box">
           <view class="rank-tag {{index === 0 ? 'rank-first' : 'rank-other'}}">
             <text class="lbl">TOP</text>
             <text class="num">{{item.rank}}</text>
           </view>
-          <image src="{{item.image}}" class="cover" mode="aspectFill"></image>
+          <image wx:if="{{item.image}}" src="{{item.image}}" class="cover" mode="aspectFill"></image>
           <view wx:if="{{item.tag}}" class="tag-label-btm">{{item.tag}}</view>
         </view>
         <view class="info-box">

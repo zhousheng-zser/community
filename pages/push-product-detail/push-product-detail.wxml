@@ -1,17 +1,20 @@
 <view class="pp-page">
   <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
-    <text bindtap="goBack">〈</text>
-    <text>•••</text>
+    <view class="back-icon" bindtap="goBack"></view>
+    <text class="nav-title">商品详情</text>
   </view>
 
-  <image class="cover" src="{{product.image}}" mode="aspectFill"></image>
+  <image wx:if="{{product.image}}" class="cover" src="{{product.image}}" mode="aspectFill"></image>
 
   <view class="info-card">
-    <text class="price">￥{{product.price}}</text>
+    <view class="price-row">
+      <text class="price-symbol">￥</text>
+      <text class="price-num">{{product.price || product.pay || '0'}}</text>
+    </view>
     <view class="calc">
-      <text>到手价 ￥{{product.price}}</text>
-      <text>支付价 ￥{{product.pay}}</text>
-      <text>预计每单返 ￥{{product.rebate}}</text>
+      <text>到手价 ￥{{product.price || product.pay || '0'}}</text>
+      <text>支付价 ￥{{product.pay || product.price || '0'}}</text>
+      <text>预计每单返 ￥{{product.rebate || '0'}}</text>
     </view>
     <text class="name">{{product.name}}</text>
     <view class="shop-row">
@@ -21,21 +24,28 @@
   </view>
 
   <view class="section-title">商品详情</view>
-  <block wx:if="{{product.detail_images && product.detail_images.length}}">
-    <image wx:for="{{product.detail_images}}" wx:key="*this" class="detail-img" src="{{item}}" mode="widthFix"></image>
-  </block>
-  <block wx:else>
-    <image class="detail-img" src="/img/placeholders/home_cleaning.png" mode="widthFix"></image>
-  </block>
+
+  <view class="recommend-section" wx:if="{{recommendedGoods.length}}">
+    <view class="recommend-head">
+      <text>{{recommendTitle}}</text>
+      <text class="more" bindtap="goShopAll">更多</text>
+    </view>
+    <view class="recommend-grid">
+      <view class="recommend-card" wx:for="{{recommendedGoods}}" wx:key="id" data-url="{{item.detailUrl}}" bindtap="goRecommendGoods">
+        <image wx:if="{{item.image}}" class="recommend-img" src="{{item.image}}" mode="aspectFill"></image>
+        <text class="recommend-name">{{item.name}}</text>
+        <text class="recommend-price">￥{{item.price || '0'}}</text>
+      </view>
+    </view>
+  </view>
 
   <view class="bottom-bar">
     <text class="home" bindtap="goHome">首页</text>
-    <text class="share">￥{{product.rebate}} 分享每单赚</text>
+    <text class="share">￥{{product.rebate || '0'}} 分享每单赚</text>
     <text class="buy" bindtap="handleBuyClick">购买每单返</text>
   </view>
 </view>
 
-<!-- 微信小店商品组件（浮层） -->
 <view class="overlay" wx:if="{{showStoreProduct}}"></view>
 <view class="store-product-wrapper" wx:if="{{showStoreProduct}}">
   <store-product
@@ -46,4 +56,3 @@
     bind:fail="onStoreProductFail"
   />
 </view>
-

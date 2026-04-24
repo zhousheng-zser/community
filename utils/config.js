@@ -3,10 +3,10 @@
  */
 const config = {
     // 当前使用的 API 基础地址
-    baseUrl: 'http://192.168.110.50:3001/api/v1',
+    baseUrl: 'https://114.55.167.14:3000/api/v1',
 
     // 静态资源（图片）基础地址，上传到服务器的图片均通过此前缀访问
-    imageBaseUrl: 'http://192.168.110.50:3001',
+    imageBaseUrl: 'https://114.55.167.14:3000',
 
     /**
      * 已迁入后端 data/uploads/images 的一级目录；/img/<目录>/... 在 imgUrl 中转为 imageBaseUrl + /uploads/...（每段 encodeURIComponent）
