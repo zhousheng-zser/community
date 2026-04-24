@@ -70,7 +70,7 @@ exports.serviceProviderApply = async (req, res) => {
     }
 };
 
-// 集市商家入驻申请 POST /api/v1/market/apply
+// 集市商家入驻申请 POST /api/v1/market/apply 与 POST /api/v1/market/merchant/apply
 exports.marketApply = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
@@ -79,11 +79,20 @@ exports.marketApply = async (req, res) => {
         const userId = req.user.id;
         const {
             shop_name, contact_name, phone, category, address, description,
-            promoter_id, credit_code, legal_person, place_photo_url, license_url, community_id
+            promoter_id, promoter_name, promoter,
+            credit_code, legal_person, entity_name,
+            place_photo_url, license_url, logo_url, background_url, community_id
         } = req.body;
         if (!contact_name || !phone || !shop_name || !category || !address) {
             return res.status(400).json({ error: '请填写必填项：shop_name、contact_name、phone、category、address' });
         }
+        if (!entity_name || !credit_code || !legal_person) {
+            return res.status(400).json({ error: '请填写公司资质：entity_name、credit_code、legal_person' });
+        }
+        if (!logo_url || !background_url || !license_url) {
+            return res.status(400).json({ error: '请上传图片：logo_url、background_url、license_url' });
+        }
+        const promoterLabel = promoter_name != null && promoter_name !== '' ? promoter_name : promoter;
         await MarketApplication.create({
             user_id: userId,
             contact_name,
@@ -93,10 +102,14 @@ exports.marketApply = async (req, res) => {
             address,
             description: description || null,
             promoter_id: promoter_id || null,
+            promoter_name: promoterLabel || null,
             credit_code: credit_code || null,
             legal_person: legal_person || null,
+            entity_name: entity_name || null,
             place_photo_url: Array.isArray(place_photo_url) ? place_photo_url : null,
             license_url: license_url || null,
+            logo_url: logo_url || null,
+            background_url: background_url || null,
             community_id: community_id || null,
             status: 'pending'
         });

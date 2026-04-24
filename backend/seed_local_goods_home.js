@@ -1,5 +1,5 @@
 /**
- * 为首页「本地好物」挂载表灌入示例数据（来源：market_goods + market_shops，需店铺有经纬度）。
+ * 为首页「本地商城」挂载表灌入示例数据（来源：market_goods + market_shops，需店铺有经纬度）。
  * 需已执行 sync_db 创建 lg_home_* 表。
  *
  * 用法：node seed_local_goods_home.js
@@ -146,7 +146,7 @@ async function main() {
 
     await t.commit();
     console.log(
-      `✅ 本地好物挂载表已写入：每日上新 ${daily.length}，热卖 ${top.length}，周期模块商品 ${p1.length}+${p2.length}，Feed ${f1.length}+${f2.length}`
+      `✅ 本地商城挂载表已写入：每日上新 ${daily.length}，热卖 ${top.length}，周期模块商品 ${p1.length}+${p2.length}，Feed ${f1.length}+${f2.length}`
     );
   } catch (e) {
     await t.rollback();

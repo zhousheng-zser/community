@@ -19,14 +19,27 @@ request.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+function apiMessage(obj) {
+  if (!obj || typeof obj !== 'object') return ''
+  return obj.message || obj.msg || obj.errmsg || ''
+}
+
+/** 与小程序/网关常见约定一致：code 为 0 或 200 均视为成功（仅 code===200 会把 0 误判为失败 →「请求失败」） */
+function isCodeSuccess(code) {
+  return code === 200 || code === 0
+}
+
 request.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res && typeof res.code === 'number' && res.code !== 200) {
-      return Promise.reject(new Error(res.message || '请求失败'))
+    if (res && typeof res.code === 'number' && !isCodeSuccess(res.code)) {
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
     }
     if (res && typeof res.errno === 'number' && res.errno !== 0) {
-      return Promise.reject(new Error(res.errmsg || '请求失败'))
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
+    }
+    if (res && typeof res.errcode === 'number' && res.errcode !== 0) {
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
     }
     return res
   },

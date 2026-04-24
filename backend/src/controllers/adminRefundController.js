@@ -101,7 +101,10 @@ exports.execute = async (req, res) => {
         await row.save();
         await appendLog(row.refund_no, from, row.status, (req.admin && req.admin.sub) || 'admin', note);
         if (success) {
-            await MarketOrder.update({ pay_status: 'refunded' }, { where: { order_no: row.order_no } });
+            await MarketOrder.update(
+                { pay_status: 'refunded', order_status: 'refunded' },
+                { where: { order_no: row.order_no } }
+            );
             await MarketPayTransaction.update({ pay_status: 'refunded' }, { where: { order_no: row.order_no } });
         }
         await logAdminAction(req, 'refund_execute', 'market_refund', row.id, { success, note });

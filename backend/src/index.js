@@ -15,7 +15,8 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const PORT = parseInt(process.env.PORT, 10) || 3000;
+/** 与 admin Vite 代理默认 VITE_PROXY_TARGET=3001 一致，避免只起前端时 ECONNREFUSED */
+const PORT = parseInt(process.env.PORT, 10) || 3001;
 
 // 中间件
 app.use(cors());
@@ -57,7 +58,6 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const postRoutes = require('./routes/postRoutes');
 const coreDataRoutes = require('./routes/coreDataRoutes');
-const orderRoutes = require('./routes/orderRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 // -------------------
@@ -68,18 +68,35 @@ app.use('/api/v1/posts', postRoutes);
 app.use('/api/v1/core', coreDataRoutes);
 app.use('/api/v1/service-orders', require('./routes/serviceOrderRoutes'));
 app.use('/api/v1/neighbor-assist', require('./routes/neighborAssistRoutes'));
-app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/messages', require('./routes/messageRoutes'));
 app.use('/api/v1/worker', require('./routes/workerRoutes'));
+
+const workerPortalLoginController = require('./controllers/workerPortalLoginController');
+const merchantPortalController = require('./controllers/merchantPortalController');
+const serviceProviderPortalController = require('./controllers/serviceProviderPortalController');
+const merchantPortalRoutes = require('./routes/merchantPortalRoutes');
+const serviceProviderPortalRoutes = require('./routes/serviceProviderPortalRoutes');
+app.post('/api/v1/worker-portal/login', workerPortalLoginController.login);
+app.post('/api/v1/merchant-portal/login', merchantPortalController.login);
+app.post('/api/v1/service-provider-portal/login', serviceProviderPortalController.login);
+app.use('/api/v1/service-provider-portal', serviceProviderPortalRoutes);
+app.use('/api/v1/service-provider-portal/workers', require('./routes/serviceProviderWorkerRoutes'));
+app.use('/api/v1/service-provider-portal/finance', require('./routes/serviceProviderFinanceRoutes'));
+app.use('/api/v1/market/merchant', merchantPortalRoutes);
+app.use('/api/v1/market/shop', merchantPortalRoutes);
+app.use('/api/v1/market/merchant/customers', require('./routes/merchantCustomerRoutes'));
+app.use('/api/v1/market/merchant/marketing', require('./routes/merchantMarketingRoutes'));
+app.use('/api/v1/market/merchant/refunds', require('./routes/merchantRefundRoutes'));
 app.use('/api/v1/service-provider', require('./routes/serviceProviderRoutes'));
 app.use('/api/v1/market', require('./routes/marketRoutes'));
 app.use('/api/v1/activities', require('./routes/activityRoutes'));
 app.use('/api/v1/feedback', require('./routes/feedbackRoutes'));
 app.use('/api/v1/admin', require('./routes/adminRoutes'));
-app.use('/api/v1/lives', require('./routes/livesRoutes'));
+app.use('/api/v1/admin/communities', require('./routes/adminCommunityRoutes'));
+app.use('/api/v1/admin/announcements', require('./routes/adminAnnouncementRoutes'));
 app.use('/api/v1/local-goods-home', require('./routes/localGoodsHomeRoutes'));
-app.use('/api/v1/pdd', require('./routes/pddRoutes'));
+require('./mountBenefitAlliance')(app);
 
 // ===================
 // User Profile Mock Routes

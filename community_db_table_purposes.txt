@@ -1,0 +1,927 @@
+community_db 全表全字段清单（无省略）
+生成时间：2026-04-22（已按当前数据库重建）
+说明：以下每个表均完整列出全部字段，包含字段类型、可空、键类型、默认值、额外属性。
+
+1. 表名：Banners
+   用途：历史轮播表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: image_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段3: target_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort_order | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: link_type | 类型=varchar(32) | 可空=YES | 键=- | 默认值=none | 额外=-
+   - 字段6: link_value | 类型=varchar(512) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: scene | 类型=varchar(32) | 可空=YES | 键=- | 默认值=home | 额外=-
+   - 字段8: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Categories
+   用途：历史分类表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: name | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段3: icon_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort_order | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: group_type | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Comments
+   用途：帖子评论表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: post_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: content | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: reply_to_user_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段6: image_urls | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Conversations
+   用途：会话主表
+   字段总数：5
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: type | 类型=enum('private','system') | 可空=YES | 键=- | 默认值=private | 额外=-
+   - 字段3: last_message_preview | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Feeds
+   用途：信息流表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: title | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段3: author_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: likes_count | 类型=int | 可空=YES | 键=- | 默认值=0 | 额外=-
+   - 字段5: media_type | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: media_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: related_goods_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段8: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Likes
+   用途：帖子点赞表
+   字段总数：5
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: post_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Messages
+   用途：消息明细表
+   字段总数：6
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: conversation_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: sender_id | 类型=int | 可空=YES | 键=MUL | 默认值=0 | 额外=-
+   - 字段4: msg_type | 类型=varchar(255) | 可空=YES | 键=- | 默认值=text | 额外=-
+   - 字段5: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Posts
+   用途：用户帖子表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: content | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: images | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: location | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: category | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Promotions
+   用途：历史推广佣金表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: promoter_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: amount | 类型=decimal(10,2) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: status | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Services
+   用途：历史服务表
+   字段总数：15
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: category_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: title | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: description | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: price | 类型=decimal(10,0) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: cover_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: sales_count | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: is_published | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段9: detail_images | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: tags | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: sub_title | 类型=varchar(200) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: provider_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: order_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段14: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段15: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：UserConversations
+   用途：用户会话关系表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: conversation_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: peer_id | 类型=int | 可空=YES | 键=MUL | 默认值=0 | 额外=-
+   - 字段5: bot_type | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: unread_count | 类型=int | 可空=YES | 键=- | 默认值=0 | 额外=-
+   - 字段7: is_deleted | 类型=tinyint(1) | 可空=YES | 键=- | 默认值=0 | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：Users
+   用途：用户主表
+   字段总数：15
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: openid | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段3: nickname | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: avatar_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: bg_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: phone | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: address | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: bank_num | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: wx_id | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: role | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: balance | 类型=decimal(10,2) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: createdAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段14: updatedAt | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段15: token_version | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+
+1. 表名：activities
+   用途：活动主表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: title | 类型=varchar(200) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: description | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: start_time | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: end_time | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: status | 类型=varchar(20) | 可空=YES | 键=- | 默认值=active | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：activity_participants
+   用途：活动参与关系表
+   字段总数：4
+   - 字段1: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段2: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: activity_id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=-
+   - 字段4: user_id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=-
+
+1. 表名：admin_operation_logs
+   用途：后台操作日志表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: admin_username | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: action | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: target_type | 类型=varchar(80) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: target_id | 类型=varchar(80) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: detail_json | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: ip | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：approval_records
+   用途：审批记录表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: biz_type | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: biz_id | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: from_status | 类型=varchar(40) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: to_status | 类型=varchar(40) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: note | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: operator | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：benefit_alliance_config
+   用途：福利联盟配置表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: scene | 类型=varchar(50) | 可空=NO | 键=- | 默认值=benefit_card | 额外=-
+   - 字段3: platform | 类型=varchar(8) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: hero_image_url | 类型=varchar(512) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: hero_title | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: hero_subtitle | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：community_featured_goods
+   用途：社区精选商品表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: community_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: market_good_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：complaint_tickets
+   用途：投诉工单表
+   字段总数：12
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: ticket_no | 类型=varchar(40) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: order_no | 类型=varchar(40) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: user_id | 类型=bigint | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: shop_id | 类型=bigint | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: type | 类型=varchar(40) | 可空=NO | 键=- | 默认值=order | 额外=-
+   - 字段7: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: status | 类型=enum('open','processing','resolved','closed') | 可空=NO | 键=- | 默认值=open | 额外=-
+   - 字段9: reply | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: resolved_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段12: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：coupon_issues
+   用途：优惠券发放表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: template_id | 类型=bigint | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=bigint | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: code | 类型=varchar(64) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: status | 类型=enum('unused','used','expired') | 可空=NO | 键=- | 默认值=unused | 额外=-
+   - 字段6: issued_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: used_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：coupon_templates
+   用途：优惠券模板表
+   字段总数：12
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: name | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: type | 类型=enum('full_minus','discount','cash') | 可空=NO | 键=- | 默认值=cash | 额外=-
+   - 字段4: threshold_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段5: discount_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段6: total_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段7: issued_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段8: valid_from | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: valid_to | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: status | 类型=enum('active','inactive') | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段11: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段12: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：feedback
+   用途：用户反馈表
+   字段总数：5
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: contact | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：housekeeping_dispatches
+   用途：家政派单表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: worker_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: service_provider_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段5: status | 类型=varchar(20) | 可空=NO | 键=- | 默认值=assigned | 额外=-
+   - 字段6: note | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: dispatcher | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：jd_benefit_goods
+   用途：京东福利商品池表
+   字段总数：12
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: scene | 类型=varchar(50) | 可空=NO | 键=- | 默认值=benefit_card | 额外=-
+   - 字段3: sku_id | 类型=varchar(64) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: title | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: image_url | 类型=varchar(512) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: spread_url | 类型=varchar(1024) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: price | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: rebate_amount | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段10: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段11: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段12: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_channel_products
+   用途：频道商品表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: channel_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_channel_tab_products
+   用途：频道Tab商品表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: tab_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_channel_tabs
+   用途：频道Tab表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: channel_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: tab_name | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_channels
+   用途：首页频道表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: channel_key | 类型=varchar(40) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: title | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_daily_news_products
+   用途：每日上新商品表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段6: start_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: end_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_feed_module_products
+   用途：Feed模块商品表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: module_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_feed_modules
+   用途：Feed模块表
+   字段总数：6
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: module_name | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段4: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段5: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_periodic_module_products
+   用途：周期模块商品表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: module_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_periodic_modules
+   用途：周期模块表
+   字段总数：6
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: module_name | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段4: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段5: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_top_sales_products
+   用途：热销商品表
+   字段总数：10
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: rank_no | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段7: start_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: end_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_zone_gift_subcategories
+   用途：分区礼包子分类表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: zone_id | 类型=int unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: sub_code | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: cover_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段7: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_zone_products
+   用途：分区商品表
+   字段总数：10
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: zone_id | 类型=int unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: goods_id | 类型=bigint unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=bigint unsigned | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: gift_sub_code | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: sidebar_category | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段8: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段9: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_zone_sidebar_categories
+   用途：分区侧边分类表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: zone_id | 类型=int unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: category_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：lg_home_zones
+   用途：首页分区表
+   字段总数：7
+   - 字段1: id | 类型=int unsigned | 可空=NO | 键=PRI | 默认值=NULL | 额外=-
+   - 字段2: zone_code | 类型=varchar(32) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: name | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: sort | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段5: status | 类型=tinyint | 可空=NO | 键=MUL | 默认值=1 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_applications
+   用途：商家入驻申请表
+   字段总数：20
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: contact_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: shop_name | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: category | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: address | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: description | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: promoter_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段10: credit_code | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: legal_person | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: place_photo_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: license_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段14: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段15: status | 类型=enum('pending','approved','rejected') | 可空=YES | 键=- | 默认值=pending | 额外=-
+   - 字段16: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段17: logo_url | 类型=varchar(512) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段18: background_url | 类型=varchar(512) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段19: entity_name | 类型=varchar(200) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段20: promoter_name | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_cart_items
+   用途：购物车表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: shop_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: goods_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: quantity | 类型=int | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段6: checked | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_good_skus
+   用途：商品SKU表
+   字段总数：10
+   - 字段1: id | 类型=bigint unsigned | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: goods_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: sku_code | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: specs | 类型=json | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: price | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: stock | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段7: image | 类型=varchar(512) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: status | 类型=varchar(16) | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段9: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=CURRENT_TIMESTAMP | 额外=DEFAULT_GENERATED
+   - 字段10: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=CURRENT_TIMESTAMP | 额外=DEFAULT_GENERATED on update CURRENT_TIMESTAMP
+
+1. 表名：market_goods
+   用途：集市商品主表
+   字段总数：19
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: goods_no | 类型=varchar(32) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: shop_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: category_key | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: name | 类型=varchar(150) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: description | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: main_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: images | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: price | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: origin_price | 类型=decimal(10,2) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: stock | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段12: safe_stock | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段13: sold_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段14: status | 类型=enum('on_sale','off_sale') | 可空=NO | 键=- | 默认值=on_sale | 额外=-
+   - 字段15: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段16: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段17: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段18: price_range | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段19: desc_html | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_order_items
+   用途：集市订单明细表
+   字段总数：13
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: order_no | 类型=varchar(40) | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: goods_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: goods_name_snapshot | 类型=varchar(150) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: goods_image_snapshot | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: unit_price_snapshot | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: quantity | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段11: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段12: market_sku_id | 类型=bigint unsigned | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: specs_snapshot | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_orders
+   用途：集市订单主表
+   字段总数：22
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_no | 类型=varchar(40) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段5: order_status | 类型=varchar(32) | 可空=NO | 键=MUL | 默认值=pending_payment | 额外=-
+   - 字段6: pay_status | 类型=enum('unpaid','paid','refund_pending','refunded','pay_failed') | 可空=NO | 键=- | 默认值=unpaid | 额外=-
+   - 字段7: goods_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段8: delivery_fee | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段9: discount_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段10: payable_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段11: receiver_name | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: receiver_phone | 类型=varchar(30) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: receiver_address | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段14: remark | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段15: cancel_reason | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段16: paid_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段17: cancelled_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段18: expired_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段19: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段20: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段21: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段22: delivery_mode | 类型=varchar(16) | 可空=NO | 键=- | 默认值=express | 额外=-
+
+1. 表名：market_pay_transactions
+   用途：支付流水表
+   字段总数：13
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_no | 类型=varchar(40) | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: out_trade_no | 类型=varchar(64) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段4: channel | 类型=enum('wechat_jsapi') | 可空=NO | 键=- | 默认值=wechat_jsapi | 额外=-
+   - 字段5: transaction_id | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: pay_status | 类型=enum('created','success','failed','closed','refunded') | 可空=NO | 键=MUL | 默认值=created | 额外=-
+   - 字段7: amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: notify_raw | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: notify_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段10: last_notify_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: paid_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段13: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_refund_logs
+   用途：退款日志表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: refund_no | 类型=varchar(40) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: from_status | 类型=varchar(30) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: to_status | 类型=varchar(30) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: note | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: operator | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_refund_orders
+   用途：退款单表
+   字段总数：12
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: refund_no | 类型=varchar(40) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: order_no | 类型=varchar(40) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: out_trade_no | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: reason | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: refund_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段7: status | 类型=enum('pending','approved','rejected','processing','success','failed') | 可空=NO | 键=- | 默认值=pending | 额外=-
+   - 字段8: audit_note | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: executed_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: reviewed_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段12: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_shop_categories
+   用途：店铺内分类表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: shop_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: category_key | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: category_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: is_active | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：market_shop_reviews
+   用途：店铺评价表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: shop_id | 类型=int unsigned | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int unsigned | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: rating | 类型=tinyint | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: images | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+
+1. 表名：market_shops
+   用途：集市店铺主表
+   字段总数：27
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: shop_no | 类型=varchar(32) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: name | 类型=varchar(120) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: category | 类型=varchar(50) | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段5: logo_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: cover_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: notice | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: delivery_type | 类型=enum('platform','merchant','self_pickup') | 可空=YES | 键=- | 默认值=platform | 额外=-
+   - 字段9: min_order_amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段10: delivery_fee | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=0.00 | 额外=-
+   - 字段11: avg_delivery_minutes | 类型=int | 可空=YES | 键=- | 默认值=30 | 额外=-
+   - 字段12: rating | 类型=decimal(3,2) | 可空=YES | 键=- | 默认值=4.80 | 额外=-
+   - 字段13: sold_count | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段14: is_open | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段15: is_active | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段16: sort_order | 类型=int | 可空=NO | 键=MUL | 默认值=0 | 额外=-
+   - 字段17: address | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段18: latitude | 类型=decimal(10,7) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段19: longitude | 类型=decimal(10,7) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段20: contact_name | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段21: contact_phone | 类型=varchar(30) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段22: business_hours | 类型=varchar(100) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段23: facade_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段24: interior_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段25: license_image | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段26: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段27: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：merchant_accounts
+   用途：商家账号表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: shop_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: username | 类型=varchar(80) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: password_hash | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: role | 类型=enum('owner','manager','operator') | 可空=NO | 键=- | 默认值=operator | 额外=-
+   - 字段6: status | 类型=enum('active','disabled') | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段7: last_login_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：neighbor_assist_orders
+   用途：邻里帮订单表
+   字段总数：16
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: assist_type | 类型=varchar(32) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: origin_address_snapshot | 类型=json | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: destination_address_snapshot | 类型=json | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: amount | 类型=decimal(10,2) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: appointment_time | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: remark | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: status | 类型=varchar(32) | 可空=NO | 键=- | 默认值=pending_pay | 额外=-
+   - 字段11: pay_status | 类型=varchar(32) | 可空=NO | 键=- | 默认值=unpaid | 额外=-
+   - 字段12: assigned_worker_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段13: dispatch_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段14: dispatch_by | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段15: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段16: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：pdd_benefit_goods
+   用途：拼多多福利商品池表
+   字段总数：15
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: scene | 类型=varchar(50) | 可空=NO | 键=- | 默认值=benefit_card | 额外=-
+   - 字段3: link_key | 类型=varchar(64) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: goods_id | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段5: title | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: image_url | 类型=varchar(512) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: spread_url | 类型=varchar(1024) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: mini_path | 类型=varchar(512) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: price | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: coupon_price | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: rebate_amount | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段13: status | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段14: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段15: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：publish_orders
+   用途：发布需求单表
+   字段总数：10
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: category | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: address | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: expected_time | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: images | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: status | 类型=enum('pending','accepted','completed','cancelled') | 可空=YES | 键=- | 默认值=pending | 额外=-
+   - 字段9: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_order_complaints
+   用途：服务订单投诉表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: content | 类型=text | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: images_json | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: status | 类型=varchar(24) | 可空=NO | 键=- | 默认值=open | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_order_reviews
+   用途：服务订单评价表
+   字段总数：8
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: order_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: worker_id | 类型=int | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段5: score | 类型=tinyint | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: content | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_orders
+   用途：到家服务订单表
+   字段总数：24
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段4: service_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段5: group_key | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: amount | 类型=decimal(10,2) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: address_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: address_snapshot | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: appointment_time | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: remark | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: status | 类型=varchar(32) | 可空=NO | 键=- | 默认值=pending_pay | 额外=-
+   - 字段12: pay_status | 类型=varchar(32) | 可空=NO | 键=- | 默认值=unpaid | 额外=-
+   - 字段13: assigned_worker_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段14: dispatch_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段15: dispatch_by | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段16: fulfillment_meta | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段17: order_no | 类型=varchar(32) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段18: contact_name | 类型=varchar(64) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段19: contact_phone | 类型=varchar(20) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段20: goods_name | 类型=varchar(200) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段21: qty | 类型=int | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段22: provider_user_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段23: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段24: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_provider_applications
+   用途：服务商申请表
+   字段总数：12
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: shop_name | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: contact_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: license_url | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: shop_front_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: environment_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: id_card_url | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: certificate_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: status | 类型=enum('pending','approved','rejected') | 可空=YES | 键=- | 默认值=pending | 额外=-
+   - 字段12: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_provider_portal_accounts
+   用途：服务商中台账号表
+   字段总数：9
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: profile_id | 类型=int | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: username | 类型=varchar(80) | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段4: password_hash | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: role | 类型=enum('owner','operator') | 可空=NO | 键=- | 默认值=owner | 额外=-
+   - 字段6: status | 类型=enum('active','disabled') | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段7: last_login_at | 类型=datetime | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：service_provider_profiles
+   用途：服务商档案表
+   字段总数：15
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: application_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: shop_name | 类型=varchar(100) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: contact_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: license_url | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段8: shop_front_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: environment_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: id_card_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: certificate_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: status | 类型=varchar(20) | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段13: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段14: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段15: community_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+
+1. 表名：user_addresses
+   用途：用户地址簿表
+   字段总数：15
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: province | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段6: city | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: district | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: detail | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段9: tag | 类型=varchar(20) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: latitude | 类型=decimal(10,7) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: longitude | 类型=decimal(10,7) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: location_poi_name | 类型=varchar(128) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: is_default | 类型=tinyint | 可空=YES | 键=- | 默认值=0 | 额外=-
+   - 字段14: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段15: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：user_follows
+   用途：用户关注表
+   字段总数：4
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: follow_user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：worker_applications
+   用途：师傅申请表
+   字段总数：14
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段4: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: industry | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: education | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段7: city | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: resume | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: id_card_url | 类型=varchar(255) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段10: work_photo_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: certificate_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: status | 类型=enum('pending','approved','rejected') | 可空=YES | 键=- | 默认值=pending | 额外=-
+   - 字段13: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段14: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：worker_profiles
+   用途：师傅档案表
+   字段总数：18
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: user_id | 类型=int | 可空=NO | 键=UNI | 默认值=NULL | 额外=-
+   - 字段3: application_id | 类型=int | 可空=YES | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: real_name | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段5: phone | 类型=varchar(20) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段6: industry | 类型=varchar(50) | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: education | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段8: city | 类型=varchar(50) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段9: resume | 类型=text | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段10: id_card_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段11: work_photo_url | 类型=varchar(255) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段12: certificate_url | 类型=json | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段13: community_id | 类型=int | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段14: gender | 类型=varchar(8) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段15: main_direction | 类型=varchar(120) | 可空=YES | 键=- | 默认值=NULL | 额外=-
+   - 字段16: status | 类型=varchar(20) | 可空=NO | 键=- | 默认值=active | 额外=-
+   - 字段17: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段18: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+
+1. 表名：worker_services
+   用途：师傅服务关系表
+   字段总数：7
+   - 字段1: id | 类型=int | 可空=NO | 键=PRI | 默认值=NULL | 额外=auto_increment
+   - 字段2: worker_user_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段3: service_id | 类型=int | 可空=NO | 键=MUL | 默认值=NULL | 额外=-
+   - 字段4: enabled | 类型=tinyint | 可空=NO | 键=- | 默认值=1 | 额外=-
+   - 字段5: sort_order | 类型=int | 可空=NO | 键=- | 默认值=0 | 额外=-
+   - 字段6: created_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-
+   - 字段7: updated_at | 类型=datetime | 可空=NO | 键=- | 默认值=NULL | 额外=-

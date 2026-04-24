@@ -109,6 +109,41 @@
           </div>
         </div>
       </div>
+
+      <div class="section-title">近 7 日</div>
+      <div class="secondary-cards week-row">
+        <div class="sub-card">
+          <div class="sub-icon-box week"><el-icon><DataLine /></el-icon></div>
+          <div class="sub-text">
+            <div class="sub-title">7 日已支付营收 (元)</div>
+            <div class="sub-value">￥{{ fmtMoney(stats.revenue_7d) }}</div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-icon-box week"><el-icon><ShoppingCart /></el-icon></div>
+          <div class="sub-text">
+            <div class="sub-title">7 日新订单 (笔)</div>
+            <div class="sub-value">{{ stats.orders_7d ?? '—' }}</div>
+          </div>
+        </div>
+        <div class="sub-card">
+          <div class="sub-icon-box week"><el-icon><UserFilled /></el-icon></div>
+          <div class="sub-text">
+            <div class="sub-title">7 日新注册用户</div>
+            <div class="sub-value">{{ stats.users_new_7d ?? '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">快捷入口</div>
+      <div class="quick-links">
+        <router-link to="/user-management" class="ql">用户管理</router-link>
+        <router-link to="/market-orders" class="ql">集市订单</router-link>
+        <router-link to="/market-shops" class="ql">店铺</router-link>
+        <router-link to="/message-center" class="ql">消息中心</router-link>
+        <router-link to="/ops-hub" class="ql">更多模块…</router-link>
+        <router-link to="/system-status" class="ql">系统状态</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -331,6 +366,33 @@ onMounted(load)
   font-size: 22px;
   color: #262626;
   font-weight: 500;
+}
+
+.week-row .sub-icon-box.week {
+  background: #fff7e6;
+  color: #d48806;
+}
+
+.quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.quick-links .ql {
+  display: inline-block;
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  color: #1890ff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.quick-links .ql:hover {
+  border-color: #1890ff;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
 }
 
 /* 响应式调整 */

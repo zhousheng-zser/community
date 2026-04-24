@@ -5,15 +5,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {}
   }
   MarketOrderItem.init({
-    order_id: { type: DataTypes.BIGINT, allowNull: false },
+    order_id: { type: DataTypes.INTEGER, allowNull: false },
     order_no: { type: DataTypes.STRING(40), allowNull: false },
-    shop_id: { type: DataTypes.BIGINT, allowNull: false },
-    goods_id: { type: DataTypes.BIGINT, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
+    goods_id: { type: DataTypes.INTEGER, allowNull: false },
     goods_name_snapshot: { type: DataTypes.STRING(150), allowNull: false },
     goods_image_snapshot: DataTypes.STRING(255),
     unit_price_snapshot: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     quantity: { type: DataTypes.INTEGER, allowNull: false },
-    amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false }
+    amount: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    market_sku_id: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    specs_snapshot: { type: DataTypes.JSON, allowNull: true }
   }, {
     sequelize,
     modelName: 'MarketOrderItem',

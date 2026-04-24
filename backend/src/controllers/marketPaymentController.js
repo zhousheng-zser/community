@@ -63,7 +63,7 @@ async function virtualPaySuccessFlow(order, orderNo) {
   await tx.save();
 
   order.pay_status = 'paid';
-  order.order_status = 'paid';
+  order.order_status = 'pending_accept';
   order.paid_at = now;
   await order.save();
 
@@ -333,7 +333,7 @@ exports.payCallback = async (req, res) => {
       const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
       if (order && order.pay_status !== 'paid') {
         order.pay_status = 'paid';
-        order.order_status = 'paid';
+        order.order_status = 'pending_accept';
         order.paid_at = tx.paid_at;
         await order.save();
       }
@@ -382,7 +382,7 @@ exports.payCallback = async (req, res) => {
     const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
     if (order && order.pay_status !== 'paid') {
       order.pay_status = 'paid';
-      order.order_status = 'paid';
+      order.order_status = 'pending_accept';
       order.paid_at = tx.paid_at;
       await order.save();
     }
@@ -437,9 +437,9 @@ exports.mockSuccess = async (req, res) => {
       await tx.save();
     }
 
-    if (order.pay_status !== 'paid' || order.order_status !== 'paid') {
+    if (order.pay_status !== 'paid' || order.order_status !== 'pending_accept') {
       order.pay_status = 'paid';
-      order.order_status = 'paid';
+      order.order_status = 'pending_accept';
       order.paid_at = tx.paid_at || new Date();
       await order.save();
     }

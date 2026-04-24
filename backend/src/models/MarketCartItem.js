@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {}
   }
   MarketCartItem.init({
-    user_id: { type: DataTypes.BIGINT, allowNull: false },
-    shop_id: { type: DataTypes.BIGINT, allowNull: false },
-    goods_id: { type: DataTypes.BIGINT, allowNull: false },
+    user_id: { type: DataTypes.INTEGER, allowNull: false },
+    shop_id: { type: DataTypes.INTEGER, allowNull: false },
+    goods_id: { type: DataTypes.INTEGER, allowNull: false },
     quantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
     checked: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 1 }
   }, {

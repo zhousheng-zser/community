@@ -9,7 +9,9 @@
       <el-table-column prop="id" label="ID" width="72" />
       <el-table-column prop="shop_no" label="编号" width="140" show-overflow-tooltip />
       <el-table-column prop="name" label="店名" min-width="140" />
-      <el-table-column prop="category" label="分类" width="100" />
+      <el-table-column label="分类" width="120">
+        <template #default="{ row }">{{ getCategoryLabel(row.category) }}</template>
+      </el-table-column>
       <el-table-column label="营业" width="80">
         <template #default="{ row }">{{ row.is_open ? '是' : '否' }}</template>
       </el-table-column>
@@ -17,9 +19,12 @@
         <template #default="{ row }">{{ row.is_active ? '是' : '否' }}</template>
       </el-table-column>
       <el-table-column prop="sort_order" label="排序" width="72" />
-      <el-table-column label="操作" width="120" fixed="right">
+      <el-table-column label="操作" width="160" fixed="right">
         <template #default="{ row }">
+          <el-button type="primary" link @click="openGoods(row)">商品</el-button>
+          <el-button type="primary" link @click="openReviews(row)">评价</el-button>
           <el-button type="primary" link @click="openEdit(row)">编辑</el-button>
+          <el-button type="danger" link @click="deleteShop(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -79,12 +84,96 @@
         <el-button type="primary" :loading="saving" @click="submit">保存</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="goodsVisible" :title="`商品管理 - ${currentShop.name || ''}`" width="980px" destroy-on-close>
+      <div class="shop-sub-toolbar">
+        <el-button type="success" @click="openCreateGood">新建商品</el-button>
+      </div>
+      <el-table v-loading="goodsLoading" :data="goodsRows" border stripe>
+        <el-table-column prop="id" label="ID" width="72" />
+        <el-table-column prop="goods_no" label="货号" width="170" show-overflow-tooltip />
+        <el-table-column prop="name" label="名称" min-width="140" />
+        <el-table-column prop="category_key" label="分类" width="110" />
+        <el-table-column prop="price" label="价格" width="90" />
+        <el-table-column prop="stock" label="库存" width="80" />
+        <el-table-column prop="status" label="状态" width="90" />
+        <el-table-column label="操作" width="90" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link @click="openEditGood(row)">编辑</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        class="pager"
+        v-model:current-page="goodsPage"
+        v-model:page-size="goodsLimit"
+        :total="goodsTotal"
+        layout="total, prev, pager, next"
+        @current-change="loadGoods"
+      />
+    </el-dialog>
+
+    <el-dialog v-model="goodEditorVisible" :title="isEditGood ? '编辑商品' : '新建商品'" width="560px" destroy-on-close @closed="resetGoodForm">
+      <el-form :model="goodForm" label-width="100px">
+        <el-form-item label="分类 key" required>
+          <el-input v-model="goodForm.category_key" />
+        </el-form-item>
+        <el-form-item label="名称" required>
+          <el-input v-model="goodForm.name" />
+        </el-form-item>
+        <el-form-item label="价格" required>
+          <el-input-number v-model="goodForm.price" :min="0" :step="0.01" />
+        </el-form-item>
+        <el-form-item label="库存">
+          <el-input-number v-model="goodForm.stock" :min="0" />
+        </el-form-item>
+        <el-form-item label="主图 URL">
+          <el-input v-model="goodForm.main_image" type="textarea" :rows="2" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="goodForm.status" style="width: 160px">
+            <el-option label="在售" value="on_sale" />
+            <el-option label="下架" value="off_sale" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="排序">
+          <el-input-number v-model="goodForm.sort_order" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="goodEditorVisible = false">取消</el-button>
+        <el-button type="primary" :loading="goodSaving" @click="submitGood">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="reviewVisible" :title="`评价管理 - ${currentShop.name || ''}`" width="980px" destroy-on-close>
+      <el-table v-loading="reviewLoading" :data="reviewRows" border stripe>
+        <el-table-column prop="id" label="ID" width="72" />
+        <el-table-column prop="user_id" label="用户ID" width="90" />
+        <el-table-column prop="rating" label="评分" width="70" />
+        <el-table-column prop="content" label="内容" min-width="260" show-overflow-tooltip />
+        <el-table-column prop="created_at" label="时间" width="180" />
+        <el-table-column label="操作" width="90" fixed="right">
+          <template #default="{ row }">
+            <el-button type="danger" link @click="deleteReview(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        class="pager"
+        v-model:current-page="reviewPage"
+        v-model:page-size="reviewLimit"
+        :total="reviewTotal"
+        layout="total, prev, pager, next"
+        @current-change="loadReviews"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '../utils/request'
 
 const loading = ref(false)
@@ -97,6 +186,23 @@ const keyword = ref('')
 const visible = ref(false)
 const isEdit = ref(false)
 const editId = ref(null)
+const currentShop = reactive({ id: null, name: '' })
+const goodsVisible = ref(false)
+const goodsLoading = ref(false)
+const goodsRows = ref([])
+const goodsTotal = ref(0)
+const goodsPage = ref(1)
+const goodsLimit = ref(20)
+const goodEditorVisible = ref(false)
+const isEditGood = ref(false)
+const editGoodId = ref(null)
+const goodSaving = ref(false)
+const reviewVisible = ref(false)
+const reviewLoading = ref(false)
+const reviewRows = ref([])
+const reviewTotal = ref(0)
+const reviewPage = ref(1)
+const reviewLimit = ref(20)
 
 const form = reactive({
   name: '',
@@ -113,6 +219,33 @@ const form = reactive({
   is_active: 1,
   sort_order: 0
 })
+const goodForm = reactive({
+  category_key: '',
+  name: '',
+  price: 0,
+  stock: 0,
+  main_image: '',
+  status: 'on_sale',
+  sort_order: 0
+})
+
+const categoryCodeToName = {
+  AAAA: '食品生鲜',
+  AAAB: '美妆洗护',
+  AAAC: '居家百货',
+  AAAD: '服装箱包',
+  AAAE: '母婴系列',
+  AAAF: '家用电器',
+  AAAG: '数码产品',
+  AAAH: '珠宝饰品',
+  AAAI: '旅游出行',
+  AAAJ: '传统工艺'
+}
+
+function getCategoryLabel(code) {
+  const raw = String(code || '').trim()
+  return categoryCodeToName[raw] || raw || '-'
+}
 
 function resetForm() {
   form.name = ''
@@ -129,6 +262,17 @@ function resetForm() {
   form.is_active = 1
   form.sort_order = 0
   editId.value = null
+}
+
+function resetGoodForm() {
+  goodForm.category_key = ''
+  goodForm.name = ''
+  goodForm.price = 0
+  goodForm.stock = 0
+  goodForm.main_image = ''
+  goodForm.status = 'on_sale'
+  goodForm.sort_order = 0
+  editGoodId.value = null
 }
 
 async function load() {
@@ -200,6 +344,132 @@ async function submit() {
   }
 }
 
+async function deleteShop(row) {
+  try {
+    const { value: password } = await ElMessageBox.prompt(
+      `确认删除店铺「${row.name}」及其全部商品？请输入管理员密码后继续。`,
+      '删除确认',
+      {
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消',
+        inputType: 'password',
+        inputPlaceholder: '请输入管理员密码',
+        inputValidator: (v) => (!!String(v || '').trim()) || '请输入管理员密码'
+      }
+    )
+    await request.delete(`/admin/market-shops/${row.id}`, {
+      data: { admin_password: String(password || '').trim() }
+    })
+    ElMessage.success('店铺及商品已删除')
+    await load()
+  } catch (e) {
+    if (e === 'cancel' || e === 'close') return
+    ElMessage.error(e.message || '删除失败')
+  }
+}
+
+function openGoods(row) {
+  currentShop.id = row.id
+  currentShop.name = row.name
+  goodsPage.value = 1
+  goodsVisible.value = true
+  loadGoods()
+}
+
+async function loadGoods() {
+  if (!currentShop.id) return
+  goodsLoading.value = true
+  try {
+    const res = await request.get('/admin/market-goods', {
+      params: { shop_id: currentShop.id, page: goodsPage.value, limit: goodsLimit.value }
+    })
+    goodsRows.value = res.data || []
+    goodsTotal.value = res.total || 0
+  } catch (e) {
+    ElMessage.error(e.message || '加载商品失败')
+  } finally {
+    goodsLoading.value = false
+  }
+}
+
+function openCreateGood() {
+  isEditGood.value = false
+  resetGoodForm()
+  goodEditorVisible.value = true
+}
+
+function openEditGood(row) {
+  isEditGood.value = true
+  editGoodId.value = row.id
+  goodForm.category_key = row.category_key || ''
+  goodForm.name = row.name || ''
+  goodForm.price = Number(row.price) || 0
+  goodForm.stock = Number(row.stock) || 0
+  goodForm.main_image = row.main_image || ''
+  goodForm.status = row.status || 'on_sale'
+  goodForm.sort_order = row.sort_order ?? 0
+  goodEditorVisible.value = true
+}
+
+async function submitGood() {
+  if (!goodForm.category_key || !goodForm.name) {
+    ElMessage.warning('请填写分类与名称')
+    return
+  }
+  goodSaving.value = true
+  try {
+    if (isEditGood.value && editGoodId.value) {
+      await request.put(`/admin/market-goods/${editGoodId.value}`, { ...goodForm })
+    } else {
+      await request.post('/admin/market-goods', {
+        shop_id: Number(currentShop.id),
+        ...goodForm
+      })
+    }
+    ElMessage.success('商品已保存')
+    goodEditorVisible.value = false
+    await loadGoods()
+  } catch (e) {
+    ElMessage.error(e.message || '保存商品失败')
+  } finally {
+    goodSaving.value = false
+  }
+}
+
+function openReviews(row) {
+  currentShop.id = row.id
+  currentShop.name = row.name
+  reviewPage.value = 1
+  reviewVisible.value = true
+  loadReviews()
+}
+
+async function loadReviews() {
+  if (!currentShop.id) return
+  reviewLoading.value = true
+  try {
+    const res = await request.get('/admin/market-shop-reviews', {
+      params: { shop_id: currentShop.id, page: reviewPage.value, limit: reviewLimit.value }
+    })
+    reviewRows.value = res.data || []
+    reviewTotal.value = res.total || 0
+  } catch (e) {
+    ElMessage.error(e.message || '加载评价失败')
+  } finally {
+    reviewLoading.value = false
+  }
+}
+
+function deleteReview(row) {
+  ElMessageBox.confirm('删除该评价？', '确认', { type: 'warning' })
+    .then(async () => {
+      await request.delete(`/admin/market-shop-reviews/${row.id}`)
+      ElMessage.success('评价已删除')
+      await loadReviews()
+    })
+    .catch(() => {})
+}
+
 onMounted(load)
 </script>
 
@@ -218,5 +488,8 @@ onMounted(load)
 .pager {
   margin-top: 16px;
   justify-content: flex-end;
+}
+.shop-sub-toolbar {
+  margin-bottom: 12px;
 }
 </style>

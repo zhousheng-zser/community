@@ -73,7 +73,7 @@ async function main() {
       [
         { id: 1, zone_code: 'hot', name: '爆款专区', sort: 100, status: 1 },
         { id: 2, zone_code: 'gift', name: '礼物专区', sort: 90, status: 1 },
-        { id: 3, zone_code: 'pick', name: '本地好物甄选', sort: 80, status: 1 },
+        { id: 3, zone_code: 'pick', name: '本地商城甄选', sort: 80, status: 1 },
         { id: 4, zone_code: 'high_comm', name: '高佣专区', sort: 70, status: 1 }
       ],
       { transaction: t }

@@ -1,5 +1,11 @@
-const { sequelize, MarketShop, MarketGood, MarketOrder, MarketOrderItem } = require('../models');
+const { sequelize, MarketShop, MarketGood, MarketGoodSku, MarketOrder, MarketOrderItem } = require('../models');
 const { Op } = require('sequelize');
+const {
+  resolveSkuId,
+  parseSpecs,
+  syncGoodStockFromSkus,
+  refreshPriceRangeForGood
+} = require('../utils/marketSku');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -21,17 +27,57 @@ function genOrderNo() {
   return `MK${y}${m}${day}${hh}${mm}${ss}${rnd}`;
 }
 
-function calcAmounts(goodsList, qtyMap, deliveryFee, discountAmount) {
+function calcAmountsFromLines(lines, deliveryFee, discountAmount) {
   let goodsAmount = 0;
-  for (const g of goodsList) {
-    const q = qtyMap.get(String(g.id)) || 0;
-    goodsAmount += Number(g.price) * q;
+  for (const ln of lines) {
+    goodsAmount += Number(ln.unitPrice) * ln.quantity;
   }
   goodsAmount = Number(goodsAmount.toFixed(2));
   deliveryFee = Number(Number(deliveryFee || 0).toFixed(2));
   discountAmount = Number(Number(discountAmount || 0).toFixed(2));
   const payableAmount = Number((goodsAmount + deliveryFee - discountAmount).toFixed(2));
   return { goods_amount: goodsAmount, delivery_fee: deliveryFee, discount_amount: discountAmount, payable_amount: payableAmount };
+}
+
+function normalizeOrderItems(items) {
+  if (!Array.isArray(items) || items.length === 0) return [];
+  const map = new Map();
+  for (const it of items) {
+    if (!it || it.goods_id == null) continue;
+    const gid = Number(it.goods_id);
+    const skuNum = resolveSkuId(it.sku_id);
+    const q = Math.max(0, parseInt(it.quantity, 10) || 0);
+    if (!q || !Number.isFinite(gid)) continue;
+    const key = skuNum != null ? `s:${skuNum}` : `g:${gid}`;
+    const prev = map.get(key) || { goods_id: gid, market_sku_id: skuNum, quantity: 0 };
+    prev.quantity += q;
+    if (skuNum != null) prev.market_sku_id = skuNum;
+    map.set(key, prev);
+  }
+  return [...map.values()];
+}
+
+function extractReceiver(reqBody, deliveryMode) {
+  const b = reqBody || {};
+  let receiver_name;
+  let receiver_phone;
+  let receiver_address;
+  if (b.address && typeof b.address === 'object') {
+    const a = b.address;
+    receiver_name = a.receiver_name || a.name || a.receiverName;
+    receiver_phone = a.receiver_phone || a.phone || a.receiverPhone;
+    receiver_address = a.receiver_address || a.address || a.full_address || a.detail;
+  }
+  if (receiver_name == null) receiver_name = b.receiver_name;
+  if (receiver_phone == null) receiver_phone = b.receiver_phone;
+  if (receiver_address == null) receiver_address = b.receiver_address;
+  const dm = String(deliveryMode || 'express');
+  if (dm === 'express') {
+    if (!receiver_phone || !receiver_address) {
+      return { err: { code: 400, msg: 'express 配送须填写收货电话与地址' } };
+    }
+  }
+  return { receiver_name: receiver_name || null, receiver_phone: receiver_phone || null, receiver_address: receiver_address || null };
 }
 
 async function loadShopOrErr(shopId) {
@@ -41,70 +87,143 @@ async function loadShopOrErr(shopId) {
   return { shop };
 }
 
-function normalizeItems(items) {
-  if (!Array.isArray(items) || items.length === 0) return [];
-  const map = new Map();
-  for (const it of items) {
-    if (!it || !it.goods_id) continue;
-    const gid = String(it.goods_id);
-    const q = Math.max(0, parseInt(it.quantity, 10) || 0);
-    if (!q) continue;
-    map.set(gid, (map.get(gid) || 0) + q);
+async function resolveLinesForShop(normItems, shopId, transaction) {
+  const lines = [];
+  for (const it of normItems) {
+    let sku = null;
+    let good = null;
+    if (it.market_sku_id != null) {
+      sku = await MarketGoodSku.findOne({
+        where: { id: it.market_sku_id, status: 'active' },
+        include: [{ model: MarketGood, as: 'good', required: true }],
+        transaction
+      });
+      if (!sku || !sku.good || sku.good.shop_id !== shopId || sku.good.status !== 'on_sale' || sku.good.id !== it.goods_id) {
+        return { err: { code: 20011, msg: 'SKU 不存在或已下架' } };
+      }
+      good = sku.good;
+    } else {
+      good = await MarketGood.findOne({
+        where: { id: it.goods_id, shop_id: shopId, status: 'on_sale' },
+        transaction
+      });
+      if (!good) return { err: { code: 20011, msg: '商品不存在或已下架' } };
+      const skus = await MarketGoodSku.findAll({
+        where: { goods_id: good.id, status: 'active' },
+        transaction
+      });
+      if (skus.length !== 1) {
+        return { err: { code: 20011, msg: '请选择规格 sku_id' } };
+      }
+      sku = skus[0];
+    }
+    lines.push({
+      goods_id: good.id,
+      market_sku_id: sku.id,
+      quantity: it.quantity,
+      unitPrice: Number(sku.price),
+      specs: parseSpecs(sku.specs),
+      good,
+      sku
+    });
   }
-  return [...map.entries()].map(([goods_id, quantity]) => ({ goods_id: Number(goods_id), quantity }));
+  return { lines };
+}
+
+async function formatListItem(order, transaction) {
+  const shop = await MarketShop.findByPk(order.shop_id, { transaction });
+  const items = await MarketOrderItem.findAll({ where: { order_no: order.order_no }, transaction });
+  let refundStatus = '';
+  if (order.pay_status === 'refund_pending') refundStatus = 'pending';
+  if (order.pay_status === 'refunded' || order.order_status === 'refunded') refundStatus = 'success';
+  return {
+    orderNo: order.order_no,
+    shopName: shop ? shop.name : '',
+    status: order.order_status,
+    amount: order.payable_amount != null ? String(order.payable_amount) : '0',
+    refundStatus,
+    goods: items.map((it) => ({
+      id: it.goods_id,
+      name: it.goods_name_snapshot,
+      image: it.goods_image_snapshot,
+      price: String(it.unit_price_snapshot),
+      quantity: it.quantity
+    }))
+  };
 }
 
 // POST /api/v1/market/orders/preview
 exports.preview = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { shop_id, items } = req.body;
+    const { shop_id, items, delivery_mode } = req.body;
     if (!shop_id) return res.status(400).json({ code: 400, msg: '缺少 shop_id', data: null });
 
-    const normItems = normalizeItems(items);
+    const dm = delivery_mode === 'pickup' ? 'pickup' : 'express';
+
+    const normItems = normalizeOrderItems(items);
     if (normItems.length === 0) return res.status(400).json({ code: 400, msg: 'items 不能为空', data: null });
 
     const { shop, err } = await loadShopOrErr(shop_id);
     if (err) return bizError(res, err.code, err.msg);
 
-    const goodsIds = normItems.map(i => i.goods_id);
-    const goodsList = await MarketGood.findAll({ where: { id: goodsIds, shop_id, status: 'on_sale' } });
-    if (goodsList.length !== goodsIds.length) return bizError(res, 20011, '商品不存在或已下架');
-
-    const qtyMap = new Map(normItems.map(i => [String(i.goods_id), i.quantity]));
-    for (const g of goodsList) {
-      const q = qtyMap.get(String(g.id)) || 0;
-      if (g.stock < q) return bizError(res, 20012, `库存不足：${g.name}`);
+    const t = await sequelize.transaction();
+    try {
+      const { lines, err: e2 } = await resolveLinesForShop(normItems, shop_id, t);
+      if (e2) {
+        await t.rollback();
+        return bizError(res, e2.code, e2.msg);
+      }
+      for (const ln of lines) {
+        if (ln.sku.stock < ln.quantity) {
+          await t.rollback();
+          return bizError(res, 20012, `库存不足：${ln.good.name}`);
+        }
+      }
+      const amounts = calcAmountsFromLines(lines, shop.delivery_fee, 0);
+      if (amounts.goods_amount < Number(shop.min_order_amount)) {
+        await t.rollback();
+        return bizError(res, 20021, '未达到起送价');
+      }
+      await t.commit();
+      res.json(
+        ok({
+          user_id: userId,
+          shop_id,
+          delivery_mode: dm,
+          ...amounts
+        })
+      );
+    } catch (e) {
+      await t.rollback();
+      throw e;
     }
-
-    const amounts = calcAmounts(goodsList, qtyMap, shop.delivery_fee, 0);
-    if (amounts.goods_amount < Number(shop.min_order_amount)) {
-      return bizError(res, 20021, '未达到起送价');
-    }
-
-    res.json(ok({
-      user_id: userId,
-      shop_id,
-      ...amounts
-    }));
   } catch (e) {
     console.error('orders/preview error:', e);
     res.status(500).json({ code: 500, msg: '预结算失败', data: null });
   }
 };
 
-// POST /api/v1/market/orders
+// POST /api/v1/market/orders 与 POST /order/create
 exports.create = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const userId = req.user.id;
-    const { shop_id, items, receiver_name, receiver_phone, receiver_address, remark } = req.body;
+    const { shop_id, items, remark, delivery_mode } = req.body;
+    const dm = delivery_mode === 'pickup' ? 'pickup' : 'express';
+    const recv = extractReceiver(req.body, dm);
+    if (recv.err) {
+      await t.rollback();
+      return res.status(400).json({ code: recv.err.code, msg: recv.err.msg, data: null });
+    }
+    const { receiver_name, receiver_phone, receiver_address } = recv;
+
     if (!shop_id) {
       await t.rollback();
       return res.status(400).json({ code: 400, msg: '缺少 shop_id', data: null });
     }
 
-    const normItems = normalizeItems(items);
+    const normItems = normalizeOrderItems(items);
     if (normItems.length === 0) {
       await t.rollback();
       return res.status(400).json({ code: 400, msg: 'items 不能为空', data: null });
@@ -116,36 +235,30 @@ exports.create = async (req, res) => {
       return bizError(res, err.code, err.msg);
     }
 
-    const goodsIds = normItems.map(i => i.goods_id);
-    const goodsList = await MarketGood.findAll({
-      where: { id: goodsIds, shop_id, status: 'on_sale' },
-      // 这里不再强制对商品行加 FOR UPDATE 锁：
-      // 库存扣减使用了 UPDATE ... WHERE stock >= q 的原子条件，能够保证不超卖，
-      // 继续叠加行锁会显著放大并发下的锁等待时间，导致客户端超时。
-      transaction: t
-    });
-    if (goodsList.length !== goodsIds.length) {
+    const { lines, err: e2 } = await resolveLinesForShop(normItems, shop_id, t);
+    if (e2) {
       await t.rollback();
-      return bizError(res, 20011, '商品不存在或已下架');
+      return bizError(res, e2.code, e2.msg);
     }
 
-    const qtyMap = new Map(normItems.map(i => [String(i.goods_id), i.quantity]));
-
-    // 扣库存（原子+事务）
-    for (const g of goodsList) {
-      const q = qtyMap.get(String(g.id)) || 0;
-      if (q <= 0) continue;
-      const [affected] = await MarketGood.update(
+    for (const ln of lines) {
+      const q = ln.quantity;
+      const [affected] = await MarketGoodSku.update(
         { stock: sequelize.literal(`stock - ${q}`) },
-        { where: { id: g.id, stock: { [Op.gte]: q }, status: 'on_sale' }, transaction: t }
+        { where: { id: ln.sku.id, stock: { [Op.gte]: q }, status: 'active' }, transaction: t }
       );
       if (!affected) {
         await t.rollback();
-        return bizError(res, 20012, `库存不足：${g.name}`);
+        return bizError(res, 20012, `库存不足：${ln.good.name}`);
       }
     }
 
-    const amounts = calcAmounts(goodsList, qtyMap, shop.delivery_fee, 0);
+    for (const ln of lines) {
+      await syncGoodStockFromSkus(ln.goods_id, t);
+      await refreshPriceRangeForGood(ln.goods_id, t);
+    }
+
+    const amounts = calcAmountsFromLines(lines, shop.delivery_fee, 0);
     if (amounts.goods_amount < Number(shop.min_order_amount)) {
       await t.rollback();
       return bizError(res, 20021, '未达到起送价');
@@ -154,36 +267,42 @@ exports.create = async (req, res) => {
     const orderNo = genOrderNo();
     const expiredAt = new Date(Date.now() + 30 * 60 * 1000);
 
-    const order = await MarketOrder.create({
-      order_no: orderNo,
-      user_id: userId,
-      shop_id,
-      order_status: 'pending_payment',
-      pay_status: 'unpaid',
-      ...amounts,
-      receiver_name: receiver_name || null,
-      receiver_phone: receiver_phone || null,
-      receiver_address: receiver_address || null,
-      remark: remark || null,
-      expired_at: expiredAt
-    }, { transaction: t });
+    const order = await MarketOrder.create(
+      {
+        order_no: orderNo,
+        user_id: userId,
+        shop_id,
+        order_status: 'pending_payment',
+        pay_status: 'unpaid',
+        delivery_mode: dm,
+        ...amounts,
+        receiver_name,
+        receiver_phone,
+        receiver_address,
+        remark: remark || null,
+        expired_at: expiredAt,
+        community_id: req.body.community_id != null ? req.body.community_id : null
+      },
+      { transaction: t }
+    );
 
-    const itemsToCreate = goodsList.map(g => {
-      const q = qtyMap.get(String(g.id)) || 0;
-      const unit = Number(g.price);
-      const amt = Number((unit * q).toFixed(2));
+    const itemsToCreate = lines.map((ln) => {
+      const unit = ln.unitPrice;
+      const amt = Number((unit * ln.quantity).toFixed(2));
       return {
         order_id: order.id,
         order_no: orderNo,
         shop_id,
-        goods_id: g.id,
-        goods_name_snapshot: g.name,
-        goods_image_snapshot: g.main_image || null,
+        goods_id: ln.goods_id,
+        market_sku_id: ln.market_sku_id,
+        specs_snapshot: ln.specs.length ? ln.specs : null,
+        goods_name_snapshot: ln.good.name,
+        goods_image_snapshot: ln.good.main_image || null,
         unit_price_snapshot: unit,
-        quantity: q,
+        quantity: ln.quantity,
         amount: amt
       };
-    }).filter(x => x.quantity > 0);
+    });
 
     await MarketOrderItem.bulkCreate(itemsToCreate, { transaction: t });
 
@@ -192,6 +311,7 @@ exports.create = async (req, res) => {
       code: 0,
       msg: '订单创建成功',
       data: {
+        orderNo: orderNo,
         order_no: orderNo,
         order_status: order.order_status,
         pay_status: order.pay_status,
@@ -206,7 +326,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// GET /api/v1/market/orders/my
+// GET /api/v1/market/orders/my 与 GET /orders
 exports.myOrders = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -221,7 +341,11 @@ exports.myOrders = async (req, res) => {
       offset,
       limit: pageSize
     });
-    res.json(ok({ list: rows, page, page_size: pageSize, total: count }));
+    const list = [];
+    for (const row of rows) {
+      list.push(await formatListItem(row, null));
+    }
+    res.json(ok({ list, page, page_size: pageSize, total: count }));
   } catch (e) {
     console.error('orders/my error:', e);
     res.status(500).json({ code: 500, msg: '获取订单列表失败', data: null });
@@ -235,9 +359,51 @@ exports.detail = async (req, res) => {
     const order = await MarketOrder.findOne({ where: { order_no: req.params.orderNo, user_id: userId } });
     if (!order) return res.status(404).json({ code: 404, msg: '订单不存在', data: null });
     const items = await MarketOrderItem.findAll({ where: { order_no: order.order_no } });
-    res.json(ok({ order, items }));
+    const shop = await MarketShop.findByPk(order.shop_id);
+    res.json(ok({ order, items, shop }));
   } catch (e) {
     console.error('orders/detail error:', e);
+    res.status(500).json({ code: 500, msg: '获取订单详情失败', data: null });
+  }
+};
+
+// GET /api/v1/market/order/detail?order_no=
+exports.detailByQuery = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const orderNo = req.query.order_no;
+    if (!orderNo) return res.status(400).json({ code: 400, msg: '缺少 order_no', data: null });
+    const order = await MarketOrder.findOne({ where: { order_no: orderNo, user_id: userId } });
+    if (!order) return res.status(404).json({ code: 404, msg: '订单不存在', data: null });
+    const items = await MarketOrderItem.findAll({ where: { order_no: order.order_no } });
+    const shop = await MarketShop.findByPk(order.shop_id);
+    const goods = items.map((it) => ({
+      id: it.goods_id,
+      name: it.goods_name_snapshot,
+      image: it.goods_image_snapshot,
+      price: String(it.unit_price_snapshot),
+      quantity: it.quantity
+    }));
+    res.json(
+      ok({
+        orderNo: order.order_no,
+        status: order.order_status,
+        shopName: shop ? shop.name : '',
+        shopPhone: shop ? shop.contact_phone || '' : '',
+        goods_amount: order.goods_amount != null ? String(order.goods_amount) : '0',
+        delivery_fee: order.delivery_fee != null ? String(order.delivery_fee) : '0',
+        discount_amount: order.discount_amount != null ? String(order.discount_amount) : '0',
+        payable_amount: order.payable_amount != null ? String(order.payable_amount) : '0',
+        created_at: order.created_at,
+        receiver_name: order.receiver_name,
+        receiver_phone: order.receiver_phone,
+        receiver_address: order.receiver_address,
+        delivery_mode: order.delivery_mode,
+        goods
+      })
+    );
+  } catch (e) {
+    console.error('order/detail error:', e);
     res.status(500).json({ code: 500, msg: '获取订单详情失败', data: null });
   }
 };
@@ -247,7 +413,11 @@ exports.cancel = async (req, res) => {
   const t = await sequelize.transaction();
   try {
     const userId = req.user.id;
-    const order = await MarketOrder.findOne({ where: { order_no: req.params.orderNo, user_id: userId }, transaction: t, lock: t.LOCK.UPDATE });
+    const order = await MarketOrder.findOne({
+      where: { order_no: req.params.orderNo, user_id: userId },
+      transaction: t,
+      lock: t.LOCK.UPDATE
+    });
     if (!order) {
       await t.rollback();
       return res.status(404).json({ code: 404, msg: '订单不存在', data: null });
@@ -259,12 +429,20 @@ exports.cancel = async (req, res) => {
 
     const items = await MarketOrderItem.findAll({ where: { order_no: order.order_no }, transaction: t });
 
-    // 回补库存
     for (const it of items) {
-      await MarketGood.update(
-        { stock: sequelize.literal(`stock + ${it.quantity}`) },
-        { where: { id: it.goods_id }, transaction: t }
-      );
+      if (it.market_sku_id) {
+        await MarketGoodSku.update(
+          { stock: sequelize.literal(`stock + ${it.quantity}`) },
+          { where: { id: it.market_sku_id }, transaction: t }
+        );
+        await syncGoodStockFromSkus(it.goods_id, t);
+        await refreshPriceRangeForGood(it.goods_id, t);
+      } else {
+        await MarketGood.update(
+          { stock: sequelize.literal(`stock + ${it.quantity}`) },
+          { where: { id: it.goods_id }, transaction: t }
+        );
+      }
     }
 
     order.order_status = 'cancelled';
@@ -273,7 +451,7 @@ exports.cancel = async (req, res) => {
     await order.save({ transaction: t });
 
     await t.commit();
-    res.json(ok({ order_no: order.order_no, order_status: order.order_status }));
+    res.json(ok({ order_no: order.order_no, orderNo: order.order_no, order_status: order.order_status }));
   } catch (e) {
     await t.rollback();
     console.error('orders/cancel error:', e);

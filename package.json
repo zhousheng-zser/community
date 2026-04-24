@@ -1,0 +1,8 @@
+{
+  "name": "community-backend",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix backend",
+    "dev:admin-stack": "bash scripts/dev-admin-stack.sh"
+  }
+}

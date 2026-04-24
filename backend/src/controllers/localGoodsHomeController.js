@@ -205,7 +205,7 @@ exports.getModules = async (req, res) => {
     );
   } catch (e) {
     console.error('local-goods-home modules error:', e);
-    return res.status(500).json({ code: 500, msg: '获取首页本地好物失败', data: null });
+    return res.status(500).json({ code: 500, msg: '获取首页本地商城失败', data: null });
   }
 };
 
@@ -231,7 +231,7 @@ exports.getFeedProducts = async (req, res) => {
 
     const mod = await LgHomeFeedModule.findOne({ where: { module_name: moduleName, status: 1 } });
     if (!mod) {
-      return res.status(404).json({ code: 40003, msg: '模块不存在', data: null });
+      return res.json(ok({ list: [], has_more: false }));
     }
 
     const rows = await LgHomeFeedModuleProduct.findAll({
@@ -270,9 +270,7 @@ exports.getZoneProducts = async (req, res) => {
     const sidebarCategory = req.query.sidebar_category != null ? String(req.query.sidebar_category).trim() : '';
 
     const zone = await LgHomeZone.findByPk(zoneId);
-    if (!zone || Number(zone.status) !== 1) {
-      return res.status(404).json({ code: 40005, msg: '专区不存在', data: null });
-    }
+    const zoneActive = !!(zone && Number(zone.status) === 1);
 
     let sub_categories = [];
     let sidebar_categories = [];
@@ -295,7 +293,7 @@ exports.getZoneProducts = async (req, res) => {
     }
 
     const emptyData = { list: [], sub_categories, sidebar_categories };
-    if (!coords) {
+    if (!coords || !zoneActive) {
       return res.json(ok(emptyData));
     }
 
@@ -337,7 +335,7 @@ exports.getChannelProducts = async (req, res) => {
 
     const ch = await LgHomeChannel.findOne({ where: { channel_key: channelKey, status: 1 } });
     if (!ch) {
-      return res.status(404).json({ code: 40007, msg: '频道不存在', data: null });
+      return res.json(ok({ list: [] }));
     }
 
     const tabs = await LgHomeChannelTab.findAll({
@@ -475,4 +473,3 @@ exports.getWeekSelect = async (req, res) => {
     return res.status(500).json({ code: 500, msg: '获取本周甄选失败', data: null });
   }
 };
-

@@ -156,8 +156,10 @@ async function main() {
   r = await userClient.post(`/service-orders/${soId}/pay`);
   ok('POST service-orders/:id/pay', r.status === 200 && r.data.errno === 0, JSON.stringify(r.data).slice(0, 200));
 
-  r = await userClient.get('/service-orders/my');
+  r = await userClient.get('/service-orders/my', { params: { page: 1, page_size: 10 } });
   ok('GET service-orders/my', r.status === 200 && r.data.errno === 0, JSON.stringify(r.data).slice(0, 150));
+  const soList = r.data.data && r.data.data.list;
+  ok('service-orders/my list shape', Array.isArray(soList) && soList.length >= 1 && soList[0].status_text, '');
 
   // 10) neighbor assist
   r = await userClient.post('/neighbor-assist/orders', {
@@ -174,6 +176,11 @@ async function main() {
 
   r = await userClient.post(`/neighbor-assist/orders/${naId}/pay`);
   ok('POST neighbor-assist/orders/:id/pay', r.status === 200 && r.data.errno === 0, JSON.stringify(r.data).slice(0, 200));
+
+  r = await userClient.get('/neighbor-assist/orders/my', { params: { page: 1, page_size: 10 } });
+  ok('GET neighbor-assist/orders/my', r.status === 200 && r.data.errno === 0, JSON.stringify(r.data).slice(0, 150));
+  const naMy = r.data.data && r.data.data.list;
+  ok('neighbor-assist/orders/my list shape', Array.isArray(naMy) && naMy.length >= 1 && naMy[0].assist_type, '');
 
   // 11) Admin
   const adminUser = process.env.ADMIN_USERNAME || 'wsxCDE';

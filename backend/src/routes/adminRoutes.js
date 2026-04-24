@@ -9,26 +9,28 @@ const adminSettlementController = require('../controllers/adminSettlementControl
 const adminMerchantAccountController = require('../controllers/adminMerchantAccountController');
 const adminRiskController = require('../controllers/adminRiskController');
 const adminOpsController = require('../controllers/adminOpsController');
-const adminHousekeepingController = require('../controllers/adminHousekeepingController');
 const adminDispatchController = require('../controllers/adminDispatchController');
+const adminCommunityOpsController = require('../controllers/adminCommunityOpsController');
+const adminPddBenefitController = require('../controllers/adminPddBenefitController');
+const adminMessageController = require('../controllers/adminMessageController');
+const adminUserController = require('../controllers/adminUserController');
+const adminSystemController = require('../controllers/adminSystemController');
+const adminLocalGoodsHomeController = require('../controllers/adminLocalGoodsHomeController');
 const adminAuthMiddleware = require('../middlewares/adminAuthMiddleware');
 
 router.use(adminAuthMiddleware);
 
 router.get('/stats/overview', adminStatsController.overview);
+router.get('/users', adminUserController.listUsers);
+router.get('/users/:id', adminUserController.getUser);
+router.get('/system/health', adminSystemController.health);
+router.get('/messages/overview', adminMessageController.overview);
+router.post('/messages/broadcast', adminMessageController.broadcast);
 router.get('/worker-applications', adminController.getWorkerApplications);
 router.put('/worker-applications/:id', adminController.updateWorkerApplication);
 router.get('/service-provider-applications', adminMarketController.listServiceProviderApplications);
 router.put('/service-provider-applications/:id', adminMarketController.updateServiceProviderApplication);
-router.get('/live-streams', adminController.listLiveStreams);
-router.post('/live-streams', adminController.createLiveStream);
-router.put('/live-streams/:id', adminController.updateLiveStream);
-router.delete('/live-streams/:id', adminController.deleteLiveStream);
-
-router.get('/housekeeping/orders', adminHousekeepingController.listOrders);
-router.get('/housekeeping/workers', adminHousekeepingController.listWorkers);
-router.post('/housekeeping/orders/:id/dispatch', adminHousekeepingController.dispatchOrder);
-
+router.post('/service-provider-portal-accounts', adminMarketController.createServiceProviderPortalAccount);
 router.get('/dispatch-queue', adminDispatchController.dispatchQueue);
 router.get('/service-orders', adminDispatchController.listServiceOrders);
 router.post('/service-orders/:id/assign', adminDispatchController.assignServiceOrder);
@@ -54,6 +56,7 @@ router.get('/market-shops', adminMarketController.listShops);
 router.post('/market-shops', adminMarketController.createShop);
 router.get('/market-shops/:id', adminMarketController.getShop);
 router.put('/market-shops/:id', adminMarketController.updateShop);
+router.delete('/market-shops/:id', adminMarketController.deleteShopCascade);
 router.get('/market-goods', adminMarketController.listGoods);
 router.post('/market-goods', adminMarketController.createGood);
 router.put('/market-goods/:id', adminMarketController.updateGood);
@@ -83,5 +86,23 @@ router.get('/jd-benefit-goods', adminJdBenefitController.list);
 router.post('/jd-benefit-goods', adminJdBenefitController.create);
 router.put('/jd-benefit-goods/:id', adminJdBenefitController.update);
 router.delete('/jd-benefit-goods/:id', adminJdBenefitController.destroy);
+
+router.get('/pdd-benefit-goods', adminPddBenefitController.list);
+router.post('/pdd-benefit-goods', adminPddBenefitController.create);
+router.put('/pdd-benefit-goods/:id', adminPddBenefitController.update);
+router.delete('/pdd-benefit-goods/:id', adminPddBenefitController.destroy);
+
+router.get('/community-featured-goods', adminCommunityOpsController.listCommunityFeatured);
+router.post('/community-featured-goods', adminCommunityOpsController.createCommunityFeatured);
+router.put('/community-featured-goods/:id', adminCommunityOpsController.updateCommunityFeatured);
+router.delete('/community-featured-goods/:id', adminCommunityOpsController.deleteCommunityFeatured);
+router.get('/benefit-alliance-config', adminCommunityOpsController.getBenefitAllianceConfig);
+router.put('/benefit-alliance-config', adminCommunityOpsController.upsertBenefitAllianceConfig);
+router.get('/local-goods-home/definitions', adminLocalGoodsHomeController.listDefinitions);
+router.get('/local-goods-home/items', adminLocalGoodsHomeController.listItems);
+router.get('/local-goods-home/goods/search', adminLocalGoodsHomeController.searchGoods);
+router.post('/local-goods-home/items', adminLocalGoodsHomeController.createItem);
+router.put('/local-goods-home/items/:id', adminLocalGoodsHomeController.updateItem);
+router.delete('/local-goods-home/items/:id', adminLocalGoodsHomeController.deleteItem);
 
 module.exports = router;

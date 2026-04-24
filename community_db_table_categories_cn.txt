@@ -1,0 +1,937 @@
+community_db 按业务分类的表与字段中文说明
+生成时间：2026-04-22（已按当前数据库重建）
+说明：每个表均列出全部字段，仅展示“字段名 + 中文含义”。
+
+一、内容社区与互动
+1. 表名：Users
+   用途：用户主表
+   字段总数：15
+   - id：主键ID
+   - openid：微信OpenID
+   - nickname：昵称
+   - avatar_url：头像URL
+   - bg_image：bg image
+   - phone：手机号
+   - address：地址
+   - bank_num：银行卡号/历史密码字段
+   - wx_id：微信相关ID
+   - role：角色
+   - balance：余额
+   - community_id：社区ID
+   - createdAt：创建时间
+   - updatedAt：更新时间
+   - token_version：令牌版本号
+
+2. 表名：Posts
+   用途：用户帖子表
+   字段总数：8
+   - id：主键ID
+   - user_id：用户ID
+   - content：内容
+   - images：图片集合
+   - location：location
+   - category：分类
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+3. 表名：Comments
+   用途：帖子评论表
+   字段总数：8
+   - id：主键ID
+   - post_id：帖子ID
+   - user_id：用户ID
+   - content：内容
+   - reply_to_user_id：replytouserID
+   - image_urls：image urls
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+4. 表名：Likes
+   用途：帖子点赞表
+   字段总数：5
+   - id：主键ID
+   - post_id：帖子ID
+   - user_id：用户ID
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+5. 表名：Feeds
+   用途：信息流表
+   字段总数：9
+   - id：主键ID
+   - title：标题
+   - author_id：authorID
+   - likes_count：likes数量
+   - media_type：media类型
+   - media_url：mediaURL
+   - related_goods_id：relatedgoodsID
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+6. 表名：user_follows
+   用途：用户关注表
+   字段总数：4
+   - id：主键ID
+   - user_id：用户ID
+   - follow_user_id：followuserID
+   - created_at：创建时间
+
+7. 表名：feedback
+   用途：用户反馈表
+   字段总数：5
+   - id：主键ID
+   - user_id：用户ID
+   - content：内容
+   - contact：联系方式
+   - created_at：创建时间
+
+二、即时消息与会话
+1. 表名：Conversations
+   用途：会话主表
+   字段总数：5
+   - id：主键ID
+   - type：类型
+   - last_message_preview：最后一条消息预览
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：Messages
+   用途：消息明细表
+   字段总数：6
+   - id：主键ID
+   - conversation_id：会话ID
+   - sender_id：发送者用户ID
+   - msg_type：消息类型
+   - content：内容
+   - created_at：创建时间
+
+3. 表名：UserConversations
+   用途：用户会话关系表
+   字段总数：9
+   - id：主键ID
+   - user_id：用户ID
+   - conversation_id：会话ID
+   - peer_id：peerID
+   - bot_type：机器人类型
+   - unread_count：未读数量
+   - is_deleted：是否已删除
+   - created_at：创建时间
+   - updated_at：更新时间
+
+三、活动运营
+1. 表名：activities
+   用途：活动主表
+   字段总数：8
+   - id：主键ID
+   - title：标题
+   - description：描述
+   - start_time：开始时间
+   - end_time：结束时间
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：activity_participants
+   用途：活动参与关系表
+   字段总数：4
+   - created_at：创建时间
+   - updated_at：更新时间
+   - activity_id：活动ID
+   - user_id：用户ID
+
+四、旧版商城/服务（历史表）
+1. 表名：Categories
+   用途：历史分类表
+   字段总数：7
+   - id：主键ID
+   - name：名称
+   - icon_url：iconURL
+   - sort_order：排序值
+   - group_type：group类型
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+2. 表名：Services
+   用途：历史服务表
+   字段总数：15
+   - id：主键ID
+   - category_id：分类ID
+   - title：标题
+   - description：描述
+   - price：价格
+   - cover_image：封面图URL
+   - sales_count：sales数量
+   - is_published：是否published
+   - detail_images：detail images
+   - tags：tags
+   - sub_title：sub title
+   - provider_id：providerID
+   - order_count：order数量
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+3. 表名：Promotions
+   用途：历史推广佣金表
+   字段总数：7
+   - id：主键ID
+   - order_id：订单ID
+   - promoter_id：推广人用户ID
+   - amount：金额
+   - status：状态
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+4. 表名：Banners
+   用途：历史轮播表
+   字段总数：9
+   - id：主键ID
+   - image_url：图片URL
+   - target_url：跳转URL
+   - sort_order：排序值
+   - link_type：链接类型
+   - link_value：链接值
+   - scene：场景
+   - createdAt：创建时间
+   - updatedAt：更新时间
+
+五、本地集市（新版电商主链路）
+1. 表名：market_shops
+   用途：集市店铺主表
+   字段总数：27
+   - id：主键ID
+   - shop_no：shop编号
+   - name：名称
+   - category：分类
+   - logo_url：Logo图片URL
+   - cover_url：封面图URL
+   - notice：notice
+   - delivery_type：delivery类型
+   - min_order_amount：最小orderamount
+   - delivery_fee：delivery fee
+   - avg_delivery_minutes：平均deliveryminutes
+   - rating：评分
+   - sold_count：sold数量
+   - is_open：是否营业中
+   - is_active：是否启用
+   - sort_order：排序值
+   - address：地址
+   - latitude：latitude
+   - longitude：longitude
+   - contact_name：联系人
+   - contact_phone：联系电话
+   - business_hours：business hours
+   - facade_image：facade image
+   - interior_image：interior image
+   - license_image：license image
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：market_shop_categories
+   用途：店铺内分类表
+   字段总数：8
+   - id：主键ID
+   - shop_id：店铺ID
+   - category_key：分类编码
+   - category_name：分类名称
+   - sort_order：排序值
+   - is_active：是否启用
+   - created_at：创建时间
+   - updated_at：更新时间
+
+3. 表名：market_goods
+   用途：集市商品主表
+   字段总数：19
+   - id：主键ID
+   - goods_no：goods编号
+   - shop_id：店铺ID
+   - category_key：分类编码
+   - name：名称
+   - description：描述
+   - main_image：main image
+   - images：图片集合
+   - price：价格
+   - origin_price：origin price
+   - stock：库存
+   - safe_stock：safe stock
+   - sold_count：sold数量
+   - status：状态
+   - sort_order：排序值
+   - created_at：创建时间
+   - updated_at：更新时间
+   - price_range：price range
+   - desc_html：desc html
+
+4. 表名：market_good_skus
+   用途：商品SKU表
+   字段总数：10
+   - id：主键ID
+   - goods_id：商品ID
+   - sku_code：sku code
+   - specs：specs
+   - price：价格
+   - stock：库存
+   - image：image
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+5. 表名：market_cart_items
+   用途：购物车表
+   字段总数：8
+   - id：主键ID
+   - user_id：用户ID
+   - shop_id：店铺ID
+   - goods_id：商品ID
+   - quantity：quantity
+   - checked：checked
+   - created_at：创建时间
+   - updated_at：更新时间
+
+6. 表名：market_orders
+   用途：集市订单主表
+   字段总数：22
+   - id：主键ID
+   - order_no：订单编号
+   - user_id：用户ID
+   - shop_id：店铺ID
+   - order_status：order状态
+   - pay_status：支付状态
+   - goods_amount：goods amount
+   - delivery_fee：delivery fee
+   - discount_amount：优惠金额
+   - payable_amount：payable amount
+   - receiver_name：receiver名称
+   - receiver_phone：receiver phone
+   - receiver_address：receiver address
+   - remark：备注
+   - cancel_reason：cancel reason
+   - paid_at：支付时间
+   - cancelled_at：cancelled时间
+   - expired_at：expired时间
+   - community_id：社区ID
+   - created_at：创建时间
+   - updated_at：更新时间
+   - delivery_mode：delivery mode
+
+7. 表名：market_order_items
+   用途：集市订单明细表
+   字段总数：13
+   - id：主键ID
+   - order_id：订单ID
+   - order_no：订单编号
+   - shop_id：店铺ID
+   - goods_id：商品ID
+   - goods_name_snapshot：goods name snapshot
+   - goods_image_snapshot：goods image snapshot
+   - unit_price_snapshot：unit price snapshot
+   - quantity：quantity
+   - amount：金额
+   - created_at：创建时间
+   - market_sku_id：marketskuID
+   - specs_snapshot：specs snapshot
+
+8. 表名：market_pay_transactions
+   用途：支付流水表
+   字段总数：13
+   - id：主键ID
+   - order_no：订单编号
+   - out_trade_no：商户支付单号
+   - channel：channel
+   - transaction_id：支付流水号
+   - pay_status：支付状态
+   - amount：金额
+   - notify_raw：回调原文JSON
+   - notify_count：回调次数
+   - last_notify_at：最后回调时间
+   - paid_at：支付时间
+   - created_at：创建时间
+   - updated_at：更新时间
+
+9. 表名：market_refund_orders
+   用途：退款单表
+   字段总数：12
+   - id：主键ID
+   - refund_no：退款单号
+   - order_no：订单编号
+   - out_trade_no：商户支付单号
+   - reason：原因
+   - refund_amount：退款金额
+   - status：状态
+   - audit_note：审核备注
+   - executed_at：执行时间
+   - reviewed_at：审核时间
+   - created_at：创建时间
+   - updated_at：更新时间
+
+10. 表名：market_refund_logs
+   用途：退款日志表
+   字段总数：7
+   - id：主键ID
+   - refund_no：退款单号
+   - from_status：原状态
+   - to_status：目标状态
+   - note：备注
+   - operator：操作人
+   - created_at：创建时间
+
+11. 表名：market_shop_reviews
+   用途：店铺评价表
+   字段总数：7
+   - id：主键ID
+   - shop_id：店铺ID
+   - user_id：用户ID
+   - rating：评分
+   - content：内容
+   - images：图片集合
+   - created_at：创建时间
+
+12. 表名：market_applications
+   用途：商家入驻申请表
+   字段总数：20
+   - id：主键ID
+   - user_id：用户ID
+   - contact_name：联系人
+   - phone：手机号
+   - shop_name：shop名称
+   - category：分类
+   - address：地址
+   - description：描述
+   - promoter_id：推广人用户ID
+   - credit_code：credit code
+   - legal_person：legal person
+   - place_photo_url：placephotoURL
+   - license_url：licenseURL
+   - community_id：社区ID
+   - status：状态
+   - created_at：创建时间
+   - logo_url：Logo图片URL
+   - background_url：backgroundURL
+   - entity_name：entity名称
+   - promoter_name：promoter名称
+
+13. 表名：merchant_accounts
+   用途：商家账号表
+   字段总数：9
+   - id：主键ID
+   - shop_id：店铺ID
+   - username：用户名
+   - password_hash：密码哈希
+   - role：角色
+   - status：状态
+   - last_login_at：最近loginat
+   - created_at：创建时间
+   - updated_at：更新时间
+
+六、优惠券与营销
+1. 表名：coupon_templates
+   用途：优惠券模板表
+   字段总数：12
+   - id：主键ID
+   - name：名称
+   - type：类型
+   - threshold_amount：门槛金额
+   - discount_amount：优惠金额
+   - total_count：总count
+   - issued_count：issued数量
+   - valid_from：生效时间
+   - valid_to：失效时间
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：coupon_issues
+   用途：优惠券发放表
+   字段总数：8
+   - id：主键ID
+   - template_id：优惠券模板ID
+   - user_id：用户ID
+   - code：code
+   - status：状态
+   - issued_at：发放时间
+   - used_at：使用时间
+   - created_at：创建时间
+
+3. 表名：benefit_alliance_config
+   用途：福利联盟配置表
+   字段总数：8
+   - id：主键ID
+   - scene：场景
+   - platform：platform
+   - hero_image_url：heroimageURL
+   - hero_title：hero title
+   - hero_subtitle：hero subtitle
+   - created_at：创建时间
+   - updated_at：更新时间
+
+4. 表名：jd_benefit_goods
+   用途：京东福利商品池表
+   字段总数：12
+   - id：主键ID
+   - scene：场景
+   - sku_id：skuID
+   - title：标题
+   - image_url：图片URL
+   - spread_url：spreadURL
+   - price：价格
+   - rebate_amount：rebate amount
+   - sort_order：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+5. 表名：pdd_benefit_goods
+   用途：拼多多福利商品池表
+   字段总数：15
+   - id：主键ID
+   - scene：场景
+   - link_key：link键
+   - goods_id：商品ID
+   - title：标题
+   - image_url：图片URL
+   - spread_url：spreadURL
+   - mini_path：mini path
+   - price：价格
+   - coupon_price：coupon price
+   - rebate_amount：rebate amount
+   - sort_order：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+6. 表名：community_featured_goods
+   用途：社区精选商品表
+   字段总数：7
+   - id：主键ID
+   - community_id：社区ID
+   - market_good_id：marketgoodID
+   - sort_order：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+七、首页编排（local goods home）
+1. 表名：lg_home_channels
+   用途：首页频道表
+   字段总数：7
+   - id：主键ID
+   - channel_key：channel键
+   - title：标题
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：lg_home_channel_tabs
+   用途：频道Tab表
+   字段总数：7
+   - id：主键ID
+   - channel_id：channelID
+   - tab_name：tab名称
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+3. 表名：lg_home_channel_products
+   用途：频道商品表
+   字段总数：8
+   - id：主键ID
+   - channel_id：channelID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+4. 表名：lg_home_channel_tab_products
+   用途：频道Tab商品表
+   字段总数：8
+   - id：主键ID
+   - tab_id：tabID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+5. 表名：lg_home_feed_modules
+   用途：Feed模块表
+   字段总数：6
+   - id：主键ID
+   - module_name：module名称
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+6. 表名：lg_home_feed_module_products
+   用途：Feed模块商品表
+   字段总数：8
+   - id：主键ID
+   - module_id：moduleID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+7. 表名：lg_home_periodic_modules
+   用途：周期模块表
+   字段总数：6
+   - id：主键ID
+   - module_name：module名称
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+8. 表名：lg_home_periodic_module_products
+   用途：周期模块商品表
+   字段总数：8
+   - id：主键ID
+   - module_id：moduleID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+9. 表名：lg_home_daily_news_products
+   用途：每日上新商品表
+   字段总数：9
+   - id：主键ID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - sort：排序值
+   - status：状态
+   - start_at：start时间
+   - end_at：end时间
+   - created_at：创建时间
+   - updated_at：更新时间
+
+10. 表名：lg_home_top_sales_products
+   用途：热销商品表
+   字段总数：10
+   - id：主键ID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - rank_no：rank编号
+   - sort：排序值
+   - status：状态
+   - start_at：start时间
+   - end_at：end时间
+   - created_at：创建时间
+   - updated_at：更新时间
+
+11. 表名：lg_home_zones
+   用途：首页分区表
+   字段总数：7
+   - id：主键ID
+   - zone_code：zone code
+   - name：名称
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+12. 表名：lg_home_zone_products
+   用途：分区商品表
+   字段总数：10
+   - id：主键ID
+   - zone_id：zoneID
+   - goods_id：商品ID
+   - shop_id：店铺ID
+   - gift_sub_code：gift sub code
+   - sidebar_category：sidebar category
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+13. 表名：lg_home_zone_sidebar_categories
+   用途：分区侧边分类表
+   字段总数：7
+   - id：主键ID
+   - zone_id：zoneID
+   - category_name：分类名称
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+14. 表名：lg_home_zone_gift_subcategories
+   用途：分区礼包子分类表
+   字段总数：9
+   - id：主键ID
+   - zone_id：zoneID
+   - sub_code：sub code
+   - name：名称
+   - cover_image：封面图URL
+   - sort：排序值
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+八、到家服务与履约
+1. 表名：service_orders
+   用途：到家服务订单表
+   字段总数：24
+   - id：主键ID
+   - user_id：用户ID
+   - community_id：社区ID
+   - service_id：服务ID
+   - group_key：group键
+   - amount：金额
+   - address_id：地址ID
+   - address_snapshot：address snapshot
+   - appointment_time：预约时间
+   - remark：备注
+   - status：状态
+   - pay_status：支付状态
+   - assigned_worker_id：已指派师傅用户ID
+   - dispatch_at：dispatch时间
+   - dispatch_by：dispatch by
+   - fulfillment_meta：fulfillment meta
+   - order_no：订单编号
+   - contact_name：联系人
+   - contact_phone：联系电话
+   - goods_name：goods名称
+   - qty：qty
+   - provider_user_id：provideruserID
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：service_order_reviews
+   用途：服务订单评价表
+   字段总数：8
+   - id：主键ID
+   - order_id：订单ID
+   - worker_id：师傅用户ID
+   - user_id：用户ID
+   - score：评分
+   - content：内容
+   - created_at：创建时间
+   - updated_at：更新时间
+
+3. 表名：service_order_complaints
+   用途：服务订单投诉表
+   字段总数：8
+   - id：主键ID
+   - order_id：订单ID
+   - user_id：用户ID
+   - content：内容
+   - images_json：图片集合JSON数据
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+4. 表名：housekeeping_dispatches
+   用途：家政派单表
+   字段总数：9
+   - id：主键ID
+   - order_id：订单ID
+   - worker_id：师傅用户ID
+   - service_provider_id：serviceproviderID
+   - status：状态
+   - note：备注
+   - dispatcher：dispatcher
+   - created_at：创建时间
+   - updated_at：更新时间
+
+5. 表名：neighbor_assist_orders
+   用途：邻里帮订单表
+   字段总数：16
+   - id：主键ID
+   - assist_type：assist类型
+   - user_id：用户ID
+   - community_id：社区ID
+   - origin_address_snapshot：origin address snapshot
+   - destination_address_snapshot：destination address snapshot
+   - amount：金额
+   - appointment_time：预约时间
+   - remark：备注
+   - status：状态
+   - pay_status：支付状态
+   - assigned_worker_id：已指派师傅用户ID
+   - dispatch_at：dispatch时间
+   - dispatch_by：dispatch by
+   - created_at：创建时间
+   - updated_at：更新时间
+
+6. 表名：publish_orders
+   用途：发布需求单表
+   字段总数：10
+   - id：主键ID
+   - user_id：用户ID
+   - category：分类
+   - address：地址
+   - expected_time：expected时间
+   - content：内容
+   - images：图片集合
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+7. 表名：user_addresses
+   用途：用户地址簿表
+   字段总数：15
+   - id：主键ID
+   - user_id：用户ID
+   - name：名称
+   - phone：手机号
+   - province：province
+   - city：city
+   - district：district
+   - detail：detail
+   - tag：tag
+   - latitude：latitude
+   - longitude：longitude
+   - location_poi_name：locationpoi名称
+   - is_default：是否默认
+   - created_at：创建时间
+   - updated_at：更新时间
+
+九、人员体系（师傅/服务商）
+1. 表名：worker_applications
+   用途：师傅申请表
+   字段总数：14
+   - id：主键ID
+   - user_id：用户ID
+   - name：名称
+   - phone：手机号
+   - industry：industry
+   - education：education
+   - city：city
+   - resume：resume
+   - id_card_url：idcardURL
+   - work_photo_url：workphotoURL
+   - certificate_url：certificateURL
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：worker_profiles
+   用途：师傅档案表
+   字段总数：18
+   - id：主键ID
+   - user_id：用户ID
+   - application_id：申请ID
+   - real_name：real名称
+   - phone：手机号
+   - industry：industry
+   - education：education
+   - city：city
+   - resume：resume
+   - id_card_url：idcardURL
+   - work_photo_url：workphotoURL
+   - certificate_url：certificateURL
+   - community_id：社区ID
+   - gender：gender
+   - main_direction：main direction
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+
+3. 表名：worker_services
+   用途：师傅服务关系表
+   字段总数：7
+   - id：主键ID
+   - worker_user_id：workeruserID
+   - service_id：服务ID
+   - enabled：enabled
+   - sort_order：排序值
+   - created_at：创建时间
+   - updated_at：更新时间
+
+4. 表名：service_provider_applications
+   用途：服务商申请表
+   字段总数：12
+   - id：主键ID
+   - user_id：用户ID
+   - shop_name：shop名称
+   - contact_name：联系人
+   - phone：手机号
+   - license_url：licenseURL
+   - shop_front_url：shopfrontURL
+   - environment_url：environmentURL
+   - id_card_url：idcardURL
+   - certificate_url：certificateURL
+   - status：状态
+   - created_at：创建时间
+
+5. 表名：service_provider_profiles
+   用途：服务商档案表
+   字段总数：15
+   - id：主键ID
+   - user_id：用户ID
+   - application_id：申请ID
+   - shop_name：shop名称
+   - contact_name：联系人
+   - phone：手机号
+   - license_url：licenseURL
+   - shop_front_url：shopfrontURL
+   - environment_url：environmentURL
+   - id_card_url：idcardURL
+   - certificate_url：certificateURL
+   - status：状态
+   - created_at：创建时间
+   - updated_at：更新时间
+   - community_id：社区ID
+
+6. 表名：service_provider_portal_accounts
+   用途：服务商中台账号表
+   字段总数：9
+   - id：主键ID
+   - profile_id：档案ID
+   - username：用户名
+   - password_hash：密码哈希
+   - role：角色
+   - status：状态
+   - last_login_at：最近loginat
+   - created_at：创建时间
+   - updated_at：更新时间
+
+十、风控、审核与后台运营
+1. 表名：complaint_tickets
+   用途：投诉工单表
+   字段总数：12
+   - id：主键ID
+   - ticket_no：ticket编号
+   - order_no：订单编号
+   - user_id：用户ID
+   - shop_id：店铺ID
+   - type：类型
+   - content：内容
+   - status：状态
+   - reply：处理回复
+   - resolved_at：解决时间
+   - created_at：创建时间
+   - updated_at：更新时间
+
+2. 表名：approval_records
+   用途：审批记录表
+   字段总数：8
+   - id：主键ID
+   - biz_type：biz类型
+   - biz_id：bizID
+   - from_status：原状态
+   - to_status：目标状态
+   - note：备注
+   - operator：操作人
+   - created_at：创建时间
+
+3. 表名：admin_operation_logs
+   用途：后台操作日志表
+   字段总数：8
+   - id：主键ID
+   - admin_username：管理员账号
+   - action：action
+   - target_type：target类型
+   - target_id：targetID
+   - detail_json：操作详情JSON
+   - ip：IP地址
+   - created_at：创建时间
