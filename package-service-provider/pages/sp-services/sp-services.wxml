@@ -1,0 +1,38 @@
+<view class="sp-services-page">
+  <view class="page-header">
+    <view class="search-box">
+      <input class="search-input" placeholder="搜索服务项目" value="{{keyword}}" bindinput="onSearchInput" />
+      <view class="clear-btn" wx:if="{{keyword}}" bindtap="clearSearch">×</view>
+    </view>
+  </view>
+  <view class="summary-bar" wx:if="{{summaryText}}"><text>{{summaryText}}</text></view>
+  <view class="loading-box" wx:if="{{loading}}"><text>加载中...</text></view>
+  <view class="service-list" wx:elif="{{list.length > 0}}">
+    <view class="service-card" wx:for="{{list}}" wx:key="id">
+      <view class="service-info">
+        <view class="service-title">{{item.title}}</view>
+        <view class="service-meta">
+          <text class="service-category">{{item.category}}</text>
+          <text class="service-duration">{{item.duration}}</text>
+        </view>
+        <view class="service-price">{{item.priceText}}/{{item.unit}}</view>
+        <view class="service-actions">
+          <view class="shelf-switch">
+            <switch checked="{{item.onShelf}}" bindchange="onShelfChange" data-id="{{item.id}}" data-on="{{item.onShelf}}" />
+            <text class="shelf-label">{{item.onShelf ? '已上架' : '已下架'}}</text>
+          </view>
+          <view class="edit-btn" bindtap="goEdit" data-id="{{item.id}}">编辑</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="empty-box" wx:elif="{{!loading}}"><text class="empty-icon">🔧</text><text class="empty-text">{{emptyTip}}</text></view>
+  <view class="add-btn-wrapper"><button class="add-btn" bindtap="goAdd">+ 添加服务项目</button></view>
+  <view class="sp-tabbar">
+    <view class="sp-tabbar-item" bindtap="goHome"><image class="sp-tabbar-icon" src="/img/home-0.png" mode="aspectFit" /><text>首页</text></view>
+    <view class="sp-tabbar-item" bindtap="goOrders"><image class="sp-tabbar-icon" src="/img/order-0.png" mode="aspectFit" /><text>订单</text></view>
+    <view class="sp-tabbar-item" bindtap="goDispatch"><image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" /><text>派单</text></view>
+    <view class="sp-tabbar-item sp-tabbar-on"><image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" /><text>服务</text></view>
+    <view class="sp-tabbar-item" bindtap="goMine"><image class="sp-tabbar-icon" src="/img/user-0.png" mode="aspectFit" /><text>我的</text></view>
+  </view>
+</view>

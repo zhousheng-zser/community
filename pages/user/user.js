@@ -3,6 +3,7 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
 const api = require('../../api/index.js');
+const balance = require('../../utils/balance.js');
 
 Page({
   data: {
@@ -12,6 +13,7 @@ Page({
     roleLabel: '普通用户',
     points: 0,
     couponCount: 0,
+    workbenchCollapsed: true,
     orderMenus: [
       { name: "服务订单", icon: "service_order", url: "../service-orders-my/service-orders-my" },
       { name: "一键发布", icon: "quick_publish", url: "../order-publish/order-publish" },
@@ -56,20 +58,50 @@ Page({
     return roles.map((r) => roleMap[r] || r).join('·');
   },
 
+  toggleWorkbench() {
+    this.setData({ workbenchCollapsed: !this.data.workbenchCollapsed });
+  },
+
   goWorkerPortal() {
+    const user = app.globalData.user || {};
+    if (!rolePortals.canUseWorkerPortal(user)) {
+      const wStatus = user.worker_status || user.workerStatus;
+      if (wStatus === 'pending' || wStatus === 'reviewing') {
+        wx.showToast({ title: '技工入驻审核中', icon: 'none' });
+      } else {
+        wx.navigateTo({ url: '../join-worker/join-worker' });
+      }
+      return;
+    }
     rolePortals.navigateToWorkerHome();
   },
 
   goServiceProviderPortal() {
-    wx.showToast({ title: '服务商版即将上线', icon: 'none' });
+    const user = app.globalData.user || {};
+    if (rolePortals.canUseServiceProviderPortal(user) || rolePortals.canUseMerchantPortal(user)) {
+      rolePortals.navigateToServiceProviderHome();
+    } else {
+      const spStatus = user.service_provider_status || user.serviceProviderStatus;
+      if (spStatus === 'pending' || spStatus === 'reviewing') {
+        wx.showToast({ title: '服务商入驻审核中', icon: 'none' });
+      } else {
+        wx.navigateTo({ url: '../join-service/join-service' });
+      }
+    }
   },
 
   goMarketPortal() {
-    rolePortals.navigateToMerchantHome();
-  },
-
-  goMarketPortal() {
-    rolePortals.navigateToMarketHome();
+    const user = app.globalData.user || {};
+    if (rolePortals.canUseMarketPortal(user)) {
+      rolePortals.navigateToMarketHome();
+    } else {
+      const mStatus = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+      if (mStatus === 'pending' || mStatus === 'reviewing') {
+        wx.showToast({ title: '集市商家入驻审核中', icon: 'none' });
+      } else {
+        wx.navigateTo({ url: '../join-market/join-market' });
+      }
+    }
   },
 
   goToLogin() {
@@ -114,15 +146,15 @@ Page({
   // 从服务端拉取用户完整资料（含余额）
   getProfile() {
     api.user.getUserProfile().then((data) => {
-      const balance = parseFloat(data.balance || 0).toFixed(2);
       const cid = data.community_id != null ? data.community_id : data.communityId;
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
         if (cid != null) app.globalData.user.communityId = cid;
       }
       const user = app.globalData.user || {};
+      const balanceValue = balance.getDisplayBalance(balance.BALANCE_TYPES.USER);
       this.setData({
-        balance,
+        balance: balanceValue,
         user,
         roleLabel: this.computeRoleLabel(user)
       });

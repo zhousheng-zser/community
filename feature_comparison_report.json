@@ -1,0 +1,2373 @@
+{
+  "summary": {
+    "total_features": 263,
+    "implemented": 163,
+    "not_implemented": 100,
+    "implemented_pages": [
+      "about",
+      "account",
+      "activity",
+      "activity-list",
+      "activity-manage",
+      "address",
+      "appeal-list",
+      "audit",
+      "benefit-orders",
+      "book",
+      "book-detail",
+      "book-my",
+      "cash",
+      "chat",
+      "classify",
+      "combo-orders",
+      "community",
+      "community-publish",
+      "community-steward",
+      "consumer-rights",
+      "coupons-all",
+      "coupons-my",
+      "dispatch",
+      "feedback",
+      "forget-password",
+      "goods-cart",
+      "goods-classify",
+      "goods-confrim",
+      "goods-detail",
+      "gorder-detail",
+      "gorder-list",
+      "index",
+      "join-market",
+      "join-service",
+      "join-worker",
+      "login",
+      "logs",
+      "market-banner",
+      "market-order-detail",
+      "market-order-list",
+      "market-shop",
+      "merchant-detail",
+      "message",
+      "my-activities",
+      "my-follows",
+      "my-posts",
+      "neighbor-assist-order-detail",
+      "neighbor-assist-orders-my",
+      "notification-settings",
+      "order",
+      "order-confrim",
+      "order-detail",
+      "order-publish",
+      "order-service",
+      "platform-kefu",
+      "privacy-publish",
+      "privacy-reply",
+      "promoter-orders",
+      "push-channel",
+      "push-daily-news",
+      "push-goods-list",
+      "push-hot-video-list",
+      "push-periodic-list",
+      "push-product-detail",
+      "push-top-sales",
+      "push-video-category",
+      "push-video-list",
+      "recomm",
+      "register",
+      "rider-location",
+      "service",
+      "service-order-detail",
+      "service-orders-my",
+      "service-provider-shop",
+      "settings",
+      "shopping-search",
+      "tidy-service",
+      "user",
+      "user-code",
+      "user-edit",
+      "wallet-transactions",
+      "worker-detail",
+      "package-market/market-home",
+      "package-worker/worker-home",
+      "package-worker/worker-mine",
+      "package-worker/worker-order-detail",
+      "package-worker/worker-orders",
+      "package-merchant/merchant-goods",
+      "package-merchant/merchant-goods-edit",
+      "package-merchant/merchant-home",
+      "package-merchant/merchant-mine",
+      "package-merchant/merchant-orders",
+      "package-merchant/merchant-service"
+    ]
+  },
+  "implemented_features": [
+    {
+      "row": 3,
+      "core_module": "注册",
+      "sub_module": "注册",
+      "feature": null,
+      "sub_feature": null,
+      "description": "用户需输入手机号码、验证码、密码、确认密码，选择位置信息进行注册。",
+      "matched_page": "register"
+    },
+    {
+      "row": 4,
+      "core_module": "注册",
+      "sub_module": "用户注册协议",
+      "feature": null,
+      "sub_feature": null,
+      "description": "可在管理后台编辑《用户注册协议》。",
+      "matched_page": "register"
+    },
+    {
+      "row": 5,
+      "core_module": "登录",
+      "sub_module": "密码登录",
+      "feature": null,
+      "sub_feature": null,
+      "description": "已注册用户输入正确的手机号码及密码进行登录。",
+      "matched_page": "register"
+    },
+    {
+      "row": 6,
+      "core_module": "登录",
+      "sub_module": "快捷登录",
+      "feature": null,
+      "sub_feature": null,
+      "description": "已注册的用户根据获取的手机号进行快捷登录。",
+      "matched_page": "register"
+    },
+    {
+      "row": 7,
+      "core_module": "登录",
+      "sub_module": "随便逛逛",
+      "feature": null,
+      "sub_feature": null,
+      "description": "未注册登录的用户使用游客模式。点击跳转到小程序首页。",
+      "matched_page": "register"
+    },
+    {
+      "row": 8,
+      "core_module": "登录",
+      "sub_module": "忘记密码",
+      "feature": null,
+      "sub_feature": null,
+      "description": "需输入已注册的手机号、手机验证码、输入新密码、确认新密码进行修改密码操作。",
+      "matched_page": "register"
+    },
+    {
+      "row": 9,
+      "core_module": "小程序首页",
+      "sub_module": "定位",
+      "feature": null,
+      "sub_feature": null,
+      "description": "未注册登录的用户自动定位系统设置的位置，支持手动修改定位信息。",
+      "matched_page": "register"
+    },
+    {
+      "row": 11,
+      "core_module": "小程序首页",
+      "sub_module": "搜索",
+      "feature": null,
+      "sub_feature": null,
+      "description": "支持输入关键词搜索上门服务类型、技术和商家等信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 12,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家修急事",
+      "description": "点击进入家修急事模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 13,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家庭服务",
+      "description": "点击进入家庭服务模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 14,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "闲置二手",
+      "description": "点击进入闲置二手模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 15,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家庭陪护",
+      "description": "点击进入家庭陪护模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 16,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "上门美业",
+      "description": "点击进入上门美业模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 17,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "宝宝家事",
+      "description": "点击进入宝宝家事模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 18,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家庭装修",
+      "description": "点击进入家庭装修模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 19,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "便民服务",
+      "description": "点击进入便民服务模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 20,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家庭保洁",
+      "description": "点击进入家庭保洁模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 21,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家居养护",
+      "description": "点击进入家居养护模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 22,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "保姆月嫂",
+      "description": "点击进入保姆月嫂模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 23,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "上门回收",
+      "description": "点击进入上门回收模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 24,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家电维修",
+      "description": "点击进入家电维修模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 25,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "家电清洗",
+      "description": "点击进入家电清洗模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 26,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "衣物洗护",
+      "description": "点击进入衣物洗护模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 27,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "上门安装",
+      "description": "点击进入上门安装模块（对应后台的服务管理版块）",
+      "matched_page": "recomm"
+    },
+    {
+      "row": 28,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "便民服务\n版块",
+      "sub_feature": "其它服务分类",
+      "description": "点击进入相应的模块。可以后台去增删改！",
+      "matched_page": "classify"
+    },
+    {
+      "row": 29,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "直约服务商",
+      "description": "定位：展示当前位置信息。",
+      "matched_page": "location"
+    },
+    {
+      "row": 34,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "直约技工",
+      "description": "定位：展示当前位置信息。",
+      "matched_page": "location"
+    },
+    {
+      "row": 40,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "秒杀",
+      "description": "展示平台可进行秒杀活动的商品列表。",
+      "matched_page": "activity"
+    },
+    {
+      "row": 41,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "领券",
+      "description": "展示用户已经领取到的优惠券信息。",
+      "matched_page": "coupon"
+    },
+    {
+      "row": 42,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "家事币商城",
+      "description": "首页：展示家事币数量余额、兑换记录，超值兑换商品列表。可进行去兑换操作。",
+      "matched_page": "index"
+    },
+    {
+      "row": 44,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "家超市",
+      "description": "轮播图自动轮播，可在管理后台设置跳转类型（网页、详情页、无操作）。",
+      "matched_page": "push"
+    },
+    {
+      "row": 48,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "特价拼团",
+      "description": "展示平台可进行拼团活动的商品列表。",
+      "matched_page": "combo"
+    },
+    {
+      "row": 52,
+      "core_module": "小程序首页",
+      "sub_module": "团购",
+      "feature": "团购列表",
+      "sub_feature": null,
+      "description": "展示管理后台配置的团购商品，显示商品主图、原价和团购价，点击进入商品详情。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 55,
+      "core_module": "小程序首页",
+      "sub_module": "邻里帮帮",
+      "feature": "代取",
+      "sub_feature": null,
+      "description": "输入取货地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入收货地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 56,
+      "core_module": "小程序首页",
+      "sub_module": "邻里帮帮",
+      "feature": "接送小孩",
+      "sub_feature": null,
+      "description": "输入接小孩地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入送小孩地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 57,
+      "core_module": "小程序首页",
+      "sub_module": "邻里帮帮",
+      "feature": "陪诊",
+      "sub_feature": null,
+      "description": "输入需陪诊人地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入服务地址地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 58,
+      "core_module": "小程序首页",
+      "sub_module": "邻里帮帮",
+      "feature": "陪读",
+      "sub_feature": null,
+      "description": "输入需陪读人服务地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 59,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "轮播图",
+      "feature": "陪读",
+      "sub_feature": null,
+      "description": "轮播图自动轮播，可在管理后台设置跳转类型（网页、详情页、无操作）。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 60,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "搜索",
+      "feature": "陪读",
+      "sub_feature": null,
+      "description": "支持输入关键词搜索便民信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 61,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务分类",
+      "sub_feature": null,
+      "description": "展示便民服务的分类，点击可进入到分类页面。",
+      "matched_page": "classify"
+    },
+    {
+      "row": 72,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "组织活动",
+      "description": "点击进入相应版块，还有二级分类，展示相应信息。",
+      "matched_page": "activity"
+    },
+    {
+      "row": 82,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "发布信息",
+      "feature": "发布组织活动",
+      "sub_feature": null,
+      "description": "点击可发布信息，选择发布类型，信息包含标题、视频、图文内容、活动人数、价格（免费价格设置为0）等\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 84,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索",
+      "sub_feature": null,
+      "description": "输入商品名称和店铺名称对商品和店铺进行搜索。",
+      "matched_page": "search"
+    },
+    {
+      "row": 85,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索历史",
+      "sub_feature": "搜索历史",
+      "description": "每次搜索都记录一个搜索历史，点击搜索历史标签跳转至搜索结果页面。",
+      "matched_page": "search"
+    },
+    {
+      "row": 86,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索历史",
+      "sub_feature": "清空",
+      "description": "清空搜索历史标签。",
+      "matched_page": "search"
+    },
+    {
+      "row": 87,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "猜你喜欢",
+      "sub_feature": "猜你喜欢",
+      "description": "展示平台猜你喜欢标签，点击猜你喜欢标签跳转至搜索结果页面。",
+      "matched_page": "search"
+    },
+    {
+      "row": 88,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索结果",
+      "sub_feature": "商品搜索",
+      "description": "展示对商品搜索的结果，包括商品图片、商品名称、销售价、原价、销量等信息。可对商品进行筛选。点击查看商品详情。",
+      "matched_page": "search"
+    },
+    {
+      "row": 89,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索结果",
+      "sub_feature": "筛选",
+      "description": "可对商品搜索结果进行筛选。\n智能排序：系统默认排序。\n好评优先：优先展示评分高的商品。\n低价优先：优先展示价格低的商品。\n销量优先：优先展示销量高的商品。",
+      "matched_page": "search"
+    },
+    {
+      "row": 90,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "搜索结果",
+      "sub_feature": "店铺搜索",
+      "description": "展示对商品搜索的结果，包括店铺头像、店铺名称、店铺类型、店铺关注数、店铺商品等信息。点击查看店铺详情。",
+      "matched_page": "search"
+    },
+    {
+      "row": 104,
+      "core_module": "商城版块",
+      "sub_module": "分类营销",
+      "feature": "公益扶贫",
+      "sub_feature": null,
+      "description": "首页分类广告展示广告标题、广告副标题、广告图片。点击查看分类广告商品列表。可在管理后台进行编辑。",
+      "matched_page": "index"
+    },
+    {
+      "row": 112,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商品列表",
+      "sub_feature": null,
+      "description": "展示商品图片、商品名称、销售价、销量等信息，点击查看商品详情。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 113,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商品列表",
+      "sub_feature": null,
+      "description": "展示商品图片、商品名称、销售价、销量等信息，点击查看商品详情。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 114,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "商品详情",
+      "description": "展示商品图片、商品名称、价格、运费、销量、商品详情图等信息",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 115,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "分享",
+      "description": "生成商品分享二维码，可发送给微信好友，也可保存图片到相册",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 116,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "收藏",
+      "description": "收藏该商品，在我的收藏里可见",
+      "matched_page": "user"
+    },
+    {
+      "row": 117,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "购物车",
+      "description": "跳转至我的购物车页面。",
+      "matched_page": "user"
+    },
+    {
+      "row": 118,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "选择规格",
+      "description": "选择商品规格进行下单，可进行立即购买或加入购物车操作。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 119,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "参数",
+      "description": "查看该商品具体的参数文本。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 120,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "评论",
+      "description": "展示用户头像、昵称、图文评价，支持查看全部评价。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 121,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "加入购物车",
+      "description": "选择商品规格加入购物车。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 122,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "商城商品详情",
+      "sub_feature": "立即购买",
+      "description": "选择商品规格立即购买，跳转至确认订单页面。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 123,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "确认订单",
+      "sub_feature": "收货地址",
+      "description": "展示用户设置的默认收货地址，若用户没有默认收货地址则提示需要添加收货地址。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 128,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "支付",
+      "sub_feature": "付款成功",
+      "description": "支付成功后展示订单编号，可选返回首页或者查看订单详情。",
+      "matched_page": "index"
+    },
+    {
+      "row": 129,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "支付",
+      "sub_feature": null,
+      "description": "跳转至搜索商品页面，支持对商品名称进行快速搜索。",
+      "matched_page": "search"
+    },
+    {
+      "row": 132,
+      "core_module": "商城版块",
+      "sub_module": "购物车",
+      "feature": "管理",
+      "sub_feature": null,
+      "description": "展示已添加至购物车的商品列表，支持增加/减少商品数量。点击去结算跳转至确认订单页面。",
+      "matched_page": "cart"
+    },
+    {
+      "row": 133,
+      "core_module": "商城版块",
+      "sub_module": "购物车",
+      "feature": "删除",
+      "sub_feature": null,
+      "description": "删除购物车商品，支持全选操作。",
+      "matched_page": "cart"
+    },
+    {
+      "row": 134,
+      "core_module": "商城版块",
+      "sub_module": "为你推荐",
+      "feature": "删除",
+      "sub_feature": null,
+      "description": "展示平台推荐的商品，点击查看商品详情。",
+      "matched_page": "goods-detail"
+    },
+    {
+      "row": 135,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "私聊",
+      "sub_feature": "聊天",
+      "description": "点击聊天跳转到聊天界面，可发文字、语音、表情包、图片。",
+      "matched_page": "chat"
+    },
+    {
+      "row": 140,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "私聊",
+      "sub_feature": "举报",
+      "description": "点击举报，填写图文字，提交投诉的内容后等待平台反馈。",
+      "matched_page": "feedback"
+    },
+    {
+      "row": 141,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "群聊",
+      "sub_feature": "入群",
+      "description": "点击加入群聊，就可以在群里发起文字，语音聊天了。",
+      "matched_page": "chat"
+    },
+    {
+      "row": 144,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "群聊",
+      "sub_feature": "举报",
+      "description": "点击举报，填写图文字，提交投诉的内容后等待平台反馈。",
+      "matched_page": "feedback"
+    },
+    {
+      "row": 162,
+      "core_module": "社区",
+      "sub_module": "定位",
+      "feature": "LSB定位",
+      "sub_feature": null,
+      "description": "自动定位当前的位置，支持手动修改定位信息。",
+      "matched_page": "location"
+    },
+    {
+      "row": 163,
+      "core_module": "社区",
+      "sub_module": "搜索",
+      "feature": "搜索输入",
+      "sub_feature": null,
+      "description": "支持输入关键词搜索信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 165,
+      "core_module": "社区",
+      "sub_module": "公告",
+      "feature": "一键已读",
+      "sub_feature": null,
+      "description": "点击一键已读，未读消息变成已读消息。",
+      "matched_page": "message"
+    },
+    {
+      "row": 167,
+      "core_module": "社区",
+      "sub_module": "发布",
+      "feature": "组织活动",
+      "sub_feature": null,
+      "description": "输入主图、活动标题、开始时间、结束时间、活动内容进行发布。\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。",
+      "matched_page": "activity"
+    },
+    {
+      "row": 169,
+      "core_module": "社区",
+      "sub_module": "热门活动",
+      "feature": "活动列表",
+      "sub_feature": null,
+      "description": "展示平台的热门活动列表。",
+      "matched_page": "activity"
+    },
+    {
+      "row": 170,
+      "core_module": "社区",
+      "sub_module": "邻里互动",
+      "feature": "互动列表",
+      "sub_feature": null,
+      "description": "展示平台的邻里互动列表。",
+      "matched_page": "community"
+    },
+    {
+      "row": 171,
+      "core_module": "一键发布",
+      "sub_module": "轮播图",
+      "feature": "轮播图展示",
+      "sub_feature": null,
+      "description": "轮播图自动轮播，可在管理后台设置跳转类型（网页、详情页、无操作）。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 172,
+      "core_module": "一键发布",
+      "sub_module": "代取",
+      "feature": "填写代取信息",
+      "sub_feature": null,
+      "description": "输入取货地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入收货地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 173,
+      "core_module": "一键发布",
+      "sub_module": "接送小孩",
+      "feature": "填写接送小孩信息",
+      "sub_feature": null,
+      "description": "输入接小孩地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入送小孩地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 174,
+      "core_module": "一键发布",
+      "sub_module": "陪诊",
+      "feature": "填写陪诊信息",
+      "sub_feature": null,
+      "description": "输入需陪诊人地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n输入服务地址地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 175,
+      "core_module": "一键发布",
+      "sub_module": "陪读",
+      "feature": "填写陪读信息",
+      "sub_feature": null,
+      "description": "输入需陪读人服务地址、门牌号、联系人姓名、手机号，可以设置为默认地址，保存并使用；\n点击去发布并支付服务费用，由技工接单并完成服务。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 176,
+      "core_module": "消息",
+      "sub_module": "消息通知",
+      "feature": "订单消息",
+      "sub_feature": null,
+      "description": "展示相关的订单信息。",
+      "matched_page": "message"
+    },
+    {
+      "row": 177,
+      "core_module": "消息",
+      "sub_module": "消息通知",
+      "feature": "系统消息",
+      "sub_feature": null,
+      "description": "展示平台发送的系统消息。",
+      "matched_page": "message"
+    },
+    {
+      "row": 187,
+      "core_module": "我的",
+      "sub_module": "我的订单",
+      "feature": "服务产品订单",
+      "sub_feature": null,
+      "description": "展示全部、待付款、待服务、服务中、待评价、已完成、已取消、拼团中、已退款的订单列表，点击可查看订单详情。",
+      "matched_page": "combo"
+    },
+    {
+      "row": 189,
+      "core_module": "我的",
+      "sub_module": "我的订单",
+      "feature": "家集市订单",
+      "sub_feature": null,
+      "description": "展示全部、待付款、待接单、待服务/备货中、待收货、已完成、已取消、已退款的订单列表，点击可查看订单详情。",
+      "matched_page": "market-order"
+    },
+    {
+      "row": 190,
+      "core_module": "我的",
+      "sub_module": "我的订单",
+      "feature": "推客订单",
+      "sub_feature": null,
+      "description": "展示预估佣金和可提现佣金余额，点击提现按钮可操作提现。",
+      "matched_page": "promoter"
+    },
+    {
+      "row": 193,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "我的关注",
+      "sub_feature": "用户",
+      "description": "展示我关注的用户列表",
+      "matched_page": "user"
+    },
+    {
+      "row": 194,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "我的关注",
+      "sub_feature": "帖子",
+      "description": "展示我关注的帖子列表",
+      "matched_page": "user"
+    },
+    {
+      "row": 195,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "我的点赞",
+      "sub_feature": "活动",
+      "description": "展示我点赞的活动列表",
+      "matched_page": "user"
+    },
+    {
+      "row": 196,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "我的点赞",
+      "sub_feature": "话题",
+      "description": "展示我点赞的话题列表",
+      "matched_page": "user"
+    },
+    {
+      "row": 197,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "我的点赞",
+      "sub_feature": "帖子",
+      "description": "展示我点赞的帖子列表",
+      "matched_page": "user"
+    },
+    {
+      "row": 203,
+      "core_module": "我的",
+      "sub_module": "加入\n惠民社区",
+      "feature": "技工入驻",
+      "sub_feature": null,
+      "description": "技工入驻需上传头像、填写真实姓名、性别、手机号、籍贯、身份证、居住地址、邀请码、接单社区、意向行业、工作性质（全职/兼职）、学历、工作经验、个人简介、工作经验、身份证正反照、工作生活照、专业证书（选填）等信息进行提交申请。",
+      "matched_page": "join"
+    },
+    {
+      "row": 204,
+      "core_module": "我的",
+      "sub_module": "加入\n惠民社区",
+      "feature": "家集市商家入驻",
+      "sub_feature": null,
+      "description": "商家入驻需填写负责人姓名、负责人手机号、商家名称、商家分类、详细地址、商家简介、推广员（选填）、证件照片包含品牌logo、商家背景图、执照照片/从业资格证、统一社会信用代码、主体名称、法人或者经验者名称、选择小区等信息进行提交申请。",
+      "matched_page": "join"
+    },
+    {
+      "row": 205,
+      "core_module": "我的",
+      "sub_module": "加入\n惠民社区",
+      "feature": "服务商入驻",
+      "sub_feature": null,
+      "description": "服务商入驻需填写门店名称、上传门店logo、手机号码、接单社区、意向行业、服务商地址、上传营业执照、门头图、环境图、法人身份证/委托书+委托人身份证、专业证书和特殊证书（选填）等信息进行提交申请。",
+      "matched_page": "join"
+    },
+    {
+      "row": 209,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "地址管理",
+      "sub_feature": "收货地址列表",
+      "description": "展示自己已经添加的收货地址信息，并支持设置默认地址、编辑和删除操作。",
+      "matched_page": "address"
+    },
+    {
+      "row": 210,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "地址管理",
+      "sub_feature": "新增收货地址",
+      "description": "新增需填写姓名、性别、手机号、位置和详情地址信息。",
+      "matched_page": "address"
+    },
+    {
+      "row": 212,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "修改资料",
+      "description": "对用户头像、名称进行修改操作。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 213,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "修改密码",
+      "description": "通过输入旧密码、新密码、确认新密码进行修改密码操作。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 214,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "换绑手机",
+      "description": "通过对旧手机号获取验证码的方式修改新的手机号。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 215,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "谁可以看我的发布",
+      "description": "可设置所有人、关注我的、我自己查看我的发布。",
+      "matched_page": "user"
+    },
+    {
+      "row": 216,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "谁可以看我的回复",
+      "description": "可设置所有人、关注我的、我自己查看我的回复。",
+      "matched_page": "user"
+    },
+    {
+      "row": 217,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "检查更新",
+      "description": "检查当前的是否是最新版，如不是最新版可进行升级版本操作。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 218,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "注销账号",
+      "description": "可进行注销账号操作。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 219,
+      "core_module": "我的",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": "退出登录",
+      "description": "可进行退出登录操作。",
+      "matched_page": "login"
+    },
+    {
+      "row": 221,
+      "core_module": "模块分类",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "模块功能",
+      "matched_page": "settings"
+    },
+    {
+      "row": 222,
+      "core_module": "登录",
+      "sub_module": "其他服务",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "输入管理后台账号和密码进行登录操作。",
+      "matched_page": "login"
+    },
+    {
+      "row": 223,
+      "core_module": "首页",
+      "sub_module": "数据统计",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "1、实时统计用户人数、商家人数。以折线图形式统计平台下单数量、下单金额、日新增用户、用户活跃度、活跃度报表。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 224,
+      "core_module": "首页",
+      "sub_module": "快速导航",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "统计待发货订单、已支付订单数量，上门自提订单数量，点击跳转至相应订单页面。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 225,
+      "core_module": "首页",
+      "sub_module": "站内消息",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "展示商城商家入驻、用户注册、意见反馈等消息列表。",
+      "matched_page": "register"
+    },
+    {
+      "row": 226,
+      "core_module": "首页",
+      "sub_module": "系统消息",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "设置声音提醒，显示系统版本、系统有效期。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 227,
+      "core_module": "平台基础信息",
+      "sub_module": "轮播图",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "搜索：支持对展示位置进行搜索\n展示：编号、展示位置、图片、展示顺序、跳转类型。\n新增：输入轮播图信息，选择跳转类型及相关操作新增轮播图。\n修改：修改轮播图设置。\n删除：删除轮播图。",
+      "matched_page": "search"
+    },
+    {
+      "row": 228,
+      "core_module": "平台基础信息",
+      "sub_module": "用户管理",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "搜索：支持根据用户ID、昵称、手机号、注册时间进行搜索。\nexcel导出：支持导出会员列表数据。\n展示编号、会员uid、手机号、昵称、头像、用户状态、推荐码、注册时间、最后登入时间、归属地。\n详情：查看用户详情\n修改密码 | 手机号：修改用户密码、手机号。\n用户拉新：查看用户拉新列表。\n修改所属地区：修改用户所属地区。",
+      "matched_page": "register"
+    },
+    {
+      "row": 229,
+      "core_module": "平台基础信息",
+      "sub_module": "短信记录",
+      "feature": "设置",
+      "sub_feature": null,
+      "description": "搜索：支持输入手机号、发送时间进行搜索。\nexcel导出：支持导出excel表格。\n展示：ID、短信签名、手机号、消耗条数、消息ID、发送内容\n详情：点击可查看短信详情信息",
+      "matched_page": "search"
+    },
+    {
+      "row": 231,
+      "core_module": "平台基础信息",
+      "sub_module": "资讯管理",
+      "feature": "资讯列表",
+      "sub_feature": null,
+      "description": "搜索：支持输入标题、状态、类型进行搜索。\n展示：编号、分类、标题、上下架、访问量、显示顺序、作者、创建时间。\n评论：点击了查看评价详情。\n编辑：对资讯进行编辑操作\n删除：删除资讯信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 233,
+      "core_module": "社区服务信息管理",
+      "sub_module": "服务管理",
+      "feature": "服务分类",
+      "sub_feature": null,
+      "description": "新增：上传分类icon，输入分类名称、显示序号进行新增父分类操作\n展示：编号、类型、名称、icon链接、显示顺序、创建时间\n修改：修改服务分类信息。\n子分类：查看子分类列表，对子分类进行新增、修改、删除操作。\n删除：删除父分类。",
+      "matched_page": "classify"
+    },
+    {
+      "row": 234,
+      "core_module": "社区服务信息管理",
+      "sub_module": "服务管理",
+      "feature": "服务列表",
+      "sub_feature": null,
+      "description": "搜索：支持输入服务名称、一级分类、二级分类、服务类型进行快速搜索。\n展示：编号、服务名称、一级分类、二级分类、发布者、封面图、服务类型、服务详情、显示序号、平台序号、浏览量、服务状态（显示服务的订单状态）、创建时间。\n用户的所有服务：点击可查看该用户的所有发布的服务，以及承接的服务。\n修改：对服务内容进行修改操作。\n删除：删除该服务。",
+      "matched_page": "search"
+    },
+    {
+      "row": 238,
+      "core_module": "社区服务信息管理",
+      "sub_module": "信息管理",
+      "feature": "信息列表",
+      "sub_feature": null,
+      "description": "搜索：支持输入服务名称、一级分类、二级分类、信息类型进行快速搜索。\n展示：编号、服务名称、一级分类、二级分类、发布者、封面图、信息类型、信息详情、显示序号、平台序号、浏览量、创建时间。\n用户的所有服务：点击可查看该用户的所有发布的信息。\n修改：对信息内容进行修改操作。\n删除：删除该信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 242,
+      "core_module": "商家、商品",
+      "sub_module": "商品列表",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "搜索：支持输入商品名称、一级分类、二级分类、商品类型进行快速搜索。\n展示：编号、商品名称、一级分类、二级分类、商家、封面图、商品类型、销售折扣、销售最低价、显示序号、平台序号、销量、商品审核、状态、创建时间。\n商家商品：点击可查看该商家的所有商品。\n修改：对商品信息进行修改操作。\n删除：删除该商品信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 243,
+      "core_module": "商家、商品",
+      "sub_module": "商品审核",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "搜索：支持对商品名称、商家编号、商品状态进行搜索\n展示：编号、商品编号、一级分类、二级分类、商品名称、审核状态。\n商品审核：对商品进行审核通过和不通过操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 244,
+      "core_module": "商家、商品",
+      "sub_module": "商家列表",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "搜索：支持商家名称、联系电话进行搜索\n快速注册商家：输入商家手机号码、登录密码、店铺名称、所在地等信息进行新增商家操作。\n展示：编号、商家名称、联系电话、商家logo、经营分类、销量、评分、状态、地区、地址、入驻时间。\n商品列表：查看商家商品列表，对商家商品进行搜索、新增、编辑、删除操作。\n商家详情：查看商家详情。\n商家属性池：查看商家的属性标签，对属性标签进行新增、修改、删除操作。\n商家优惠：查看商家满减优惠，对满减优惠进行新增、修改、删除操作。\n修改归属地：修改商城商家所属地区。",
+      "matched_page": "register"
+    },
+    {
+      "row": 245,
+      "core_module": "商家、商品",
+      "sub_module": "商家入驻",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "搜索：支持根据用户uid、商户名称、推荐码、入驻时间进行搜索。\n快速注册商家：支持在这里进行商家快速注册操作。\nexcel导出：支持导出商城商家入驻列表数据。\n展示编号、用户uid、商户名称、商户类型、所属地、入驻状态、推荐码、入驻时间。\n入驻详情：查看商家入驻的详情资料\n修改所属地区：修改商家所属地区。",
+      "matched_page": "register"
+    },
+    {
+      "row": 246,
+      "core_module": "商家、商品",
+      "sub_module": "商家账号",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "搜索：支持根据用户uid、手机号、商城名称进行搜索。\n展示编号、会员uid、手机号、店铺名称、推荐码、所属地、用户状态、注册时间、最后登入时间。\n修改密码 | 手机号：修改商家密码、手机号。\n子账号：查看商家子账号情况。",
+      "matched_page": "register"
+    },
+    {
+      "row": 248,
+      "core_module": "订单",
+      "sub_module": "社区服务订单",
+      "feature": "订单列表",
+      "sub_feature": null,
+      "description": "搜索：支持输入订单编号、用户uid、服务名称、一级分类、二级分类、订单状态进行搜索。\nexcel导出：支持以表格形式导出列表。\n展示：订单编号、订单类型、用户订单状态、支付价格、用户昵称、用户手机号、用户uid、服务信息、下单时间。\n修改：修改订单状态和订单信息。\n订单详情：查看订单详情。",
+      "matched_page": "search"
+    },
+    {
+      "row": 249,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "已发货订单",
+      "sub_feature": null,
+      "description": "搜索：支持输入订单编号、用户uid、店铺名称、一级分类、二级分类、用户状态、商家状态、发货方式、下单时间进行搜索。\nexcel导出：支持以表格形式导出列表。\n展示：编号、订单编号、订单类型、用户订单状态、商家订单状态、支付价格、用户昵称、用户手机号、用户uid、店铺名称、发货方式、商品数量、商品信息、下单时间。\n发货：选择物流公司、物流编号进行发货。\n查看物流：查看物流信息。\n订单详情：查看订单详情。",
+      "matched_page": "search"
+    },
+    {
+      "row": 250,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "团购订单",
+      "sub_feature": null,
+      "description": "搜索：支持输入订单编号、用户uid、下单时间搜索。\nexcel导出：支持以表格形式导出列表。\n展示：编号、订单编号、订单状态、用户昵称、用户头像、购买人数、相差人数、团购结束时间、商品封面、购买商品、支付价格、订单状态。\n参团成员：点击可查看参团情况。\n订单详情：点击可查看订单详情信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 251,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "退单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、用户手机、销售渠道、下单时间进行搜索\nexcel导出：支持以表格形式导出列表\n展示：订单编号、订单类型、用户手机号、消费者状态、商家状态、支付金额、优惠金额、支付时间、三方支付状态、地区、下单时间。\n订单详情：查看订单详情。\n确认完成：对订单进行确认完成操作。\n退单退款：对订单进行退单退款操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 252,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "订单发货",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、用户手机号、下单时间进行搜索。\nexcel导出：支持以表格方式导出列表\n展示：编号、订单编号、用户订单状态、商家订单状态、订单类型、发货方式、用户昵称、用户手机号、用户uid、商家名称、支付价格、下单时间。\n订单详情：查看订单详情。\n发货：选择物流公司、物流编号进行发货。\n查看物流：查看物流信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 253,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "售后退款",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、用户uid进行搜索\nexcel导出：支持以表格方式导出列表\n展示：编号、订单编号、用户uid、订单状态、平台操作、订单金额、售后金额、商品、规格、申请时间。\n订单详情：查看订单详情。\n查看物流：查看物流信息。\n售后详情：查看用户申请退款的原因。\n确认退款：对订单进行退款操作。\n拒绝退款：对订单进行拒绝退款操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 254,
+      "core_module": "订单",
+      "sub_module": "商城订单",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、用户手机号、下单时间进行搜索。\nexcel导出：支持以表格方式导出列表\n展示：编号、订单编号、类型、用户手机号、支付金额、优惠金额、订单总金额、消费者订单状态、商家订单状态、跑腿订单状态、地区、下单时间。\n订单详情：查看订单详情。\n确认退款：对订单进行退款操作。\n拒绝退款：对订单进行拒绝退款操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 255,
+      "core_module": "财务",
+      "sub_module": "订单收入",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、用户、收支类型、时间进行搜索。\nexcel导出：支持以表格形式导出订单收入列表\n展示：编号、订单编号、用户、财务类型、收支类型、金额、佣金金额、交易状态、备注、时间\n财务详情：查看订单收入详情信息。\n订单详情：查看订单详情信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 256,
+      "core_module": "财务",
+      "sub_module": "用户提现",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对财务单号、用户名、注册时间对用户提现进行搜索。\nexcel导出：支持以表格方式导出用户提现列表\n展示：编号、财务单号、用户、财务类型、提交金额、落地金额、佣金金额、交易方式、交易状态、创建时间\n详情、操作：查看用户提现详情，对提现进行审核通过和审核不通过操作。",
+      "matched_page": "register"
+    },
+    {
+      "row": 257,
+      "core_module": "财务",
+      "sub_module": "用户余额",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对用户uid、名称、手机号、注册时间进行快速搜索。\nexcel导出：支持以表格形式导出用户余额列表。\n展示：编号、用户uid、手机号、昵称、推荐码、推广员、用户状态、所属地、注册时间、最后登录时间。\n奖惩：对用户进行奖励和惩罚操作。\n余额、提现：查看用户账户的余额和可提现金额，并可进行提现操作。",
+      "matched_page": "register"
+    },
+    {
+      "row": 258,
+      "core_module": "财务",
+      "sub_module": "充值提现",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对财务单号、收支类型、用户名、时间进行搜索。\nexcel导出：支持以表格形式导出充值提现列表。\n展示：编号、财务单号、用户、财务类型、收支类型、提交金额、落地金额、佣金金额、交易方式、交易状态、创建时间。",
+      "matched_page": "search"
+    },
+    {
+      "row": 259,
+      "core_module": "财务",
+      "sub_module": "社区商店商家佣金",
+      "feature": "订单退款",
+      "sub_feature": null,
+      "description": "搜索：支持对商家名称、联系电话进行搜索。\n展示：编号、商家名称、联系电话、商城佣金率、结算周期。\n修改：对商家佣金进行修改。\n奖惩：对商家进行奖励和惩罚操作。\n余额、提现：查看用户账户的余额和可提现金额，并可进行提现操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 260,
+      "core_module": "财务",
+      "sub_module": "服务佣金",
+      "feature": "邻里互助\n（父分类）",
+      "sub_feature": "平台设置",
+      "description": "平台佣金率设置：默认10%，平台可以对父分类统一设置该分类佣金率，也可以针对子分类单独设置佣金率",
+      "matched_page": "settings"
+    },
+    {
+      "row": 261,
+      "core_module": "财务",
+      "sub_module": "服务佣金",
+      "feature": "闲置家具\n（父分类）",
+      "sub_feature": "佣金设置\n",
+      "description": "佣金率设置：默认10%，平台可以自由设置",
+      "matched_page": "settings"
+    },
+    {
+      "row": 262,
+      "core_module": "财务",
+      "sub_module": "服务佣金",
+      "feature": "家政服务\n（父分类）",
+      "sub_feature": "平台设置",
+      "description": "佣金率设置：默认10%，平台可以对父分类统一设置该分类佣金率，也可以针对子分类单独设置佣金率",
+      "matched_page": "settings"
+    },
+    {
+      "row": 263,
+      "core_module": "财务",
+      "sub_module": "服务佣金",
+      "feature": "组织活动\n（父分类）",
+      "sub_feature": "平台设置",
+      "description": "平台佣金率设置：默认10%，平台可以对父分类统一设置该分类佣金率，也可以针对子分类单独设置佣金率",
+      "matched_page": "settings"
+    },
+    {
+      "row": 264,
+      "core_module": "财务",
+      "sub_module": "提现账号",
+      "feature": "组织活动\n（父分类）",
+      "sub_feature": null,
+      "description": "搜索：支持对用户编号、交易类型进行搜索。\n展示：编号、用户编号、用户类型、交易类型、账户名、账号、创建时间。\n修改：对提现账户进行修改操作。\n删除：删除提现信息。",
+      "matched_page": "search"
+    },
+    {
+      "row": 265,
+      "core_module": "财务",
+      "sub_module": "结算周期",
+      "feature": "组织活动\n（父分类）",
+      "sub_feature": null,
+      "description": "设置用户提现的结算周期。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 266,
+      "core_module": "财务",
+      "sub_module": "提现规则",
+      "feature": "组织活动\n（父分类）",
+      "sub_feature": null,
+      "description": "最低提现金额：设置最低提现金额\n最低保留金额：设置最低可保留的金额\n只能整百提现：设置是否只能整百提现",
+      "matched_page": "settings"
+    },
+    {
+      "row": 267,
+      "core_module": "营销",
+      "sub_module": "\n\n优惠券",
+      "feature": "优惠券列表",
+      "sub_feature": null,
+      "description": "搜索：支持对标题进行搜索\n新增：进行新增优惠券操作\n展示：编号、标题、满、减、有效期、发放数量、剩余数量、状态、使用地区、创建时间\n优惠券管理：对优惠券进行查看、选择发放用户等操作。\n删除：对优惠券进行删除操作",
+      "matched_page": "search"
+    },
+    {
+      "row": 268,
+      "core_module": "营销",
+      "sub_module": "\n\n优惠券",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "新增：进行新增弹框优惠券操作\n展示：编号、图片、弹框类型、优惠券名称、上下架、发放总数、剩余数量、活动结束日期、创建管理员、适用地区、创建时间\n修改：对弹框优惠券进行修改操作。\n删除：对弹框优惠券进行删除操作。",
+      "matched_page": "activity"
+    },
+    {
+      "row": 270,
+      "core_module": "营销",
+      "sub_module": "三级分销",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "搜索：支持对用户uid、名称和手机号进行快速搜索。\n分销树图：支持以分销树图的方式展示三级分销关系。\n展示：编号、用户uid、用户昵称、用户手机、一级推荐人用户uid、一级推荐人昵称、二级推荐人用户uid、二级推荐人昵称、三级推荐人用户uid、三级推荐人昵称。\n编辑：对分销关系进行编辑操作。",
+      "matched_page": "search"
+    },
+    {
+      "row": 271,
+      "core_module": "营销",
+      "sub_module": "三级分销佣金",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "设置三级分销佣金的比例。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 272,
+      "core_module": "营销",
+      "sub_module": "消息推送",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "消息标题：对消息标题进行编辑操作\n消息内容：对要推送的消息内容进行编辑操作\n推送类型：可选择系统消息推送或者手机短信推送\n推送目标：进行推送目标设置操作，可选择推送消费用户或者跑腿用户\n目标指定：对推送目标进行设置操作，可选择推送全部用户或指定用户推送",
+      "matched_page": "message"
+    },
+    {
+      "row": 274,
+      "core_module": "营销",
+      "sub_module": "欢迎注册",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "输入系统消息，该系统消息为新用户注册成功时，默认发送给用户的消息内容。",
+      "matched_page": "register"
+    },
+    {
+      "row": 275,
+      "core_module": "系统设置",
+      "sub_module": "管理员",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "新增：新增管理员操作。\n展示：编号、账号、名称、手机号码、角色、状态、注册时间。\n修改：修改管理员的信息。\n删除：对管理员进行删除操作。",
+      "matched_page": "register"
+    },
+    {
+      "row": 276,
+      "core_module": "系统设置",
+      "sub_module": "意见反馈",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "搜索：支持对用户电话、处理状态对意见反馈进行搜索。\n展示：编号、用户手机号、用户名称、反馈内容、是否已处理、回馈内容、提交时间。\n详细信息：查看意见反馈详细信息，并对意见反馈进行处理操作。\n删除：删除意见反馈。",
+      "matched_page": "search"
+    },
+    {
+      "row": 277,
+      "core_module": "系统设置",
+      "sub_module": "关于我们",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "设置icon、客服电话、官网地址、官方邮箱、APP介绍信息。",
+      "matched_page": "settings"
+    },
+    {
+      "row": 279,
+      "core_module": "系统设置",
+      "sub_module": "平台协议",
+      "feature": "用户协议",
+      "sub_feature": null,
+      "description": "编辑用户注册协议文本。",
+      "matched_page": "register"
+    },
+    {
+      "row": 280,
+      "core_module": "系统设置",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "编辑商家入驻协议文本。",
+      "matched_page": "join"
+    },
+    {
+      "row": 282,
+      "core_module": "模块分类",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "模块功能",
+      "matched_page": "join"
+    },
+    {
+      "row": 283,
+      "core_module": "注册",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "输入手机号码、验证码、登录密码进行商城商家注册操作",
+      "matched_page": "register"
+    },
+    {
+      "row": 284,
+      "core_module": "忘记密码",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "输入手机号码、验证码、登录密码、确认密码进行修改密码操作",
+      "matched_page": "login"
+    },
+    {
+      "row": 285,
+      "core_module": "登录",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "输入商城商家账号密码和验证码进行登录操作",
+      "matched_page": "login"
+    },
+    {
+      "row": 286,
+      "core_module": "商城商家入驻",
+      "sub_module": "平台协议",
+      "feature": "商家入驻协议",
+      "sub_feature": null,
+      "description": "首次登录商城商家需要填写商城信息进行入驻操作。审核通过后才允许添加商品",
+      "matched_page": "login"
+    },
+    {
+      "row": 291,
+      "core_module": "单品商品",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "搜索：支持对商品名称、商品类型进行搜索\n展示：商品名称、商品类型、封面图、折扣、销量、状态\n新增商品：新增单品商品\n修改：修改单品商品设置\n删除：删除单品商品\n发起团购：对该商品发起团购，设置团购价格，数量，时间等",
+      "matched_page": "search"
+    },
+    {
+      "row": 292,
+      "core_module": "商城订单列表",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "搜索：支持对订单编号、提货方式、用户会员uid进行搜索\n展示：编号、订单编号、用户昵称、用户手机号、用户会员uid、商家类型、提货方式、支付价格、用户订单状态、商家订单状态、下单时间\nexcel导出：支持以excel表格导出\n订单详情：查看商城订单详情\n发货：对商城订单进行发货操作\n查看物流：查看物流详细情况",
+      "matched_page": "search"
+    },
+    {
+      "row": 293,
+      "core_module": "财务订单流水",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "搜索：支持以订单编号、收支类型、时间进行搜索\n展示：编号、订单编号、财务类型、收支类型、落地金额、佣金金额、交易状态、时间\n订单详情：查看财务订单详情",
+      "matched_page": "search"
+    },
+    {
+      "row": 294,
+      "core_module": "财务落地流水",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "财务信息：可查看账户余额和可提现金额\n提现：输入提现金额进行提现操作（商家提现温馨提示：2个工作日到账）\n搜索：支持以财务单号、收支类型、时间进行搜索\n展示：编号、财务单号、财务类型、收支类型、提交金额、落地金额、佣金金额、交易方式、交易状态、时间",
+      "matched_page": "search"
+    },
+    {
+      "row": 296,
+      "core_module": "待退款订单",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "搜索：支持以订单编号、用户编号进行搜索\nexcel导出：支持以表格形式导出待退款订单\n展示：编号、订单编号、商品描述、用户手机号、支付金额、可退金额、消费者订单状态、商家操作状态、平台操作状态、申请时间\n订单详情：查看订单详情信息\n售后详情：查看售后订单详情信息\n确认退款：查看退款原因，进行确认退款操作\n拒绝退款：填写拒绝原因，进行拒绝退款操作",
+      "matched_page": "search"
+    }
+  ],
+  "not_implemented_features": [
+    {
+      "row": 2,
+      "core_module": "模块分类",
+      "sub_module": null,
+      "feature": null,
+      "sub_feature": null,
+      "description": "模块功能"
+    },
+    {
+      "row": 49,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "易达速递",
+      "description": "通过平台跳转到易达速递小程序进行寄件服务。"
+    },
+    {
+      "row": 50,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "啄木鸟",
+      "description": "通过平台跳转到啄木鸟小程序。"
+    },
+    {
+      "row": 51,
+      "core_module": "小程序首页",
+      "sub_module": "宫格分类",
+      "feature": "其他服务\n板块",
+      "sub_feature": "榕益收",
+      "description": "通过平台跳转到榕益收小程序。"
+    },
+    {
+      "row": 53,
+      "core_module": "小程序首页",
+      "sub_module": "团购",
+      "feature": "团购详情",
+      "sub_feature": null,
+      "description": "展示商品的主图、团购价、原价、团购距结束时间、标题、已团件数、分享可得佣金、跟团购买、图文详情、订购须知；\n店铺的头像、名称、销量，点击可进入店铺；\n平台为你推荐的团购商品。"
+    },
+    {
+      "row": 54,
+      "core_module": "小程序首页",
+      "sub_module": "邻里帮帮",
+      "feature": "一键发布",
+      "sub_feature": null,
+      "description": "进入发布页面。"
+    },
+    {
+      "row": 62,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "热门服务",
+      "description": "展示该分类下面比较热门的服务，点击可查看服务详情。这一类服务信息是需要付费的，以技能服务为主。"
+    },
+    {
+      "row": 63,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "邻里互助",
+      "description": "点击进入相应版块，还有二级分类，展示相应服务。"
+    },
+    {
+      "row": 64,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "维修服务",
+      "description": "点击进入相应版块，还有二级分类，展示相应服务。"
+    },
+    {
+      "row": 65,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "家政保洁",
+      "description": "点击进入相应版块，还有二级分类，展示相应服务。"
+    },
+    {
+      "row": 66,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "其它服务等",
+      "description": "同上，后台可添加更多的服务类目。"
+    },
+    {
+      "row": 67,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "服务列表",
+      "description": "展示展示发布者的头像、名称、发布标题，图文内容，价格，发布时间，评论数，点赞数。"
+    },
+    {
+      "row": 68,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "服务类",
+      "sub_feature": "服务详情",
+      "description": "展示发布者的头像、名称、发布标题、图文内容缩略、发布的时间、开始时间（选填），预计完成时间（选填），描述备注信息，并支持联系发布者操作。"
+    },
+    {
+      "row": 70,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "热门信息",
+      "description": "展示该分类下面比较热门的信息，点击可查看信息详情。这一类信息是免费发布的，多以发布信息交流为主。"
+    },
+    {
+      "row": 71,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "二手闲置",
+      "description": "点击进入相应版块，还有二级分类，展示相应信息。"
+    },
+    {
+      "row": 73,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "育儿心得",
+      "description": "点击进入相应版块，还有二级分类，展示相应信息。"
+    },
+    {
+      "row": 74,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "其它信息等",
+      "description": "同上，后台可添加更多的信息类目。"
+    },
+    {
+      "row": 75,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "信息列表",
+      "description": "展示展示发布者的头像、名称、发布标题，图文内容缩略，发布时间，评论数，点赞数。"
+    },
+    {
+      "row": 76,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "信息类",
+      "sub_feature": "信息详情",
+      "description": "展示发布者的头像、名称、发布标题、图文内容、发布时间、开始时间（选填），预计完成时间（选填），描述备注信息，并支持点赞、评论和联系发布者操作。"
+    },
+    {
+      "row": 78,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "分类",
+      "feature": "最新发布",
+      "sub_feature": null,
+      "description": "展示该分类下面最新发布的服务信息，点击可查看服务详情。"
+    },
+    {
+      "row": 79,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "发布服务",
+      "feature": "发布邻里互助",
+      "sub_feature": null,
+      "description": "点击可发布信息，选择发布类型，信息包含标题、视频、图文内容、 支付赏金、开始时间（选填），预计完成时间（选填），描述备注信息等\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。"
+    },
+    {
+      "row": 81,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "发布信息",
+      "feature": "发布闲置家具",
+      "sub_feature": null,
+      "description": "点击可发布信息，选择发布类型，信息包含标题、视频、图文内容、价格等\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。"
+    },
+    {
+      "row": 83,
+      "core_module": "便民服务\n信息板块",
+      "sub_module": "发布信息",
+      "feature": "发布社区物业",
+      "sub_feature": null,
+      "description": "点击可发布信息，选择发布类型，信息包含标题、视频、图文内容等\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。"
+    },
+    {
+      "row": 91,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "食品生鲜",
+      "sub_feature": null,
+      "description": "点击进入食品生鲜模块。"
+    },
+    {
+      "row": 92,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "美妆洗护",
+      "sub_feature": null,
+      "description": "点击进入美妆洗护模块。"
+    },
+    {
+      "row": 93,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "居家百货",
+      "sub_feature": null,
+      "description": "点击进入居家百货模块。"
+    },
+    {
+      "row": 94,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "服装箱包",
+      "sub_feature": null,
+      "description": "点击进入服装箱包模块。"
+    },
+    {
+      "row": 95,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "母婴系列",
+      "sub_feature": null,
+      "description": "点击进入母婴系列模块。"
+    },
+    {
+      "row": 96,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "家用电器",
+      "sub_feature": null,
+      "description": "点击进入家用电器模块。"
+    },
+    {
+      "row": 97,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "数码产品",
+      "sub_feature": null,
+      "description": "点击进入数码产品模块。"
+    },
+    {
+      "row": 98,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "珠宝饰品",
+      "sub_feature": null,
+      "description": "点击进入珠宝饰品模块。"
+    },
+    {
+      "row": 99,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "旅游出行",
+      "sub_feature": null,
+      "description": "点击进入旅游出行模块。"
+    },
+    {
+      "row": 100,
+      "core_module": "商城版块",
+      "sub_module": "多宫格",
+      "feature": "传统工艺",
+      "sub_feature": null,
+      "description": "点击进入传统工艺模块。"
+    },
+    {
+      "row": 101,
+      "core_module": "商城版块",
+      "sub_module": "营销活动",
+      "feature": "营销",
+      "sub_feature": "促销信息",
+      "description": "填写促销文字+图片，吸引顾客"
+    },
+    {
+      "row": 102,
+      "core_module": "商城版块",
+      "sub_module": "营销活动",
+      "feature": "营销",
+      "sub_feature": "团购",
+      "description": "团购数量、时间节点、下单购买等信息。"
+    },
+    {
+      "row": 103,
+      "core_module": "商城版块",
+      "sub_module": "营销活动",
+      "feature": "营销",
+      "sub_feature": "优惠券",
+      "description": "展示用户已领取的优惠券，可选择可用的优惠券进行抵扣。"
+    },
+    {
+      "row": 110,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "分类",
+      "sub_feature": null,
+      "description": "展示推荐商品分类。可左右滑动，切换分类展示分类下的商品列表。分类信息可在管理后台【商家与商品】——商城分类列表进行编辑。"
+    },
+    {
+      "row": 111,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "筛选",
+      "sub_feature": null,
+      "description": "智能排序：系统默认排序。\n好评优先：优先展示评分高的商品。\n低价优先：优先展示价格低的商品。\n销量优先：优先展示销量高的商品。"
+    },
+    {
+      "row": 124,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "确认订单",
+      "sub_feature": "商品信息",
+      "description": "展示用户购买的商品名称、商品图片、及商品单价、数量和商品总价、运费等信息。"
+    },
+    {
+      "row": 125,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "确认订单",
+      "sub_feature": "优惠券",
+      "description": "展示用户已领取的优惠券，可选择可用的优惠券进行抵扣。"
+    },
+    {
+      "row": 126,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "确认订单",
+      "sub_feature": "上门自提订单",
+      "description": "展示自提的地址，需填写自提日期、时间、提货人姓名和预留电话等相关信息。"
+    },
+    {
+      "row": 127,
+      "core_module": "商城版块",
+      "sub_module": "推荐商品",
+      "feature": "支付",
+      "sub_feature": "支付",
+      "description": "支持微信支付，支付宝支付"
+    },
+    {
+      "row": 130,
+      "core_module": "商城版块",
+      "sub_module": "搜索",
+      "feature": "父分类",
+      "sub_feature": null,
+      "description": "展示平台所有的父分类，点击父分类查看父分类下的所有子分类列表。"
+    },
+    {
+      "row": 131,
+      "core_module": "商城版块",
+      "sub_module": "商城分类",
+      "feature": "子分类",
+      "sub_feature": null,
+      "description": "展示父分类下的所有子分类列表，点击子分类查看子分类下的所有商品列表。"
+    },
+    {
+      "row": 138,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "私聊",
+      "sub_feature": "关注",
+      "description": "点击关注按钮可以关注对方，关注后可以私信"
+    },
+    {
+      "row": 139,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "私聊",
+      "sub_feature": "取关",
+      "description": "点击取关，取消和该用户的关注。"
+    },
+    {
+      "row": 142,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "群聊",
+      "sub_feature": "群聊详情",
+      "description": "点击群聊详情后，可以进入群面板查看群用户。"
+    },
+    {
+      "row": 143,
+      "core_module": "聊天版块",
+      "sub_module": "IM聊天",
+      "feature": "群聊",
+      "sub_feature": "退出群聊",
+      "description": "删除并退出群聊。"
+    },
+    {
+      "row": 145,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待付款",
+      "sub_feature": null,
+      "description": "展示用户待支付状态订单，点击可查看订单详情；可进行取消、去支付操作。\n取消：取消订单。\n去支付：跳转至支付页面。支付成功后订单状态改变为待发货状态。"
+    },
+    {
+      "row": 146,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待付款订单详情",
+      "sub_feature": null,
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n取消订单：点击可取消订单。\n去支付：点击可使用微信进行支付。"
+    },
+    {
+      "row": 147,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待发货",
+      "sub_feature": null,
+      "description": "展示用户待发货状态的订单。点击可查看订单详情，可进行申请退款、联系商家操作。\n申请退款：点击跳转到申请退款页面，选择退款类型，输入退款原因支持图片进行申请退款操作。\n联系商家：点击可拨打商家的电话。"
+    },
+    {
+      "row": 148,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待发货订单详情",
+      "sub_feature": null,
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n申请退款：点击跳转到申请退款页面，选择退款类型，输入退款原因支持图片进行申请退款操作。\n联系商家：点击可拨打商家的电话。"
+    },
+    {
+      "row": 149,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待收货",
+      "sub_feature": null,
+      "description": "展示待收货状态的订单。点击可查看订单详情，可进行查看物流、联系商家、确认收货操作。\n查看物流：点击可查看物流信息。\n联系商家：跳转至手机拨号页面拨打商家电话。\n确认收货：用户确认收货，订单状态改变为待评价状态。"
+    },
+    {
+      "row": 150,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待收货订单详情",
+      "sub_feature": null,
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n查看物流：点击可查看物流信息。\n联系商家：跳转至手机拨号页面拨打商家电话。\n确认收货：用户确认收货，订单状态改变为待评价状态。"
+    },
+    {
+      "row": 151,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待评价",
+      "sub_feature": null,
+      "description": "展示待评价状态的订单；点击可查看订单详情；可进行删除订单、查看物流、去评价等操作。\n删除订单：点击可删除该订单信息。\n查看物流：点击可查看物流信息。\n去评价：输入评论、上传图片、评分对商品进行评价操作。\n申请售后：选择需要售后的商品，输入售后金额提交至商家审核，订单状态改变为审核中状态。"
+    },
+    {
+      "row": 152,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "待评价订单详情",
+      "sub_feature": null,
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n删除订单：点击可删除该订单信息。\n查看物流：点击可查看物流信息。\n去评价：输入评论、上传图片、评分对商品进行评价操作。\n申请售后：选择需要售后的商品，输入售后金额提交至商家审核，订单状态改变为审核中状态。"
+    },
+    {
+      "row": 153,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "售后",
+      "sub_feature": null,
+      "description": "展示售后状态的订单（包含待退款、拒绝退款、退款成功），点击可查看售后详情；并支持以下操作\n待退款状态：支持取消售后、联系客服、联系商家等操作。\n拒绝退款状态：支持联客服操作。\n退款成功状态：支持删除订单操作。"
+    },
+    {
+      "row": 154,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "售后订单详情",
+      "sub_feature": "待退款详情",
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n联系客服：点击拨打客服的电话。\n联系商家：点击拨打商家的电话。\n取消售后：点击取送售后操作。"
+    },
+    {
+      "row": 155,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "售后订单详情",
+      "sub_feature": "拒绝退款详情",
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n联系客服：点击拨打客服的电话。\n联系商家：点击拨打商家的电话。"
+    },
+    {
+      "row": 156,
+      "core_module": "订单版块",
+      "sub_module": "商城订单",
+      "feature": "售后订单详情",
+      "sub_feature": "退款成功详情",
+      "description": "展示商品信息（图片、名称、单价、数量、商品总价、运费、优惠金额、合计金额）、订单信息（订单编号、下单时间）、物流等信息。\n删除订单：点击可删除该订单信息。"
+    },
+    {
+      "row": 157,
+      "core_module": "订单版块",
+      "sub_module": "便民服务订单",
+      "feature": "全部",
+      "sub_feature": null,
+      "description": "展示待接单、进行中、已完成、退款等所有类型的订单，点击可查看订单详情。"
+    },
+    {
+      "row": 158,
+      "core_module": "订单版块",
+      "sub_module": "便民服务订单",
+      "feature": "待接单",
+      "sub_feature": null,
+      "description": "展示待接单状态的服务订单，点击可查看订单详情。\n补加小费：点击可进行补加小费操作。\n取消：取消该订单，订单费用原路返回至用户付款账户中。"
+    },
+    {
+      "row": 159,
+      "core_module": "订单版块",
+      "sub_module": "便民服务订单",
+      "feature": "进行中",
+      "sub_feature": null,
+      "description": "被接单后，展示进行中的订单，点击可查看订单详情。\n确认完成：点击可完成该笔订单。\n联系服务人员：点击可拨打服务人员的电话。"
+    },
+    {
+      "row": 160,
+      "core_module": "订单版块",
+      "sub_module": "便民服务订单",
+      "feature": "已完成",
+      "sub_feature": null,
+      "description": "展示已完成的服务订单（已完成的取送订单有待评价、已评价等状态），点击可查看订单详情。\n待评价状态：支持去评价、联系服务人员和删除操作。\n已评价状态：支持联系服务人员和删除操作。"
+    },
+    {
+      "row": 161,
+      "core_module": "订单版块",
+      "sub_module": "便民服务订单",
+      "feature": "服务订单详情",
+      "sub_feature": null,
+      "description": "展示订单信息（订单编号、下单时间、服务费用、优惠券金额、合计金额）、服务者信息（基本信息，电话）、需求者信息（描述、开始时间、预估时长、地址、联系电话）等相关信息。各状态订单详情支持操作如下：\n待接单状态：支持补加小费、取消订单操作\n已接单状态：支持取消订单和联系服务人员操作\n已完成状态：支持去评价、联系服务人员、删除订单操作\n已评价状态：支持删除订单、联系服务人员操作\n已取消状态：支持删除订单操作"
+    },
+    {
+      "row": 164,
+      "core_module": "社区",
+      "sub_module": "公告",
+      "feature": "全部公告",
+      "sub_feature": null,
+      "description": "展示所有的公告列表。"
+    },
+    {
+      "row": 166,
+      "core_module": "社区",
+      "sub_module": "发布",
+      "feature": "发布动态",
+      "sub_feature": null,
+      "description": "输入标题、内容、图片进行发布。\n发布完通过第三方敏感字审核，审核成功才可以在列表看到内容。"
+    },
+    {
+      "row": 168,
+      "core_module": "社区",
+      "sub_module": "热门话题",
+      "feature": "话题列表",
+      "sub_feature": null,
+      "description": "展示平台的热门话题列表。"
+    },
+    {
+      "row": 178,
+      "core_module": "我的",
+      "sub_module": "个人资料",
+      "feature": "个人信息展示",
+      "sub_feature": null,
+      "description": "展示用户昵称\\真实姓名、头像、手机号等基本信息。"
+    },
+    {
+      "row": 179,
+      "core_module": "我的",
+      "sub_module": "个人资料",
+      "feature": "修改",
+      "sub_feature": null,
+      "description": "支持对用户头像、名称进行修改操作。"
+    },
+    {
+      "row": 180,
+      "core_module": "我的",
+      "sub_module": "优惠券",
+      "feature": "修改",
+      "sub_feature": null,
+      "description": "展示用户已经领取到的优惠券信息。"
+    },
+    {
+      "row": 181,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "金额",
+      "sub_feature": "展示金额",
+      "description": "显示所有金额（包含可提现和待结算的金额）"
+    },
+    {
+      "row": 182,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "金额",
+      "sub_feature": "可提现金额",
+      "description": "已结算的可提现金额"
+    },
+    {
+      "row": 183,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "提现方式",
+      "sub_feature": null,
+      "description": "绑定微信、银行卡两种提现方式。"
+    },
+    {
+      "row": 184,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "提现金额",
+      "sub_feature": null,
+      "description": "输入提现金额进行提现。（提现温馨提示：2个工作日到账）"
+    },
+    {
+      "row": 185,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "交易明细",
+      "sub_feature": null,
+      "description": "列表形式展示交易明细。"
+    },
+    {
+      "row": 186,
+      "core_module": "我的",
+      "sub_module": "我的收益",
+      "feature": "提现明细",
+      "sub_feature": null,
+      "description": "列表形式展示提现明细。"
+    },
+    {
+      "row": 188,
+      "core_module": "我的",
+      "sub_module": "我的订单",
+      "feature": "一键发布订单",
+      "sub_feature": null,
+      "description": "展示全部、待支付、待接单、已接单、服务中、已完成、已取消、已退款的订单列表，点击可查看订单详情。"
+    },
+    {
+      "row": 200,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "诉求列表",
+      "sub_feature": "全部",
+      "description": "展示全部的诉求列表"
+    },
+    {
+      "row": 201,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "诉求列表",
+      "sub_feature": "受理中",
+      "description": "展示受理中的诉求列表"
+    },
+    {
+      "row": 202,
+      "core_module": "我的",
+      "sub_module": "我的社区",
+      "feature": "诉求列表",
+      "sub_feature": "已结案",
+      "description": "展示已结案的诉求列表"
+    },
+    {
+      "row": 230,
+      "core_module": "平台基础信息",
+      "sub_module": "资讯管理",
+      "feature": "资讯分类",
+      "sub_feature": null,
+      "description": "展示：编号、名称、显示顺序、创建时间。\n新增：进行新增资讯分类操作。\n编辑：进行编辑资讯分类操作。\n删除：进行删除资讯分类操作。"
+    },
+    {
+      "row": 232,
+      "core_module": "平台基础信息",
+      "sub_module": "资讯管理",
+      "feature": "附件上传",
+      "sub_feature": null,
+      "description": "上传资讯文件"
+    },
+    {
+      "row": 235,
+      "core_module": "社区服务信息管理",
+      "sub_module": "服务管理",
+      "feature": "服务审核",
+      "sub_feature": "敏感字审核",
+      "description": "对接第三方敏感字接口进行审核（需产生些许费用甲方承担）"
+    },
+    {
+      "row": 236,
+      "core_module": "社区服务信息管理",
+      "sub_module": "服务管理",
+      "feature": "服务审核",
+      "sub_feature": "服务举报",
+      "description": "被用户举报的服务内容，平台可以进行修改或者删除操作。"
+    },
+    {
+      "row": 237,
+      "core_module": "社区服务信息管理",
+      "sub_module": "信息管理",
+      "feature": "信息分类",
+      "sub_feature": null,
+      "description": "新增：上传分类icon，输入分类名称、显示序号进行新增父分类操作\n展示：编号、类型、名称、icon链接、显示顺序、创建时间\n修改：修改信息分类信息。\n子分类：查看子分类列表，对子分类进行新增、修改、删除操作。\n删除：删除父分类。"
+    },
+    {
+      "row": 239,
+      "core_module": "社区服务信息管理",
+      "sub_module": "信息管理",
+      "feature": "信息审核",
+      "sub_feature": "敏感字审核",
+      "description": "对接第三方敏感字接口进行审核（需产生些许费用甲方承担）"
+    },
+    {
+      "row": 240,
+      "core_module": "社区服务信息管理",
+      "sub_module": "信息管理",
+      "feature": "信息审核",
+      "sub_feature": "信息举报",
+      "description": "被用户举报的信息内容，平台可以进行修改或者删除操作。"
+    },
+    {
+      "row": 241,
+      "core_module": "商家、商品",
+      "sub_module": "商品分类",
+      "feature": "信息审核",
+      "sub_feature": null,
+      "description": "新增：上传分类icon，输入分类名称、显示序号进行新增父分类操作\n展示：编号、类型、名称、icon链接、显示顺序、创建时间\n修改：修改商城分类信息。\n子分类：查看子分类列表，对子分类进行新增、修改、删除操作。\n删除：删除父分类。"
+    },
+    {
+      "row": 247,
+      "core_module": "订单",
+      "sub_module": "社区服务订单",
+      "feature": "全部",
+      "sub_feature": null,
+      "description": "展示待接单、进行中、已完成、退款等所有类型的订单，点击可查看订单详情。"
+    },
+    {
+      "row": 269,
+      "core_module": "营销",
+      "sub_module": "分类营销",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "新增：选择广告类型，输入标题、副标题、显示序号、所属区域、广告图进行新增分类营销商品操作。\n展示：编号、标题、附标题、广告类型、显示顺序、创建时间\n管理商品：对该分类进行添加商品操作。\n编辑：编辑分类营销商品信息。\n删除：删除营销商品。"
+    },
+    {
+      "row": 273,
+      "core_module": "营销",
+      "sub_module": "搜索关键词",
+      "feature": "优惠券弹框",
+      "sub_feature": null,
+      "description": "新增：增加新的关键词标签，需输入关键字、显示顺序、所属区域等信息。\n展示：编号、关键字、显示顺序。\n修改：修改关键字标签信息。\n删除：删除关键字。"
+    },
+    {
+      "row": 278,
+      "core_module": "系统设置",
+      "sub_module": "平台协议",
+      "feature": "隐私协议",
+      "sub_feature": null,
+      "description": "编辑隐私协议文本。"
+    },
+    {
+      "row": 287,
+      "core_module": "商城主页",
+      "sub_module": "商城信息",
+      "feature": "商城信息",
+      "sub_feature": null,
+      "description": "展示商城LOGO、商城名称、商城评分、商城地址、商城销量、商城评论。"
+    },
+    {
+      "row": 288,
+      "core_module": "商城主页",
+      "sub_module": "商城信息",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "修改商城信息。"
+    },
+    {
+      "row": 289,
+      "core_module": "商城主页",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "展示折线图商城财务日订单收入流水数据分析。"
+    },
+    {
+      "row": 290,
+      "core_module": "客服聊天",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "展示待接待的客户信息。"
+    },
+    {
+      "row": 295,
+      "core_module": "满减优惠券",
+      "sub_module": "数据分析",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "新增：进行新增优惠券操作\n展示：编号、满、减、创建时间\n修改：对现有的优惠券进行修改操作\n删除：对优惠券进行删除操作"
+    },
+    {
+      "row": 297,
+      "core_module": "购物省钱",
+      "sub_module": "链接多平台推送性价比好物",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "二、链接多平台优惠商品，三、临近商铺折扣"
+    },
+    {
+      "row": 298,
+      "core_module": "赚取佣金",
+      "sub_module": "四、免费看广告得佣金\n五、分享给他人购物（会员推荐会员）\n六、代理推荐代理\n购物成功赚取佣金。",
+      "feature": "修改信息",
+      "sub_feature": null,
+      "description": "分佣比例：总部5%，c级市场合伙人5%，c端区县合伙人，20%，推广者，70%\n（此佣金可多种使用模式，可直接兑换现金，也可用作商城购物，也可继续推广领更高档次佣金）\n"
+    }
+  ]
+}

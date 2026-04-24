@@ -210,7 +210,7 @@ Page({
     const doneOk = (data) => {
       wx.hideLoading();
       if (data && data.id) {
-        wx.redirectTo({ url: '../order-detail/order-detail?id=' + data.id });
+        wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + data.id });
       } else {
         wx.showToast({ title: '下单成功', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 1500);

@@ -55,7 +55,8 @@ Page({
       const list = raw.map((o) => ({
         id: o.id,
         statusText: o.status_text || o.status_label || o.status || '待处理',
-        title: (o.content || o.title || o.assist_type || '邻里帮帮').slice(0, 40),
+        title: (o.assist_type_label || o.content || o.title || o.assist_type || '邻里帮帮').slice(0, 40),
+        type: o.assist_type_label || o.assist_type || '',
         time: o.created_at || o.createdAt || '',
         amount: o.reward_amount != null ? o.reward_amount : o.amount,
         roleTag: tab === 'published' ? '我发布' : '我接单'

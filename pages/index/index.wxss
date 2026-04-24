@@ -228,6 +228,33 @@
   color: #303030;
 }
 
+.mini-program-grid {
+  display: flex;
+  padding: 0 20rpx 20rpx;
+  gap: 20rpx;
+}
+
+.mini-program-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+}
+
+.mini-program-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.mini-program-name {
+  font-size: 24rpx;
+  color: #333;
+}
+
 .promo-swiper {
   height: 170rpx;
 }

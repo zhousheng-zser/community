@@ -1,5 +1,4 @@
 {
-  "navigationBarTitleText": "客服与售后",
-  "navigationBarBackgroundColor": "#7a5c28",
-  "navigationBarTextStyle": "white"
+  "navigationBarTitleText": "服务项目管理",
+  "enablePullDownRefresh": true
 }

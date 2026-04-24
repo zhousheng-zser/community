@@ -176,6 +176,17 @@
 }
 
 /* 底部功能盘 */
+.countdown-row {
+  background: #fff7e6;
+  border-radius: 8rpx;
+  padding: 16rpx;
+  margin-top: 16rpx;
+}
+.countdown-text {
+  color: #e6a23c;
+  font-weight: 600;
+}
+
 .bottomBar {
   position: fixed;
   bottom: 0;

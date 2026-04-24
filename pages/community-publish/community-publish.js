@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const { sensitiveCheck } = require('../../utils/sensitiveWords.js');
 
 Page({
     data: {
@@ -59,6 +60,19 @@ Page({
             return wx.showToast({ title: '写点内容或发张照片吧', icon: 'none' });
         }
 
+        const passed = sensitiveCheck(content, 
+            () => {
+                this.doSubmitPost(content, location, images);
+            },
+            (result) => {
+                wx.showToast({ title: '内容包含敏感词汇，请修改后重试', icon: 'none' });
+            }
+        );
+        
+        if (!passed) return;
+    },
+
+    doSubmitPost(content, location, images) {
         this.setData({ isSubmitting: true });
         wx.showLoading({ title: '发布中', mask: true });
 

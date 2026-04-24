@@ -1,0 +1,39 @@
+<view class="ship-page">
+  <view class="ship-section">
+    <view class="section-title">配送方式</view>
+    <picker mode="selector" range="{{['平台骑手配送', '自行发货']}}" value="{{logisticsType === 'platform_rider' ? 0 : 1}}" bindchange="onLogisticsTypeChange">
+      <view class="picker-cell">
+        <text>{{logisticsType === 'platform_rider' ? '平台骑手配送' : '自行发货'}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="ship-section" wx:if="{{logisticsType === 'self'}}">
+    <view class="section-title">快递信息</view>
+    <view class="input-group">
+      <view class="input-label">快递公司</view>
+      <input class="input-field" placeholder="请输入或选择快递公司" value="{{logisticsCompany}}" bindinput="onCompanyInput" />
+    </view>
+    <view class="company-list" wx:if="{{!logisticsCompany}}">
+      <view class="company-item" wx:for="{{companies}}" wx:key="*this" data-company="{{item}}" bindtap="onCompanySelect">
+        <text>{{item}}</text>
+      </view>
+    </view>
+    <view class="input-group">
+      <view class="input-label">快递单号</view>
+      <input class="input-field" placeholder="请输入快递单号" value="{{logisticsNo}}" bindinput="onLogisticsNoInput" />
+    </view>
+  </view>
+
+  <view class="ship-section">
+    <view class="section-title">备注（选填）</view>
+    <textarea class="remark-area" placeholder="可填写发货备注信息" value="{{remark}}" bindinput="onRemarkInput" maxlength="200" />
+  </view>
+
+  <view class="ship-footer">
+    <button class="submit-btn" bindtap="submitShip" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '确认发货'}}
+    </button>
+  </view>
+</view>

@@ -66,6 +66,21 @@
           confirm-type="done"
         />
       </view>
+      <!-- 悬赏价格 -->
+      <view class="remark-row">
+        <text class="remark-label">悬赏金额</text>
+        <text class="currency-symbol">¥</text>
+        <input
+          class="remark-input price-input"
+          type="digit"
+          placeholder="填写悬赏金额（可选）"
+          placeholder-class="addr-ph"
+          value="{{helperForm.price}}"
+          bindinput="onPriceInput"
+          data-field="helperPrice"
+          confirm-type="done"
+        />
+      </view>
       <view class="submit-btn {{helperForm.pickup && helperForm.delivery ? '' : 'disabled'}}" bindtap="submitHelper">去发布</view>
       <text class="flow-tips">填写取送信息 › 支付服务费用 › 技工取送 › 完成</text>
     </view>
@@ -120,6 +135,23 @@
           <text class="row-arrow">›</text>
         </view>
       </picker>
+
+      <!-- 悬赏价格 -->
+      <view class="form-row">
+        <view class="dot orange"></view>
+        <text class="time-label">悬赏金额</text>
+        <text class="currency-symbol">¥</text>
+        <input
+          class="form-input-inline price-input"
+          type="digit"
+          placeholder="填写悬赏金额（可选）"
+          placeholder-class="addr-ph"
+          value="{{form.price}}"
+          bindinput="onPriceInput"
+          data-field="formPrice"
+          confirm-type="done"
+        />
+      </view>
 
       <!-- 需求描述 -->
       <view class="need-section">

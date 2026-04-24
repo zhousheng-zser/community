@@ -1,0 +1,36 @@
+<view class="env-page">
+  <view class="env-header">
+    <text class="env-title">环境配置</text>
+    <text class="env-current">当前：{{currentEnv}}</text>
+  </view>
+
+  <view class="env-list">
+    <view
+      class="env-item {{item.value === currentEnv ? 'active' : ''}}"
+      wx:for="{{envOptions}}"
+      wx:key="value"
+      bindtap="switchEnv"
+      data-value="{{item.value}}"
+    >
+      <view class="item-main">
+        <view class="item-info">
+          <text class="item-label">{{item.label}}</text>
+          <text class="item-desc">{{item.desc}}</text>
+        </view>
+        <view class="item-radio {{item.value === currentEnv ? 'checked' : ''}}">
+          <view class="radio-dot" wx:if="{{item.value === currentEnv}}"></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="env-tips">
+    <text class="tip-title">说明</text>
+    <text class="tip-text">• 开发环境：显示所有演示入口和mock数据，适合本地开发调试</text>
+    <text class="tip-text">• 测试环境：显示演示入口但不使用mock数据，适合联调测试</text>
+    <text class="tip-text">• 生产环境：隐藏所有演示入口，使用真实数据</text>
+    <text class="tip-text">• 切换环境后将重新加载页面，请确认是否需要保存当前数据</text>
+  </view>
+
+  <view class="env-back-btn" bindtap="back">返回</view>
+</view>

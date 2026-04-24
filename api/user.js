@@ -2,7 +2,7 @@
  * 用户模块 API
  * 对应后端文档：二、用户模块
  */
-const { get, post, patch, del } = require('../util.js');
+const { get, post, patch, put, del } = require('../utils/util.js');
 
 /**
  * 获取用户信息
@@ -14,10 +14,10 @@ const getUserProfile = () => {
 
 /**
  * 更新用户信息
- * PATCH /user/profile
+ * POST /user/profile (后端使用POST因为可能包含文件上传)
  */
 const updateUserProfile = (data) => {
-  return patch('/user/profile', data);
+  return post('/user/profile', data);
 };
 
 /**
@@ -41,7 +41,7 @@ const addAddress = (data) => {
  * PUT /user/addresses/:id
  */
 const updateAddress = (id, data) => {
-  return post(`/user/addresses/${id}`, data);
+  return put(`/user/addresses/${id}`, data);
 };
 
 /**

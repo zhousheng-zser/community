@@ -3,6 +3,10 @@
     <image class="mm-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
     <text class="mm-name">{{displayName}}</text>
     <text class="mm-sub">商家端 · 与用户端同一账号</text>
+    <view class="mm-balance-box">
+      <text class="mm-balance-label">{{balanceLabel}}</text>
+      <text class="mm-balance-amount">¥{{balanceText}}</text>
+    </view>
   </view>
 
   <view class="portal-card">

@@ -387,6 +387,25 @@
   border-color: #99f6e4;
 }
 
+.m-act--primary {
+  background: linear-gradient(135deg, #6b4f2a 0%, #9a7340 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4rpx 12rpx rgba(90, 70, 35, 0.25);
+}
+
+.m-act--warn {
+  background: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
+}
+
+.m-act--danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
 .m-pill {
   font-size: 22rpx;
   padding: 8rpx 18rpx;

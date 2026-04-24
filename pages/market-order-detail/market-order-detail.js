@@ -1,10 +1,18 @@
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
+const orderTimeout = require('../../utils/orderTimeout.js');
+const env = require('../../utils/env.js');
 
 const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
+  pending_accept: { text: '待接单', class: 'primary' },
   pending_shipment: { text: '待发货', class: 'primary' },
+  pending_service: { text: '备货中', class: 'primary' },
   pending_receipt: { text: '待收货', class: 'primary' },
   pending_review: { text: '待评价', class: 'primary' },
+  completed: { text: '已完成', class: 'done' },
+  cancelled: { text: '已取消', class: 'cancel' },
+  refunded: { text: '已退款', class: 'cancel' },
   after_sales: { text: '售后中', class: 'done' },
   refund_pending: { text: '待退款', class: 'primary' },
   refund_rejected: { text: '拒绝退款', class: 'cancel' },
@@ -17,6 +25,7 @@ Page({
     status: '',
     statusText: '',
     shopName: '',
+    shopId: '',
     items: [],
     
     // 金额信息
@@ -36,7 +45,16 @@ Page({
     receiver_address: '',
 
     // 其他
-    refundStatus: ''
+    refundStatus: '',
+
+    // 超时倒计时
+    autoConfirmCountdown: null,
+    autoConfirmDeadline: null,
+    countdownTimerId: null
+  },
+
+  onUnload() {
+    orderTimeout.clearCountdownTimer(this.data.countdownTimerId);
   },
 
   onLoad(options) {
@@ -49,21 +67,30 @@ Page({
   async loadOrderDetail() {
     wx.showLoading({ title: '加载中...' });
     try {
-      const res = await util.get('api/market/order/detail', { order_no: this.data.orderNo });
+      const res = await api.market.getOrderDetail(this.data.orderNo);
       wx.hideLoading();
       this.normalizeDetail(res.data || res);
     } catch (e) {
       wx.hideLoading();
-      this.mockLoad();
+      console.log('订单详情加载失败', e);
+      if (env.shouldUseMockData()) {
+        console.log('开发环境：使用模拟数据');
+        this.mockLoad();
+      } else {
+        wx.showToast({ title: '订单加载失败', icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 1500);
+      }
     }
   },
 
   normalizeDetail(o) {
     const statusObj = STATUS_MAP[o.status] || { text: o.status || '未知订单状态' };
     this.setData({
+      orderNo: o.orderNo || o.order_no,
       status: o.status,
       statusText: o.refundStatus ? STATUS_MAP[o.refundStatus].text : statusObj.text,
       shopName: o.shopName || o.shop_name || '社区精选商家',
+      shopId: o.shopId || o.shop_id,
       
       goodsAmount: String(o.goods_amount || '0.00'),
       deliveryFee: String(o.delivery_fee || '0.00'),
@@ -88,6 +115,52 @@ Page({
         image: g.image || g.main_image || '/img/placeholders/home_cleaning.png'
       }))
     });
+    this.initCountdown(o);
+  },
+
+  initCountdown(o) {
+    orderTimeout.clearCountdownTimer(this.data.countdownTimerId);
+    const { status, delivery_time, created_at } = o;
+    if (status === 'pending_receipt' && delivery_time) {
+      const deadline = orderTimeout.calcAutoConfirmDeadline(delivery_time);
+      if (deadline) {
+        const timerId = orderTimeout.startCountdownTimer(this, 'autoConfirmDeadline', 'autoConfirmCountdown', 1000);
+        this.setData({ autoConfirmDeadline: deadline, countdownTimerId: timerId });
+      }
+    } else if (status === 'pending_payment' && created_at) {
+      const deadline = orderTimeout.calcAutoCancelUnpaidDeadline(created_at);
+      if (deadline) {
+        const timerId = orderTimeout.startCountdownTimer(this, 'autoConfirmDeadline', 'autoConfirmCountdown', 1000);
+        this.setData({ autoConfirmDeadline: deadline, countdownTimerId: timerId });
+      }
+    } else {
+      this.setData({ autoConfirmCountdown: null, autoConfirmDeadline: null });
+    }
+  },
+
+  onCountdownExpired(key) {
+    const { status } = this.data;
+    if (key === 'autoConfirmDeadline') {
+      if (status === 'pending_receipt') {
+        wx.showModal({
+          title: '自动确认收货',
+          content: '您已超过10天未确认收货，系统将自动确认收货。如未收到货，请联系客服。',
+          showCancel: false,
+          success: () => {
+            this.confirmReceipt();
+          }
+        });
+      } else if (status === 'pending_payment') {
+        wx.showModal({
+          title: '订单自动取消',
+          content: '您已超过30分钟未支付，订单将自动取消。',
+          showCancel: false,
+          success: () => {
+            this.cancelOrder();
+          }
+        });
+      }
+    }
   },
 
   mockLoad() {
@@ -116,52 +189,160 @@ Page({
   },
 
   // ---- 动作区 ----
-  cancelOrder() {
+  async cancelOrder() {
     wx.showModal({
-      title: '取消订单', content: '确定取消吗？',
-      success: (res) => { if(res.confirm) wx.showToast({ title: '已取消', icon: 'none' }); }
+      title: '取消订单', 
+      content: '确定取消吗？',
+      success: async (res) => { 
+        if(res.confirm) {
+          try {
+            await api.market.cancelOrder(this.data.orderNo);
+            wx.showToast({ title: '已取消', icon: 'success' });
+            setTimeout(() => wx.navigateBack(), 1500);
+          } catch (err) {
+            wx.showToast({ title: '取消失败', icon: 'none' });
+          }
+        } 
+      }
     });
   },
-  payNow() {
-    wx.showToast({ title: '调起微信支付', icon: 'none' });
+
+  async payNow() {
+    try {
+      const payRes = await api.market.createPayment({ order_no: this.data.orderNo, pay_type: 'wechat' });
+      
+      wx.requestPayment({
+        timeStamp: payRes.timeStamp,
+        nonceStr: payRes.nonceStr,
+        package: payRes.package,
+        signType: payRes.signType || 'MD5',
+        paySign: payRes.paySign,
+        success: () => {
+          wx.showToast({ title: '支付成功', icon: 'success' });
+          this.loadOrderDetail();
+        },
+        fail: (err) => {
+          console.log('支付失败', err);
+          wx.showToast({ title: '支付取消', icon: 'none' });
+        }
+      });
+    } catch (err) {
+      console.log('创建支付订单失败', err);
+      wx.showModal({
+        title: '提示',
+        content: '支付功能暂未接入，是否模拟支付成功？',
+        success: async (modalRes) => {
+          if (modalRes.confirm) {
+            try {
+              await api.market.mockPaymentSuccess({ order_no: this.data.orderNo });
+              wx.showToast({ title: '支付成功', icon: 'success' });
+              this.loadOrderDetail();
+            } catch (e) {
+              wx.showToast({ title: '模拟支付失败', icon: 'none' });
+            }
+          }
+        }
+      });
+    }
   },
 
   applyRefund(e) {
-    // 可能是局部退款也可能是整单退款
     const goodsId = e.currentTarget.dataset.goodsid;
     wx.navigateTo({ url: `/pages/after-sale-apply/after-sale-apply?orderNo=${this.data.orderNo}&goodsId=${goodsId || ''}` });
   },
-  contactMerchant() {
-    wx.showToast({ title: '拨打商家电话: 13800000000', icon: 'none' });
+
+  async contactMerchant() {
+    if (!this.data.shopId) {
+      wx.showToast({ title: '暂无商家信息', icon: 'none' });
+      return;
+    }
+
+    try {
+      const contactRes = await api.market.getShopContact(this.data.shopId);
+      const phone = contactRes.phone || contactRes.contact_phone;
+      if (phone) {
+        wx.makePhoneCall({ phoneNumber: phone });
+      } else {
+        wx.showToast({ title: '暂无商家电话', icon: 'none' });
+      }
+    } catch (err) {
+      wx.showToast({ title: '获取商家信息失败', icon: 'none' });
+    }
   },
   
-  viewLogistics() {
-    wx.navigateTo({ url: `/pages/order-logistics/order-logistics?orderNo=${this.data.orderNo}` });
+  async viewLogistics() {
+    try {
+      const logisticsRes = await api.market.getOrderLogistics(this.data.orderNo);
+      const trackingNo = logisticsRes.tracking_no || logisticsRes.trackingNo;
+      const company = logisticsRes.company || logisticsRes.express_company;
+      
+      wx.navigateTo({
+        url: `/pages/order-logistics/order-logistics?orderNo=${this.data.orderNo}&trackingNo=${trackingNo}&company=${company}`
+      });
+    } catch (err) {
+      wx.showToast({ title: '暂无物流信息', icon: 'none' });
+    }
   },
-  confirmReceipt() {
+
+  async confirmReceipt() {
     wx.showModal({
-      title: '确认收货', content: '确认收到所有商品了吗？',
-      success: (res) => { if(res.confirm) wx.showToast({ title: '已确认收货' }); }
+      title: '确认收货', 
+      content: '确认收到所有商品了吗？',
+      success: async (res) => { 
+        if(res.confirm) {
+          try {
+            await api.market.confirmReceipt(this.data.orderNo);
+            wx.showToast({ title: '已确认收货', icon: 'success' });
+            this.loadOrderDetail();
+          } catch (err) {
+            wx.showToast({ title: '操作失败', icon: 'none' });
+          }
+        } 
+      }
     });
   },
 
-  deleteOrder() {
+  async deleteOrder() {
     wx.showModal({
-      title: '删除订单', content: '不可恢复，确定删除？',
-      success: (res) => { if(res.confirm) wx.navigateBack(); }
+      title: '删除订单', 
+      content: '不可恢复，确定删除？',
+      success: async (res) => { 
+        if(res.confirm) {
+          try {
+            await api.market.deleteOrder(this.data.orderNo);
+            wx.showToast({ title: '订单已删除', icon: 'success' });
+            setTimeout(() => wx.navigateBack(), 1500);
+          } catch (err) {
+            wx.showToast({ title: '删除失败', icon: 'none' });
+          }
+        } 
+      }
     });
   },
+
   goRate() {
-    wx.showToast({ title: '打分评价页在建中', icon: 'none' });
+    wx.navigateTo({ url: `/pages/goods-rate/goods-rate?orderNo=${this.data.orderNo}` });
   },
 
   contactCustomerService() {
     wx.showToast({ title: '唤起官方在线客服', icon: 'none' });
   },
-  cancelRefund() {
+
+  async cancelRefund() {
     wx.showModal({
-      title: '取消售后', content: '确定放弃售后申请吗？',
-      success: (res) => { if(res.confirm) wx.showToast({ title: '已撤销', icon:'none' }); }
+      title: '取消售后', 
+      content: '确定放弃售后申请吗？',
+      success: async (res) => { 
+        if(res.confirm) {
+          try {
+            await api.market.cancelRefund(this.data.orderNo);
+            wx.showToast({ title: '已撤销', icon: 'success' });
+            this.loadOrderDetail();
+          } catch (err) {
+            wx.showToast({ title: '操作失败', icon: 'none' });
+          }
+        } 
+      }
     });
   }
 });

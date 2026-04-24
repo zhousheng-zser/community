@@ -1,67 +1,72 @@
-<view class="portal-page">
-  <view class="portal-top merchant-gradient ms-hero">
-    <text class="portal-title">客服与售后</text>
-    <text class="portal-sub">每笔订单自动建立买卖家会话（文字/图片）；与消息列表、订单详情联动</text>
+<view class="service-page">
+  <view class="page-header">
+    <view class="search-box">
+      <image class="search-icon" src="/img/icons/search.png" mode="aspectFit" />
+      <input class="search-input" placeholder="搜索服务项目" value="{{keyword}}" bindinput="onSearchInput" />
+      <view class="clear-btn" wx:if="{{keyword}}" bindtap="clearSearch">×</view>
+    </view>
   </view>
 
-  <view class="ms-hint">
-    <text class="ms-hint-line">客户下单后会自动创建本订单专属会话；商家与客户在「消息」中沟通，支持文字与图片，类似外卖/团购中的商家聊天。</text>
+  <view class="summary-bar" wx:if="{{summaryText}}">
+    <text>{{summaryText}}</text>
   </view>
 
-  <view class="portal-card ms-card">
-    <view class="mh-link-list">
-      <view class="mh-link-item" bindtap="goMerchantAfterSale">
-        <image class="mh-link-ico" src="/img/my_orders/market_order.png" mode="aspectFit"></image>
-        <view class="mh-link-main">
-          <text class="mh-link-title">店铺订单 · 售后/退单</text>
-          <text class="mh-link-desc">商家处理退款、退货与协商，与店铺订单/售后状态同步</text>
-        </view>
-        <text class="mh-link-arrow">›</text>
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="service-list" wx:elif="{{list.length > 0}}">
+    <view class="service-card" wx:for="{{list}}" wx:key="id">
+      <image class="service-image" src="{{item.mainImage || '/img/default-service.png'}}" mode="aspectFill" wx:if="{{item.hasImage}}" />
+      <view class="service-image service-image-placeholder" wx:else>
+        <text>服</text>
       </view>
-      <view class="mh-link-item" bindtap="goMessage">
-        <image class="mh-link-ico" src="/img/other_services/platform_service.png" mode="aspectFit"></image>
-        <view class="mh-link-main">
-          <text class="mh-link-title">消息 · 订单会话</text>
-          <text class="mh-link-desc">按订单维度的买卖家聊天，含文字与图片</text>
+      <view class="service-info">
+        <view class="service-title">{{item.title}}</view>
+        <view class="service-meta">
+          <text class="service-category">{{item.category}}</text>
+          <text class="service-duration">{{item.duration}}</text>
         </view>
-        <text class="mh-link-arrow">›</text>
-      </view>
-      <view class="mh-link-item" bindtap="goMarketOrdersBuyer">
-        <image class="mh-link-ico" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
-        <view class="mh-link-main">
-          <text class="mh-link-title">客户侧订单与退单</text>
-          <text class="mh-link-desc">买家取消、退款进度（同一账号下的购物订单）</text>
+        <view class="service-price">{{item.priceText}}/{{item.unit}}</view>
+        <view class="service-actions">
+          <view class="shelf-switch">
+            <switch checked="{{item.onShelf}}" bindchange="onShelfChange" data-id="{{item.id}}" data-on="{{item.onShelf}}" />
+            <text class="shelf-label">{{item.onShelf ? '已上架' : '已下架'}}</text>
+          </view>
+          <view class="edit-btn" bindtap="goEdit" data-id="{{item.id}}">编辑</view>
         </view>
-        <text class="mh-link-arrow">›</text>
-      </view>
-      <view class="mh-link-item" bindtap="goFeedback">
-        <image class="mh-link-ico" src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
-        <view class="mh-link-main">
-          <text class="mh-link-title">客服工单与平台协调</text>
-          <text class="mh-link-desc">投诉建议、需平台介入时提交工单</text>
-        </view>
-        <text class="mh-link-arrow">›</text>
       </view>
     </view>
   </view>
 
-  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+  <view class="empty-box" wx:elif="{{!loading}}">
+    <text class="empty-icon">🔧</text>
+    <text class="empty-text">{{emptyTip}}</text>
+  </view>
 
-  <view class="portal-tabbar pt-bar-4">
-    <view class="pt-item" bindtap="goHome">
-      <image class="pt-ico" src="/img/home-0.png" mode="aspectFit"></image>
+  <view class="add-btn-wrapper">
+    <button class="add-btn" bindtap="goAdd">+ 添加服务项目</button>
+  </view>
+
+  <view class="tabbar">
+    <view class="tabbar-item" bindtap="goHome">
+      <image class="tabbar-icon" src="/img/home-0.png" mode="aspectFit" />
       <text>首页</text>
     </view>
-    <view class="pt-item pt-on">
-      <image class="pt-ico" src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
-      <text class="pt-text-nowrap">客服与售后</text>
+    <view class="tabbar-item tabbar-on">
+      <image class="tabbar-icon" src="/img/icons/service.png" mode="aspectFit" />
+      <text>服务</text>
     </view>
-    <view class="pt-item" bindtap="goOrders">
-      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+    <view class="tabbar-item" bindtap="goGoods">
+      <image class="tabbar-icon" src="/img/icons/goods.png" mode="aspectFit" />
+      <text>商品</text>
+    </view>
+    <view class="tabbar-item" bindtap="goOrders">
+      <image class="tabbar-icon" src="/img/order-0.png" mode="aspectFit" />
       <text>订单</text>
     </view>
-    <view class="pt-item" bindtap="goMine">
-      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+    <view class="tabbar-item" bindtap="goMine">
+      <image class="tabbar-icon" src="/img/user-0.png" mode="aspectFit" />
       <text>我的</text>
     </view>
   </view>

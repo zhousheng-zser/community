@@ -17,8 +17,19 @@ function parseDetail(raw, myUserId) {
   const category = r.category || r.assist_type || '';
   const desc = r.content || r.description || r.title || '';
   const title = desc ? String(desc).slice(0, 28) + (String(desc).length > 28 ? '…' : '') : '邻里帮帮';
-  const address = r.address || r.service_address || '';
-  const serviceTime = r.service_time || r.expect_time || r.time || '';
+  
+  // 解析地址：优先使用 origin/destination 对象，兼容旧的 address 字段
+  const originAddr = r.origin_address_snapshot 
+    ? (typeof r.origin_address_snapshot === 'string' ? JSON.parse(r.origin_address_snapshot) : r.origin_address_snapshot)
+    : {};
+  const destAddr = r.destination_address_snapshot
+    ? (typeof r.destination_address_snapshot === 'string' ? JSON.parse(r.destination_address_snapshot) : r.destination_address_snapshot)
+    : {};
+  const pickupAddress = originAddr.address || originAddr.detail || '';
+  const deliveryAddress = destAddr.address || destAddr.detail || '';
+  const address = r.address || r.service_address || pickupAddress || '';
+  
+  const serviceTime = r.service_time || r.expect_time || r.appointment_time || r.time || '';
   const reward = r.reward_amount != null ? r.reward_amount : r.amount;
   const rewardText =
     reward != null && reward !== '' ? (typeof reward === 'number' ? reward.toFixed(2) : String(reward)) : '';
@@ -50,6 +61,8 @@ function parseDetail(raw, myUserId) {
     desc,
     category,
     address,
+    pickupAddress: pickupAddress || address,
+    deliveryAddress: deliveryAddress || address,
     serviceTime,
     rewardText,
     lat: Number.isFinite(lat) ? lat : null,

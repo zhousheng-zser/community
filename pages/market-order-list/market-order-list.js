@@ -56,11 +56,12 @@ Page({
     try {
       const params = { page: 1, page_size: 50 };
       if (queryStatus) params.status = queryStatus;
-      const res = await api.market.getOrderList(params);
+      const res = await api.market.getMyOrders(params);
       const rawList = res.list || (res.data && res.data.list) || res || [];
       const list = rawList.map(this.normalizeOrder);
       this.setData({ list, loading: false });
     } catch (e) {
+      console.log('订单加载失败，使用模拟数据', e);
       this.setData({ loading: false });
       this.mockLoad(queryStatus);
     }
@@ -71,6 +72,7 @@ Page({
     return {
       orderNo: o.orderNo || o.order_no,
       shopName: o.shopName || o.shop_name,
+      shopId: o.shopId || o.shop_id,
       status: o.status,
       statusText: statusObj.text,
       statusClass: statusObj.class,
@@ -107,25 +109,156 @@ Page({
     wx.navigateTo({ url: `../market-order-detail/market-order-detail?orderNo=${orderNo}` });
   },
 
-  cancelOrder(e) {
-    wx.showToast({ title: '已取消', icon: 'none' });
+  async cancelOrder(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '提示',
+      content: '确定要取消该订单吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await api.market.cancelOrder(orderNo);
+            wx.showToast({ title: '订单已取消', icon: 'success' });
+            this.loadOrders();
+          } catch (err) {
+            console.log('取消订单失败', err);
+            wx.showToast({ title: '取消失败', icon: 'none' });
+          }
+        }
+      }
+    });
   },
-  payOrder(e) {
-    wx.showToast({ title: '拉起微信支付', icon: 'none' });
+
+  async payOrder(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    try {
+      const payRes = await api.market.createPayment({ order_no: orderNo, pay_type: 'wechat' });
+      const paymentId = payRes.payment_id || payRes.paymentId;
+      
+      wx.requestPayment({
+        timeStamp: payRes.timeStamp,
+        nonceStr: payRes.nonceStr,
+        package: payRes.package,
+        signType: payRes.signType || 'MD5',
+        paySign: payRes.paySign,
+        success: () => {
+          wx.showToast({ title: '支付成功', icon: 'success' });
+          this.loadOrders();
+        },
+        fail: (err) => {
+          console.log('支付失败', err);
+          wx.showToast({ title: '支付取消', icon: 'none' });
+        }
+      });
+    } catch (err) {
+      console.log('创建支付订单失败', err);
+      wx.showModal({
+        title: '提示',
+        content: '支付功能暂未接入，是否模拟支付成功？',
+        success: async (modalRes) => {
+          if (modalRes.confirm) {
+            try {
+              await api.market.mockPaymentSuccess({ order_no: orderNo });
+              wx.showToast({ title: '支付成功', icon: 'success' });
+              this.loadOrders();
+            } catch (e) {
+              wx.showToast({ title: '模拟支付失败', icon: 'none' });
+            }
+          }
+        }
+      });
+    }
   },
+
   applyRefund(e) {
-    wx.navigateTo({ url: `/pages/after-sale-apply/after-sale-apply?orderNo=${e.currentTarget.dataset.id}` });
+    const orderNo = e.currentTarget.dataset.id;
+    wx.navigateTo({ url: `/pages/after-sale-apply/after-sale-apply?orderNo=${orderNo}` });
   },
-  contactMerchant(e) {
-    wx.showToast({ title: '拨打商家电话', icon: 'none' });
+
+  async contactMerchant(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    const order = this.data.list.find(o => o.orderNo === orderNo);
+    if (!order) return;
+
+    try {
+      const contactRes = await api.market.getShopContact(order.shopId);
+      const phone = contactRes.phone || contactRes.contact_phone;
+      if (phone) {
+        wx.makePhoneCall({ phoneNumber: phone });
+      } else {
+        wx.showToast({ title: '暂无商家电话', icon: 'none' });
+      }
+    } catch (err) {
+      wx.showToast({ title: '获取商家信息失败', icon: 'none' });
+    }
   },
-  viewLogistics(e) {
-    wx.navigateTo({ url: `/pages/order-logistics/order-logistics?orderNo=${e.currentTarget.dataset.id}` });
+
+  async viewLogistics(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    try {
+      const logisticsRes = await api.market.getOrderLogistics(orderNo);
+      const trackingNo = logisticsRes.tracking_no || logisticsRes.trackingNo;
+      const company = logisticsRes.company || logisticsRes.express_company;
+      
+      wx.navigateTo({
+        url: `/pages/order-logistics/order-logistics?orderNo=${orderNo}&trackingNo=${trackingNo}&company=${company}`
+      });
+    } catch (err) {
+      wx.showToast({ title: '暂无物流信息', icon: 'none' });
+    }
   },
-  confirmReceipt(e) {
-    wx.showToast({ title: '收货成功' });
+
+  async confirmReceipt(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '提示',
+      content: '确认已收到商品？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await api.market.confirmReceipt(orderNo);
+            wx.showToast({ title: '确认收货成功', icon: 'success' });
+            this.loadOrders();
+          } catch (err) {
+            console.log('确认收货失败', err);
+            wx.showToast({ title: '操作失败', icon: 'none' });
+          }
+        }
+      }
+    });
   },
-  buyAgain(e) {
-    wx.showToast({ title: '已将商品重新加入该店购物车', icon: 'none' });
+
+  async buyAgain(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    try {
+      await api.market.buyAgain(orderNo);
+      wx.showToast({ title: '已加入购物车', icon: 'success' });
+      setTimeout(() => {
+        wx.navigateTo({ url: '../goods-cart/goods-cart' });
+      }, 1000);
+    } catch (err) {
+      console.log('再次购买失败', err);
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    }
+  },
+
+  async deleteOrder(e) {
+    const orderNo = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '提示',
+      content: '确定要删除该订单吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            await api.market.deleteOrder(orderNo);
+            wx.showToast({ title: '订单已删除', icon: 'success' });
+            this.loadOrders();
+          } catch (err) {
+            console.log('删除订单失败', err);
+            wx.showToast({ title: '删除失败', icon: 'none' });
+          }
+        }
+      }
+    });
   }
 });

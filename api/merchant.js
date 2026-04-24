@@ -2,7 +2,7 @@
  * 商家后台模块 API（集市商家端）
  * 对应后端文档：九、商家后台模块
  */
-const { get, post, patch } = require('../util.js');
+const { get, post, patch } = require('../utils/util.js');
 
 /**
  * 获取仪表盘数据

@@ -61,8 +61,26 @@ Page({
     if (block) {
       return wx.showToast({ title: block, icon: 'none' });
     }
-    wx.showToast({ title: '发布成功！', icon: 'success' });
-    this.setData({ currentForm: { from: '', to: '', remark: '' } });
+
+    wx.showLoading({ title: '发布中...' });
+    util.post('neighbor-assist', {
+      category: activeTabConfig.title,
+      content: currentForm.remark || '',
+      address: currentForm.from || currentForm.to,
+      pickup_address: currentForm.from,
+      delivery_address: currentForm.to,
+      reward: 0
+    })
+      .then(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '发布成功！', icon: 'success' });
+        this.setData({ currentForm: { from: '', to: '', remark: '' } });
+      })
+      .catch((err) => {
+        wx.hideLoading();
+        const msg = (err && err.errmsg) || '发布失败，请重试';
+        wx.showToast({ title: msg, icon: 'none' });
+      });
   },
 
   goBack() {

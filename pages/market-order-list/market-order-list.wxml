@@ -67,6 +67,7 @@
           <!-- 已完成/已取消/已退款 -> 纯展示或再来一单 -->
           <block wx:if="{{item.status === 'completed' || item.status === 'cancelled' || item.status === 'refunded'}}">
             <button class="action-btn default" catchtap="buyAgain" data-id="{{item.orderNo}}">再来一单</button>
+            <button class="action-btn" catchtap="deleteOrder" data-id="{{item.orderNo}}">删除订单</button>
           </block>
         </view>
       </view>

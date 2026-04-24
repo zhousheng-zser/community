@@ -276,6 +276,15 @@ const goodsStateTabel = (state) => {
         btn: ""
       }
       break;
+    case "pending_shipment":
+      result = {
+        name: "待发货",
+        icon: "/img/order/orderdetail-1.png",
+        title: "待发货",
+        desc: "商家正在为您发货",
+        btn: ""
+      }
+      break;
     case "pending_receipt":
       result = {
         name: "待收货",
@@ -349,7 +358,7 @@ const stateTabel = (state, userFlag) => {
         result = {
           name: "待付款",
           icon: "/img/order/orderdetail-1.png",
-          title: "服务结束",
+          title: "待付款",
           desc: "本次服务已完成，请支付",
           btn: "去支付"
         }

@@ -2,7 +2,7 @@
  * 核心数据模块 API
  * 对应后端文档：三、核心数据模块
  */
-const { get } = require('../util.js');
+const { get } = require('../utils/util.js');
 
 /**
  * 获取轮播图

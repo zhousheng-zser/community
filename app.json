@@ -78,9 +78,12 @@
     "pages/wallet-transactions/wallet-transactions",
     "pages/shopping-search/shopping-search",
     "pages/consumer-rights/consumer-rights",
+    "pages/after-sale-apply/after-sale-apply",
     "pages/login/login",
     "pages/register/register",
-    "pages/forget-password/forget-password"
+    "pages/forget-password/forget-password",
+    "pages/env-switcher/env-switcher",
+    "pages/notification-center/notification-center"
   ],
   "subPackages": [
     {
@@ -98,11 +101,15 @@
       "name": "merchant",
       "pages": [
         "pages/merchant-home/merchant-home",
-        "pages/merchant-service/merchant-service",
-        "pages/merchant-goods/merchant-goods",
-        "pages/merchant-goods-edit/merchant-goods-edit",
-        "pages/merchant-orders/merchant-orders",
-        "pages/merchant-mine/merchant-mine"
+    "pages/merchant-service/merchant-service",
+    "pages/merchant-goods/merchant-goods",
+    "pages/merchant-goods-edit/merchant-goods-edit",
+    "pages/merchant-orders/merchant-orders",
+    "pages/merchant-mine/merchant-mine",
+    "pages/merchant-ship/merchant-ship",
+    "pages/merchant-refund-handle/merchant-refund-handle",
+    "pages/merchant-dispatch/merchant-dispatch",
+    "pages/merchant-arbitrate/merchant-arbitrate"
       ]
     },
     {
@@ -110,6 +117,26 @@
       "name": "market",
       "pages": [
         "pages/market-home/market-home"
+      ]
+    },
+    {
+      "root": "package-service-provider",
+      "name": "service_provider",
+      "pages": [
+        "pages/sp-home/sp-home",
+        "pages/sp-orders/sp-orders",
+        "pages/sp-dispatch/sp-dispatch",
+        "pages/sp-services/sp-services",
+        "pages/sp-mine/sp-mine"
+      ]
+    },
+    {
+      "root": "package-rider",
+      "name": "rider",
+      "pages": [
+        "pages/rider-tasks/rider-tasks",
+        "pages/rider-home/rider-home",
+        "pages/rider-mine/rider-mine"
       ]
     }
   ],
@@ -155,7 +182,7 @@
     "scope.userLocation": {
       "desc": "用于本地集市按距离展示附近店铺；选择服务地址时获取位置"
     },
-    "scope.record": {
+    "scope.recordAudio": {
       "desc": "用于帮帮/会话中录制并发送语音消息"
     }
   },
@@ -163,11 +190,5 @@
     "getLocation",
     "chooseLocation",
     "chooseAddress"
-  ],
-  "navigateToMiniProgramAppIdList": [
-    "wx91d27dbf599dcd7e",
-    "wx91d27dbf599dff74",
-    "wx91d27dbf5999dbf5",
-    "wx32540bd863b27570"
   ]
 }

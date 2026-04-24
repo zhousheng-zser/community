@@ -168,6 +168,7 @@ page { background: #fdf3ef; }
 .dot { width: 18rpx; height: 18rpx; border-radius: 50%; flex-shrink: 0; }
 .dot.blue { background: #4a90e2; }
 .dot.green { background: #4caf50; }
+.dot.orange { background: #f64e4e; }
 .form-placeholder { flex: 1; font-size: 28rpx; color: #bbb; }
 .form-value { flex: 1; font-size: 28rpx; color: #333; }
 .time-label { font-size: 28rpx; color: #333; flex-shrink: 0; }
@@ -213,6 +214,17 @@ page { background: #fdf3ef; }
 .agree-circle.checked { background: #f64e4e; border-color: #f64e4e; }
 .agree-text { font-size: 22rpx; color: #999; }
 .agree-link { color: #f64e4e; }
+
+/* 金额输入 */
+.currency-symbol {
+  font-size: 28rpx;
+  color: #f64e4e;
+  flex-shrink: 0;
+}
+.price-input {
+  color: #f64e4e;
+  font-weight: 600;
+}
 
 /* 流程提示 */
 .flow-tips { display: block; font-size: 22rpx; color: #bbb; text-align: center; line-height: 1.6; }

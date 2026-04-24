@@ -2,7 +2,7 @@
  * 本地集市模块 API（用户端）
  * 对应后端文档：六、本地集市模块
  */
-const { get, post, put, del } = require('../util.js');
+const { get, post, put, del } = require('../utils/util.js');
 
 /**
  * 商家入驻申请
@@ -53,15 +53,15 @@ const getGoodsDetail = (goodsId) => {
 };
 
 /**
- * 获取购物车
- * GET /market/cart
+ * 获取购物车 (需传 shop_id)
+ * GET /market/cart?shop_id=xxx
  */
-const getCart = () => {
-  return get('/market/cart');
+const getCart = (shopId) => {
+  return get('/market/cart', shopId ? { shop_id: shopId } : null);
 };
 
 /**
- * 添加购物车
+ * 添加购物车 (需传 shop_id + goods_id + quantity)
  * POST /market/cart/items
  */
 const addToCart = (data) => {
@@ -156,6 +156,70 @@ const mockPaymentSuccess = (data) => {
   return post('/market/payments/mock-success', data);
 };
 
+/**
+ * 确认收货
+ * POST /market/orders/:orderNo/confirm-receipt
+ */
+const confirmReceipt = (orderNo) => {
+  return post(`/market/orders/${orderNo}/confirm-receipt`);
+};
+
+/**
+ * 申请退款
+ * POST /market/orders/:orderNo/refund
+ */
+const applyRefund = (orderNo, data) => {
+  return post(`/market/orders/${orderNo}/refund`, data);
+};
+
+/**
+ * 获取退款详情
+ * GET /market/orders/:orderNo/refund
+ */
+const getRefundDetail = (orderNo) => {
+  return get(`/market/orders/${orderNo}/refund`);
+};
+
+/**
+ * 取消退款申请
+ * POST /market/orders/:orderNo/refund/cancel
+ */
+const cancelRefund = (orderNo) => {
+  return post(`/market/orders/${orderNo}/refund/cancel`);
+};
+
+/**
+ * 删除订单
+ * DELETE /market/orders/:orderNo
+ */
+const deleteOrder = (orderNo) => {
+  return del(`/market/orders/${orderNo}`);
+};
+
+/**
+ * 再次购买
+ * POST /market/orders/:orderNo/buy-again
+ */
+const buyAgain = (orderNo) => {
+  return post(`/market/orders/${orderNo}/buy-again`);
+};
+
+/**
+ * 联系商家
+ * GET /market/shops/:shopId/contact
+ */
+const getShopContact = (shopId) => {
+  return get(`/market/shops/${shopId}/contact`);
+};
+
+/**
+ * 查看物流
+ * GET /market/orders/:orderNo/logistics
+ */
+const getOrderLogistics = (orderNo) => {
+  return get(`/market/orders/${orderNo}/logistics`);
+};
+
 module.exports = {
   applyMarketMerchant,
   searchMarket,
@@ -175,5 +239,13 @@ module.exports = {
   cancelOrder,
   createPayment,
   getPaymentStatus,
-  mockPaymentSuccess
+  mockPaymentSuccess,
+  confirmReceipt,
+  applyRefund,
+  getRefundDetail,
+  cancelRefund,
+  deleteOrder,
+  buyAgain,
+  getShopContact,
+  getOrderLogistics
 };

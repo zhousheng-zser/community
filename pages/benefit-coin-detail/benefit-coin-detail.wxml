@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="goods-header">
+    <swiper class="goods-swiper" indicator-dots autoplay>
+      <swiper-item wx:for="{{goods.images || [goods.image]}}" wx:key="*this">
+        <image class="goods-img" src="{{item}}" mode="aspectFill"></image>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <view class="goods-info-section">
+    <view class="goods-price-box">
+      <view class="price-coins">
+        <text class="coin-icon">🪙</text>
+        <text class="price-value">{{goods.coins}}</text>
+        <text class="price-unit">家事币</text>
+      </view>
+      <view class="balance-tip">
+        <text>余额: </text>
+        <text class="balance-value">{{balance}}</text>
+      </view>
+    </view>
+    
+    <view class="goods-title">{{goods.name}}</view>
+    
+    <view class="goods-tags">
+      <text class="tag" wx:if="{{goods.stock > 0}}">有库存</text>
+      <text class="tag gray" wx:else>已兑完</text>
+    </view>
+  </view>
+
+  <view class="goods-desc-section">
+    <view class="section-title">商品详情</view>
+    <view class="desc-content">{{goods.description || '暂无详情'}}</view>
+  </view>
+
+  <view class="footer-bar">
+    <view class="footer-info">
+      <text class="stock-text">库存{{goods.stock || 0}}件</text>
+    </view>
+    <button 
+      class="exchange-btn {{balance < goods.coins ? 'disabled' : ''}}" 
+      bindtap="handleExchange"
+      disabled="{{balance < goods.coins || goods.stock <= 0}}"
+    >
+      {{balance < goods.coins ? '余额不足' : (goods.stock <= 0 ? '已兑完' : '立即兑换')}}
+    </button>
+  </view>
+</view>

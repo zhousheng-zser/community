@@ -1,0 +1,37 @@
+page { background: #f5f5f5; min-height: 100vh; }
+.rider-tasks-page { padding-bottom: 40rpx; }
+.rider-tabs { display: flex; background: #fff; padding: 0 24rpx; }
+.rider-tab-item { flex: 1; text-align: center; padding: 24rpx 0; font-size: 28rpx; color: #666; position: relative; }
+.rider-tab-item.active { color: #1890ff; font-weight: 600; }
+.rider-tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 40rpx; height: 4rpx; background: #1890ff; border-radius: 2rpx; }
+.rider-task-list { padding: 24rpx; }
+.rider-task-card { background: #fff; border-radius: 16rpx; margin-bottom: 24rpx; overflow: hidden; box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05); }
+.rider-task-header { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 24rpx; background: #fafafa; border-bottom: 1rpx solid #f0f0f0; }
+.rider-task-no { font-size: 24rpx; color: #666; }
+.rider-task-status { font-size: 24rpx; color: #1890ff; font-weight: 600; }
+.rider-task-body { padding: 24rpx; }
+.rider-task-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 12rpx 0; }
+.rider-task-label { font-size: 26rpx; color: #999; flex-shrink: 0; width: 140rpx; }
+.rider-task-value { font-size: 26rpx; color: #333; flex: 1; text-align: right; word-break: break-all; }
+.rider-task-amount { color: #e74c3c; font-weight: 600; font-size: 30rpx; }
+.rider-task-actions { padding: 0 24rpx 24rpx; }
+.rider-action-btn { width: 100%; height: 72rpx; line-height: 72rpx; font-size: 28rpx; border-radius: 36rpx; border: none; text-align: center; }
+.rider-action-btn.accept { background: #1890ff; color: #fff; }
+.rider-action-btn.pickup { background: #52c41a; color: #fff; }
+.rider-action-btn.deliver { background: #faad14; color: #fff; }
+.rider-empty, .rider-loading { text-align: center; padding: 120rpx 0; color: #999; font-size: 28rpx; }
+.rider-task-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.rider-modal-content { width: 90%; max-height: 80vh; background: #fff; border-radius: 16rpx; overflow: hidden; }
+.rider-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 24rpx; border-bottom: 1rpx solid #f0f0f0; }
+.rider-modal-title { font-size: 32rpx; font-weight: 600; color: #333; }
+.rider-modal-close { font-size: 40rpx; color: #999; line-height: 1; }
+.rider-modal-body { padding: 24rpx; max-height: 50vh; overflow-y: auto; }
+.rider-modal-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 16rpx 0; border-bottom: 1rpx solid #f5f5f5; }
+.rider-modal-row:last-child { border-bottom: none; }
+.rider-modal-label { font-size: 26rpx; color: #999; flex-shrink: 0; width: 140rpx; }
+.rider-modal-value { font-size: 26rpx; color: #333; flex: 1; text-align: right; word-break: break-all; }
+.rider-modal-amount { color: #e74c3c; font-weight: 600; font-size: 30rpx; }
+.rider-modal-actions { padding: 24rpx; display: flex; gap: 16rpx; }
+.rider-modal-btn { flex: 1; height: 72rpx; line-height: 72rpx; font-size: 28rpx; border-radius: 36rpx; border: none; text-align: center; }
+.rider-modal-btn.location { background: #f0f0f0; color: #333; }
+.rider-modal-btn.primary { background: #1890ff; color: #fff; }

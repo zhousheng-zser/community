@@ -26,10 +26,17 @@
       <view class="sheet-section">
         <view class="sheet-head"><text class="sheet-title">地址</text></view>
         <view class="sheet-body">
-          <text class="addr-text">{{order.address || '—'}}</text>
+          <view class="addr-row" wx:if="{{order.pickupAddress || order.deliveryAddress}}">
+            <view class="addr-dot pickup">取</view>
+            <text class="addr-text pickup-addr">{{order.pickupAddress || order.address || '—'}}</text>
+          </view>
+          <view class="addr-row" wx:if="{{order.pickupAddress || order.deliveryAddress}}">
+            <view class="addr-dot delivery">送</view>
+            <text class="addr-text delivery-addr">{{order.deliveryAddress || order.address || '—'}}</text>
+          </view>
+          <text class="addr-text" wx:elif="{{order.address}}">{{order.address}}</text>
           <view class="btn-row-2">
             <button class="sheet-btn ghost" bindtap="copyAddress">复制地址</button>
-            <button class="sheet-btn primary" bindtap="openNav">路线规划</button>
           </view>
         </view>
       </view>

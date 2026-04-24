@@ -407,6 +407,18 @@
     </view>
   </view>
 
+  <view class="card section-card" wx:if="{{thirdPartyMiniPrograms.length > 0}}">
+    <view class="section-head">
+      <text class="title">便民服务</text>
+    </view>
+    <view class="mini-program-grid">
+      <view class="mini-program-item" wx:for="{{thirdPartyMiniPrograms}}" wx:key="name" bindtap="jumpToMiniProgram" data-idx="{{index}}">
+        <image class="mini-program-icon" src="{{item.icon}}" mode="aspectFit"></image>
+        <text class="mini-program-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
   <swiper class="promo-swiper card" autoplay="{{true}}" indicator-dots="{{true}}" circular="{{true}}">
     <swiper-item wx:for="{{banner}}" wx:key="id" bindtap="onHomeBannerTap" data-idx="{{index}}">
       <image src="{{item.imageUrl}}" class="slide-image" mode="aspectFill" />

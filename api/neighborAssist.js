@@ -2,46 +2,46 @@
  * 邻里帮帮模块 API
  * 对应后端文档：五、邻里帮帮模块
  */
-const { get, post } = require('../util.js');
+const { get, post } = require('../utils/util.js');
 
 /**
  * 创建帮帮订单
- * POST /neighbor-assist
+ * POST /neighbor-assist/orders
  */
 const createAssistOrder = (data) => {
-  return post('/neighbor-assist', data);
+  return post('/neighbor-assist/orders', data);
 };
 
 /**
  * 获取我的帮帮订单
- * GET /neighbor-assist/my
+ * GET /neighbor-assist/orders/my
  */
 const getMyAssistOrders = (params) => {
-  return get('/neighbor-assist/my', params);
+  return get('/neighbor-assist/orders/my', params);
 };
 
 /**
  * 获取待接单池
- * GET /neighbor-assist/pool
+ * GET /neighbor-assist/orders/pool
  */
 const getAssistPool = (params) => {
-  return get('/neighbor-assist/pool', params);
+  return get('/neighbor-assist/orders/pool', params);
 };
 
 /**
  * 抢单
- * POST /neighbor-assist/:id/grab
+ * POST /neighbor-assist/orders/:id/grab
  */
 const grabAssistOrder = (id) => {
-  return post(`/neighbor-assist/${id}/grab`);
+  return post(`/neighbor-assist/orders/${id}/grab`);
 };
 
 /**
  * 完成订单
- * POST /neighbor-assist/:id/complete
+ * POST /neighbor-assist/orders/:id/complete
  */
 const completeAssistOrder = (id) => {
-  return post(`/neighbor-assist/${id}/complete`);
+  return post(`/neighbor-assist/orders/${id}/complete`);
 };
 
 module.exports = {

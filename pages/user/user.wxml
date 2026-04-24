@@ -72,11 +72,14 @@
   </navigator>
 
   <view class="card" wx:if="{{loggedIn}}">
-    <view class="card-head">
-      <text class="card-title">工作台</text>
-      <text class="card-more muted">技工 / 服务商 / 集市商家</text>
+    <view class="card-head" bindtap="toggleWorkbench">
+      <view class="workbench-head-left">
+        <text class="card-title">工作台</text>
+        <text class="card-more muted">技工 / 服务商 / 集市商家</text>
+      </view>
+      <text class="collapse-arrow {{workbenchCollapsed ? '' : 'expanded'}}">▶</text>
     </view>
-    <view class="portal-grid">
+    <view class="portal-grid {{workbenchCollapsed ? 'collapsed' : ''}}">
       <view class="portal-item" bindtap="goWorkerPortal">
         <view class="portal-icon-wrap worker-tone">
           <image class="portal-icon-img" src="/img/join_services/worker_join.png" mode="aspectFit"></image>

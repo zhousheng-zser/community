@@ -76,7 +76,7 @@
   box-shadow: 0 4px 10px rgba(255, 122, 0, 0.35);
 }
 
-.publish-btn-inner text {
+.publish-btn-inner .btn-text {
   color: #fff;
   font-size: 11px;
   line-height: 1.2;

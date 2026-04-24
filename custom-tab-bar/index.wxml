@@ -12,7 +12,7 @@
     <block wx:else>
       <view class="publish-btn-wrap">
         <view class="publish-btn-inner">
-          <text>一键\n发布</text>
+          <text class="btn-text">一键\n发布</text>
         </view>
       </view>
     </block>

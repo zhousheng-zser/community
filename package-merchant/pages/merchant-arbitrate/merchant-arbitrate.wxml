@@ -1,0 +1,93 @@
+<view class="arbitrate-page">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="arbitrate-content" wx:elif="{{refundInfo}}">
+    <view class="section">
+      <view class="section-title">订单信息</view>
+      <view class="info-row">
+        <text class="info-label">订单号</text>
+        <text class="info-value">{{orderInfo.order_no || refundInfo.order_no || orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">订单金额</text>
+        <text class="info-value amount">¥{{orderInfo.amount || '0.00'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">买家</text>
+        <text class="info-value">{{orderInfo.buyer_name || '—'}}</text>
+        <button class="contact-btn" data-phone="{{orderInfo.buyer_phone}}" bindtap="contactUser" wx:if="{{orderInfo.buyer_phone}}">联系</button>
+      </view>
+      <view class="info-row">
+        <text class="info-label">商家</text>
+        <text class="info-value">{{orderInfo.merchant_name || '—'}}</text>
+        <button class="contact-btn" data-phone="{{orderInfo.merchant_phone}}" bindtap="contactUser" wx:if="{{orderInfo.merchant_phone}}">联系</button>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">退款申请</view>
+      <view class="info-row">
+        <text class="info-label">退款金额</text>
+        <text class="info-value amount">¥{{refundInfo.refund_amount || '0.00'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">退款原因</text>
+        <text class="info-value">{{refundInfo.reason || '—'}}</text>
+      </view>
+      <view class="info-row" wx:if="{{refundInfo.images && refundInfo.images.length}}">
+        <text class="info-label">凭证图片</text>
+        <view class="image-list">
+          <image class="evidence-image" wx:for="{{refundInfo.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}" />
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">申请时间</text>
+        <text class="info-value">{{refundInfo.created_at || '—'}}</text>
+      </view>
+    </view>
+
+    <view class="section" wx:if="{{refundInfo.merchant_action}}">
+      <view class="section-title">商家处理记录</view>
+      <view class="info-row">
+        <text class="info-label">处理结果</text>
+        <text class="info-value">{{refundInfo.merchant_action === 'reject' ? '拒绝退款' : '同意退款'}}</text>
+      </view>
+      <view class="info-row" wx:if="{{refundInfo.merchant_reason}}">
+        <text class="info-label">商家理由</text>
+        <text class="info-value">{{refundInfo.merchant_reason}}</text>
+      </view>
+    </view>
+
+    <view class="section" wx:if="{{chatRecords && chatRecords.length}}">
+      <view class="section-title">沟通记录</view>
+      <view class="chat-item" wx:for="{{chatRecords}}" wx:key="id">
+        <text class="chat-sender">{{item.sender}}</text>
+        <text class="chat-time">{{item.created_at}}</text>
+        <text class="chat-content">{{item.content}}</text>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-title">仲裁决定</view>
+      <picker mode="selector" range="{{['强制退款', '驳回申请']}}" value="{{adminDecision === 'refund' ? 0 : 1}}" bindchange="onDecisionChange">
+        <view class="picker-cell">
+          <text>{{adminDecision === 'refund' ? '强制退款（支持买家）' : '驳回申请（支持商家）'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="section">
+      <view class="section-title">仲裁备注</view>
+      <textarea class="remark-area" placeholder="请填写仲裁理由和说明" value="{{adminRemark}}" bindinput="onRemarkInput" maxlength="500" />
+    </view>
+  </view>
+
+  <view class="arbitrate-footer" wx:if="{{!loading}}">
+    <button class="submit-btn" bindtap="submitArbitration" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : (adminDecision === 'refund' ? '强制退款' : '驳回申请')}}
+    </button>
+  </view>
+</view>

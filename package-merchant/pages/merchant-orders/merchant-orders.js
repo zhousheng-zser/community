@@ -200,6 +200,70 @@ Page({
     });
   },
 
+  async acceptOrder(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.showModal({
+      title: '确认接单',
+      content: '确认接受此订单吗？接单后请尽快备货发货。',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中', mask: true });
+            await util.post(`market/merchant/orders/${orderNo}/accept`, {});
+            wx.hideLoading();
+            wx.showToast({ title: '接单成功', icon: 'success' });
+            this.load();
+          } catch (err) {
+            wx.hideLoading();
+            wx.showToast({ title: (err && err.errmsg) || '接单失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  },
+
+  shipOrder(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.navigateTo({
+      url: `/package-merchant/pages/merchant-ship/merchant-ship?orderNo=${encodeURIComponent(orderNo)}`
+    });
+  },
+
+  handleRefund(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    const refundId = e.currentTarget.dataset.refundid;
+    if (!orderNo) return;
+    wx.navigateTo({
+      url: `/package-merchant/pages/merchant-refund-handle/merchant-refund-handle?orderNo=${encodeURIComponent(orderNo)}&refundId=${refundId || ''}`
+    });
+  },
+
+  cancelOrder(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.showModal({
+      title: '确认取消订单',
+      content: '取消后系统将自动退款给买家，确认取消吗？',
+      confirmColor: '#e74c3c',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中', mask: true });
+            await util.post(`market/merchant/orders/${orderNo}/cancel`, {});
+            wx.hideLoading();
+            wx.showToast({ title: '订单已取消', icon: 'success' });
+            this.load();
+          } catch (err) {
+            wx.hideLoading();
+            wx.showToast({ title: (err && err.errmsg) || '取消失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  },
+
   _enrichDirectServiceRow(o) {
     const w = workerOrderUi.enrichOrderItem(o);
     const orderNo = o.order_no || o.orderNo || o.id;

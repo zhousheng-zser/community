@@ -1,0 +1,59 @@
+<view class="refund-page">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="refund-content" wx:elif="{{refundInfo}}">
+    <view class="refund-section">
+      <view class="section-title">退款信息</view>
+      <view class="info-row">
+        <text class="info-label">订单号</text>
+        <text class="info-value">{{refundInfo.order_no || orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">退款金额</text>
+        <text class="info-value amount">¥{{refundInfo.refund_amount || '0.00'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">退款原因</text>
+        <text class="info-value">{{refundInfo.reason || '未填写'}}</text>
+      </view>
+      <view class="info-row" wx:if="{{refundInfo.images && refundInfo.images.length}}">
+        <text class="info-label">凭证图片</text>
+        <view class="image-list">
+          <image class="refund-image" wx:for="{{refundInfo.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}" />
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">申请时间</text>
+        <text class="info-value">{{refundInfo.created_at || '—'}}</text>
+      </view>
+    </view>
+
+    <view class="refund-section">
+      <view class="section-title">处理方式</view>
+      <picker mode="selector" range="{{['同意退款', '拒绝退款']}}" value="{{actionType === 'approve' ? 0 : 1}}" bindchange="onActionTypeChange">
+        <view class="picker-cell">
+          <text>{{actionType === 'approve' ? '同意退款' : '拒绝退款'}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="refund-section" wx:if="{{actionType === 'reject'}}">
+      <view class="section-title">拒绝理由 <text class="required">*</text></view>
+      <textarea class="reason-area" placeholder="请填写拒绝退款的理由" value="{{rejectReason}}" bindinput="onRejectReasonInput" maxlength="500" />
+    </view>
+
+    <view class="refund-section">
+      <view class="section-title">备注（选填）</view>
+      <textarea class="remark-area" placeholder="可填写处理备注" value="{{remark}}" bindinput="onRemarkInput" maxlength="200" />
+    </view>
+  </view>
+
+  <view class="refund-footer" wx:if="{{!loading}}">
+    <button class="submit-btn" bindtap="submitHandle" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : (actionType === 'approve' ? '同意退款' : '拒绝退款')}}
+    </button>
+  </view>
+</view>

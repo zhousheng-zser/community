@@ -259,10 +259,34 @@ page {
 }
 
 /* ===== 工作台入口（技工 / 商家分包）===== */
+.workbench-head-left {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.collapse-arrow {
+  font-size: 24rpx;
+  color: #999;
+  transition: transform 0.2s;
+  margin-left: 12rpx;
+}
+.collapse-arrow.expanded {
+  transform: rotate(90deg);
+}
 .portal-grid {
   display: flex;
   gap: 16rpx;
   padding: 8rpx 0 16rpx;
+  overflow: hidden;
+  transition: max-height 0.3s, opacity 0.3s;
+  max-height: 400rpx;
+  opacity: 1;
+}
+.portal-grid.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
 }
 
 .portal-item {

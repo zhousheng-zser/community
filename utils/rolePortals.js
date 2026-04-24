@@ -44,10 +44,19 @@ function canUseMerchantPortal(user) {
 /** 是否具备集市商家工作台能力 */
 function canUseMarketPortal(user) {
   if (!user) return false;
-  if (hasRole(user, 'market_merchant') || hasRole(user, 'merchant') || hasRole(user, 'admin')) return true;
+  if (hasRole(user, 'market_merchant') || hasRole(user, 'admin')) return true;
   const sid = user.shop_id != null ? user.shop_id : user.shopId;
   if (sid != null && sid !== '') return true;
   const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
+}
+
+/** 是否具备服务商工作台能力（独立于集市商家） */
+function canUseServiceProviderPortal(user) {
+  if (!user) return false;
+  if (hasRole(user, 'service_provider') || hasRole(user, 'admin')) return true;
+  const st = user.service_provider_status || user.serviceProviderStatus;
   if (st === 'approved' || st === 'active' || st === 1) return true;
   return false;
 }
@@ -108,6 +117,17 @@ function navigateToMarketHome() {
   });
 }
 
+function navigateToServiceProviderHome() {
+  const token = wx.getStorageSync('token');
+  if (!token) {
+    requireLoginToast();
+    return;
+  }
+  wx.navigateTo({
+    url: '/package-service-provider/pages/sp-home/sp-home'
+  });
+}
+
 function backToUserTab() {
   wx.switchTab({ url: USER_TAB });
 }
@@ -124,19 +144,26 @@ function marketTabUrl(path) {
   return `/package-market/pages/${path}/${path}`;
 }
 
+function serviceProvTabUrl(path) {
+  return `/package-service-provider/pages/${path}/${path}`;
+}
+
 module.exports = {
   normalizeRoles,
   hasRole,
   canUseWorkerPortal,
   canUseMerchantPortal,
   canUseMarketPortal,
+  canUseServiceProviderPortal,
   mergePortalFlags,
   navigateToWorkerHome,
   navigateToMerchantHome,
   navigateToMarketHome,
+  navigateToServiceProviderHome,
   backToUserTab,
   workerTabUrl,
   merchantTabUrl,
   marketTabUrl,
+  serviceProvTabUrl,
   USER_TAB
 };

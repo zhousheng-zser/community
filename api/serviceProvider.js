@@ -2,7 +2,7 @@
  * 服务商后台模块 API
  * 对应后端文档：八、服务商后台模块
  */
-const { get, post, patch } = require('../util.js');
+const { get, post, patch } = require('../utils/util.js');
 
 /**
  * 获取个人信息

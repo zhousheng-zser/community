@@ -8,15 +8,19 @@
       <view class='line'></view>
     </view>
     <view class='item {{activeItem==1?"active":""}}'>
-      <text data-item="1">待发货</text>
+      <text data-item="1">待接单</text>
       <view class='line'></view>
     </view>
     <view class='item {{activeItem==2?"active":""}}'>
-      <text data-item="2">待收货</text>
+      <text data-item="2">待发货</text>
       <view class='line'></view>
     </view>
     <view class='item {{activeItem==3?"active":""}}'>
-      <text data-item="3">已完成</text>
+      <text data-item="3">待收货</text>
+      <view class='line'></view>
+    </view>
+    <view class='item {{activeItem==4?"active":""}}'>
+      <text data-item="4">已完成</text>
       <view class='line'></view>
     </view>
   </view>

@@ -1,0 +1,129 @@
+page {
+  background: #f5f5f5;
+}
+
+.container {
+  padding-bottom: 40rpx;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, #FF9500 0%, #FF5E3A 100%);
+  margin: 20rpx;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  color: #fff;
+  text-align: center;
+}
+
+.balance-title {
+  font-size: 28rpx;
+  opacity: 0.9;
+}
+
+.balance-value {
+  font-size: 72rpx;
+  font-weight: bold;
+  margin: 20rpx 0;
+}
+
+.balance-tip {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+.goods-section {
+  padding: 0 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 30rpx 0;
+  color: #333;
+}
+
+.goods-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.goods-item {
+  width: 48%;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.goods-img {
+  width: 100%;
+  height: 280rpx;
+}
+
+.goods-info {
+  padding: 20rpx;
+}
+
+.goods-name {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 10rpx;
+}
+
+.goods-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goods-coins {
+  display: flex;
+  align-items: center;
+}
+
+.coin-icon {
+  font-size: 24rpx;
+  margin-right: 6rpx;
+}
+
+.coin-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #FF9500;
+}
+
+.goods-stock {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.loading-wrap,
+.empty-wrap {
+  text-align: center;
+  padding: 100rpx 0;
+}
+
+.loading-text,
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.loading-more {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #999;
+  font-size: 24rpx;
+}

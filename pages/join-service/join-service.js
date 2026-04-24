@@ -125,13 +125,16 @@ Page({
       wx.showLoading({ title: '提交数据中...', mask: true });
       let payload = {
         shop_name: form.shopName,
-        contact_name: form.legalPerson || '负责人', // fallback as frontend doesn't have standalone contact string
+        contact_name: form.legalPerson || '负责人',
         phone: form.phone,
         license_url: licenseUrl,
         shop_front_url: shopFrontUrl || '',
         environment_url: environmentUrl,
         id_card_url: idCardUrl,
-        certificate_url: certificateUrl
+        certificate_url: certificateUrl,
+        industry: form.industry || '',
+        community: form.community || '',
+        address: form.address || ''
       };
 
       Object.keys(payload).forEach(key => {
@@ -142,12 +145,61 @@ Page({
 
       await util.post('service-provider/apply', payload);
       wx.hideLoading();
+      const user = app.globalData.user || {};
+      user.service_provider_status = 'pending';
+      user.roles = user.roles || [];
+      if (!user.roles.includes('service_provider')) {
+        user.roles.push('service_provider');
+      }
+      app.globalData.user = user;
+      wx.setStorageSync('user', user);
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
       wx.hideLoading();
       wx.showToast({ title: (err && err.errmsg) || '提交失败，请重试', icon: 'none' });
       this.setData({ submitting: false });
+    }
+  },
+
+  async checkApplyStatus() {
+    const user = app.globalData.user || {};
+    const userId = user.id;
+    if (!userId) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '查询中', mask: true });
+    try {
+      const res = await util.get(`service-provider/apply/status`, { user_id: userId });
+      const data = res && res.data !== undefined ? res.data : res;
+      wx.hideLoading();
+      const statusMap = {
+        pending: '审核中',
+        reviewing: '审核中',
+        approved: '审核通过',
+        rejected: '审核未通过',
+        '': '未提交申请'
+      };
+      const status = data.status || '';
+      const remark = data.remark || '';
+      let content = `审核状态：${statusMap[status] || '未知'}`;
+      if (remark) content += `\n备注：${remark}`;
+      if (status === 'approved') {
+        user.service_provider_status = 'approved';
+        app.globalData.user = user;
+        wx.setStorageSync('user', user);
+        content += '\n您已获得服务商权限，可进入服务商工作台';
+      }
+      wx.showModal({
+        title: '入驻申请进度',
+        content,
+        showCancel: false,
+        confirmText: '我知道了'
+      });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: '查询失败', icon: 'none' });
     }
   }
 });

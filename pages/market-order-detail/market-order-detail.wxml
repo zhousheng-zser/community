@@ -73,6 +73,10 @@
       <text class="label">发货时间</text>
       <text class="value">{{deliveryTime}}</text>
     </view>
+    <view class="row countdown-row" wx:if="{{autoConfirmCountdown}}">
+      <text class="label">自动确认</text>
+      <text class="value countdown-text">剩余 {{autoConfirmCountdown.text}}</text>
+    </view>
   </view>
 
   <view class="bottomBar">

@@ -104,7 +104,12 @@ Page({
     activeMarketSort: 'distance',
     allMarketShops: [],
     marketShops: [],
-    marketShopsCacheByCat: {} // { [catName]: mappedShopList }
+    marketShopsCacheByCat: {}, // { [catName]: mappedShopList }
+    thirdPartyMiniPrograms: [
+      { name: '易达速递', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
+      { name: '啄木鸟', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
+      { name: '榕益收', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' }
+    ]
   },
   onLoad: function (options) {
     const sysInfo = wx.getSystemInfoSync();
@@ -496,6 +501,30 @@ Page({
     wx.switchTab({ url: '/pages/community/community' });
   },
 
+  jumpToMiniProgram(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const mp = this.data.thirdPartyMiniPrograms[idx];
+    if (!mp) return;
+
+    if (!mp.appId) {
+      wx.showToast({ title: '该功能暂未开放', icon: 'none' });
+      return;
+    }
+
+    wx.navigateToMiniProgram({
+      appId: mp.appId,
+      path: mp.path,
+      envVersion: 'release',
+      success(res) {
+        console.log('跳转成功', res);
+      },
+      fail(err) {
+        console.log('跳转失败', err);
+        wx.showToast({ title: '跳转失败', icon: 'none' });
+      }
+    });
+  },
+
   goAssistFromMarquee(e) {
     const id = e.currentTarget.dataset.id;
     if (!id) return;
@@ -563,6 +592,23 @@ Page({
       { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
       { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
     ]);
+
+    // 加载第三方小程序配置
+    let thirdPartyMiniPrograms = this.data.thirdPartyMiniPrograms;
+    try {
+      const res = await api.miniProgram.getMiniPrograms();
+      const programs = res.list || (res.data && res.data.list) || [];
+      if (programs.length > 0) {
+        thirdPartyMiniPrograms = programs.map(p => ({
+          name: p.name,
+          icon: p.icon || '/img/index/menuicon1.png',
+          appId: p.appId,
+          path: p.path
+        }));
+      }
+    } catch (e) {
+      console.log('加载第三方小程序配置失败，使用默认配置', e);
+    }
     // ===== 小区热卖榜：优先 core/community/hot，回退 core/services/hot =====
     const hotRankFallback = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', '上新'];
     const mapHotRows = (rows) => {
@@ -656,7 +702,8 @@ Page({
       hotFilters,
       merchantList,
       workerList,
-      marketList
+      marketList,
+      thirdPartyMiniPrograms
     });
 
     // ===== 从数据库获取服务商品（直约服务商）=====
@@ -1061,7 +1108,7 @@ Page({
           if (new Date().getTime() - v.createTime > 1296000000) {
             return;
           }
-          const { name } = util.stateTabel(v.orderState),
+          const { name } = util.stateTabel(v.orderState, userFlag),
             time = util.formatTime(new Date(v.createTime));
           v.stateStr = name;
           v.time = time;

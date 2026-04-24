@@ -12,6 +12,11 @@ const worker = require('./worker.js');
 const serviceProvider = require('./serviceProvider.js');
 const merchant = require('./merchant.js');
 const message = require('./message.js');
+const coupon = require('./coupon.js');
+const benefitCoin = require('./benefitCoin.js');
+const promoter = require('./promoter.js');
+const chat = require('./chat.js');
+const miniProgram = require('./miniProgram.js');
 
 module.exports = {
   auth,
@@ -23,5 +28,10 @@ module.exports = {
   worker,
   serviceProvider,
   merchant,
-  message
+  message,
+  coupon,
+  benefitCoin,
+  promoter,
+  chat,
+  miniProgram
 };

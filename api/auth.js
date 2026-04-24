@@ -2,22 +2,22 @@
  * 认证模块 API
  * 对应后端文档：一、认证模块
  */
-const { post, get } = require('../util.js');
+const { post, get } = require('../utils/util.js');
 
 /**
  * 微信小程序登录
- * POST /auth/wechat/login
+ * POST /auth/login
  */
 const wechatLogin = (data) => {
-  return post('/auth/wechat/login', data);
+  return post('/auth/login', data);
 };
 
 /**
  * 账号密码登录
- * POST /auth/login
+ * POST /auth/login_password
  */
 const accountLogin = (data) => {
-  return post('/auth/login', data);
+  return post('/auth/login_password', data);
 };
 
 /**
@@ -30,10 +30,10 @@ const register = (data) => {
 
 /**
  * 发送短信验证码
- * POST /auth/sms-code
+ * POST /auth/sms/send
  */
 const sendSmsCode = (data) => {
-  return post('/auth/sms-code', data);
+  return post('/auth/sms/send', data);
 };
 
 /**

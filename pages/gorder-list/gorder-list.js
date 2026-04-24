@@ -9,7 +9,7 @@ Page({
   data: {
     noOrderTip:"没有该类订单",
     activeItem: 0,
-    statusTable: ["", "待支付", "待发货", "待收货", "已收货", "退款中", "已退款", "已取消", '已完成']
+    statusTable: ["", "待支付", "待接单", "待发货", "待收货", "已完成", "退款中", "已退款", "已取消"]
   },
 
   /**
@@ -31,7 +31,7 @@ Page({
   getOrderList() {
     const { id: userId } = app.globalData.user;
     util.get('api/wx/goods_order/list/' + userId).then((data) => {
-      let orderList = [data[1], data[2], data[3], data[4]];
+      let orderList = [data[1], data[2], data[3], data[4], data[5]];
       orderList.forEach((v, i) => {
         if (v.length > 0) {
           v.forEach((n, m) => {

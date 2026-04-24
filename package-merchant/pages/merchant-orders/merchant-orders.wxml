@@ -98,8 +98,13 @@
                 data-rider-id="{{item.riderUserId}}"
                 data-rider-name="{{item.riderName}}"
                 bindtap="contactRider"
+                wx:if="{{item.bucket === 'shipping'}}"
               >联系骑手</view>
-              <view class="m-act m-act--ghost" data-no="{{item.orderNo}}" bindtap="openRiderLocation">骑手位置</view>
+              <view class="m-act m-act--ghost" data-no="{{item.orderNo}}" bindtap="openRiderLocation" wx:if="{{item.bucket === 'shipping'}}">骑手位置</view>
+              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="acceptOrder" wx:if="{{item.bucket === 'to_ship' && item.statusText.indexOf('接单') !== -1}}">接单</view>
+              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="shipOrder" wx:if="{{item.bucket === 'to_ship'}}">发货</view>
+              <view class="m-act m-act--warn" data-no="{{item.orderNo}}" data-refundid="{{item.refundId}}" bindtap="handleRefund" wx:if="{{item.bucket === 'after_sale'}}">处理售后</view>
+              <view class="m-act m-act--danger" data-no="{{item.orderNo}}" bindtap="cancelOrder" wx:if="{{item.bucket === 'to_ship' || item.bucket === 'unpaid'}}">取消订单</view>
             </view>
           </view>
         </view>

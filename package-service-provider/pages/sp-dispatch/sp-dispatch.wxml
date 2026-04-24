@@ -1,0 +1,112 @@
+<view class="sp-dispatch-page">
+  <view class="loading-box" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="dispatch-content" wx:elif="{{pendingOrders.length > 0}}">
+    <view class="order-card" wx:for="{{pendingOrders}}" wx:key="id">
+      <view class="order-header" bindtap="viewOrderDetail" data-id="{{item.id}}">
+        <text class="order-no">订单号 {{item.orderNo}}</text>
+        <text class="order-status">{{item.statusText}}</text>
+      </view>
+      <view class="order-body" bindtap="viewOrderDetail" data-id="{{item.id}}">
+        <view class="info-row">
+          <text class="info-label">服务项目</text>
+          <text class="info-value">{{item.serviceTitle}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">预约时间</text>
+          <text class="info-value">{{item.bookTime || '—'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">客户</text>
+          <text class="info-value">{{item.contactName || '—'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">服务地址</text>
+          <text class="info-value">{{item.address || '—'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">订单金额</text>
+          <text class="info-value amount">¥{{item.amount}}</text>
+        </view>
+      </view>
+      <view class="order-actions">
+        <button class="action-btn accept" bindtap="acceptOrder" data-id="{{item.id}}">自行接单</button>
+        <button class="action-btn dispatch" bindtap="openDispatchModal" data-id="{{item.id}}">派单给技工</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-box" wx:elif="{{!loading}}">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无待派单的服务订单</text>
+  </view>
+
+  <view class="dispatch-modal-mask" wx:if="{{showDispatchModal}}" bindtap="closeDispatchModal">
+    <view class="dispatch-modal" catchtap="noop">
+      <view class="modal-header">
+        <text class="modal-title">选择技工</text>
+        <text class="modal-close" bindtap="closeDispatchModal">×</text>
+      </view>
+      <view class="modal-body">
+        <view class="workers-loading" wx:if="{{workersLoading}}">
+          <text>加载技工列表中...</text>
+        </view>
+        <scroll-view class="workers-list" scroll-y wx:elif="{{availableWorkers.length > 0}}">
+          <view
+            class="worker-item {{selectedWorkerId === item.id ? 'selected' : ''}}"
+            wx:for="{{availableWorkers}}"
+            wx:key="id"
+            bindtap="selectWorker"
+            data-id="{{item.id}}"
+          >
+            <image class="worker-avatar" src="{{item.avatar || '/img/default-avatar.png'}}" mode="aspectFill" />
+            <view class="worker-info">
+              <text class="worker-name">{{item.name}}</text>
+              <view class="worker-meta">
+                <text class="worker-rating" wx:if="{{item.rating}}">⭐ {{item.rating}}</text>
+                <text class="worker-orders">已完成 {{item.completedOrders}} 单</text>
+              </view>
+              <view class="worker-tags" wx:if="{{item.tags && item.tags.length}}">
+                <text class="tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+              </view>
+            </view>
+            <view class="worker-check" wx:if="{{selectedWorkerId === item.id}}">✓</view>
+          </view>
+        </scroll-view>
+        <view class="workers-empty" wx:else>
+          <text>暂无可用技工</text>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="confirm-btn" bindtap="confirmDispatch" disabled="{{!selectedWorkerId}}">
+          {{selectedWorkerId ? '确认派单' : '请选择技工'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="sp-tabbar">
+    <view class="sp-tabbar-item" bindtap="goHome">
+      <image class="sp-tabbar-icon" src="/img/home-0.png" mode="aspectFit" />
+      <text>首页</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goOrders">
+      <image class="sp-tabbar-icon" src="/img/order-0.png" mode="aspectFit" />
+      <text>订单</text>
+    </view>
+    <view class="sp-tabbar-item sp-tabbar-on">
+      <image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <text>派单</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goServices">
+      <image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" />
+      <text>服务</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goMine">
+      <image class="sp-tabbar-icon" src="/img/user-0.png" mode="aspectFit" />
+      <text>我的</text>
+    </view>
+  </view>
+</view>

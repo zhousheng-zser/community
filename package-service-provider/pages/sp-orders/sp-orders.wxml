@@ -1,0 +1,68 @@
+<view class="sp-orders-page">
+  <view class="sp-tabs">
+    <view class="sp-tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="sp-tab-item {{activeTab === 'pending_accept' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending_accept">待接单</view>
+    <view class="sp-tab-item {{activeTab === 'dispatching' ? 'active' : ''}}" bindtap="switchTab" data-tab="dispatching">派单中</view>
+    <view class="sp-tab-item {{activeTab === 'in_progress' ? 'active' : ''}}" bindtap="switchTab" data-tab="in_progress">服务中</view>
+    <view class="sp-tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+  </view>
+
+  <view class="sp-order-list" wx:if="{{orders.length > 0}}">
+    <view class="sp-order-card" wx:for="{{orders}}" wx:key="id" bindtap="viewOrderDetail" data-id="{{item.id}}">
+      <view class="sp-order-header">
+        <text class="sp-order-no">{{item.orderNo}}</text>
+        <text class="sp-order-status">{{item.statusText}}</text>
+      </view>
+      <view class="sp-order-body">
+        <text class="sp-order-title">{{item.serviceTitle}}</text>
+        <view class="sp-order-row">
+          <text class="sp-order-label">预约时间</text>
+          <text class="sp-order-value">{{item.bookTime || '—'}}</text>
+        </view>
+        <view class="sp-order-row">
+          <text class="sp-order-label">客户</text>
+          <text class="sp-order-value">{{item.contactName || '—'}}</text>
+        </view>
+        <view class="sp-order-row">
+          <text class="sp-order-label">技工</text>
+          <text class="sp-order-value">{{item.workerName || '待派单'}}</text>
+        </view>
+        <view class="sp-order-row">
+          <text class="sp-order-label">金额</text>
+          <text class="sp-order-value sp-order-amount">¥{{item.amount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="sp-empty" wx:elif="{{!loading}}">
+    <text>暂无订单数据</text>
+  </view>
+
+  <view class="sp-loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="sp-tabbar">
+    <view class="sp-tabbar-item" bindtap="goHome">
+      <image class="sp-tabbar-icon" src="/img/home-0.png" mode="aspectFit" />
+      <text>首页</text>
+    </view>
+    <view class="sp-tabbar-item sp-tabbar-on">
+      <image class="sp-tabbar-icon" src="/img/order-0.png" mode="aspectFit" />
+      <text>订单</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goDispatch">
+      <image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <text>派单</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goServices">
+      <image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" />
+      <text>服务</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goMine">
+      <image class="sp-tabbar-icon" src="/img/user-0.png" mode="aspectFit" />
+      <text>我的</text>
+    </view>
+  </view>
+</view>

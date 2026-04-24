@@ -1,4 +1,5 @@
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 const { unwrapList } = util;
 
 Page({
@@ -16,10 +17,11 @@ Page({
   async load() {
     this.setData({ loading: true });
     try {
-      const res = await util.get('promoter/orders', { page: 1, limit: 100, status: this.data.tab });
+      const res = await api.promoter.getOrders({ page: 1, limit: 100, status: this.data.tab });
       const list = unwrapList(res);
       this.setData({ list, loading: false });
     } catch (e) {
+      console.log('推客订单加载失败', e);
       this.setData({
         list: [],
         loading: false

@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="balance-card">
+    <view class="balance-title">我的家事币</view>
+    <view class="balance-value">{{balance}}</view>
+    <view class="balance-tip">可兑换超值好物</view>
+  </view>
+
+  <view class="goods-section">
+    <view class="section-title">超值兑换</view>
+    
+    <view wx:if="{{loading && goodsList.length === 0}}" class="loading-wrap">
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <view wx:elif="{{goodsList.length > 0}}" class="goods-grid">
+      <view class="goods-item" wx:for="{{goodsList}}" wx:key="id" bindtap="goDetail" data-id="{{item.id}}">
+        <image class="goods-img" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="goods-info">
+          <text class="goods-name">{{item.name}}</text>
+          <view class="goods-footer">
+            <view class="goods-coins">
+              <text class="coin-icon">🪙</text>
+              <text class="coin-value">{{item.coins}}</text>
+            </view>
+            <text class="goods-stock">库存{{item.stock}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-wrap">
+      <text class="empty-icon">🎁</text>
+      <text class="empty-text">暂无可兑换商品</text>
+    </view>
+
+    <view wx:if="{{loading && goodsList.length > 0}}" class="loading-more">
+      <text>加载中...</text>
+    </view>
+  </view>
+</view>

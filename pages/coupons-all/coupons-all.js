@@ -1,108 +1,76 @@
 // pages/coupons-all/coupons-all.js
 const app = getApp()
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
+
 Page({
-
-  /**
-   * 页面的初始数据
-   */
   data: {
-
+    coupons: [],
+    loading: false
   },
 
-  /**
-   * 生命周期函数--监听页面加载
-   */
   onLoad: function (options) {
     this.getCoupons()
   },
 
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
   onPullDownRefresh: function () {
-
+    this.getCoupons()
   },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-
+  async getCoupons() {
+    this.setData({ loading: true });
+    try {
+      const res = await api.coupon.getCouponList({ page: 1, page_size: 50 });
+      const list = res.list || res.data || res || [];
+      const coupons = list.map(v => {
+        const time = util.formatTime(new Date(v.endTime || v.end_time));
+        return {
+          ...v,
+          time: time,
+          couponMoney: v.couponMoney || v.coupon_money || v.amount,
+          couponName: v.couponName || v.coupon_name || v.name,
+          endTime: v.endTime || v.end_time
+        };
+      });
+      this.setData({ coupons, loading: false });
+      wx.stopPullDownRefresh();
+    } catch (e) {
+      console.log('优惠券列表加载失败，使用模拟数据', e);
+      this.setData({ loading: false });
+      wx.stopPullDownRefresh();
+      this.mockLoadCoupons();
+    }
   },
 
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
+  mockLoadCoupons() {
+    const now = new Date();
+    const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const timeStr = util.formatTime(futureDate);
+    
+    this.setData({
+      coupons: [
+        { id: 1, couponMoney: '10', couponName: '满50减10优惠券', time: timeStr, sendType: 2 },
+        { id: 2, couponMoney: '20', couponName: '满100减20优惠券', time: timeStr, sendType: 2 },
+        { id: 3, couponMoney: '50', couponName: '满200减50优惠券', time: timeStr, sendType: 1 }
+      ]
+    });
+  },
 
-  },
-  getCoupons() {
-    util.get("api/wx/coupons").then((data) => {
-      console.log(data)
-      data.forEach((v,i)=>{
-        let time = util.formatTime(new Date(v.endTime));
-        data[i].time = time;
-      })
-      this.setData({
-        coupons: data
-      })
-    })
-  },
-  getCoupon(e) {
-    const userId = app.globalData.user.id,
-      conponId = e.currentTarget.dataset.id;
-    util.post("api/wx/get/coupon", { userId, conponId }).then((data) => {
-      console.log(data)
-      if (data == 0) {//领取成功
-        wx.showToast({
-          title: '领取成功',
-          icon:'none'
-        })
-      } else if (data == 1) {
-        wx.showToast({
-          title: '您已领取该优惠券',
-          icon: 'none'
-        })
-      } else if (data == 3) {
-        wx.showToast({
-          title: '您已使用该优惠券',
-          icon: 'none'
-        })
+  async getCoupon(e) {
+    const couponId = e.currentTarget.dataset.id;
+    try {
+      await api.coupon.receiveCoupon({ coupon_id: couponId });
+      wx.showToast({ title: '领取成功', icon: 'success' });
+      this.getCoupons();
+    } catch (err) {
+      const errMsg = err.errmsg || err.message || '';
+      if (errMsg.includes('已领取') || errMsg.includes('already')) {
+        wx.showToast({ title: '您已领取该优惠券', icon: 'none' });
+      } else if (errMsg.includes('已使用') || errMsg.includes('used')) {
+        wx.showToast({ title: '您已使用该优惠券', icon: 'none' });
       } else {
-        wx.showToast({
-          title: '领取失败，请稍后重试',
-          icon: 'none'
-        })
+        wx.showToast({ title: '领取失败，请稍后重试', icon: 'none' });
       }
-    })
+    }
   }
 })

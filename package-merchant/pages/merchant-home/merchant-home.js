@@ -158,6 +158,12 @@ Page({
     });
   },
 
+  goDispatch() {
+    wx.navigateTo({
+      url: '/package-merchant/pages/merchant-dispatch/merchant-dispatch'
+    });
+  },
+
   goMine() {
     wx.redirectTo({ url: rp.merchantTabUrl('merchant-mine') });
   },

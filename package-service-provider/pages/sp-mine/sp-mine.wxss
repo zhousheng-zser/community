@@ -1,0 +1,21 @@
+page { background: #f5f5f5; padding-bottom: calc(120rpx + env(safe-area-inset-bottom)); }
+.sp-mine-page { min-height: 100vh; }
+.sp-profile { margin: 0 0 16rpx; padding: 48rpx 32rpx 40rpx; border-radius: 0 0 40rpx 40rpx; display: flex; flex-direction: column; align-items: center; text-align: center; background: linear-gradient(135deg, #6b4f2a 0%, #9a7340 100%); box-shadow: 0 12rpx 40rpx rgba(90, 70, 35, 0.28); }
+.sp-avatar { width: 140rpx; height: 140rpx; border-radius: 70rpx; border: 5rpx solid rgba(255, 255, 255, 0.45); margin-bottom: 20rpx; }
+.sp-name { font-size: 40rpx; font-weight: 800; color: #fff; }
+.sp-sub { margin-top: 10rpx; font-size: 24rpx; color: rgba(255, 255, 255, 0.9); }
+.sp-balance-box { margin-top: 24rpx; padding: 20rpx 40rpx; background: rgba(255, 255, 255, 0.2); border-radius: 16rpx; backdrop-filter: blur(10rpx); display: flex; flex-direction: column; align-items: center; }
+.sp-balance-label { font-size: 22rpx; color: rgba(255, 255, 255, 0.85); margin-bottom: 8rpx; }
+.sp-balance-amount { font-size: 48rpx; font-weight: 700; color: #fff; }
+.sp-card { margin: 16rpx 24rpx 0; border-radius: 24rpx; background: #fff; padding: 18rpx 20rpx 10rpx; box-shadow: 0 8rpx 20rpx rgba(0,0,0,0.04); }
+.sp-card-title { font-size: 30rpx; font-weight: 700; color: #1a1a1a; margin-bottom: 12rpx; }
+.sp-block { padding-bottom: 8rpx; }
+.sp-row { display: flex; justify-content: space-between; align-items: center; padding: 24rpx 0; border-bottom: 1rpx solid #f0f0f0; }
+.sp-row:last-child { border-bottom: none; }
+.sp-label { font-size: 28rpx; color: #333; }
+.sp-arrow { font-size: 32rpx; color: #ccc; }
+.sp-back-btn { margin: 40rpx 24rpx 0; text-align: center; padding: 20rpx; font-size: 26rpx; color: #999; }
+.sp-tabbar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(100rpx + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: #fff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -4rpx 16rpx rgba(0,0,0,0.05); }
+.sp-tabbar-item { display: flex; flex-direction: column; align-items: center; font-size: 20rpx; color: #999; }
+.sp-tabbar-on { color: #6b4f2a; }
+.sp-tabbar-icon { width: 40rpx; height: 40rpx; margin-bottom: 4rpx; }

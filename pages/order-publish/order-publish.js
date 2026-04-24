@@ -1,6 +1,24 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 
+// 同步发布到社区邻里互动
+function syncToCommunityPost(content, category, address, price, imageUrls) {
+  const priceText = price && parseFloat(price) > 0 ? ` 悬赏¥${parseFloat(price).toFixed(2)}` : '';
+  const postContent = `[${category}]${priceText}\n${content}\n📍${address}`;
+  const postData = {
+    content: postContent,
+    category: '邻里互动',
+    location: address
+  };
+  if (imageUrls && imageUrls.length > 0) {
+    postData.images = imageUrls;
+  }
+  // 异步发布，不阻塞主流程
+  util.post('posts', postData).catch(() => {
+    // 静默失败，不影响订单发布结果
+  });
+}
+
 // 生成年月日时范围
 function buildTimeRanges() {
   const now = new Date();
@@ -25,10 +43,10 @@ Page({
     activeCategory: '代取',
 
     // 邻里帮帮表单
-    helperForm: { pickup: '', delivery: '', remark: '' },
+    helperForm: { pickup: '', delivery: '', remark: '', price: '' },
 
     // 一键发布表单
-    form: { address: '', time: '', content: '', images: [] },
+    form: { address: '', time: '', content: '', images: [], price: '' },
     agreed: false,
     submitting: false,
     canSubmit: false,
@@ -154,6 +172,17 @@ Page({
     this.updateCanSubmit();
   },
 
+  onPriceInput(e) {
+    const field = e.currentTarget.dataset.field;
+    const val = e.detail.value;
+    if (field === 'helperPrice') {
+      this.setData({ 'helperForm.price': val });
+    } else {
+      this.setData({ 'form.price': val });
+      this.updateCanSubmit();
+    }
+  },
+
   /* ===== 一键发布 ===== */
   onContentInput(e) {
     this.setData({ 'form.content': e.detail.value });
@@ -202,12 +231,15 @@ Page({
         if (url) imageUrls.push(url);
       }
       try {
+        const categoryMap = { '代取': 'take', '看护': 'child', '陪护': 'escort', '代扔垃圾': 'trash', '宠物照看': 'pet' };
+        const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
         await util.post('neighbor-assist/orders', {
-          category: activeCategory,
-          address: form.address,
-          time: form.time,
-          content: form.content,
-          images: imageUrls
+          assist_type: categoryMap[activeCategory] || 'take',
+          origin_address_snapshot: { address: form.address, detail: form.address },
+          destination_address_snapshot: { address: form.address, detail: form.address },
+          appointment_time: form.time || null,
+          remark: form.content,
+          reward_amount: rewardAmount
         });
       } catch (e1) {
         await util.post('orders/publish', {
@@ -215,11 +247,14 @@ Page({
           address: form.address,
           time: form.time,
           content: form.content,
-          images: imageUrls
+          images: imageUrls,
+          price: rewardAmount
         });
       }
+      // 同步到社区邻里互动
+      syncToCommunityPost(form.content, activeCategory, form.address, rewardAmount, imageUrls);
       wx.showToast({ title: '发布成功', icon: 'success' });
-      this.setData({ form: { address: '', time: '', content: '', images: [] }, agreed: false, canSubmit: false, submitting: false });
+      this.setData({ form: { address: '', time: '', content: '', images: [], price: '' }, agreed: false, canSubmit: false, submitting: false });
       this.loadRecentList();
     } catch (err) {
       wx.showToast({ title: '发布失败，请重试', icon: 'none' });
@@ -228,11 +263,42 @@ Page({
   },
 
   /* ===== 邻里帮帮提交 ===== */
-  submitHelper() {
-    const { pickup, delivery } = this.data.helperForm;
+  async submitHelper() {
+    const { pickup, delivery, remark, price } = this.data.helperForm;
     if (!pickup || !delivery) return wx.showToast({ title: '请填写取送地址', icon: 'none' });
-    wx.showToast({ title: '发布成功', icon: 'success' });
-    this.setData({ helperForm: { pickup: '', delivery: '', remark: '' } });
+
+    // 将中文分类映射为英文 assist_type
+    const categoryMap = { '代取': 'take', '看护': 'child', '陪护': 'escort', '代扔垃圾': 'trash', '宠物照看': 'pet' };
+    const assistType = categoryMap[this.data.activeCategory] || 'take';
+    const rewardAmount = price && parseFloat(price) > 0 ? parseFloat(price) : null;
+
+    wx.showLoading({ title: '发布中...' });
+    try {
+      await util.post('neighbor-assist/orders', {
+        assist_type: assistType,
+        community_id: 1,
+        origin_address_snapshot: {
+          address: pickup,
+          detail: pickup
+        },
+        destination_address_snapshot: {
+          address: delivery,
+          detail: delivery
+        },
+        remark: remark || `${pickup} → ${delivery}`,
+        reward_amount: rewardAmount
+      });
+      wx.hideLoading();
+      // 同步到社区邻里互动
+      syncToCommunityPost(remark || `${pickup} → ${delivery}`, this.data.activeCategory, pickup, rewardAmount);
+      wx.showToast({ title: '发布成功', icon: 'success' });
+      this.setData({ helperForm: { pickup: '', delivery: '', remark: '', price: '' } });
+    } catch (err) {
+      wx.hideLoading();
+      const msg = (err && err.errmsg) || '发布失败，请重试';
+      console.error('发布失败:', err);
+      wx.showToast({ title: msg, icon: 'none' });
+    }
   },
 
   loadRecentList() {

@@ -2,7 +2,7 @@
  * 服务订单模块 API
  * 对应后端文档：四、服务订单模块
  */
-const { get, post } = require('../util.js');
+const { get, post } = require('../utils/util.js');
 
 /**
  * 创建服务订单
@@ -28,26 +28,30 @@ const getMyOrders = (params) => {
   return get('/service-orders/my', params);
 };
 
+/** Alias for getMyOrders - used by service-orders-my page */
+const getMyList = getMyOrders;
+
 /**
  * 模拟支付
- * POST /service-orders/:id/mock-pay
+ * POST /service-orders/:id/pay
  */
 const mockPay = (id) => {
-  return post(`/service-orders/${id}/mock-pay`);
+  return post(`/service-orders/${id}/pay`);
 };
 
 /**
  * 确认完成
- * POST /service-orders/:id/confirm
+ * POST /service-orders/:id/confirm-complete
  */
 const confirmOrder = (id) => {
-  return post(`/service-orders/${id}/confirm`);
+  return post(`/service-orders/${id}/confirm-complete`);
 };
 
 module.exports = {
   createServiceOrder,
   getOrderDetail,
   getMyOrders,
+  getMyList,
   mockPay,
   confirmOrder
 };

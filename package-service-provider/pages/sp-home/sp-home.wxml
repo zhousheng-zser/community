@@ -1,0 +1,53 @@
+<view class="sp-home-page">
+  <view class="sp-header">
+    <image class="sp-avatar" src="{{userPhoto}}" mode="aspectFill" />
+    <view class="sp-info">
+      <text class="sp-greeting">{{greeting}}，{{displayName}}</text>
+      <text class="sp-role">服务商工作台</text>
+    </view>
+    <view class="sp-balance-box">
+      <text class="sp-balance-label">服务商结算</text>
+      <text class="sp-balance-amount">¥{{balanceText}}</text>
+    </view>
+  </view>
+
+  <view class="sp-stats">
+    <view class="sp-stat-item">
+      <text class="sp-stat-num">{{stats.pendingOrders}}</text>
+      <text class="sp-stat-label">待接单</text>
+    </view>
+    <view class="sp-stat-item">
+      <text class="sp-stat-num">{{stats.dispatching}}</text>
+      <text class="sp-stat-label">派单中</text>
+    </view>
+    <view class="sp-stat-item">
+      <text class="sp-stat-num">{{stats.inProgress}}</text>
+      <text class="sp-stat-label">服务中</text>
+    </view>
+    <view class="sp-stat-item">
+      <text class="sp-stat-num">{{stats.completed}}</text>
+      <text class="sp-stat-label">已完成</text>
+    </view>
+  </view>
+
+  <view class="sp-menu">
+    <view class="sp-menu-item" bindtap="goOrders">
+      <image class="sp-menu-icon" src="/img/order-0.png" mode="aspectFit" />
+      <text class="sp-menu-text">服务订单</text>
+    </view>
+    <view class="sp-menu-item" bindtap="goDispatch">
+      <image class="sp-menu-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <text class="sp-menu-text">派单管理</text>
+    </view>
+    <view class="sp-menu-item" bindtap="goServices">
+      <image class="sp-menu-icon" src="/img/service.png" mode="aspectFit" />
+      <text class="sp-menu-text">服务项目</text>
+    </view>
+    <view class="sp-menu-item" bindtap="goMine">
+      <image class="sp-menu-icon" src="/img/user-0.png" mode="aspectFit" />
+      <text class="sp-menu-text">账户中心</text>
+    </view>
+  </view>
+
+  <view class="sp-back-btn" bindtap="backUser">返回用户端</view>
+</view>

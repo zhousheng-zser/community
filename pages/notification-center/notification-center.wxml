@@ -1,0 +1,32 @@
+<view class="nc-page">
+  <view class="nc-header">
+    <view class="nc-tabs">
+      <view class="nc-tab {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+      <view class="nc-tab {{activeTab === 'unread' ? 'active' : ''}}" bindtap="switchTab" data-tab="unread">未读</view>
+    </view>
+    <view class="nc-actions">
+      <view class="nc-action" bindtap="markAllAsRead" wx:if="{{unreadCount > 0}}">全部已读</view>
+      <view class="nc-action" bindtap="clearNotifications">清空</view>
+    </view>
+  </view>
+
+  <view class="nc-list" wx:if="{{notificationList.length > 0}}">
+    <view class="nc-item {{item.isRead ? 'read' : 'unread'}}" wx:for="{{notificationList}}" wx:key="id" bindtap="handleNotificationTap" data-item="{{item}}">
+      <view class="nc-dot" wx:if="{{!item.isRead}}"></view>
+      <view class="nc-content">
+        <view class="nc-title">{{item.title}}</view>
+        <view class="nc-time">{{item.timeDisplay}}</view>
+      </view>
+      <view class="nc-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="nc-empty" wx:elif="{{!loading}}">
+    <text class="nc-empty-icon">🔔</text>
+    <text class="nc-empty-text">暂无通知</text>
+  </view>
+
+  <view class="nc-loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

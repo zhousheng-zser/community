@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const { sensitiveCheck } = require('../../utils/sensitiveWords.js');
 
 Page({
   data: {
@@ -82,6 +83,20 @@ Page({
   sendText() {
     if (!this.data.inputText.trim()) return;
     const text = this.data.inputText;
+    
+    const passed = sensitiveCheck(text, 
+      () => {
+        this.doSendText(text);
+      },
+      (result) => {
+        wx.showToast({ title: '内容包含敏感词汇，请修改后重试', icon: 'none' });
+      }
+    );
+    
+    if (!passed) return;
+  },
+
+  doSendText(text) {
     const payload = {
       conversationId: this.data.conversationId,
       content: text,

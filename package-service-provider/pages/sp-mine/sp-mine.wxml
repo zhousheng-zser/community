@@ -1,0 +1,76 @@
+<view class="sp-mine-page">
+  <view class="sp-profile">
+    <image class="sp-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+    <text class="sp-name">{{displayName}}</text>
+    <text class="sp-sub">服务商端 · 与用户端同一账号</text>
+    <view class="sp-balance-box">
+      <text class="sp-balance-label">{{balanceLabel}}</text>
+      <text class="sp-balance-amount">¥{{balanceText}}</text>
+    </view>
+  </view>
+
+  <view class="sp-card">
+    <view class="sp-card-title">经营</view>
+    <view class="sp-block">
+      <navigator class="sp-row" url="/package-service-provider/pages/sp-services/sp-services">
+        <text class="sp-label">服务项目管理</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/package-service-provider/pages/sp-orders/sp-orders">
+        <text class="sp-label">服务订单</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/package-service-provider/pages/sp-dispatch/sp-dispatch">
+        <text class="sp-label">派单管理</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="sp-card">
+    <view class="sp-card-title">账户</view>
+    <view class="sp-block">
+      <navigator class="sp-row" url="/pages/join-service/join-service">
+        <text class="sp-label">入驻与资质</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/pages/account/account">
+        <text class="sp-label">资金与提现</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/pages/message/message">
+        <text class="sp-label">消息通知</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/pages/settings/settings">
+        <text class="sp-label">设置</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+    </view>
+  </view>
+
+  <view class="sp-back-btn" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="sp-tabbar">
+    <view class="sp-tabbar-item" bindtap="goHome">
+      <image class="sp-tabbar-icon" src="/img/home-0.png" mode="aspectFit" />
+      <text>首页</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goOrders">
+      <image class="sp-tabbar-icon" src="/img/order-0.png" mode="aspectFit" />
+      <text>订单</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goDispatch">
+      <image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <text>派单</text>
+    </view>
+    <view class="sp-tabbar-item" bindtap="goServices">
+      <image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" />
+      <text>服务</text>
+    </view>
+    <view class="sp-tabbar-item sp-tabbar-on">
+      <image class="sp-tabbar-icon" src="/img/user-0.png" mode="aspectFit" />
+      <text>我的</text>
+    </view>
+  </view>
+</view>

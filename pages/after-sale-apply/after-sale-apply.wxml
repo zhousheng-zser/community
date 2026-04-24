@@ -1,0 +1,54 @@
+<view class="refund-apply-page">
+  <view class="section">
+    <view class="section-title">退款类型</view>
+    <picker mode="selector" range="{{['仅退款', '退货退款']}}" value="{{refundType === 'refund_only' ? 0 : 1}}" bindchange="onRefundTypeChange">
+      <view class="picker-cell">
+        <text>{{refundType === 'refund_only' ? '仅退款' : '退货退款'}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="section">
+    <view class="section-title">退款原因 <text class="required">*</text></view>
+    <picker mode="selector" range="{{['商品质量问题', '商品与描述不符', '尺寸/规格不符', '未收到货', '多拍/错拍', '其他']}}" bindchange="onReasonSelect">
+      <view class="picker-cell">
+        <text>{{refundReason || '请选择退款原因'}}</text>
+        <text class="picker-arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <view class="section">
+    <view class="section-title">退款金额</view>
+    <view class="input-group">
+      <text class="currency">¥</text>
+      <input class="amount-input" type="digit" placeholder="请输入退款金额" value="{{refundAmount}}" bindinput="onAmountInput" />
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-title">问题描述</view>
+    <textarea class="desc-area" placeholder="请详细描述您遇到的问题（选填）" value="{{description}}" bindinput="onDescriptionInput" maxlength="500" />
+  </view>
+
+  <view class="section">
+    <view class="section-title">凭证图片（最多3张）</view>
+    <view class="image-list">
+      <view class="image-item" wx:for="{{images}}" wx:key="*this">
+        <image class="refund-image" src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}" />
+        <view class="remove-btn" data-index="{{index}}" bindtap="removeImage">×</view>
+      </view>
+      <view class="upload-btn" bindtap="uploadImage" wx:if="{{images.length < 3}}">
+        <text class="upload-icon">+</text>
+        <text class="upload-text">上传凭证</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="submit-btn" bindtap="submitRefund" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '提交申请'}}
+    </button>
+  </view>
+</view>

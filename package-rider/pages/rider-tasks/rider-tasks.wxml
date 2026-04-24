@@ -1,0 +1,101 @@
+<view class="rider-tasks-page">
+  <view class="rider-tabs">
+    <view class="rider-tab-item {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待取货</view>
+    <view class="rider-tab-item {{activeTab === 'delivering' ? 'active' : ''}}" bindtap="switchTab" data-tab="delivering">配送中</view>
+    <view class="rider-tab-item {{activeTab === 'delivered' ? 'active' : ''}}" bindtap="switchTab" data-tab="delivered">已送达</view>
+    <view class="rider-tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+  </view>
+
+  <view class="rider-task-list" wx:if="{{tasks.length > 0}}">
+    <view class="rider-task-card" wx:for="{{tasks}}" wx:key="id" bindtap="viewTaskDetail" data-id="{{item.id}}">
+      <view class="rider-task-header">
+        <text class="rider-task-no">订单 {{item.orderNo}}</text>
+        <text class="rider-task-status">{{item.statusText}}</text>
+      </view>
+      <view class="rider-task-body">
+        <view class="rider-task-row">
+          <text class="rider-task-label">商家</text>
+          <text class="rider-task-value">{{item.shopName}}</text>
+        </view>
+        <view class="rider-task-row">
+          <text class="rider-task-label">客户</text>
+          <text class="rider-task-value">{{item.customerName}}</text>
+        </view>
+        <view class="rider-task-row">
+          <text class="rider-task-label">地址</text>
+          <text class="rider-task-value">{{item.customerAddress}}</text>
+        </view>
+        <view class="rider-task-row">
+          <text class="rider-task-label">金额</text>
+          <text class="rider-task-value rider-task-amount">¥{{item.amount}}</text>
+        </view>
+      </view>
+      <view class="rider-task-actions" wx:if="{{item.status === 'pending'}}">
+        <button class="rider-action-btn accept" bindtap="acceptTask" data-id="{{item.id}}">接单</button>
+      </view>
+      <view class="rider-task-actions" wx:elif="{{item.status === 'picked'}}">
+        <button class="rider-action-btn pickup" bindtap="confirmPickup" data-id="{{item.id}}">确认取货</button>
+      </view>
+      <view class="rider-task-actions" wx:elif="{{item.status === 'delivering'}}">
+        <button class="rider-action-btn deliver" bindtap="confirmDelivery" data-id="{{item.id}}">确认送达</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="rider-empty" wx:elif="{{!loading}}">
+    <text>暂无配送任务</text>
+  </view>
+
+  <view class="rider-loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="rider-task-modal" wx:if="{{showTaskDetail}}" bindtap="closeTaskDetail">
+    <view class="rider-modal-content" catchtap="noop">
+      <view class="rider-modal-header">
+        <text class="rider-modal-title">配送任务详情</text>
+        <text class="rider-modal-close" bindtap="closeTaskDetail">×</text>
+      </view>
+      <view class="rider-modal-body">
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">订单号</text>
+          <text class="rider-modal-value">{{currentTask.orderNo}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">商家</text>
+          <text class="rider-modal-value">{{currentTask.shopName}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">商家电话</text>
+          <text class="rider-modal-value" bindtap="contactShop" data-phone="{{currentTask.shopPhone}}">{{currentTask.shopPhone || '—'}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">商家地址</text>
+          <text class="rider-modal-value">{{currentTask.shopAddress}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">客户</text>
+          <text class="rider-modal-value">{{currentTask.customerName}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">客户电话</text>
+          <text class="rider-modal-value" bindtap="contactCustomer" data-phone="{{currentTask.customerPhone}}">{{currentTask.customerPhone || '—'}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">配送地址</text>
+          <text class="rider-modal-value" bindtap="navigateToAddress" data-address="{{currentTask.customerAddress}}">{{currentTask.customerAddress}}</text>
+        </view>
+        <view class="rider-modal-row">
+          <text class="rider-modal-label">配送金额</text>
+          <text class="rider-modal-value rider-modal-amount">¥{{currentTask.amount}}</text>
+        </view>
+      </view>
+      <view class="rider-modal-actions">
+        <button class="rider-modal-btn location" bindtap="reportLocation">上报位置</button>
+        <button class="rider-modal-btn primary" wx:if="{{currentTask.status === 'pending'}}" bindtap="acceptTask" data-id="{{currentTask.id}}">接单</button>
+        <button class="rider-modal-btn primary" wx:elif="{{currentTask.status === 'picked'}}" bindtap="confirmPickup" data-id="{{currentTask.id}}">确认取货</button>
+        <button class="rider-modal-btn primary" wx:elif="{{currentTask.status === 'delivering'}}" bindtap="confirmDelivery" data-id="{{currentTask.id}}">确认送达</button>
+      </view>
+    </view>
+  </view>
+</view>

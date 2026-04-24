@@ -1,9 +1,10 @@
 //app.js
 const util = require('utils/util.js');
 const rolePortals = require('utils/rolePortals.js');
+const env = require('utils/env.js');
 App({
   onLaunch: function (query) {
-    // 冷启动：自动定位仅在本轮打开做一次；未手动选点前清空上次自动坐标，首页 init 会重新 getLocation
+    env.init();
     this._resetMarketAutoLocationOnColdStart();
   },
   /** 冷启动清空本地集市定位缓存（含手动选点标记），下次进入首页会重新自动定位一次；同一次使用中手动选点后再不会被 Tab/列表刷新自动改坐标 */

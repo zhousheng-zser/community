@@ -2,7 +2,7 @@
  * 消息模块 API
  * 对应后端文档：十一、消息模块
  */
-const { get, post } = require('../util.js');
+const { get, post, del } = require('../utils/util.js');
 
 /**
  * 获取会话列表
@@ -13,32 +13,41 @@ const getConversations = (params) => {
 };
 
 /**
- * 获取会话消息
- * GET /messages/conversations/:id
+ * 获取会话消息历史
+ * GET /messages/history/:conversationId
  */
-const getConversationMessages = (id, params) => {
-  return get(`/messages/conversations/${id}`, params);
+const getConversationMessages = (conversationId, params) => {
+  return get(`/messages/history/${conversationId}`, params);
 };
 
 /**
- * 发送消息
- * POST /messages/conversations/:id
+ * 删除(隐藏)会话
+ * DELETE /messages/conversations/:conversationId
  */
-const sendMessage = (id, data) => {
-  return post(`/messages/conversations/${id}`, data);
+const deleteConversation = (conversationId) => {
+  return del(`/messages/conversations/${conversationId}`);
 };
 
 /**
- * 创建会话
- * POST /messages/conversations
+ * 发送私聊消息 (后端参数: peerId, content, msgType)
+ * POST /messages/send
  */
-const createConversation = (data) => {
-  return post('/messages/conversations', data);
+const sendMessage = (data) => {
+  return post('/messages/send', data);
+};
+
+/**
+ * 发送系统广播消息
+ * POST /messages/broadcast
+ */
+const broadcastMessage = (data) => {
+  return post('/messages/broadcast', data);
 };
 
 module.exports = {
   getConversations,
   getConversationMessages,
+  deleteConversation,
   sendMessage,
-  createConversation
+  broadcastMessage
 };
