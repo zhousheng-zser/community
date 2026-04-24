@@ -149,7 +149,7 @@ exports.listGoods = async (req, res) => {
     const where = { shop_id: shopId };
     const andParts = [];
     if (req.query.need_restock === '1' || req.query.need_restock === 'true') {
-      andParts.push(sequelize.literal('stock <= safe_stock'));
+      andParts.push(sequelize.literal('`market_goods`.`stock` <= `market_goods`.`safe_stock`'));
     }
     const kw = req.query.keyword != null ? String(req.query.keyword).trim() : '';
     if (kw) {
@@ -405,7 +405,7 @@ exports.getDashboard = async (req, res) => {
       MarketGood.count({
         where: {
           shop_id: shopId,
-          [Op.and]: [sequelize.literal('stock <= safe_stock')]
+          [Op.and]: [sequelize.literal('`market_goods`.`stock` <= `market_goods`.`safe_stock`')]
         }
       }),
       MarketOrder.count({

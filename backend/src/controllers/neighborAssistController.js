@@ -117,7 +117,6 @@ exports.myList = async (req, res) => {
         { model: User, as: 'assignedWorker', attributes: ['id', 'nickname', 'phone', 'avatar_url'], required: false }
       ]
     });
-
     const list = rows.map((row) => {
       const plain = row.get({ plain: true });
       const pub = plain.buyer;
@@ -137,6 +136,7 @@ exports.myList = async (req, res) => {
         community_id: plain.community_id,
         origin_address_snapshot: plain.origin_address_snapshot,
         destination_address_snapshot: plain.destination_address_snapshot,
+        remark: plain.remark,
         publisher: pub ? { id: pub.id, nickname: pub.nickname, phone: pub.phone, avatar_url: pub.avatar_url } : null,
         helper: worker ? { id: worker.id, nickname: worker.nickname, phone: worker.phone, avatar_url: worker.avatar_url } : null,
         assigned_worker: worker
