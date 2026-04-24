@@ -46,6 +46,7 @@ Page({
     pushPeriodicTabs: [],
     pushPeriodicGoodsDict: {},
     pushPeriodicGoods: [],
+    pushFeedTabs: [],
     pushFeedGoods: [],
     pushFeedGoodsDict: {},
     feedPageByTab: {},
@@ -777,6 +778,7 @@ Page({
     let pushDailyNews = [];
     let pushTopSales = [];
     let pushPeriodicTabs = [];
+    let activePeriodicTabIndex = 0;
     let pushPeriodicGoodsDict = {};
     let pushPeriodicGoods = [];
     let pushFeedTabs = [];
@@ -792,6 +794,7 @@ Page({
       pushPeriodicTabs = moduleGoods.pushPeriodicTabs;
       pushPeriodicGoodsDict = moduleGoods.pushPeriodicGoodsDict;
       pushPeriodicGoods = moduleGoods.pushPeriodicGoods;
+      activePeriodicTabIndex = moduleGoods.activePeriodicTabIndex || 0;
       pushFeedTabs = moduleGoods.pushFeedTabs;
       pushFeedGoodsDict = moduleGoods.pushFeedGoodsDict;
       pushFeedGoods = moduleGoods.pushFeedGoods;
@@ -1051,6 +1054,7 @@ Page({
       pushDailyNews,
       pushTopSales,
       pushPeriodicTabs,
+      activePeriodicTabIndex,
       pushPeriodicGoods,
       pushPeriodicGoodsDict,
 
@@ -1339,13 +1343,38 @@ Page({
     const arr = Array.isArray(list) ? list : [];
     return util.filterShopProductsByDistance(arr, 5).map((item, idx) => this.normalizeModuleGoods(item, idx, extra));
   },
+  pickModuleGoodsList(module) {
+    if (!module || typeof module !== 'object') return [];
+    const candidates = [
+      module.goods_list,
+      module.goodsList,
+      module.products,
+      module.items,
+      module.list,
+      module.data && module.data.goods_list,
+      module.data && module.data.goodsList,
+      module.data && module.data.products,
+      module.data && module.data.items,
+      module.data && module.data.list
+    ];
+    for (let i = 0; i < candidates.length; i++) {
+      if (Array.isArray(candidates[i])) return candidates[i];
+    }
+    return [];
+  },
+  unwrapLocalGoodsPayload(res) {
+    let payload = res && typeof res === 'object' ? res : {};
+    if (payload.data && typeof payload.data === 'object') payload = payload.data;
+    if (payload.data && typeof payload.data === 'object') payload = payload.data;
+    return payload;
+  },
   buildLocalGoodsQuery(extra = {}) {
     return util.buildShopGoodsQuery({ distance_km: 5, ...extra });
   },
   async loadLocalGoodsModules() {
     await this.ensureMarketUserCoordsForList();
     const res = await util.get('local-goods-home/modules', this.buildLocalGoodsQuery());
-    const payload = res && typeof res === 'object' ? (res.data || res) : {};
+    const payload = this.unwrapLocalGoodsPayload(res);
 
     const rawDaily = payload.daily_news || payload.dailyNews || [];
     const rawTop = payload.top_sales || payload.topSales || [];
@@ -1359,11 +1388,13 @@ Page({
     const pushPeriodicGoodsDict = {};
     (Array.isArray(rawPeriodic) ? rawPeriodic : []).forEach((m, idx) => {
       const tab = m.module_name || m.name || m.title || `周期模块${idx + 1}`;
-      const list = this.normalizeModuleList(m.goods_list || m.products || m.items || [], { module: tab });
+      const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
       pushPeriodicTabs.push(tab);
       pushPeriodicGoodsDict[tab] = list;
     });
-    const pushPeriodicGoods = pushPeriodicTabs.length > 0 ? (pushPeriodicGoodsDict[pushPeriodicTabs[0]] || []) : [];
+    const activePeriodicTab = pushPeriodicTabs.find((tab) => (pushPeriodicGoodsDict[tab] || []).length > 0) || pushPeriodicTabs[0] || "";
+    const activePeriodicTabIndex = activePeriodicTab ? Math.max(pushPeriodicTabs.indexOf(activePeriodicTab), 0) : 0;
+    const pushPeriodicGoods = activePeriodicTab ? (pushPeriodicGoodsDict[activePeriodicTab] || []) : [];
 
     const pushFeedTabs = [];
     const pushFeedGoodsDict = {};
@@ -1372,13 +1403,13 @@ Page({
     (Array.isArray(rawFeed) ? rawFeed : []).forEach((m) => {
       const tab = m.module_name || m.name || m.title;
       if (!tab) return;
-      const list = this.normalizeModuleList(m.goods_list || m.products || m.items || [], { module: tab });
+      const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
       pushFeedTabs.push(tab);
       pushFeedGoodsDict[tab] = list;
       feedPageByTab[tab] = Number(m.page || 1);
       feedHasMoreByTab[tab] = !!m.has_more;
     });
-    const activeFeedTab = pushFeedTabs[0] || "";
+    const activeFeedTab = pushFeedTabs.find((tab) => (pushFeedGoodsDict[tab] || []).length > 0) || pushFeedTabs[0] || "";
     const pushFeedGoods = activeFeedTab ? [...(pushFeedGoodsDict[activeFeedTab] || [])] : [];
 
     return {
@@ -1387,6 +1418,7 @@ Page({
       pushPeriodicTabs,
       pushPeriodicGoodsDict,
       pushPeriodicGoods,
+      activePeriodicTabIndex,
       pushFeedTabs,
       pushFeedGoodsDict,
       pushFeedGoods,
