@@ -1,0 +1,140 @@
+<view class="portal-page">
+  <view class="portal-top market-gradient mk-hero">
+    <view class="mk-row">
+      <image class="mk-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="mk-text">
+        <text class="mk-greet">{{greeting}}，{{displayName}}</text>
+        <text class="portal-sub mk-sub">{{marketOk ? '集市经营 · 商品与订单管理' : '完成入驻即可经营集市店铺'}}</text>
+      </view>
+    </view>
+    <text class="portal-title mk-title">集市商家工作台</text>
+  </view>
+
+  <view class="portal-banner {{marketOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">
+    {{bannerText}}
+  </view>
+
+  <view class="mk-stat" wx:if="{{orderStats}}">
+    <view class="mk-stat-item">
+      <text class="mk-stat-num">{{orderStats.total}}</text>
+      <text class="mk-stat-label">累计订单</text>
+    </view>
+    <view class="mk-stat-item">
+      <text class="mk-stat-num">{{orderStats.today}}</text>
+      <text class="mk-stat-label">今日订单</text>
+    </view>
+    <view class="mk-stat-item">
+      <text class="mk-stat-num">{{goodsCount}}</text>
+      <text class="mk-stat-label">在售商品</text>
+    </view>
+    <view class="mk-stat-item {{lowStockCount > 0 ? 'warn' : ''}}">
+      <text class="mk-stat-num">{{lowStockCount}}</text>
+      <text class="mk-stat-label">低库存</text>
+    </view>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-card">
+    <view class="card-title">经营中心</view>
+    <view class="grid-2 mk-grid">
+      <view class="grid-btn" bindtap="goJoin">
+        <view class="grid-btn-icon">
+          <image src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">店铺入驻与资质</text>
+          <text class="grid-btn-desc">店铺信息 · 营业时间 · 配送范围</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goGoods">
+        <view class="grid-btn-icon">
+          <image src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">商品与库存</text>
+          <text class="grid-btn-desc">上下架 · 销量 · 补货</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goOrders">
+        <view class="grid-btn-icon">
+          <image src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">集市订单</text>
+          <text class="grid-btn-desc">买家下单同步</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goMarketShop">
+        <view class="grid-btn-icon">
+          <image src="/img/market_icons/home.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">店铺预览</text>
+          <text class="grid-btn-desc">集市店铺页</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goAccount">
+        <view class="grid-btn-icon">
+          <image src="/img/local_goods_icons/money.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">资金与对账</text>
+          <text class="grid-btn-desc">余额与提现</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goMine">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/settings.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">店铺设置</text>
+          <text class="grid-btn-desc">{{marketOk ? '资料与设置' : '入驻通过后可使用'}}</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="portal-card mk-section">
+    <view class="card-title">商品上下架</view>
+    <view class="mk-link-list">
+      <view class="mk-link-item" bindtap="goGoodsShelfUp">
+        <image class="mk-link-ico" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
+        <view class="mk-link-main">
+          <text class="mk-link-title">上架管理</text>
+          <text class="mk-link-desc">仅已下架商品，开关上架</text>
+        </view>
+        <text class="mk-link-arrow">›</text>
+      </view>
+      <view class="mk-link-item" bindtap="goGoodsShelfDown">
+        <image class="mk-link-ico" src="/img/market_icons/home.png" mode="aspectFit"></image>
+        <view class="mk-link-main">
+          <text class="mk-link-title">下架管理</text>
+          <text class="mk-link-desc">仅在售商品，开关下架</text>
+        </view>
+        <text class="mk-link-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="portal-tabbar">
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/home-1.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item" bindtap="goMine">
+      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
+</view>

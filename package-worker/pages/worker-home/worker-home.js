@@ -3,6 +3,7 @@ const util = require('../../../utils/util.js');
 const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
 const workerOrderUi = require('../../../utils/workerOrderUi.js');
+const api = require('../../../api/index.js');
 
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -47,7 +48,7 @@ Page({
       return;
     }
     try {
-      const data = await util.get('user/profile');
+      const data = await api.user.getUserProfile();
       const b = data.balance != null ? parseFloat(data.balance) : NaN;
       this.setData({
         balanceText: Number.isFinite(b) ? b.toFixed(2) : '0.00'
@@ -89,10 +90,10 @@ Page({
     try {
       let res;
       try {
-        res = await util.get('worker/service-orders', { page: 1, limit: 100 });
+        res = await api.worker.getServiceOrderList({ page: 1, limit: 100 });
       } catch (e1) {
         if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
-          res = await util.get('worker/orders', { page: 1, limit: 100 });
+          res = await api.worker.getOrderList({ page: 1, limit: 100 });
         } else {
           throw e1;
         }

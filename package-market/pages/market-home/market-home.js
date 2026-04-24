@@ -29,7 +29,7 @@ function isToday(iso) {
 
 Page({
   data: {
-    merchantOk: false,
+    marketOk: false,
     bannerText: '',
     greeting: '你好',
     displayName: '商家',
@@ -54,18 +54,18 @@ Page({
 
   refresh() {
     const user = app.globalData.user || {};
-    const merchantOk = rp.canUseMerchantPortal(user);
+    const marketOk = rp.canUseMarketPortal(user);
     let bannerText = '';
-    if (!merchantOk) {
+    if (!marketOk) {
       const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
-      if (st === 'pending') bannerText = '商家入驻审核中，通过后可管理订单';
+      if (st === 'pending') bannerText = '集市商家入驻审核中，通过后可管理订单';
       else if (st === 'rejected') bannerText = '入驻未通过，可重新提交资料';
       else bannerText = '请先完成集市商家入驻，审核通过后可使用本工作台';
     } else {
-      bannerText = '您已绑定店铺，可管理商品、库存与买家订单';
+      bannerText = '您已绑定集市店铺，可管理商品、库存与买家订单';
     }
     this.setData({
-      merchantOk,
+      marketOk,
       bannerText,
       greeting: getGreeting(),
       displayName: user.userName || '商家',
@@ -149,21 +149,11 @@ Page({
   },
 
   goOrders() {
-    wx.redirectTo({ url: rp.merchantTabUrl('merchant-orders') });
-  },
-
-  goDirectServiceOrders() {
-    wx.navigateTo({
-      url: '/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service'
-    });
+    wx.navigateTo({ url: '/pages/market-order-list/market-order-list' });
   },
 
   goMine() {
-    wx.redirectTo({ url: rp.merchantTabUrl('merchant-mine') });
-  },
-
-  goService() {
-    wx.redirectTo({ url: rp.merchantTabUrl('merchant-service') });
+    wx.navigateTo({ url: '/pages/join-market/join-market' });
   },
 
   goJoin() {
@@ -174,6 +164,10 @@ Page({
     wx.navigateTo({ url: '/pages/account/account' });
   },
 
+  goMarketShop() {
+    wx.navigateTo({ url: '/pages/market-shop/market-shop' });
+  },
+
   goGoodsShelfUp() {
     wx.navigateTo({ url: '/package-merchant/pages/merchant-goods/merchant-goods?mode=up' });
   },
@@ -182,18 +176,7 @@ Page({
     wx.navigateTo({ url: '/package-merchant/pages/merchant-goods/merchant-goods?mode=down' });
   },
 
-  goMarketShop() {
-    wx.navigateTo({ url: '/pages/market-shop/market-shop' });
-  },
-
   backUser() {
     rp.backToUserTab();
-  },
-
-  /** 虚构演示单，便于预览订单列表/详情（不请求后端） */
-  goMockOrders() {
-    wx.navigateTo({
-      url: '/package-merchant/pages/merchant-orders/merchant-orders?mock=1'
-    });
   }
 });
