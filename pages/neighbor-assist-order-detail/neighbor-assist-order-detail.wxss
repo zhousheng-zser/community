@@ -289,3 +289,10 @@ page {
 .star.on {
   color: #fbbf24;
 }
+
+.waiting-text {
+  text-align: center;
+  font-size: 28rpx;
+  color: #9ca3af;
+  padding: 20rpx 0;
+}

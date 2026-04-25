@@ -19,9 +19,9 @@
       <view class="sheet-section">
         <view class="sheet-head"><text class="sheet-title">需求信息</text></view>
         <view class="sheet-body">
-          <view class="kv" wx:if="{{order.category}}"><text class="k">类型</text><text class="v">{{order.category}}</text></view>
+          <view class="kv" wx:if="{{order.category}}"><text class="k">服务类型</text><text class="v">{{order.category}}</text></view>
           <view class="kv" wx:if="{{order.serviceTime}}"><text class="k">期望时间</text><text class="v">{{order.serviceTime}}</text></view>
-          <view class="kv"><text class="k">描述</text><text class="v multiline">{{order.desc || '—'}}</text></view>
+          <view class="kv"><text class="k">备注</text><text class="v multiline">{{order.desc || '—'}}</text></view>
         </view>
       </view>
 
@@ -100,7 +100,9 @@
       <view class="sheet-section">
         <view class="sheet-head"><text class="sheet-title">沟通</text></view>
         <view class="sheet-body">
-          <button class="sheet-btn block primary chat-btn" bindtap="openChat">文字 / 语音聊天</button>
+          <view class="waiting-text" wx:if="{{!order.peerName && !canCommunityGrab && myRole === 'publisher'}}">待接单</view>
+          <button class="sheet-btn block primary chat-btn" bindtap="openChat" wx:elif="{{order.peerName}}">文字 / 语音聊天</button>
+          <view class="waiting-text" wx:else>待接单</view>
         </view>
       </view>
     </view>

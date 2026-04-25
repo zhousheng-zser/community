@@ -52,18 +52,6 @@ const deleteAddress = (id) => {
   return del(`/user/addresses/${id}`);
 };
 
-module.exports = {
-  getUserProfile,
-  updateUserProfile,
-  getAddressList,
-  addAddress,
-  updateAddress,
-  deleteAddress,
-  getInviteCode,
-  bindInviter,
-  getInvitees
-};
-
 /**
  * 获取或生成邀请码 GET /user/invite-code
  */
@@ -83,4 +71,16 @@ const bindInviter = (inviteCode) => {
  */
 const getInvitees = (params) => {
   return get('/user/invitees', params);
+};
+
+module.exports = {
+  getUserProfile,
+  updateUserProfile,
+  getAddressList,
+  addAddress,
+  updateAddress,
+  deleteAddress,
+  getInviteCode,
+  bindInviter,
+  getInvitees
 };
