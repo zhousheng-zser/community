@@ -17,9 +17,9 @@ function parseDetail(raw, myUserId) {
   const category = r.category || r.assist_type || '';
   const desc = r.content || r.description || r.title || '';
   const title = desc ? String(desc).slice(0, 28) + (String(desc).length > 28 ? '…' : '') : '邻里帮帮';
-  
+
   // 解析地址：优先使用 origin/destination 对象，兼容旧的 address 字段
-  const originAddr = r.origin_address_snapshot 
+  const originAddr = r.origin_address_snapshot
     ? (typeof r.origin_address_snapshot === 'string' ? JSON.parse(r.origin_address_snapshot) : r.origin_address_snapshot)
     : {};
   const destAddr = r.destination_address_snapshot
@@ -28,7 +28,7 @@ function parseDetail(raw, myUserId) {
   const pickupAddress = originAddr.address || originAddr.detail || '';
   const deliveryAddress = destAddr.address || destAddr.detail || '';
   const address = r.address || r.service_address || pickupAddress || '';
-  
+
   const serviceTime = r.service_time || r.expect_time || r.appointment_time || r.time || '';
   const reward = r.reward_amount != null ? r.reward_amount : r.amount;
   const rewardText =
@@ -73,6 +73,7 @@ function parseDetail(raw, myUserId) {
     peerPhoneDisplay: maskPhone(peerPhoneRaw),
     conversationId: r.conversation_id || r.conversationId || null,
     check_in_at: r.check_in_at || r.check_in_time,
+    payStatus: r.pay_status || r.payStatus || 'unpaid',
     reviewed: !!(r.reviewed || r.has_review)
   };
 }
@@ -95,7 +96,11 @@ Page({
     complaintText: '',
     reviewShow: false,
     reviewScore: 5,
-    reviewText: ''
+    reviewText: '',
+    canPay: false,
+    canCancel: false,
+    showFundsReceived: false,
+    canCommunityGrab: false
   },
 
   onLoad(options) {
@@ -129,6 +134,16 @@ Page({
     const canAcceptOrder = !myRole && bucket === 'pending_accept';
     const checkInDisplay = order.check_in_at ? `已打卡 ${order.check_in_at}` : '';
     const canCompleteService = myRole === 'helper' && bucket === 'in_service' && !!checkInDisplay;
+
+    // 支付相关
+    const isPendingPay = bucket === 'pending_pay';
+    const canPay = isPendingPay && myRole === 'publisher' && order.payStatus === 'unpaid';
+    const canCancel = isPendingPay && myRole === 'publisher' && order.payStatus === 'unpaid';
+    const showFundsReceived = myRole === 'helper' && bucket === 'completed' && order.payStatus === 'paid';
+
+    // 社区成员接单：非发布人非接单人的同社区成员，且订单状态为待接单
+    const canCommunityGrab = !myRole && order.payStatus === 'paid' && (order.statusText === '待接单' || order.statusText === '已接单');
+
     this.setData({
       order: Object.assign({}, order, { myRole }),
       myRole,
@@ -138,7 +153,11 @@ Page({
       checkInDisplay,
       canCompleteService: !!canCompleteService,
       reviewed: !!order.reviewed,
-      canAcceptOrder: !!canAcceptOrder
+      canAcceptOrder: !!canAcceptOrder,
+      canPay,
+      canCancel,
+      showFundsReceived,
+      canCommunityGrab
     });
   },
 
@@ -230,6 +249,55 @@ Page({
     }
   },
 
+  goPay() {
+    if (this.data.isMock) {
+      wx.showToast({ title: '演示：虚拟支付', icon: 'none' });
+      this.setData({ canPay: false });
+      return;
+    }
+    wx.showLoading({ title: '支付中...', mask: true });
+    util.post(`neighbor-assist/orders/${this.data.id}/pay`)
+      .then(async () => {
+        wx.hideLoading();
+        wx.showToast({ title: '支付成功', icon: 'success' });
+        await this.load();
+      })
+      .catch((e) => {
+        wx.hideLoading();
+        wx.showToast({ title: (e && e.errmsg) || '支付失败', icon: 'none' });
+      });
+  },
+
+  cancelOrder() {
+    wx.showModal({
+      title: '取消订单',
+      content: '取消后将无法恢复，确定要取消吗？',
+      success: (r) => {
+        if (r.confirm) {
+          this.postAction(`neighbor-assist/orders/${this.data.id}/cancel`, {});
+        }
+      }
+    });
+  },
+
+  communityGrabOrder() {
+    if (this.data.isMock) {
+      wx.showToast({ title: '演示：接单成功', icon: 'success' });
+      return;
+    }
+    wx.showLoading({ title: '接单中...', mask: true });
+    util.post(`neighbor-assist/orders/${this.data.id}/community-grab`)
+      .then(async () => {
+        wx.hideLoading();
+        wx.showToast({ title: '接单成功', icon: 'success' });
+        await this.load();
+      })
+      .catch((e) => {
+        wx.hideLoading();
+        wx.showToast({ title: (e && e.errmsg) || '接单失败', icon: 'none' });
+      });
+  },
+
   checkIn() {
     this.setData({ checking: true });
     wx.getLocation({
@@ -258,12 +326,25 @@ Page({
     this.postAction(`neighbor-assist/orders/${this.data.id}/accept`, {});
   },
 
+  // 社区成员接单（非技工）
+  communityGrab() {
+    wx.showModal({
+      title: '确认接单',
+      content: '接单后该订单将变为您和发布人之间的私有信息，确定要接单吗？',
+      success: (r) => {
+        if (r.confirm) {
+          this.postAction(`neighbor-assist/orders/${this.data.id}/community-grab`, {});
+        }
+      }
+    });
+  },
+
   completeService() {
     wx.showModal({
       title: '确认完成服务',
-      content: '提交后等待发布人确认结单。',
+      content: '完成后资金将转移到您的账户',
       success: (r) => {
-        if (r.confirm) this.postAction(`neighbor-assist/orders/${this.data.id}/complete-service`, {});
+        if (r.confirm) this.postAction(`neighbor-assist/orders/${this.data.id}/complete`, {});
       }
     });
   },

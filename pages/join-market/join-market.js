@@ -25,6 +25,14 @@ Page({
     });
   },
 
+  onShow() {
+    const user = app.globalData.user || {};
+    const rp = require('../../utils/rolePortals.js');
+    if (rp.canUseMarketPortal(user)) {
+      wx.redirectTo({ url: '/package-market/pages/market-home/market-home' });
+    }
+  },
+
   onInput(e) {
     this.setData({ ['form.' + e.currentTarget.dataset.key]: e.detail.value });
   },

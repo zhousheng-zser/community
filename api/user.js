@@ -58,5 +58,29 @@ module.exports = {
   getAddressList,
   addAddress,
   updateAddress,
-  deleteAddress
+  deleteAddress,
+  getInviteCode,
+  bindInviter,
+  getInvitees
+};
+
+/**
+ * 获取或生成邀请码 GET /user/invite-code
+ */
+const getInviteCode = () => {
+  return get('/user/invite-code');
+};
+
+/**
+ * 绑定邀请人 POST /user/bind-inviter
+ */
+const bindInviter = (inviteCode) => {
+  return post('/user/bind-inviter', { invite_code: inviteCode });
+};
+
+/**
+ * 查询邀请列表 GET /user/invitees
+ */
+const getInvitees = (params) => {
+  return get('/user/invitees', params);
 };

@@ -25,7 +25,7 @@ const getCategories = () => {
  * GET /core/hot-services
  */
 const getHotServices = () => {
-  return get('/core/hot-services');
+  return get('/core/services/hot');
 };
 
 /**

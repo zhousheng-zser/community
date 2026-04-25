@@ -18,6 +18,13 @@
         </view>
         <text class="qr-text">邀请码</text>
       </navigator>
+      <view class="scan-btn-header" bindtap="scanInviterCode">
+        <view class="qr-icon-wrap">
+          <image class="qr-icon-img" src="/img/icon-scan.png" mode="aspectFit" wx:if="false"></image>
+          <text class="scan-icon">📷</text>
+        </view>
+        <text class="qr-text">扫一扫</text>
+      </view>
     </view>
 
     <view class="header-stats">

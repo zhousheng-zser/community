@@ -59,6 +59,7 @@ Page({
         type: o.assist_type_label || o.assist_type || '',
         time: o.created_at || o.createdAt || '',
         amount: o.reward_amount != null ? o.reward_amount : o.amount,
+        payStatus: o.pay_status || o.payStatus || 'unpaid',
         roleTag: tab === 'published' ? '我发布' : '我接单'
       }));
       this.setData({

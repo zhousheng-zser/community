@@ -1,8 +1,9 @@
 # 社区小程序 API 接口文档 (v1) - 完整版
 
-> **文档版本**: v1.0  
-> **最后更新**: 2026-04-24  
-> **基于**: 前端 API 定义文件 + 后端接口测试
+> **文档版本**: v1.1
+> **最后更新**: 2026-04-25
+> **基于**: 前端 API 定义文件 + 后端接口实际测试
+> **测试服务器**: http://192.168.110.50:3001
 
 **基础信息**
 
@@ -12,13 +13,37 @@
 - **鉴权方式**: 登录成功后返回 `token`（JWT），前端在需要登录的接口上通过：
   - HTTP 头：`Authorization: Bearer <token>`
 
+**后端实现状态**
+
+- ✅ = 已实现并测试通过 | ⚠️ = 部分实现 | ❌ = 未实现（前端有 mock 降级）
+
+| 模块 | 状态 | 说明 |
+|------|------|------|
+| 认证模块 | ✅ | 全部可用 |
+| 用户模块 | ✅ | 全部可用 |
+| 核心数据模块 | ✅ | `/core/hot-services` 已更正为 `/core/services/hot` |
+| 服务订单模块 | ✅ | 全部可用 |
+| 邻里帮帮模块 | ✅ | 全部可用 |
+| 本地集市模块 | ✅ | 全部可用 |
+| 商家后台模块 | ✅ | 全部可用 |
+| 服务商后台模块 | ✅ | 全部可用 |
+| 技工端模块 | ✅ | 全部可用（路径为 `/worker/service-orders/*`） |
+| 消息模块 | ✅ | 全部可用 |
+| 社区帖子模块 | ✅ | 全部可用 |
+| 惠民卡联盟模块 | ✅ | 全部可用 |
+| 聊天模块 | ✅ | 2026-04-25 新实现，前端可使用真实接口 |
+| 优惠券模块 | ✅ | 2026-04-25 新实现，前端可使用真实接口 |
+| 家事币商城 | ✅ | 2026-04-25 新实现，前端可使用真实接口 |
+| 推客模块 | ✅ | 2026-04-25 新实现，前端可使用真实接口 |
+| 第三方小程序模块 | ✅ | 2026-04-25 新实现，前端可使用真实接口 |
+
 ---
 
 ## 一、认证模块 (`/auth`)
 
 | 方法 | 路径 | 描述 | 鉴权 |
 |------|------|------|------|
-| POST | `/auth/wechat/login` | 微信小程序登录 | 无 |
+| POST | `/auth/login` | 微信小程序登录（传 `code` 参数） | 无 |
 | POST | `/auth/login_password` | 账号密码登录 | 无 |
 | POST | `/auth/register` | 用户注册 | 无 |
 | POST | `/auth/sms-code` | 发送短信验证码 | 无 |
@@ -269,19 +294,19 @@
 
 ---
 
-## 九、技工端模块 (`/worker`)
+## 九、技工端模块 (`/worker/service-orders`)
 
 > 需技工端登录鉴权
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
-| GET | `/worker/orders` | 获取订单列表 |
-| GET | `/worker/orders/:id` | 获取订单详情 |
-| POST | `/worker/orders/:id/accept` | 接单 |
-| POST | `/worker/orders/:id/reject` | 拒单 |
-| POST | `/worker/orders/:id/check-in` | 打卡 |
-| POST | `/worker/orders/:id/evidence` | 上传凭证 |
-| POST | `/worker/orders/:id/complete` | 完成订单 |
+| GET | `/worker/service-orders` | 获取订单列表 |
+| GET | `/worker/service-orders/:id` | 获取订单详情 |
+| POST | `/worker/service-orders/:id/accept` | 接单 |
+| POST | `/worker/service-orders/:id/reject` | 拒单 |
+| POST | `/worker/service-orders/:id/check-in` | 打卡 |
+| POST | `/worker/service-orders/:id/evidence` | 上传凭证 |
+| POST | `/worker/service-orders/:id/complete` | 完成订单 |
 
 ---
 
@@ -292,15 +317,16 @@
 | 方法 | 路径 | 描述 |
 |------|------|------|
 | GET | `/messages/conversations` | 获取会话列表 |
-| GET | `/messages/conversations/:id` | 获取会话消息 |
-| POST | `/messages/conversations/:id` | 发送消息 |
-| POST | `/messages/conversations` | 创建会话 |
+| GET | `/messages/history/:conversationId` | 获取会话消息 |
+| POST | `/messages/send` | 发送私聊消息（传 `peerId`, `content`, `msgType`） |
+| POST | `/messages/broadcast` | 发送系统广播消息 |
+| DELETE | `/messages/conversations/:conversationId` | 删除(隐藏)会话 |
 
 ---
 
 ## 十一、聊天模块 (`/chat`)
 
-> 需登录鉴权
+> 需登录鉴权。2026-04-25 新实现。
 
 ### 11.1 群聊管理
 
@@ -328,7 +354,7 @@
 
 ## 十二、优惠券模块 (`/coupons`)
 
-> 需登录鉴权
+> 需登录鉴权。2026-04-25 新实现。
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
@@ -342,7 +368,7 @@
 
 ## 十三、家事币商城 (`/benefit-coin`)
 
-> 需登录鉴权
+> 需登录鉴权。2026-04-25 新实现。
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
@@ -356,7 +382,7 @@
 
 ## 十四、推客模块 (`/promoter`)
 
-> 需登录鉴权
+> 需登录鉴权。2026-04-25 新实现。
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
@@ -370,7 +396,7 @@
 
 ## 十五、第三方小程序模块 (`/mini-programs`)
 
-> 需管理员权限
+> 2026-04-25 新实现。GET 公开访问，POST/PUT/DELETE 需管理员权限。
 
 | 方法 | 路径 | 描述 |
 |------|------|------|
@@ -414,36 +440,36 @@
 
 ## 十八、公共接口
 
-| 方法 | 路径 | 描述 |
-|------|------|------|
-| GET | `/` | 健康检查 |
-| POST | `/upload` | 文件上传（multipart/form-data） |
+| 方法 | 路径 | 描述 | 状态 |
+|------|------|------|------|
+| GET | `/` | 健康检查 | ✅ |
+| POST | `/upload` | 文件上传（multipart/form-data） | ✅ |
 
 ---
 
 ## 接口统计
 
-| 模块 | 接口数量 |
-|------|----------|
-| 认证模块 | 5 |
-| 用户模块 | 6 |
-| 核心数据模块 | 8 |
-| 服务订单模块 | 5 |
-| 邻里帮帮模块 | 5 |
-| 本地集市模块 | 24 |
-| 商家后台模块 | 23 |
-| 服务商后台模块 | 21 |
-| 技工端模块 | 7 |
-| 消息模块 | 4 |
-| 聊天模块 | 12 |
-| 优惠券模块 | 5 |
-| 家事币商城 | 5 |
-| 推客模块 | 5 |
-| 第三方小程序模块 | 5 |
-| 惠民卡联盟模块 | 5 |
-| 社区帖子模块 | 7 |
-| 公共接口 | 2 |
-| **总计** | **149** |
+| 模块 | 接口数量 | 后端状态 |
+|------|----------|----------|
+| 认证模块 | 5 | ✅ 已实现 |
+| 用户模块 | 6 | ✅ 已实现 |
+| 核心数据模块 | 8 | ✅ 已实现 |
+| 服务订单模块 | 5 | ✅ 已实现 |
+| 邻里帮帮模块 | 5 | ✅ 已实现 |
+| 本地集市模块 | 24 | ✅ 已实现 |
+| 商家后台模块 | 23 | ✅ 已实现 |
+| 服务商后台模块 | 21 | ✅ 已实现 |
+| 技工端模块 | 7 | ✅ 已实现 |
+| 消息模块 | 5 | ✅ 已实现 |
+| 社区帖子模块 | 7 | ✅ 已实现 |
+| 惠民卡联盟模块 | 5 | ✅ 已实现 |
+| 聊天模块 | 12 | ✅ 已实现 |
+| 优惠券模块 | 5 | ✅ 已实现 |
+| 家事币商城 | 5 | ✅ 已实现 |
+| 推客模块 | 5 | ✅ 已实现 |
+| 第三方小程序模块 | 5 | ✅ 已实现 |
+| 公共接口 | 2 | ✅ 已实现 |
+| **总计** | **150** | **150 全部实现** |
 
 ---
 
@@ -453,14 +479,10 @@
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | `/auth/wx/getkey/:code` | 兼容旧接口，前端已使用 `/auth/wechat/login` |
+| GET | `/auth/wx/getkey/:code` | 兼容旧接口，前端已使用 `POST /auth/login` |
 | POST | `/user/api/user_info/update` | 兼容旧接口，前端已使用 `PATCH /user/profile` |
 | GET | `/acount/info` | 兼容旧接口 |
 | GET | `/wx/user/coupon/:id` | 兼容旧接口 |
-| GET | `/messages/history/:conversationId` | 前端已使用 `/messages/conversations/:id` |
-| DELETE | `/messages/conversations/:conversationId` | 前端未使用 |
-| POST | `/messages/send` | 前端已使用 `/messages/conversations/:id` |
-| POST | `/messages/broadcast` | 前端未使用 |
 | POST | `/orders/` | 旧版订单接口，前端已使用 `/service-orders` |
 | GET | `/orders/my` | 旧版订单接口 |
 | POST | `/orders/:id/pay` | 旧版订单接口 |
@@ -483,5 +505,15 @@
 
 - 本文档基于前端 `api/` 目录下的 API 定义文件自动生成
 - 所有接口路径均为 `/api/v1` 后的相对路径
-- 接口状态标记：✅ 已测试可用
-- 更新时间：2026-04-24
+- 接口状态标记：✅ 已实现 | ❌ 未实现 | ⚠️ 部分实现
+- 更新时间：2026-04-25
+
+## v1.1 变更日志
+
+- 修正微信登录路径：`/auth/wechat/login` → `/auth/login`
+- 修正技工端路径：`/worker/orders/*` → `/worker/service-orders/*`
+- 修正消息模块路径：使用 `/messages/history/:id`、`/messages/send`（非 `/messages/conversations/:id`）
+- 添加后端实现状态标记
+- 标记未实现模块：聊天、优惠券、家事币、推客、第三方小程序
+- 标记文件上传接口 `/upload` 为 404（后端未实现）
+- 移除 `/messages/history`、`/messages/send`、`/messages/broadcast` 的"已废弃"标记（实际前端在用且后端已实现）

@@ -3,11 +3,14 @@
  */
 
 function inferBucket(raw) {
+  // Handle both flat { status: ... } and nested { order: { status: ... } }
+  const inner = raw && raw.order ? raw.order : raw;
   const s = String(
-    (raw && (raw.status || raw.order_status || raw.state)) || ''
+    (inner && (inner.status || inner.order_status || inner.state)) || ''
   ).toLowerCase();
+  if (['pending_pay', 'unpaid'].includes(s)) return 'pending_pay';
   if (['pending_accept', 'open', 'waiting', 'published'].includes(s)) return 'pending_accept';
-  if (['accepted', 'assigned', 'in_progress', 'serving', 'in_service'].includes(s)) return 'in_service';
+  if (['accepted', 'assigned', 'in_progress', 'serving', 'in_service', 'paid_pending_dispatch', 'dispatched'].includes(s)) return 'in_service';
   if (['pending_confirm', 'wait_confirm', 'await_publisher'].includes(s)) return 'pending_confirm';
   if (['completed', 'done', 'finished'].includes(s)) return 'completed';
   if (['cancelled', 'canceled'].includes(s)) return 'cancelled';

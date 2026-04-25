@@ -65,7 +65,7 @@ function getApiBaseUrl() {
     case ENV.TESTING:
       return 'https://test-api.yourdomain.com';
     default:
-      return 'http://localhost:3000';
+      return 'http://192.168.110.50:3001';
   }
 }
 

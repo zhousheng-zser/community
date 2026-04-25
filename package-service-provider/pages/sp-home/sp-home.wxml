@@ -11,6 +11,13 @@
     </view>
   </view>
 
+  <view class="sp-banner {{spOk ? 'sp-ok' : 'sp-warn'}}" style="margin:12px;padding:10px 14px;background:{{spOk ? '#e8f5e9' : '#fff3e0'}};border-radius:8px;">
+    <text style="font-size:13px;color:{{spOk ? '#2e7d32' : '#e65100'}};">{{bannerText}}</text>
+    <view class="sp-go-join" wx:if="{{!spOk}}" bindtap="goJoin" style="margin-top:8px;">
+      <button class="sp-btn" style="background:#ff9800;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;">去入驻</button>
+    </view>
+  </view>
+
   <view class="sp-stats">
     <view class="sp-stat-item">
       <text class="sp-stat-num">{{stats.pendingOrders}}</text>

@@ -27,6 +27,14 @@ Page({
     this.setData({ maskedPhone, 'form.phone': mobile });
   },
 
+  onShow() {
+    const user = app.globalData.user || {};
+    const rp = require('../../utils/rolePortals.js');
+    if (rp.canUseWorkerPortal(user)) {
+      wx.redirectTo({ url: '/package-worker/pages/worker-home/worker-home' });
+    }
+  },
+
   onInput(e) {
     this.setData({ ['form.' + e.currentTarget.dataset.key]: e.detail.value });
   },

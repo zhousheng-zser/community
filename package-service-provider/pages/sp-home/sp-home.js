@@ -15,6 +15,8 @@ function getGreeting() {
 
 Page({
   data: {
+    spOk: false,
+    bannerText: '',
     greeting: '你好',
     displayName: '服务商',
     userPhoto: DEF_AVATAR,
@@ -43,7 +45,23 @@ Page({
 
   refresh() {
     const user = app.globalData.user || {};
+    const spOk = rp.canUseServiceProviderPortal(user);
+    let bannerText = '';
+    if (!spOk) {
+      const st = user.service_provider_status || user.serviceProviderStatus;
+      if (st === 'pending' || st === 'reviewing') {
+        bannerText = '服务商入驻审核中，通过后可使用本工作台';
+      } else if (st === 'rejected') {
+        bannerText = '入驻未通过，请重新提交资料';
+      } else {
+        bannerText = '请先完成服务商入驻，审核通过后可使用本工作台';
+      }
+    } else {
+      bannerText = '您已具备服务商身份，可管理服务订单';
+    }
     this.setData({
+      spOk,
+      bannerText,
       greeting: getGreeting(),
       displayName: user.userName || '服务商',
       userPhoto: user.userPhoto || DEF_AVATAR
@@ -90,6 +108,10 @@ Page({
         loading: false
       });
     }
+  },
+
+  goJoin() {
+    wx.navigateTo({ url: '/pages/join-service/join-service' });
   },
 
   goOrders() {

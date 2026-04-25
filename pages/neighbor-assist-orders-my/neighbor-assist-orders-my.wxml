@@ -19,8 +19,10 @@
       <view class="row-meta" wx:if="{{item.time}}">
         <text class="meta">{{item.time}}</text>
       </view>
-      <view class="row-meta" wx:if="{{item.amount != null && item.amount !== ''}}">
+      <view class="row-meta" wx:if="{{item.amount != null && item.amount !== ''}}" style="display:flex;align-items:center;gap:8px;">
         <text class="amount">悬赏 ￥{{item.amount}}</text>
+        <text class="pay-tag" wx:if="{{item.payStatus === 'unpaid'}}" style="font-size:11px;color:#e67e22;background:#fff3e6;padding:1px 6px;border-radius:4px;">待支付</text>
+        <text class="pay-tag" wx:elif="{{item.payStatus === 'paid'}}" style="font-size:11px;color:#27ae60;background:#e8f5e9;padding:1px 6px;border-radius:4px;">已支付</text>
       </view>
     </view>
   </view>

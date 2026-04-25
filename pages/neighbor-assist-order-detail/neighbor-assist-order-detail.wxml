@@ -10,6 +10,8 @@
           <text class="detail-copy" bindtap="copyOrderNo">复制</text>
         </view>
         <text class="detail-amount" wx:if="{{order.rewardText}}">悬赏 ¥{{order.rewardText}}</text>
+        <view class="pay-status-badge" wx:if="{{order.payStatus === 'unpaid'}}" style="display:inline-block;background:#fff3e6;color:#e67e22;padding:2px 10px;border-radius:10px;font-size:12px;margin-top:6px;">待支付</view>
+        <view class="pay-status-badge" wx:elif="{{order.payStatus === 'paid'}}" style="display:inline-block;background:#e8f5e9;color:#27ae60;padding:2px 10px;border-radius:10px;font-size:12px;margin-top:6px;">已支付</view>
       </view>
     </view>
 
@@ -47,6 +49,14 @@
           <view class="kv"><text class="k">称呼</text><text class="v">{{order.peerName}}</text></view>
           <view class="kv"><text class="k">手机</text><text class="v">{{order.peerPhoneDisplay || '—'}}</text></view>
           <button class="call-big" bindtap="callPeer" wx:if="{{order.peerPhoneRaw}}">拨打电话</button>
+        </view>
+      </view>
+
+      <view class="sheet-section" wx:if="{{showFundsReceived}}">
+        <view class="sheet-head"><text class="sheet-title">费用到账</text></view>
+        <view class="sheet-body">
+          <view class="kv"><text class="k">悬赏金额</text><text class="v" style="color:#27ae60;font-weight:bold;">¥{{order.rewardText}}</text></view>
+          <view class="kv"><text class="k">状态</text><text class="v" style="color:#27ae60;">已到账</text></view>
         </view>
       </view>
 
@@ -96,8 +106,25 @@
     </view>
   </scroll-view>
 
-  <view class="bottom-bar" wx:if="{{(myRole === 'helper' && bucket === 'pending_accept') || canAcceptOrder}}">
+  <!-- 接单按钮 -->
+<view class="bottom-bar" wx:if="{{(myRole === 'helper' && bucket === 'pending_accept') || canAcceptOrder}}">
     <button class="bar-btn primary" bindtap="acceptOrder">接单</button>
+  </view>
+
+  <!-- 社区成员接单按钮 -->
+<view class="bottom-bar" wx:elif="{{canCommunityGrab}}">
+    <button class="bar-btn primary" bindtap="communityGrabOrder">邻里接单</button>
+  </view>
+
+  <!-- 同社区成员接单（非发布人非接单人，且订单已支付待接单） -->
+<view class="bottom-bar" wx:elif="{{canCommunityGrab}}">
+    <button class="bar-btn primary" bindtap="communityGrab">接单</button>
+  </view>
+
+  <!-- 发布人-待支付时显示支付和取消按钮 -->
+<view class="bottom-bar" wx:elif="{{canPay}}" style="display:flex;gap:12px;padding:12px 24px;">
+    <button class="bar-btn" bindtap="cancelOrder" style="flex:1;background:#fff;color:#e74c3c;border:1px solid #e74c3c;">取消订单</button>
+    <button class="bar-btn primary" bindtap="goPay" style="flex:2;">去支付</button>
   </view>
 
   <view class="modal-mask" wx:if="{{complaintShow}}" catchtouchmove="noop">

@@ -1,4 +1,62 @@
-<!--pages/user-code/user-code.wxml-->
-<view class='main'>
-    <image src='{{usercode}}' mode='widthFix'></image>
+<view class='invite-page'>
+  <!-- 用户信息 -->
+  <view class='user-card'>
+    <image class='avatar' src='{{userAvatar || "/img/placeholders/default-avatar.png"}}' mode='aspectFill'></image>
+    <text class='nickname'>{{userNickname}}</text>
+  </view>
+
+  <!-- 二维码卡片 -->
+  <view class='qr-card'>
+    <text class='qr-title'>我的邀请码</text>
+    <view class='code-box' bindtap='copyInviteCode'>
+      <text class='invite-code'>{{inviteCode}}</text>
+      <text class='copy-hint'>点击复制</text>
+    </view>
+    <view class='qr-image-wrap'>
+      <canvas type='2d' id='qr-canvas' class='qr-canvas' style='width:300rpx;height:300rpx;'></canvas>
+    </view>
+    <text class='share-hint'>分享给朋友扫码或发送邀请码即可绑定</text>
+  </view>
+
+  <!-- 我的邀请 -->
+  <view class='invite-stats'>
+    <view class='stat-item'>
+      <text class='stat-num'>{{inviteeCount}}</text>
+      <text class='stat-label'>已邀请人数</text>
+    </view>
+    <view class='stat-divider'></view>
+    <view class='stat-item'>
+      <text class='stat-num'>{{hasInviter ? "已绑定" : "未绑定"}}</text>
+      <text class='stat-label'>邀请关系</text>
+    </view>
+  </view>
+
+  <!-- 邀请人信息 -->
+  <view class='inviter-card' wx:if="{{hasInviter}}">
+    <text class='inviter-label'>我的邀请人</text>
+    <text class='inviter-name'>{{inviterNickname}}</text>
+  </view>
+
+  <!-- 扫码绑定 -->
+  <view class='scan-section' wx:if="{{!binded}}">
+    <view class='scan-btn-wrap'>
+      <button class='scan-btn' bindtap='scanQRCode'>📷 扫一扫绑定邀请人</button>
+    </view>
+    <view class='manual-input' bindtap='manualInput'>
+      <text class='manual-text'>手动输入邀请码</text>
+    </view>
+  </view>
+
+  <!-- 已绑定提示 -->
+  <view class='binded-section' wx:if="{{binded}}">
+    <view class='binded-hint'>✅ 已绑定邀请人，无法重复绑定</view>
+  </view>
+
+  <!-- 分享按钮 -->
+  <button class='share-btn' open-type='share'>📤 分享给朋友</button>
+
+  <!-- 加载状态 -->
+  <view class='loading' wx:if="{{loading}}">
+    <text class='loading-text'>加载中...</text>
+  </view>
 </view>

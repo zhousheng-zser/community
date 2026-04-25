@@ -47,6 +47,35 @@ Page({
     ]
   },
 
+  scanInviterCode() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.scanCode({
+      onlyFromCamera: false,
+      success: async (res) => {
+        if (!res.result) return;
+        wx.showLoading({ title: '绑定中...' });
+        try {
+          await api.user.bindInviter(res.result.trim());
+          wx.hideLoading();
+          wx.showToast({ title: '绑定成功', icon: 'success' });
+          // 刷新用户信息
+          this.onShow();
+        } catch (e) {
+          wx.hideLoading();
+          const msg = (e && e.msg) || (e && e.errmsg) || '绑定失败';
+          wx.showToast({ title: msg, icon: 'none' });
+        }
+      },
+      fail: () => {
+        wx.showToast({ title: '扫码取消', icon: 'none' });
+      }
+    });
+  },
+
   showToastWait() {
     wx.showToast({ title: '敬请期待', icon: 'none' });
   },
