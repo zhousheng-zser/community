@@ -123,7 +123,24 @@ app.post('/api/v1/upload', upload.single('file'), (req, res) => {
 });
 
 
-// 启动服务器
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+const https = require('https');
+const fs = require('fs');
+
+const sslDir = path.join(__dirname, '..', 'ssl');
+const hasSsl = fs.existsSync(path.join(sslDir, 'key.pem')) && fs.existsSync(path.join(sslDir, 'cert.pem'));
+const HTTPS_PORT = parseInt(process.env.HTTPS_PORT, 10) || 3001;
+const HTTP_PORT = parseInt(process.env.HTTP_PORT, 10) || 3002;
+
+if (hasSsl) {
+    const httpsOptions = {
+        key: fs.readFileSync(path.join(sslDir, 'key.pem')),
+        cert: fs.readFileSync(path.join(sslDir, 'cert.pem'))
+    };
+    https.createServer(httpsOptions, app).listen(HTTPS_PORT, () => {
+        console.log(`HTTPS Server is running on https://localhost:${HTTPS_PORT}`);
+    });
+}
+
+app.listen(HTTP_PORT, () => {
+    console.log(`Server is running on http://localhost:${HTTP_PORT}`);
 });

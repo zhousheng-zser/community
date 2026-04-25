@@ -31,6 +31,9 @@ backend/data/uploads/images/
 backend/uploads/
 backend/uploads
 
+# SSL certificates
+backend/ssl/
+
 # OS / IDE
 .DS_Store
 .idea/
