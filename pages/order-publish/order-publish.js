@@ -231,13 +231,13 @@ Page({
         if (url) imageUrls.push(url);
       }
       try {
-        const categoryMap = { '代取': 'take', '看护': 'child', '陪护': 'escort', '代扔垃圾': 'trash', '宠物照看': 'pet' };
         const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
         const orderRes = await util.post('neighbor-assist/orders', {
-          assist_type: categoryMap[activeCategory] || 'take',
+          assist_type: activeCategory,
           origin_address_snapshot: { address: form.address, detail: form.address },
           destination_address_snapshot: { address: form.address, detail: form.address },
           appointment_time: form.time || null,
+          content: form.content,
           remark: form.content,
           reward_amount: rewardAmount
         });
@@ -268,15 +268,15 @@ Page({
     const { pickup, delivery, remark, price } = this.data.helperForm;
     if (!pickup || !delivery) return wx.showToast({ title: '请填写取送地址', icon: 'none' });
 
-    // 将中文分类映射为英文 assist_type
-    const categoryMap = { '代取': 'take', '看护': 'child', '陪护': 'escort', '代扔垃圾': 'trash', '宠物照看': 'pet' };
-    const assistType = categoryMap[this.data.activeCategory] || 'take';
+    // 将中文分类直接作为 assist_type
+    const assistType = this.data.activeCategory;
     const rewardAmount = price && parseFloat(price) > 0 ? parseFloat(price) : null;
 
     wx.showLoading({ title: '发布中...' });
     try {
       const res = await util.post('neighbor-assist/orders', {
         assist_type: assistType,
+        content: remark || `${pickup} → ${delivery}`,
         community_id: 1,
         origin_address_snapshot: {
           address: pickup,

@@ -15,7 +15,10 @@ function parseDetail(raw, myUserId) {
   const status = r.status || r.order_status || '';
   const statusText = r.status_text || r.status_label || status || '';
   const category = r.category || r.assist_type || '';
-  const desc = r.content || r.description || r.title || '';
+  // 兼容旧数据：英文代码转中文
+  const categoryMap = { take: '代取', child: '接送小孩', escort: '陪诊', read: '陪读', trash: '代扔垃圾', pet: '宠物喂养', errand: '跑腿', other: '其他' };
+  const categoryDisplay = categoryMap[category] || category || '';
+  const desc = r.content || r.remark || r.description || r.title || '';
   const title = desc ? String(desc).slice(0, 28) + (String(desc).length > 28 ? '…' : '') : '邻里帮帮';
 
   // 解析地址：优先使用 origin/destination 对象，兼容旧的 address 字段
@@ -59,7 +62,7 @@ function parseDetail(raw, myUserId) {
     statusText,
     title,
     desc,
-    category,
+    category: categoryDisplay,
     address,
     pickupAddress: pickupAddress || address,
     deliveryAddress: deliveryAddress || address,
