@@ -28,18 +28,41 @@ Page({
       shopId: options.shopId || '',
       fromUrl: options.from || 'cart'
     });
-    
-    // 从本地缓存拿商品列
-    const tempItems = wx.getStorageSync('temp_checkout_items') || [];
-    if (tempItems.length === 0) {
+
+    let items = [];
+    const from = options.from || 'cart';
+
+    // 来源: market-shop 店铺购物车 (local)
+    if (from === 'local') {
+      const localItems = wx.getStorageSync('local_checkout_goods') || [];
+      const shopId = wx.getStorageSync('local_checkout_shop_id');
+      const shopName = wx.getStorageSync('local_checkout_shop_name') || '';
+      // 将 local 格式转为标准格式
+      items = localItems.map(it => ({
+        goodsId: it.goodsId,
+        skuId: it.skuId || 'default_sku_' + it.goodsId,
+        name: it.goodsName,
+        specsText: it.goodsBrief || '默认规格',
+        price: Number(it.goodsRealPrice) || 0,
+        image: it.goodsPictureUrl || '',
+        quantity: it.goodsNum || 1
+      }));
+      if (shopId) this.setData({ shopId });
+      if (shopName) this.setData({ 'shopInfo.name': shopName });
+    } else {
+      // 来源: goods-detail 商品详情页 (cart / buyNow)
+      items = wx.getStorageSync('temp_checkout_items') || [];
+    }
+
+    if (items.length === 0) {
       wx.showToast({ title: '订单数据丢失', icon: 'none' });
       setTimeout(() => wx.navigateBack(), 1000);
       return;
     }
-    
-    this.setData({ items: tempItems });
+
+    this.setData({ items });
     this.calcPrices();
-    
+
     // 初始化默认地址
     this.loadDefaultAddress();
   },
@@ -141,6 +164,12 @@ Page({
       // 提交成功，清理购物车
       if (this.data.fromUrl === 'cart') {
         wx.removeStorageSync(`cart_${this.data.shopId}`);
+      }
+      if (this.data.fromUrl === 'local') {
+        wx.removeStorageSync('local_checkout_goods');
+        wx.removeStorageSync('local_checkout_totle');
+        wx.removeStorageSync('local_checkout_shop_id');
+        wx.removeStorageSync('local_checkout_shop_name');
       }
       wx.removeStorageSync('temp_checkout_items');
 
