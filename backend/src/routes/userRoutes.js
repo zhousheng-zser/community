@@ -27,3 +27,8 @@ router.put('/addresses/:id', userController.updateAddress);
 router.delete('/addresses/:id', userController.deleteAddress);
 
 module.exports = router;
+
+// 邀请系统
+router.get('/invite-code', userController.getInviteCode);
+router.post('/bind-inviter', userController.bindInviter);
+router.get('/invitees', userController.getInvitees);

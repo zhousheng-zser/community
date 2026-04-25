@@ -96,6 +96,13 @@ app.use('/api/v1/admin', require('./routes/adminRoutes'));
 app.use('/api/v1/admin/communities', require('./routes/adminCommunityRoutes'));
 app.use('/api/v1/admin/announcements', require('./routes/adminAnnouncementRoutes'));
 app.use('/api/v1/local-goods-home', require('./routes/localGoodsHomeRoutes'));
+// New modules: chat, coupons, benefit-coin, promoter, mini-programs
+app.use('/api/v1/chat', require('./routes/chatRoutes'));
+app.use('/api/v1/coupons', require('./routes/couponRoutes'));
+app.use('/api/v1/benefit-coin', require('./routes/benefitCoinRoutes'));
+app.use('/api/v1/promoter', require('./routes/promoterRoutes'));
+app.use('/api/v1/mini-programs', require('./routes/miniProgramRoutes'));
+
 require('./mountBenefitAlliance')(app);
 
 // ===================

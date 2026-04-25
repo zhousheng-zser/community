@@ -2,7 +2,9 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class CouponIssue extends Model {
-    static associate() {}
+    static associate(models) {
+      this.belongsTo(models.CouponTemplate, { foreignKey: 'template_id', as: 'CouponTemplate' });
+    }
   }
   CouponIssue.init({
     template_id: { type: DataTypes.BIGINT, allowNull: false },

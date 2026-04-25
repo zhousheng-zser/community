@@ -289,3 +289,158 @@ exports.deleteAddress = async (req, res) => {
 
 /** 供一次性数据回填脚本调用：按用户修正默认地址唯一性 */
 exports.ensureUserAddressDefaultInternal = ensureUserAddressDefault;
+
+// ========== 邀请系统 ==========
+
+/** 生成6位邀请码（数字+大写字母） */
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉容易混淆的字符
+  let code;
+  do {
+    code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+  } while (code.length < 6);
+  return code;
+}
+
+/**
+ * 获取或生成邀请码 GET /user/invite-code
+ * 返回用户的唯一邀请码，如果不存在则自动生成
+ */
+exports.getInviteCode = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'nickname', 'avatar_url', 'invite_code', 'invited_by']
+    });
+    if (!user) {
+      return res.status(404).json({ code: 404, msg: '用户不存在', data: null });
+    }
+    // 如果还没有邀请码，生成一个
+    if (!user.invite_code) {
+      let inviteCode;
+      let attempts = 0;
+      do {
+        inviteCode = generateInviteCode();
+        attempts++;
+        if (attempts > 10) {
+          return res.status(500).json({ code: 500, msg: '邀请码生成失败', data: null });
+        }
+      } while (await User.findOne({ where: { invite_code: inviteCode } }));
+      await user.update({ invite_code: inviteCode });
+    }
+    // 获取邀请人信息（如果有）
+    let inviter = null;
+    if (user.invited_by) {
+      inviter = await User.findByPk(user.invited_by, {
+        attributes: ['id', 'nickname', 'avatar_url', 'invite_code']
+      });
+    }
+    res.json({
+      code: 0,
+      msg: 'ok',
+      data: {
+        user_id: user.id,
+        invite_code: user.invite_code,
+        inviter: inviter ? {
+          user_id: inviter.id,
+          nickname: inviter.nickname,
+          avatar_url: inviter.avatar_url
+        } : null
+      }
+    });
+  } catch (error) {
+    console.error('获取邀请码失败:', error);
+    res.status(500).json({ code: 500, msg: '获取邀请码失败', data: null });
+  }
+};
+
+/**
+ * 绑定邀请人 POST /user/bind-inviter
+ * body: { invite_code: 'ABC123' }
+ * 扫描他人邀请码后调用，绑定邀请关系
+ */
+exports.bindInviter = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { invite_code } = req.body;
+    if (!invite_code || typeof invite_code !== 'string') {
+      return res.status(400).json({ code: 400, msg: '缺少邀请码', data: null });
+    }
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ code: 404, msg: '用户不存在', data: null });
+    }
+    // 如果已经绑定了邀请人，不允许再次绑定
+    if (user.invited_by) {
+      return res.status(400).json({ code: 400, msg: '已绑定邀请人，无法重复绑定', data: null });
+    }
+    // 查找邀请人
+    const inviter = await User.findOne({
+      where: { invite_code: invite_code.trim().toUpperCase() }
+    });
+    if (!inviter) {
+      return res.status(404).json({ code: 404, msg: '邀请码不存在', data: null });
+    }
+    // 不能邀请自己
+    if (inviter.id === userId) {
+      return res.status(400).json({ code: 400, msg: '不能使用自己的邀请码', data: null });
+    }
+    // 绑定邀请关系
+    await user.update({ invited_by: inviter.id });
+    res.json({
+      code: 0,
+      msg: '绑定成功',
+      data: {
+        inviter: {
+          user_id: inviter.id,
+          nickname: inviter.nickname,
+          avatar_url: inviter.avatar_url
+        }
+      }
+    });
+  } catch (error) {
+    console.error('绑定邀请人失败:', error);
+    res.status(500).json({ code: 500, msg: '绑定失败', data: null });
+  }
+};
+
+/**
+ * 查询邀请列表 GET /user/invitees
+ * 返回当前用户邀请的所有用户列表
+ */
+exports.getInvitees = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 50);
+    const offset = (page - 1) * limit;
+    const { rows, count } = await User.findAndCountAll({
+      where: { invited_by: userId },
+      attributes: ['id', 'nickname', 'avatar_url', 'created_at'],
+      order: [['created_at', 'DESC']],
+      limit,
+      offset
+    });
+    res.json({
+      code: 0,
+      msg: 'ok',
+      data: {
+        list: rows.map(u => ({
+          user_id: u.id,
+          nickname: u.nickname,
+          avatar_url: u.avatar_url,
+          invited_at: u.created_at
+        })),
+        total: count,
+        page,
+        limit
+      }
+    });
+  } catch (error) {
+    console.error('查询邀请列表失败:', error);
+    res.status(500).json({ code: 500, msg: '查询失败', data: null });
+  }
+};

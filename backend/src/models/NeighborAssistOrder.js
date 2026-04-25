@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     pay_status: { type: DataTypes.STRING(32), allowNull: false, defaultValue: 'unpaid' },
     assigned_worker_id: { type: DataTypes.INTEGER, allowNull: true },
     dispatch_at: { type: DataTypes.DATE, allowNull: true },
-    dispatch_by: { type: DataTypes.INTEGER, allowNull: true }
+    dispatch_by: { type: DataTypes.INTEGER, allowNull: true },
+    completed_at: { type: DataTypes.DATE, allowNull: true }
   }, {
     sequelize,
     modelName: 'NeighborAssistOrder',
