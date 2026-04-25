@@ -12,7 +12,6 @@ const {
   MarketShop,
   WorkerService,
   ServiceOrderReview,
-  CommunityFeaturedGood,
   MarketGood,
   ServiceOrder
 } = require('../models');
@@ -657,6 +656,78 @@ exports.getServiceProviderCatalog = async (req, res) => {
     return ok(res, { groups: Object.values(groups) });
   } catch (e) {
     console.error('getServiceProviderCatalog', e);
+    return fail(res, 500, '服务异常');
+  }
+};
+
+/**
+ * 兼容旧前端：/core/goods/featured
+ * 优先返回小区精选商品；若未配置则回退全站在售商品。
+ */
+exports.getFeaturedGoods = async (req, res) => {
+  try {
+    let limit = parseInt(req.query.limit, 10);
+    if (!Number.isFinite(limit) || limit < 1) limit = 10;
+    limit = Math.min(limit, 30);
+    const goods = await MarketGood.findAll({
+      where: { status: 'on_sale' },
+      order: [['sold_count', 'DESC'], ['sort_order', 'ASC'], ['id', 'DESC']],
+      limit
+    });
+
+    const data = goods.map((g) => {
+      const j = g.toJSON ? g.toJSON() : g;
+      const title = j.name || '';
+      const cover = j.main_image || (Array.isArray(j.images) && j.images.length ? j.images[0] : null);
+      return {
+        id: j.id,
+        title,
+        goodsTitle: title,
+        name: title,
+        price: j.price,
+        goodsRealPrice: j.price,
+        mainPicture: cover,
+        cover_image: cover,
+        image: cover,
+        unit: ''
+      };
+    });
+    return ok(res, data);
+  } catch (e) {
+    console.error('getFeaturedGoods', e);
+    return fail(res, 500, '服务异常');
+  }
+};
+
+/**
+ * 兼容旧前端：/core/goods/:id
+ */
+exports.getGoodDetail = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (!id) return fail(res, 400, '无效商品 id');
+    const g = await MarketGood.findByPk(id);
+    if (!g || g.status !== 'on_sale') return fail(res, 404, '不存在', 404);
+    const j = g.toJSON();
+    const title = j.name || '';
+    const cover = j.main_image || (Array.isArray(j.images) && j.images.length ? j.images[0] : null);
+    return ok(res, {
+      id: j.id,
+      title,
+      goodsTitle: title,
+      name: title,
+      price: j.price,
+      goodsRealPrice: j.price,
+      mainPicture: cover,
+      cover_image: cover,
+      image: cover,
+      unit: '',
+      detail_images: Array.isArray(j.images) ? j.images : [],
+      stock: j.stock != null ? Number(j.stock) : 0,
+      tab_category: j.category_key || ''
+    });
+  } catch (e) {
+    console.error('getGoodDetail', e);
     return fail(res, 500, '服务异常');
   }
 };
