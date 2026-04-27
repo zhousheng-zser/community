@@ -18,11 +18,20 @@ Page({
     deliveryFee: '0.00',
     discountAmount: '0.00',
     payableAmount: '0.00',
+    previewReady: false,
     
     remark: '',
     submitting: false
   },
-
+  pickFirstNumber() {
+    for (let i = 0; i < arguments.length; i++) {
+      const v = arguments[i];
+      if (v === undefined || v === null || v === '') continue;
+      const n = Number(v);
+      if (!Number.isNaN(n)) return n;
+    }
+    return null;
+  },
   onLoad(options) {
     this.setData({
       shopId: options.shopId || '',
@@ -38,9 +47,9 @@ Page({
       const shopId = wx.getStorageSync('local_checkout_shop_id');
       const shopName = wx.getStorageSync('local_checkout_shop_name') || '';
       // 将 local 格式转为标准格式
-      items = localItems.map(it => ({
+      items = localItems.map((it, idx) => ({
         goodsId: it.goodsId,
-        skuId: it.skuId || 'default_sku_' + it.goodsId,
+        itemKey: `${it.goodsId || 'goods'}_${idx}`,
         name: it.goodsName,
         specsText: it.goodsBrief || '默认规格',
         price: Number(it.goodsRealPrice) || 0,
@@ -53,6 +62,11 @@ Page({
       // 来源: goods-detail 商品详情页 (cart / buyNow)
       items = wx.getStorageSync('temp_checkout_items') || [];
     }
+
+    items = items.map((it, idx) => ({
+      ...it,
+      itemKey: it.itemKey || `${it.goodsId || it.id || 'goods'}_${idx}`
+    }));
 
     if (items.length === 0) {
       wx.showToast({ title: '订单数据丢失', icon: 'none' });
@@ -96,27 +110,44 @@ Page({
   },
 
   async calcPrices() {
+    this.setData({ previewReady: false });
+
     // 组装预结算报文
     const payload = {
       shop_id: this.data.shopId,
       delivery_mode: this.data.deliveryType,
       items: this.data.items.map(it => ({
         goods_id: it.goodsId,
-        sku_id: it.skuId,
         quantity: it.quantity
       }))
     };
     try {
       const res = await util.post('market/orders/preview', payload);
-      const data = res || {};
+      const data = (res && typeof res === 'object' && res.data && typeof res.data === 'object') ? res.data : (res || {});
+      const goodsAmount = this.pickFirstNumber(data.goods_amount, data.goodsAmount, data.items_amount, data.itemsAmount, data.total_goods_amount);
+      const deliveryFee = this.pickFirstNumber(data.delivery_fee, data.deliveryFee, data.freight_fee, data.freightFee, data.shipping_fee, data.shippingFee);
+      const discountAmount = this.pickFirstNumber(data.discount_amount, data.discountAmount, data.coupon_amount, data.couponAmount, data.reduce_amount, data.reduceAmount);
+      const payableAmount = this.pickFirstNumber(data.payable_amount, data.payableAmount, data.total_amount, data.totalAmount, data.amount);
+      if (goodsAmount == null || deliveryFee == null || discountAmount == null || payableAmount == null) {
+        throw new Error('preview fields missing');
+      }
+
       this.setData({
-        goodsAmount: typeof data.goods_amount !== 'undefined' ? Number(data.goods_amount).toFixed(2) : '0.00',
-        deliveryFee: typeof data.delivery_fee !== 'undefined' ? Number(data.delivery_fee).toFixed(2) : '0.00',
-        discountAmount: typeof data.discount_amount !== 'undefined' ? Number(data.discount_amount).toFixed(2) : '0.00',
-        payableAmount: typeof data.payable_amount !== 'undefined' ? Number(data.payable_amount).toFixed(2) : '0.00'
+        goodsAmount: Number(goodsAmount || 0).toFixed(2),
+        deliveryFee: Number(deliveryFee || 0).toFixed(2),
+        discountAmount: Number(discountAmount || 0).toFixed(2),
+        payableAmount: Number(payableAmount || 0).toFixed(2),
+        previewReady: true
       });
     } catch (err) {
-      wx.showToast({ title: '无法获取预结算信息', icon: 'none' });
+      this.setData({
+        goodsAmount: '0.00',
+        deliveryFee: '0.00',
+        discountAmount: '0.00',
+        payableAmount: '0.00',
+        previewReady: false
+      });
+      wx.showToast({ title: '预结算失败，请稍后重试', icon: 'none' });
     }
   },
 
@@ -125,6 +156,10 @@ Page({
   },
 
   async submitOrder() {
+    if (!this.data.previewReady) {
+      wx.showToast({ title: '请先完成预结算', icon: 'none' });
+      return;
+    }
     if (this.data.deliveryType === 'express' && !this.data.address) {
       wx.showToast({ title: '请选择收货地址', icon: 'none' });
       return;
@@ -141,7 +176,6 @@ Page({
       address: this.data.deliveryType === 'express' ? this.data.address : null,
       remark: this.data.remark,
       items: this.data.items.map(it => ({
-        sku_id: it.skuId,
         goods_id: it.goodsId,
         quantity: it.quantity
       }))
@@ -149,7 +183,13 @@ Page({
 
     try {
       // 真实创单API
-      const res = await util.post('market/order/create', payload);
+      let res = null;
+      try {
+        res = await util.post('market/orders', payload);
+      } catch (createErr) {
+        // 兼容旧链路：部分环境仍保留 market/order/create
+        res = await util.post('market/order/create', payload);
+      }
       const orderNo = res.orderNo || res.order_no;
 
       if (!orderNo) throw new Error('创建订单失败，未返回单号');

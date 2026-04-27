@@ -84,38 +84,47 @@ Page({
   },
 
   normalizeDetail(o) {
-    const statusObj = STATUS_MAP[o.status] || { text: o.status || '未知订单状态' };
+    const detail = (o && typeof o === 'object') ? o : {};
+    const order = detail.order && typeof detail.order === 'object' ? detail.order : detail;
+    const shop = detail.shop && typeof detail.shop === 'object' ? detail.shop : {};
+    const rawItems = Array.isArray(detail.items) ? detail.items : (Array.isArray(order.items) ? order.items : (Array.isArray(detail.goods) ? detail.goods : []));
+
+    const status = order.status || order.order_status || detail.status || detail.order_status || '';
+    const refundStatus = order.refundStatus || order.refund_status || detail.refundStatus || detail.refund_status || '';
+    const statusObj = STATUS_MAP[status] || { text: status || '未知订单状态' };
+    const refundObj = refundStatus ? (STATUS_MAP[refundStatus] || { text: refundStatus }) : null;
+
     this.setData({
-      orderNo: o.orderNo || o.order_no,
-      status: o.status,
-      statusText: o.refundStatus ? STATUS_MAP[o.refundStatus].text : statusObj.text,
-      shopName: o.shopName || o.shop_name || '社区精选商家',
-      shopId: o.shopId || o.shop_id,
+      orderNo: order.orderNo || order.order_no || detail.orderNo || detail.order_no,
+      status,
+      statusText: refundObj ? refundObj.text : statusObj.text,
+      shopName: shop.name || order.shopName || order.shop_name || detail.shopName || detail.shop_name || '社区精选商家',
+      shopId: shop.id || order.shopId || order.shop_id || detail.shopId || detail.shop_id,
       
-      goodsAmount: String(o.goods_amount || '0.00'),
-      deliveryFee: String(o.delivery_fee || '0.00'),
-      discountAmount: String(o.discount_amount || '0.00'),
-      payableAmount: String(o.payable_amount || o.amount || '0.00'),
+      goodsAmount: String(order.goods_amount || detail.goods_amount || '0.00'),
+      deliveryFee: String(order.delivery_fee || detail.delivery_fee || '0.00'),
+      discountAmount: String(order.discount_amount || detail.discount_amount || '0.00'),
+      payableAmount: String(order.payable_amount || detail.payable_amount || order.amount || detail.amount || '0.00'),
 
-      createdAt: o.created_at || '2026-01-01 12:00:00',
-      payTime: o.pay_time || '',
-      deliveryTime: o.delivery_time || '',
+      createdAt: order.created_at || detail.created_at || '2026-01-01 12:00:00',
+      payTime: order.pay_time || order.paid_at || detail.pay_time || detail.paid_at || '',
+      deliveryTime: order.delivery_time || detail.delivery_time || '',
 
-      receiver_name: o.receiver_name || '张三',
-      receiver_phone: o.receiver_phone || '13888888888',
-      receiver_address: o.receiver_address || '浙江省杭州市西湖区某某小区 1幢1单元101',
+      receiver_name: order.receiver_name || detail.receiver_name || '张三',
+      receiver_phone: order.receiver_phone || detail.receiver_phone || '13888888888',
+      receiver_address: order.receiver_address || detail.receiver_address || '浙江省杭州市西湖区某某小区 1幢1单元101',
 
-      refundStatus: o.refundStatus || o.refund_status,
+      refundStatus,
 
-      items: (o.goods || []).map(g => ({
-        id: g.id,
-        name: g.name || g.goods_name,
-        price: String(g.price || '0.00'),
+      items: rawItems.map(g => ({
+        id: g.id || g.goods_id,
+        name: g.name || g.goods_name || g.goods_name_snapshot,
+        price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
         quantity: g.quantity || 1,
-        image: g.image || g.main_image || '/img/placeholders/home_cleaning.png'
+        image: g.image || g.main_image || g.goods_image_snapshot || '/img/placeholders/home_cleaning.png'
       }))
     });
-    this.initCountdown(o);
+    this.initCountdown(order);
   },
 
   initCountdown(o) {

@@ -73,23 +73,33 @@ Page({
   },
 
   normalizeOrder(o) {
-    const statusObj = STATUS_MAP[o.status] || { text: o.status || '未知', class: '' };
+    const detail = (o && typeof o === 'object') ? o : {};
+    const order = detail.order && typeof detail.order === 'object' ? detail.order : detail;
+    const rawItems = Array.isArray(detail.items)
+      ? detail.items
+      : (Array.isArray(order.items) ? order.items : (Array.isArray(detail.goods) ? detail.goods : []));
+    const status = order.status || order.order_status || detail.status || detail.order_status || '';
+    const statusObj = STATUS_MAP[status] || { text: status || '未知', class: '' };
+    const goods = rawItems.map((g) => {
+      const rawImage = g.image || g.main_image || g.goods_image_snapshot || '';
+      return {
+        id: g.id || g.goods_id,
+        name: g.name || g.goods_name || g.goods_name_snapshot,
+        price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
+        quantity: g.quantity || 1,
+        image: rawImage ? util.imgUrl(rawImage) : '/img/placeholders/home_cleaning.png'
+      };
+    });
     return {
-      orderNo: o.orderNo || o.order_no,
-      shopName: o.shopName || o.shop_name,
-      shopId: o.shopId || o.shop_id,
-      status: o.status,
+      orderNo: order.orderNo || order.order_no || detail.orderNo || detail.order_no,
+      shopName: order.shopName || order.shop_name || detail.shopName || detail.shop_name,
+      shopId: order.shopId || order.shop_id || detail.shopId || detail.shop_id,
+      status,
       statusText: statusObj.text,
       statusClass: statusObj.class,
-      amount: String(o.amount || o.payable_amount || '0.00'),
-      totalQuantity: o.goods ? o.goods.reduce((acc, g) => acc + (g.quantity || 1), 0) : 0,
-      goods: (o.goods || []).map(g => ({
-        id: g.id,
-        name: g.name || g.goods_name,
-        price: String(g.price || '0.00'),
-        quantity: g.quantity || 1,
-        image: g.image || g.main_image || '/img/placeholders/home_cleaning.png'
-      }))
+      amount: String(order.amount || order.payable_amount || detail.amount || detail.payable_amount || '0.00'),
+      totalQuantity: goods.reduce((acc, g) => acc + Number(g.quantity || 1), 0),
+      goods
     };
   },
 

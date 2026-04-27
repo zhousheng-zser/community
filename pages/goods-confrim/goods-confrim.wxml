@@ -31,7 +31,7 @@
   <!-- 结算商品列表 -->
   <view class="card goods-list">
     <view class="shop-title">📦 订单清单</view>
-    <view class="goods-item" wx:for="{{items}}" wx:key="skuId">
+    <view class="goods-item" wx:for="{{items}}" wx:key="itemKey">
       <image class="g-img" src="{{item.image}}" mode="aspectFill"></image>
       <view class="g-info">
         <text class="g-name">{{item.name}}</text>

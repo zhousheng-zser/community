@@ -125,16 +125,18 @@ Page({
     const grouped = {};
     goodsList.forEach((g) => {
       const key = g.category_key || g.categoryKey || 'default';
+      const priceRaw = g.pay_price != null && g.pay_price !== '' ? g.pay_price : (g.price != null ? g.price : 0);
+      const oldPriceRaw = g.origin_price != null && g.origin_price !== '' ? g.origin_price : (g.old_price != null ? g.old_price : priceRaw);
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push({
         id: g.id || g.goods_id,
         name: g.name || g.goods_name || '精选商品',
         desc: g.description || g.desc || '',
         sold: `已售${Number(g.sold_count || 0)}`,
-        price: String(g.price || 0),
-        oldPrice: String(g.origin_price || g.old_price || g.price || 0),
+        price: String(priceRaw),
+        oldPrice: String(oldPriceRaw),
         image: g.main_image || g.image ? imgUrl(g.main_image || g.image) : '',
-        detailUrl: `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(g.id || g.goods_id))}&shopId=${encodeURIComponent(String(this.data.currentShopId || ''))}&image=${encodeURIComponent(g.main_image || g.image ? imgUrl(g.main_image || g.image) : '')}&name=${encodeURIComponent(g.name || g.goods_name || '')}&price=${encodeURIComponent(String(g.price || ''))}`
+        detailUrl: `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(g.id || g.goods_id))}&shopId=${encodeURIComponent(String(this.data.currentShopId || ''))}&image=${encodeURIComponent(g.main_image || g.image ? imgUrl(g.main_image || g.image) : '')}&name=${encodeURIComponent(g.name || g.goods_name || '')}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`
       });
     });
 

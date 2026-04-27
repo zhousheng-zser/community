@@ -88,6 +88,17 @@ Page({
     }
     return '';
   },
+  /**
+   * 价格字段专用：跳过 undefined/null/空字符串/0/'0'
+   * 避免后端返回 original_price: 0 时把价格覆盖为 0
+   */
+  firstPriceValue() {
+    for (let i = 0; i < arguments.length; i++) {
+      const value = arguments[i];
+      if (value !== undefined && value !== null && value !== '' && value !== 0 && value !== '0') return value;
+    }
+    return '';
+  },
   normalizeMoney(value) {
     if (value === undefined || value === null || value === '') return '';
     const num = Number(value);
@@ -99,9 +110,9 @@ Page({
     const name = item.name || item.title || item.goods_name || '';
     const rawImage = util.pickShopProductCoverRaw(item);
     const image = rawImage ? util.imgUrl(rawImage) : '';
-    const price = this.normalizeMoney(this.firstValue(
-      item.price,
+    const price = this.normalizeMoney(this.firstPriceValue(
       item.pay_price,
+      item.price,
       item.goods_price,
       item.goodsRealPrice,
       item.original_price,
@@ -161,29 +172,38 @@ Page({
       const store = g.store && typeof g.store === 'object' ? g.store : {};
       const merchant = g.merchant && typeof g.merchant === 'object' ? g.merchant : {};
       const nested = g.goods || g.good || {};
-      const priceRaw = this.firstValue(
+      // 详情接口若未返回价格字段，保留进入详情时已展示的价格，避免被覆盖成 0
+      const currentPriceRaw = this.firstPriceValue(
+        this.data.product && this.data.product.price,
+        this.data.product && this.data.product.pay
+      );
+      const priceRaw = this.firstPriceValue(
+        g.pay_price,
+        g.price,
+        g.goods_price,
+        g.goodsRealPrice,
+        g.market_price,
         g.original_price,
         g.origin_price,
-        g.market_price,
-        g.goodsRealPrice,
-        g.goods_price,
-        g.price,
+        nested.pay_price,
+        nested.price,
+        nested.goods_price,
+        nested.goodsRealPrice,
         nested.original_price,
         nested.origin_price,
-        nested.goodsRealPrice,
-        nested.goods_price,
-        nested.price
+        currentPriceRaw
       );
-      const payRaw = this.firstValue(
-        g.price,
+      const payRaw = this.firstPriceValue(
         g.pay_price,
+        g.price,
         g.goods_price,
         g.goodsRealPrice,
         priceRaw,
-        nested.price,
         nested.pay_price,
+        nested.price,
         nested.goods_price,
-        nested.goodsRealPrice
+        nested.goodsRealPrice,
+        currentPriceRaw
       );
       const rebateRaw = this.firstValue(g.rebate_amount, g.comm, g.commission, nested.rebate_amount, nested.comm, 0);
       const mainRaw = util.pickShopProductCoverRaw(g) || util.pickShopProductCoverRaw(nested);
