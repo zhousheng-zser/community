@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('./controllers/benefitAlliance.controller');
 
-router.get('/benefit/display', ctrl.getDisplay);
+// 公开接口：小程序调用
+router.get('/goods', ctrl.getGoods);
+router.get('/display', ctrl.getDisplay);
+
+// 兼容旧路径
 router.get('/jd/benefit/goods', ctrl.getJdGoods);
-router.get('/jd/promotion/spread-url', ctrl.getJdSpreadUrl);
 router.get('/pdd/benefit/goods', ctrl.getPddGoods);
-router.get('/pdd/promotion/spread-url', ctrl.getPddSpreadUrl);
 
 module.exports = router;

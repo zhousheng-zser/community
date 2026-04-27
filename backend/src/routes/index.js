@@ -28,6 +28,7 @@ const marketRoutes = require('../modules/market/routes');
 // ── 惠民卡 / 福利联盟 ───────────────────────────────────────────────────
 const benefitCardRoutes = require('../modules/benefit-card/routes');
 const benefitAllianceRoutes = require('../modules/benefit-card/alliance.routes');
+const benefitAllianceAdminRoutes = require('../modules/benefit-card/admin.routes');
 
 // ── 优惠券 ───────────────────────────────────────────────────────────────
 const couponRoutes = require('../modules/coupon/routes');
@@ -76,6 +77,7 @@ router.use('/market', marketRoutes);
 // router.use('/shop', shopRoutes);
 router.use('/benefit-coin', benefitCardRoutes);
 router.use('/benefit-alliance', benefitAllianceRoutes);
+router.use('/admin', benefitAllianceAdminRoutes);
 router.use('/coupons', couponRoutes);
 router.use('/chat', chatRoutes);
 router.use('/commission', commissionRoutes);

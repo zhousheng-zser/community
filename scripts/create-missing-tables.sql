@@ -133,3 +133,51 @@ INSERT IGNORE INTO `coupon_templates` (`name`, `type`, `threshold_amount`, `disc
 ('满50减10优惠券', 'full_minus', 50.00, 10.00, 1000, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'active', NOW(), NOW()),
 ('满100减20优惠券', 'full_minus', 100.00, 20.00, 500, 0, NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), 'active', NOW(), NOW()),
 ('满200减50优惠券', 'full_minus', 200.00, 50.00, 200, 0, NOW(), DATE_ADD(NOW(), INTERVAL 60 DAY), 'active', NOW(), NOW());
+
+-- ============================================================
+-- benefit_alliance_goods: 惠民卡多平台推广商品统一管理
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `benefit_alliance_goods` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `platform` ENUM('jd','pdd','taobao','meituan','brand') NOT NULL DEFAULT 'jd',
+  `title` VARCHAR(200) NOT NULL DEFAULT '',
+  `subtitle` VARCHAR(500) DEFAULT '',
+  `image_url` VARCHAR(500) DEFAULT '',
+  `price` DECIMAL(10,2) DEFAULT 0,
+  `coupon_price` DECIMAL(10,2) DEFAULT 0,
+  `rebate_amount` DECIMAL(10,2) DEFAULT 0,
+  `sku_id` VARCHAR(100) DEFAULT '',
+  `goods_id` VARCHAR(100) DEFAULT '',
+  `spread_url` VARCHAR(500) DEFAULT '',
+  `mini_path` VARCHAR(500) DEFAULT '',
+  `keyword` VARCHAR(100) DEFAULT '',
+  `sort_order` INT NOT NULL DEFAULT 0,
+  `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  `scene` VARCHAR(50) DEFAULT 'benefit_card',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_platform_status` (`platform`, `status`),
+  INDEX `idx_platform_scene_status` (`platform`, `scene`, `status`),
+  INDEX `idx_sort_order` (`sort_order`),
+  INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Seed demo data: JD
+INSERT IGNORE INTO `benefit_alliance_goods`
+(`platform`,`title`,`subtitle`,`image_url`,`price`,`rebate_amount`,`sku_id`,`spread_url`,`sort_order`,`status`,`scene`) VALUES
+('jd','美的空气炸锅家用5L','大容量无油低脂，京挑客爆款','/img/jd_benefit/demo-airfryer.png','199.00','15.00','12345678','https://u.jd.com/demo1',0,'active','benefit_card'),
+('jd','苏泊尔电饭煲4L','球釜内胆，智能预约','/img/jd_benefit/demo-cooker.png','299.00','20.00','87654321','https://u.jd.com/demo2',1,'active','benefit_card');
+
+-- Seed demo data: PDD
+INSERT IGNORE INTO `benefit_alliance_goods`
+(`platform`,`title`,`subtitle`,`image_url`,`price`,`coupon_price`,`rebate_amount`,`goods_id`,`spread_url`,`sort_order`,`status`,`scene`) VALUES
+('pdd','维达抽纸整箱20包','三层加厚，券后超低价','/img/pdd_benefit/demo-paper.png','39.90','19.90','2.00','PDD001','https://p.pinduoduo.com/demo1',0,'active','benefit_card'),
+('pdd','三只松鼠零食大礼包','网红爆款零食组合','/img/pdd_benefit/demo-snack.png','99.00','59.00','5.00','PDD002','https://p.pinduoduo.com/demo2',1,'active','benefit_card');
+
+-- Seed demo data: brand
+INSERT IGNORE INTO `benefit_alliance_goods`
+(`platform`,`title`,`subtitle`,`image_url`,`keyword`,`sort_order`,`status`,`scene`) VALUES
+('brand','肯德基优惠券','炸鸡汉堡 · 先领券再下单','/img/benefit_alliance/kfc.png','肯德基',0,'active','benefit_card'),
+('brand','麦当劳优惠券','巨无霸 · 麦乐送','/img/benefit_alliance/mcd.png','麦当劳',1,'active','benefit_card'),
+('brand','星巴克优惠券','咖啡星享 · 券包与周边','/img/benefit_alliance/starbucks.png','星巴克',2,'active','benefit_card');

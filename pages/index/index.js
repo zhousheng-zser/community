@@ -889,31 +889,31 @@ Page({
 
     if (!useLocalJd || !useLocalPdd) {
       try {
-        const disp = await util.get('benefit/display', { scene: 'benefit_card' });
+        const disp = await util.get('benefit-alliance/display', { scene: 'benefit_card' });
         if (!useLocalJd && disp && disp.jd) {
-          if (disp.jd.heroImage) jdBanner = imgUrl(disp.jd.heroImage);
-          jdHeroTitle = disp.jd.heroTitle || '';
-          jdHeroSubtitle = disp.jd.heroSubtitle || '';
+          if (disp.jd.image) jdBanner = imgUrl(disp.jd.image);
+          jdHeroTitle = disp.jd.title || '';
+          jdHeroSubtitle = disp.jd.subtitle || '';
         }
         if (!useLocalPdd && disp && disp.pdd) {
-          if (disp.pdd.heroImage) pddBanner = imgUrl(disp.pdd.heroImage);
-          pddHeroTitle = disp.pdd.heroTitle || '';
-          pddHeroSubtitle = disp.pdd.heroSubtitle || '';
+          if (disp.pdd.image) pddBanner = imgUrl(disp.pdd.image);
+          pddHeroTitle = disp.pdd.title || '';
+          pddHeroSubtitle = disp.pdd.subtitle || '';
         }
       } catch (e) {
-        console.warn('[惠民卡] benefit/display 失败', e && (e.errmsg || e.message || e));
+        console.warn('[惠民卡] benefit-alliance/display 失败', e && (e.errmsg || e.message || e));
       }
     }
     if (!useLocalJd) {
       try {
-        const res = await util.get('jd/benefit/goods', { scene: 'benefit_card' });
+        const res = await util.get('benefit-alliance/goods', { platform: 'jd', scene: 'benefit_card', limit: 8 });
         const list = pickAllianceList(res);
         if (list.length > 0) {
-          jdGoods = list.map((x, idx) => ({
-            id: x.id || idx + 1,
+          jdGoods = list.map((x) => ({
+            id: x.id || 0,
             skuId: String(x.skuId || x.sku_id || ''),
-            title: x.title || x.name || '',
-            image: imgUrl(x.image || x.image_url || images.pushFood1),
+            title: x.title || '',
+            image: x.image ? imgUrl(x.image) : imgUrl(images.pushFood1),
             price: x.price != null && x.price !== '' ? String(x.price) : '',
             rebateAmount: x.rebateAmount || x.rebate_amount || '',
             spreadUrl: x.spreadUrl || x.spread_url || ''
@@ -923,19 +923,19 @@ Page({
           }
         }
       } catch (e) {
-        console.warn('[惠民卡] jd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+        console.warn('[惠民卡] benefit-alliance/goods?platform=jd 失败', e && (e.errmsg || e.message || e));
       }
     }
     if (!useLocalPdd) {
       try {
-        const res = await util.get('pdd/benefit/goods', { scene: 'benefit_card' });
+        const res = await util.get('benefit-alliance/goods', { platform: 'pdd', scene: 'benefit_card', limit: 8 });
         const list = pickAllianceList(res);
         if (list.length > 0) {
-          pddGoods = list.map((x, idx) => ({
-            id: x.id || idx + 1,
+          pddGoods = list.map((x) => ({
+            id: x.id || 0,
             goodsId: String(x.goodsId || x.goods_id || ''),
-            title: x.title || x.name || '',
-            image: imgUrl(x.image || x.image_url || images.pushFood1),
+            title: x.title || '',
+            image: x.image ? imgUrl(x.image) : imgUrl(images.pushFood1),
             price: String(x.price || ''),
             couponPrice: String(x.couponPrice || x.coupon_price || ''),
             rebateAmount: x.rebateAmount || x.rebate_amount || '',
@@ -944,7 +944,7 @@ Page({
           })).filter((x) => !!(x.goodsId || x.spreadUrl));
         }
       } catch (e) {
-        console.warn('[惠民卡] pdd/benefit/goods 失败', e && (e.errmsg || e.message || e));
+        console.warn('[惠民卡] benefit-alliance/goods?platform=pdd 失败', e && (e.errmsg || e.message || e));
       }
     }
     if (Array.isArray(pddGoods) && pddGoods.length > 0) {
