@@ -19,8 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         media_url: DataTypes.STRING,
         related_goods_id: DataTypes.INTEGER
     }, {
-        sequelize,
-        modelName: 'Feed',
-    });
+    sequelize,
+    modelName: 'Feed',
+    tableName: 'Feeds',
+  });
     return Feed;
 };

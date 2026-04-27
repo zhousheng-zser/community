@@ -4,14 +4,25 @@ const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require(
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
 
-const ASSIST_TYPES = new Set(['take', 'child', 'escort', 'trash', 'pet']);
+const ASSIST_TYPES = new Set(['take', 'child', 'escort', 'trash', 'pet', 'read', 'errand', 'other', '代取', '接送小孩', '陪诊', '陪读', '代扔垃圾', '宠物喂养', '跑腿', '其他']);
 
 const ASSIST_TYPE_LABELS = {
   take: '代取快递',
-  child: '接送孩子',
+  child: '接送小孩',
   escort: '陪诊陪护',
   trash: '代扔垃圾',
-  pet: '宠物代办'
+  pet: '宠物喂养',
+  read: '陪读',
+  errand: '跑腿',
+  other: '其他',
+  '代取': '代取快递',
+  '接送小孩': '接送小孩',
+  '陪诊': '陪诊陪护',
+  '陪读': '陪读',
+  '代扔垃圾': '代扔垃圾',
+  '宠物喂养': '宠物喂养',
+  '跑腿': '跑腿',
+  '其他': '其他'
 };
 
 const NEIGHBOR_ORDER_STATUS_TEXT = {
@@ -80,6 +91,7 @@ exports.create = async (req, res) => {
       destination_address_snapshot,
       amount: orderAmount,
       appointment_time: appointment_time || null,
+      content: req.body.content || remark || null,
       remark: remark || null,
       status: 'pending_pay',
       pay_status: 'unpaid'
@@ -139,6 +151,7 @@ exports.myList = async (req, res) => {
         community_id: plain.community_id,
         origin_address_snapshot: plain.origin_address_snapshot,
         destination_address_snapshot: plain.destination_address_snapshot,
+        content: plain.content || plain.remark,
         remark: plain.remark,
         publisher: pub ? { id: pub.id, nickname: pub.nickname, phone: pub.phone, avatar_url: pub.avatar_url } : null,
         helper: worker ? { id: worker.id, nickname: worker.nickname, phone: worker.phone, avatar_url: worker.avatar_url } : null,
@@ -222,6 +235,7 @@ exports.pool = async (req, res) => {
         appointment_time: plain.appointment_time,
         origin_address_snapshot: plain.origin_address_snapshot,
         destination_address_snapshot: plain.destination_address_snapshot,
+        content: plain.content || plain.remark,
         remark: plain.remark,
         buyer: b ? { id: b.id, nickname: b.nickname || '', avatar_url: b.avatar_url || '' } : null
       };
@@ -276,6 +290,7 @@ exports.communityPool = async (req, res) => {
         appointment_time: plain.appointment_time,
         origin_address_snapshot: plain.origin_address_snapshot,
         destination_address_snapshot: plain.destination_address_snapshot,
+        content: plain.content || plain.remark,
         remark: plain.remark,
         publisher: b ? { id: b.id, nickname: b.nickname || '', avatar_url: b.avatar_url || '' } : null
       };

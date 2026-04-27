@@ -7,7 +7,9 @@ router.get('/feed-products', localGoodsHomeController.getFeedProducts);
 router.get('/zone-products', localGoodsHomeController.getZoneProducts);
 router.get('/channel-products', localGoodsHomeController.getChannelProducts);
 router.get('/brand-goods', localGoodsHomeController.getBrandGoods);
+router.get('/jiuzhou-haoshi', localGoodsHomeController.getJiuzhouHaoshi);
 router.get('/jiuzhou-haowu', localGoodsHomeController.getJiuzhouHaowu);
+router.get('/jiuzhou-haowei', localGoodsHomeController.getJiuzhouHaowei);
 router.get('/autumn-winter', localGoodsHomeController.getAutumnWinter);
 
 router.get('/hot-zone', localGoodsHomeController.getHotZone);

@@ -140,7 +140,9 @@ const FALLBACK_DEFINITIONS = [
   { key: 'pick_other', name: '商城甄选 > 其他' },
   { key: 'high_comm_zone', name: '高佣专区' },
   { key: 'brand_goods', name: '品牌好货' },
-  { key: 'jiuzhou_haowu', name: '寻找九州好物（多Tab）' },
+  { key: 'jiuzhou_haoshi', name: '九州好食' },
+  { key: 'jiuzhou_haowu', name: '九州好物' },
+  { key: 'jiuzhou_haowei', name: '九州好味' },
   { key: 'autumn_winter', name: '秋冬好物' },
   { key: 'daily_news', name: '每日上新（首页）', safe_edit: true },
   { key: 'top_sales', name: '热卖TOP榜（首页）', safe_edit: true },
@@ -163,7 +165,7 @@ const form = reactive({
 })
 
 const showModuleSelect = computed(() => currentDef.value && ['periodic_modules', 'feed_modules', 'feed_products_paged'].includes(currentDef.value.key))
-const showTabSelect = computed(() => currentDef.value && currentDef.value.key === 'jiuzhou_haowu')
+const showTabSelect = computed(() => currentDef.value && currentDef.value.key === 'jiuzhou_haowu_multi_tab')
 
 function resetForm() {
   form.goods_id = null

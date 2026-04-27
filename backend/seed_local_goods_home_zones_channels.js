@@ -1,5 +1,5 @@
 /**
- * 金刚区 zone_id 1～4 + 导购 channel_key 三频道灌数（来源 market_goods，店铺须有经纬度）。
+ * 金刚区 zone_id 1～4 + 导购 channel_key 多频道灌数（来源 market_goods，店铺须有经纬度）。
  * 依赖：已 sync_db；建议先跑 seed_local_goods_home.js。
  *
  * 用法：node seed_local_goods_home_zones_channels.js
@@ -153,12 +153,20 @@ async function main() {
       { channel_key: 'brand_goods', title: '品牌好货', sort: 100, status: 1 },
       { transaction: t }
     );
-    const chJiu = await LgHomeChannel.create(
-      { channel_key: 'jiuzhou_haowu', title: '寻找九州好物', sort: 90, status: 1 },
+    const chJiuFood = await LgHomeChannel.create(
+      { channel_key: 'jiuzhou_haoshi', title: '九州好食', sort: 90, status: 1 },
+      { transaction: t }
+    );
+    const chJiuGoods = await LgHomeChannel.create(
+      { channel_key: 'jiuzhou_haowu', title: '九州好物', sort: 85, status: 1 },
+      { transaction: t }
+    );
+    const chJiuTaste = await LgHomeChannel.create(
+      { channel_key: 'jiuzhou_haowei', title: '九州好味', sort: 80, status: 1 },
       { transaction: t }
     );
     const chAutumn = await LgHomeChannel.create(
-      { channel_key: 'autumn_winter', title: '秋冬好物', sort: 80, status: 1 },
+      { channel_key: 'autumn_winter', title: '秋冬好物', sort: 70, status: 1 },
       { transaction: t }
     );
 
@@ -186,36 +194,41 @@ async function main() {
       { transaction: t }
     );
 
-    const tab1 = await LgHomeChannelTab.create(
-      { channel_id: chJiu.id, tab_name: '九州好食', sort: 100, status: 1 },
-      { transaction: t }
-    );
-    const tab2 = await LgHomeChannelTab.create(
-      { channel_id: chJiu.id, tab_name: '九州好味', sort: 90, status: 1 },
-      { transaction: t }
-    );
-    const tab3 = await LgHomeChannelTab.create(
-      { channel_id: chJiu.id, tab_name: '九州好物', sort: 80, status: 1 },
+    const jfGoods = take(8);
+    await LgHomeChannelProduct.bulkCreate(
+      jfGoods.map((g, j) => ({
+        channel_id: chJiuFood.id,
+        goods_id: g.id,
+        shop_id: g.shop_id,
+        sort: 100 - j,
+        status: 1
+      })),
       { transaction: t }
     );
 
-    for (const [tab, n] of [
-      [tab1, 6],
-      [tab2, 6],
-      [tab3, 6]
-    ]) {
-      const chunk = take(n);
-      await LgHomeChannelTabProduct.bulkCreate(
-        chunk.map((g, j) => ({
-          tab_id: tab.id,
-          goods_id: g.id,
-          shop_id: g.shop_id,
-          sort: 100 - j,
-          status: 1
-        })),
-        { transaction: t }
-      );
-    }
+    const jwGoods = take(8);
+    await LgHomeChannelProduct.bulkCreate(
+      jwGoods.map((g, j) => ({
+        channel_id: chJiuGoods.id,
+        goods_id: g.id,
+        shop_id: g.shop_id,
+        sort: 100 - j,
+        status: 1
+      })),
+      { transaction: t }
+    );
+
+    const jtGoods = take(8);
+    await LgHomeChannelProduct.bulkCreate(
+      jtGoods.map((g, j) => ({
+        channel_id: chJiuTaste.id,
+        goods_id: g.id,
+        shop_id: g.shop_id,
+        sort: 100 - j,
+        status: 1
+      })),
+      { transaction: t }
+    );
 
     await t.commit();
     console.log('✅ 金刚区专区 + 导购频道挂载数据已写入');

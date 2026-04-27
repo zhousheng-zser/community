@@ -314,7 +314,14 @@ exports.getZoneProducts = async (req, res) => {
   }
 };
 
-const CHANNEL_KEYS = new Set(['brand_goods', 'jiuzhou_haowu', 'autumn_winter']);
+const CHANNEL_KEYS = new Set([
+  'brand_goods',
+  'jiuzhou_haoshi',
+  'jiuzhou_haowu',
+  'jiuzhou_haowei',
+  'autumn_winter'
+]);
+const MULTI_TAB_CHANNEL_KEYS = new Set([]);
 
 exports.getChannelProducts = async (req, res) => {
   try {
@@ -350,7 +357,7 @@ exports.getChannelProducts = async (req, res) => {
 
     const { lat, lng } = coords;
 
-    if (tabs.length > 0) {
+    if (tabs.length > 0 && MULTI_TAB_CHANNEL_KEYS.has(channelKey)) {
       const tab_groups = [];
       for (const tab of tabs) {
         const rows = await LgHomeChannelTabProduct.findAll({
@@ -388,6 +395,12 @@ exports.getBrandGoods = async (req, res) =>
 
 exports.getJiuzhouHaowu = async (req, res) =>
   callWithFixedQuery(req, res, { channel_key: 'jiuzhou_haowu' }, exports.getChannelProducts);
+
+exports.getJiuzhouHaoshi = async (req, res) =>
+  callWithFixedQuery(req, res, { channel_key: 'jiuzhou_haoshi' }, exports.getChannelProducts);
+
+exports.getJiuzhouHaowei = async (req, res) =>
+  callWithFixedQuery(req, res, { channel_key: 'jiuzhou_haowei' }, exports.getChannelProducts);
 
 exports.getAutumnWinter = async (req, res) =>
   callWithFixedQuery(req, res, { channel_key: 'autumn_winter' }, exports.getChannelProducts);

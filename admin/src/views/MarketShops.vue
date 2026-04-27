@@ -93,7 +93,9 @@
         <el-table-column prop="id" label="ID" width="72" />
         <el-table-column prop="goods_no" label="货号" width="170" show-overflow-tooltip />
         <el-table-column prop="name" label="名称" min-width="140" />
-        <el-table-column prop="category_key" label="分类" width="110" />
+        <el-table-column label="分类" width="160">
+          <template #default="{ row }">{{ getGoodsCategoryLabel(row.category_key) }}</template>
+        </el-table-column>
         <el-table-column prop="price" label="价格" width="90" />
         <el-table-column prop="stock" label="库存" width="80" />
         <el-table-column prop="status" label="状态" width="90" />
@@ -116,7 +118,11 @@
     <el-dialog v-model="goodEditorVisible" :title="isEditGood ? '编辑商品' : '新建商品'" width="560px" destroy-on-close @closed="resetGoodForm">
       <el-form :model="goodForm" label-width="100px">
         <el-form-item label="分类 key" required>
-          <el-input v-model="goodForm.category_key" />
+          <el-input v-model="goodForm.category_key" :placeholder="'如 fresh 或 in_0_1_1'">
+            <template #append>
+              <span class="category-hint">{{ getGoodsCategoryLabel(goodForm.category_key) }}</span>
+            </template>
+          </el-input>
         </el-form-item>
         <el-form-item label="名称" required>
           <el-input v-model="goodForm.name" />
@@ -245,6 +251,54 @@ const categoryCodeToName = {
 function getCategoryLabel(code) {
   const raw = String(code || '').trim()
   return categoryCodeToName[raw] || raw || '-'
+}
+
+const goodsCategoryToName = {
+  fresh: '食品生鲜',
+  beauty: '美妆洗护',
+  home: '居家百货',
+  wear: '服装箱包',
+  baby: '母婴系列',
+  digital: '数码产品',
+  appliance: '家用电器',
+  jewel: '珠宝饰品',
+  travel: '旅游出行',
+  craft: '传统工艺',
+  local: '本地特产'
+}
+
+const goodsMainCategoryNames = [
+  '食品生鲜', '美妆洗护', '居家百货', '服装箱包', '母婴系列',
+  '家用电器', '数码产品', '珠宝饰品', '旅游出行', '传统工艺'
+]
+
+const goodsSubCategoryNames = {
+  0: { 1: '蔬菜', 2: '水果', 3: '肉禽蛋', 4: '水产海鲜', 5: '干货调料' },
+  1: { 1: '护肤', 2: '彩妆', 3: '洗护', 4: '香水', 5: '个护工具' },
+  2: { 1: '厨房用品', 2: '清洁用品', 3: '床上用品', 4: '整理收纳', 5: '家居装饰' },
+  3: { 1: '上衣', 2: '裤装', 3: '外套', 4: '鞋包', 5: '配饰' },
+  4: { 1: '奶粉辅食', 2: '尿裤湿巾', 3: '玩具', 4: '童装', 5: '孕产用品' },
+  5: { 1: '大家电', 2: '小家电', 3: '厨房电器', 4: '生活电器', 5: '个护电器' },
+  6: { 1: '手机通讯', 2: '电脑办公', 3: '配件', 4: '智能设备', 5: '影音娱乐' },
+  7: { 1: '首饰', 2: '手表', 3: '配饰', 4: '礼品', 5: '文玩' },
+  8: { 1: '旅游装备', 2: '行李箱包', 3: '配件', 4: '户外用品', 5: '车载用品' },
+  9: { 1: '手工艺品', 2: '刺绣布艺',3 : '陶瓷', 4: '木雕竹编', 5: '民俗特产' }
+}
+
+function getGoodsCategoryLabel(key) {
+  const raw = String(key || '').trim()
+  if (!raw) return '-'
+  if (goodsCategoryToName[raw]) return goodsCategoryToName[raw]
+  const m = raw.match(/^in_(\d+)_(\d+)/)
+  if (m) {
+    const shopIdx = parseInt(m[1], 10)
+    const subIdx = parseInt(m[2], 10)
+    const mainName = goodsMainCategoryNames[shopIdx] || ''
+    const subName = shopIdx in goodsSubCategoryNames && subIdx in goodsSubCategoryNames[shopIdx]
+      ? goodsSubCategoryNames[shopIdx][subIdx] : ''
+    return subName ? `${mainName} > ${subName}` : mainName || raw
+  }
+  return raw
 }
 
 function resetForm() {
@@ -491,5 +545,11 @@ onMounted(load)
 }
 .shop-sub-toolbar {
   margin-bottom: 12px;
+}
+.category-hint {
+  color: #999;
+  font-size: 12px;
+  padding: 0 8px;
+  white-space: nowrap;
 }
 </style>

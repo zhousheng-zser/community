@@ -406,7 +406,7 @@ exports.mockPay = async (req, res) => {
     if (!order) return fail(res, 404, '订单不存在');
     if (order.pay_status === 'paid') return fail(res, 400, '已支付');
     order.pay_status = 'paid';
-    if (order.status === 'pending_pay' || order.status === 'pending_worker_accept') {
+    if (order.status === 'pending_pay') {
       if (order.provider_user_id) {
         order.status = 'pending_accept';
       } else if (order.assigned_worker_id) {

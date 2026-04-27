@@ -14,8 +14,9 @@ module.exports = (sequelize, DataTypes) => {
         amount: DataTypes.DECIMAL(10, 2),
         status: DataTypes.STRING // 'pending', 'settled'
     }, {
-        sequelize,
-        modelName: 'Promotion',
-    });
+    sequelize,
+    modelName: 'Promotion',
+    tableName: 'Promotions',
+  });
     return Promotion;
 };

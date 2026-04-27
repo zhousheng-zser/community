@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     destination_address_snapshot: { type: DataTypes.JSON, allowNull: false },
     amount: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
     appointment_time: { type: DataTypes.DATE, allowNull: true },
+    content: { type: DataTypes.TEXT, allowNull: true },
     remark: { type: DataTypes.TEXT, allowNull: true },
     status: { type: DataTypes.STRING(32), allowNull: false, defaultValue: 'pending_pay' },
     pay_status: { type: DataTypes.STRING(32), allowNull: false, defaultValue: 'unpaid' },

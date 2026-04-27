@@ -132,18 +132,20 @@ const localGoodsLinks = [
   { key: 'pick_other', name: '15 商城甄选 > 其他' },
   { key: 'high_comm_zone', name: '16 高佣专区' },
   { key: 'brand_goods', name: '17 品牌好货' },
-  { key: 'jiuzhou_haowu', name: '18 寻找九州好物（多Tab）' },
-  { key: 'autumn_winter', name: '19 秋冬好物' },
-  { key: 'daily_news', name: '20 每日上新（首页）' },
-  { key: 'top_sales', name: '21 热卖TOP榜（首页）' },
-  { key: 'periodic_today', name: '22 周期榜单 > 今日主推' },
-  { key: 'periodic_weekly', name: '23 周期榜单 > 本周甄选' },
-  { key: 'feed_high_comm_first', name: '24 Feed > 高佣推荐（首屏）' },
-  { key: 'feed_hot_shop_first', name: '25 Feed > 热门好店（首屏）' },
-  { key: 'feed_you_like_first', name: '26 Feed > 你可能喜欢（首屏）' },
-  { key: 'feed_high_comm_paged', name: '27 Feed > 高佣推荐（翻页）' },
-  { key: 'feed_hot_shop_paged', name: '28 Feed > 热门好店（翻页）' },
-  { key: 'feed_you_like_paged', name: '29 Feed > 你可能喜欢（翻页）' }
+  { key: 'jiuzhou_haoshi', name: '18 九州好食' },
+  { key: 'jiuzhou_haowu', name: '19 九州好物' },
+  { key: 'jiuzhou_haowei', name: '20 九州好味' },
+  { key: 'autumn_winter', name: '21 秋冬好物' },
+  { key: 'daily_news', name: '22 每日上新（首页）' },
+  { key: 'top_sales', name: '23 热卖TOP榜（首页）' },
+  { key: 'periodic_today', name: '24 周期榜单 > 今日主推' },
+  { key: 'periodic_weekly', name: '25 周期榜单 > 本周甄选' },
+  { key: 'feed_high_comm_first', name: '26 Feed > 高佣推荐（首屏）' },
+  { key: 'feed_hot_shop_first', name: '27 Feed > 热门好店（首屏）' },
+  { key: 'feed_you_like_first', name: '28 Feed > 你可能喜欢（首屏）' },
+  { key: 'feed_high_comm_paged', name: '29 Feed > 高佣推荐（翻页）' },
+  { key: 'feed_hot_shop_paged', name: '30 Feed > 热门好店（翻页）' },
+  { key: 'feed_you_like_paged', name: '31 Feed > 你可能喜欢（翻页）' }
 ]
 
 onMounted(() => {

@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Message',
+        tableName: 'Messages',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: false // 消息发出后一般不可修改

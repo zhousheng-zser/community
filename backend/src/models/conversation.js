@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'Conversation',
+        tableName: 'Conversations',
         timestamps: true, // 会自动带有 created_at 和 updated_at，后者用于会话列表排序
         createdAt: 'created_at',
         updatedAt: 'updated_at'

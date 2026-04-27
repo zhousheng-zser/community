@@ -380,10 +380,15 @@ exports.getServiceGroup = async (req, res) => {
 
 exports.getWorkers = async (req, res) => {
   try {
-    const communityId = req.query.community_id != null && req.query.community_id !== ''
+    let communityId = req.query.community_id != null && req.query.community_id !== ''
       ? parseInt(req.query.community_id, 10)
       : null;
-    if (!communityId) return fail(res, 400, '请传 community_id');
+    // 兼容旧前端：未传 community_id 时，尝试从登录用户默认小区回填
+    if (!communityId && req.user && req.user.id) {
+      const u = await User.findByPk(req.user.id, { attributes: ['community_id'] });
+      communityId = u && u.community_id ? Number(u.community_id) : null;
+    }
+    if (!communityId) return fail(res, 400, '请传 community_id 或登录后绑定默认小区');
 
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     let pageSize = parseInt(req.query.page_size, 10) || 20;

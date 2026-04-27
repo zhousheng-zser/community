@@ -33,9 +33,7 @@ const LIST_DEFINITIONS = [
   { key: 'pick_other', name: '商城甄选 > 其他', kind: 'zone', zone_id: 3, sidebar_category: '其他' },
   { key: 'high_comm_zone', name: '高佣专区', kind: 'zone', zone_id: 4 },
   { key: 'brand_goods', name: '品牌好货', kind: 'channel', channel_key: 'brand_goods' },
-  { key: 'jiuzhou_haoshi', name: '九州好食', kind: 'channel', channel_key: 'jiuzhou_haoshi' },
-  { key: 'jiuzhou_haowu', name: '九州好物', kind: 'channel', channel_key: 'jiuzhou_haowu' },
-  { key: 'jiuzhou_haowei', name: '九州好味', kind: 'channel', channel_key: 'jiuzhou_haowei' },
+  { key: 'jiuzhou_haowu', name: '寻找九州好物（多Tab）', kind: 'channel_tab', channel_key: 'jiuzhou_haowu' },
   { key: 'autumn_winter', name: '秋冬好物', kind: 'channel', channel_key: 'autumn_winter' },
   { key: 'daily_news', name: '每日上新（首页展示）', kind: 'daily_news', safe_edit: true },
   { key: 'top_sales', name: '热卖TOP榜（首页展示）', kind: 'top_sales', safe_edit: true },
@@ -63,16 +61,11 @@ async function findGoodAndShop(goodsId) {
 
 async function resolveContext(def) {
   if (def.kind === 'channel' || def.kind === 'channel_tab') {
-    let channel = null;
-    let tabs = [];
-    channel = await LgHomeChannel.findOne({ where: { channel_key: def.channel_key } });
+    const channel = await LgHomeChannel.findOne({ where: { channel_key: def.channel_key } });
     if (!channel) return { channel: null, tabs: [] };
-    if (def.kind === 'channel_tab') {
-      tabs = await LgHomeChannelTab.findAll({
-        where: { channel_id: channel.id },
-        order: [['sort', 'DESC'], ['id', 'ASC']]
-      });
-    }
+    const tabs = def.kind === 'channel_tab'
+      ? await LgHomeChannelTab.findAll({ where: { channel_id: channel.id }, order: [['sort', 'DESC'], ['id', 'ASC']] })
+      : [];
     return { channel, tabs };
   }
   if (def.kind === 'periodic_modules') {
