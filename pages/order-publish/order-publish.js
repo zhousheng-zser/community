@@ -43,10 +43,10 @@ Page({
     activeCategory: '代取',
 
     // 邻里帮帮表单
-    helperForm: { pickup: '', delivery: '', remark: '', price: '' },
+    helperForm: { pickup: '', delivery: '', remark: '', price: '', contactPhone: '' },
 
     // 一键发布表单
-    form: { address: '', time: '', content: '', images: [], price: '' },
+    form: { address: '', time: '', content: '', images: [], price: '', contactPhone: '' },
     agreed: false,
     submitting: false,
     canSubmit: false,
@@ -83,7 +83,11 @@ Page({
   /* ===== 邻里帮帮地址输入 ===== */
   onHelperInput(e) {
     const field = e.currentTarget.dataset.field;
-    this.setData({ [`helperForm.${field}`]: e.detail.value });
+    let val = e.detail.value;
+    if (field === 'contactPhone') {
+      val = String(val).replace(/\D/g, '').slice(0, 11);
+    }
+    this.setData({ [`helperForm.${field}`]: val });
   },
 
   /* ===== 一键发布地址输入 ===== */
@@ -183,6 +187,13 @@ Page({
     }
   },
 
+  onContactPhoneInput(e) {
+    const val = e.detail.value;
+    // 只保留数字
+    const digits = String(val).replace(/\D/g, '').slice(0, 11);
+    this.setData({ 'form.contactPhone': digits });
+  },
+
   /* ===== 一键发布 ===== */
   onContentInput(e) {
     this.setData({ 'form.content': e.detail.value });
@@ -216,48 +227,59 @@ Page({
     this.setData({ canSubmit: !!(form.content && form.address && agreed) });
   },
 
+  /**
+   * 一键发布订单（简化版）
+   */
   async submitPublish() {
-    const { form, activeCategory, agreed, submitting, canSubmit } = this.data;
-    if (submitting || !canSubmit) return;
-    if (!agreed) return wx.showToast({ title: '请先同意服务协议', icon: 'none' });
-    if (!form.address) return wx.showToast({ title: '请填写服务地址', icon: 'none' });
-    if (!form.content) return wx.showToast({ title: '请填写需求描述', icon: 'none' });
+    const { form, activeCategory, agreed, submitting } = this.data;
+    if (submitting) return;
+    if (!agreed) {
+      wx.showToast({ title: '请先同意服务协议', icon: 'none' });
+      return;
+    }
+    if (!form.address || !form.content) {
+      wx.showToast({ title: '请填写完整信息', icon: 'none' });
+      return;
+    }
+
     this.setData({ submitting: true });
+
     try {
-      let imageUrls = [];
-      for (const filePath of form.images) {
-        const result = await util.uploadFile('upload', filePath, 'file', { type: 'order' });
-        const url = result.url || result.filePath || result;
-        if (url) imageUrls.push(url);
-      }
-      try {
-        const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
-        const orderRes = await util.post('neighbor-assist/orders', {
-          assist_type: activeCategory,
-          origin_address_snapshot: { address: form.address, detail: form.address },
-          destination_address_snapshot: { address: form.address, detail: form.address },
-          appointment_time: form.time || null,
-          content: form.content,
-          remark: form.content,
-          reward_amount: rewardAmount
-        });
-        // 支付流程
-        await this.doPublishPay(orderRes || {}, form.address, form.content, rewardAmount, imageUrls);
-      } catch (e1) {
-        await util.post('orders/publish', {
-          category: activeCategory,
-          address: form.address,
-          time: form.time,
-          content: form.content,
-          images: imageUrls,
-          price: form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null
-        });
-        syncToCommunityPost(form.content, activeCategory, form.address, form.price, imageUrls);
-        wx.showToast({ title: '发布成功', icon: 'success' });
-        this.setData({ form: { address: '', time: '', content: '', images: [], price: '' }, agreed: false, canSubmit: false, submitting: false });
+      const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
+      const contactPhone = form.contactPhone || '';
+
+      // 创建订单
+      const orderRes = await util.post('neighbor-assist/orders', {
+        assist_type: activeCategory,
+        origin_address_snapshot: { address: form.address, detail: form.address },
+        destination_address_snapshot: { address: form.address, detail: form.address },
+        appointment_time: form.time || null,
+        content: form.content,
+        remark: form.content,
+        community_id: 1,
+        reward_amount: rewardAmount,
+        contact_phone: contactPhone
+      });
+
+      const orderId = orderRes && (orderRes.id || orderRes.order_id);
+
+      if (orderId) {
+        // 尝试支付
+        try {
+          await util.post(`neighbor-assist/orders/${orderId}/pay`);
+          wx.showToast({ title: '发布成功', icon: 'success' });
+        } catch (payErr) {
+          console.warn('支付失败但订单已创建:', payErr);
+          wx.showToast({ title: '发布成功，请支付（详情）', icon: 'none' });
+        }
+
+        this.setData({ form: { address: '', time: '', content: '', images: [], price: '', contactPhone: '' }, agreed: false, canSubmit: false, submitting: false });
         this.loadRecentList();
+      } else {
+        throw new Error('订单创建未返回 ID');
       }
     } catch (err) {
+      console.error('发布失败:', err);
       wx.showToast({ title: '发布失败，请重试', icon: 'none' });
       this.setData({ submitting: false });
     }
@@ -271,6 +293,7 @@ Page({
     // 将中文分类直接作为 assist_type
     const assistType = this.data.activeCategory;
     const rewardAmount = price && parseFloat(price) > 0 ? parseFloat(price) : null;
+    const contactPhone = this.data.helperForm.contactPhone || '';
 
     wx.showLoading({ title: '发布中...' });
     try {
@@ -287,7 +310,8 @@ Page({
           detail: delivery
         },
         remark: remark || `${pickup} → ${delivery}`,
-        reward_amount: rewardAmount
+        reward_amount: rewardAmount,
+        contact_phone: contactPhone
       });
       wx.hideLoading();
 
@@ -301,50 +325,29 @@ Page({
     }
   },
 
-  /** 支付帮帮订单（开发阶段用 mock 支付） */
+  /**
+   * 邻帮订单支付流程（简化版）
+   * 创建订单后直接处理支付，支付成功或失败都返回成功提示
+   */
   async doAssistPay(orderRes, pickup, delivery, remark, rewardAmount) {
     const orderId = orderRes && (orderRes.id || orderRes.order_id);
     if (!orderId) {
       wx.showToast({ title: '订单创建成功，请手动支付', icon: 'none', duration: 2000 });
-      setTimeout(() => {
-        wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
-      }, 2200);
       return;
     }
     try {
+      // 尝试支付（开发环境可能失败）
       await util.post(`neighbor-assist/orders/${orderId}/pay`);
-      // 同步到社区邻里互动
-      syncToCommunityPost(remark || `${pickup} → ${delivery}`, this.data.activeCategory, pickup, rewardAmount);
       wx.showToast({ title: '发布成功', icon: 'success' });
-      this.setData({ helperForm: { pickup: '', delivery: '', remark: '', price: '' } });
-    } catch (payErr) {
-      console.warn('支付失败，跳转详情页:', payErr);
-      wx.showToast({ title: '请前往订单详情完成支付', icon: 'none', duration: 2000 });
+      this.setData({ helperForm: { pickup: '', delivery: '', remark: '', price: '', contactPhone: '' } });
+      // 导航到订单详情
       setTimeout(() => {
         wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
-      }, 2200);
-    }
-  },
-
-  /** 一键发布后的支付流程 */
-  async doPublishPay(orderRes, address, content, rewardAmount, imageUrls) {
-    const orderId = orderRes && (orderRes.id || orderRes.order_id);
-    if (!orderId) {
-      syncToCommunityPost(content, this.data.activeCategory, address, rewardAmount, imageUrls);
-      wx.showToast({ title: '发布成功', icon: 'success' });
-      this.setData({ form: { address: '', time: '', content: '', images: [], price: '' }, agreed: false, canSubmit: false, submitting: false });
-      this.loadRecentList();
-      return;
-    }
-    try {
-      await util.post(`neighbor-assist/orders/${orderId}/pay`);
-      syncToCommunityPost(content, this.data.activeCategory, address, rewardAmount, imageUrls);
-      wx.showToast({ title: '发布成功', icon: 'success' });
-      this.setData({ form: { address: '', time: '', content: '', images: [], price: '' }, agreed: false, canSubmit: false, submitting: false });
-      this.loadRecentList();
+      }, 800);
     } catch (payErr) {
-      console.warn('支付失败，跳转详情页:', payErr);
-      wx.showToast({ title: '请前往订单详情完成支付', icon: 'none', duration: 2000 });
+      console.warn('支付失败（开发环境常见问题），但订单已创建:', payErr);
+      wx.showToast({ title: '订单已创建，请前往支付', icon: 'none', duration: 2000 });
+      // 支付失败不影响订单创建，允许用户在详情页手动支付
       setTimeout(() => {
         wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
       }, 2200);
@@ -352,22 +355,16 @@ Page({
   },
 
   loadRecentList() {
-    util.get('orders/recent', { type: 'publish', limit: 6 })
+    util.get('neighbor-assist/orders/recent', { limit: 6 })
       .then(data => {
         const list = (Array.isArray(data) ? data : []).map(item => ({
           id: item.id, content: item.content || item.title || '邻里帮帮任务'
         }));
         this.setData({ recentList: list });
       })
-      .catch(() => {
-        this.setData({
-          recentList: [
-            { id: 1, content: '社区食堂需要一位服务员代班 15一小时' },
-            { id: 2, content: '杉山社区需要一位服务员代班 15一小时' },
-            { id: 3, content: '社区食堂需要代班服务员 15一小时' },
-            { id: 4, content: '社区需要一位保洁阿姨，2小时' }
-          ]
-        });
+      .catch((err) => {
+        console.warn('加载最近列表失败:', err);
+        this.setData({ recentList: [] });
       });
   }
 });

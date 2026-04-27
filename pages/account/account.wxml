@@ -24,4 +24,6 @@
     </view>
   </view>
   <navigator class="wt-link" url="../wallet-transactions/wallet-transactions">查看交易明细 ›</navigator>
+  <navigator class="wt-link" url="../commission-overview/commission-overview">合伙人中心（4方分佣）›</navigator>
+  <navigator class="wt-link" url="../commission-records/commission-records">佣金明细 ›</navigator>
 </view>

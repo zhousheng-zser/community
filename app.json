@@ -83,7 +83,10 @@
     "pages/register/register",
     "pages/forget-password/forget-password",
     "pages/env-switcher/env-switcher",
-    "pages/notification-center/notification-center"
+    "pages/notification-center/notification-center",
+    "pages/commission-overview/commission-overview",
+    "pages/commission-records/commission-records",
+    "pages/partner-manage/partner-manage"
   ],
   "subPackages": [
     {

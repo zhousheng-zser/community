@@ -61,6 +61,24 @@ function canUseServiceProviderPortal(user) {
   return false;
 }
 
+/** 是否具备推广者能力 */
+function canUsePromoterPortal(user) {
+  if (!user) return false;
+  return hasRole(user, 'promoter') || hasRole(user, 'admin');
+}
+
+/** 是否具备区县合伙人能力 */
+function canUseDistrictPartnerPortal(user) {
+  if (!user) return false;
+  return hasRole(user, 'district_partner') || hasRole(user, 'admin');
+}
+
+/** 是否具备市场合伙人能力 */
+function canUseMarketPartnerPortal(user) {
+  if (!user) return false;
+  return hasRole(user, 'market_partner') || hasRole(user, 'admin');
+}
+
 function mergePortalFlags(target, src) {
   if (!target || !src || typeof src !== 'object') return target;
   const next = Object.assign({}, target);
@@ -155,6 +173,9 @@ module.exports = {
   canUseMerchantPortal,
   canUseMarketPortal,
   canUseServiceProviderPortal,
+  canUsePromoterPortal,
+  canUseDistrictPartnerPortal,
+  canUseMarketPartnerPortal,
   mergePortalFlags,
   navigateToWorkerHome,
   navigateToMerchantHome,

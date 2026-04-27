@@ -32,6 +32,7 @@ function mockDetail(id) {
     address: '阳光小区 3 栋',
     service_time: '今日 16:00 前',
     reward_amount: '15',
+    contact_phone: '13800138000',
     lat: 28.22,
     lng: 112.98,
     publisher: {

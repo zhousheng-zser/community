@@ -1,6 +1,7 @@
 // pages/order/order.js
 const app = getApp();
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 Page({
 
   /**
@@ -74,25 +75,33 @@ Page({
   getService() {
     const { id } = app.globalData.user;
     const userFlag = this.data.userFlag;
-    return new Promise((resolve) => {
-      util.post('api/order/all', {
-        userFlag,
-        id
-      }).then((data) => {
-        let list = [];
-        data.forEach((v, i) => {
-          if (new Date().getTime() - v.createTime > 1296000000) {
-            return;
-          }
-          const { name } = util.stateTabel(v.orderState, userFlag),
-            time = util.formatTime(new Date(v.createTime));
-          v.stateStr = name;
-          v.time = time;
-          list.push(v);
+    return new Promise((resolve, reject) => {
+      api.order.getAll({ userFlag, id })
+        .then((data) => {
+          const rawList = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+          const now = Date.now();
+          const fifteenDays = 1296000000;
+          const list = [];
+          rawList.forEach((v) => {
+            // 兼容字符串/数字时间戳
+            const createTimeVal = v.createTime || v.create_time || v.createdAt || v.created_at;
+            const createTimeMs = createTimeVal ? new Date(createTimeVal).getTime() : 0;
+            if (createTimeMs && now - createTimeMs > fifteenDays) {
+              return;
+            }
+            const { name } = util.stateTabel(v.orderState || v.status, userFlag);
+            const time = createTimeMs ? util.formatTime(new Date(createTimeMs)) : '';
+            v.stateStr = name;
+            v.time = time;
+            list.push(v);
+          });
+          resolve(list);
         })
-        resolve(list);
-      })
-    })
+        .catch((err) => {
+          console.error('getService 加载失败:', err);
+          reject(err);
+        });
+    });
   },
   changeListBar(e) {
     let index = e.target.dataset.item;

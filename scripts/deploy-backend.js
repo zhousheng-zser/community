@@ -1,5 +1,6 @@
 /**
- * 将 backend/ 同步到远程并执行 npm install（需本机已安装 Node）。
+ * [开发阶段] 将 backend/ 同步到远程并执行 npm install（需本机已安装 Node）。
+ * 开发阶段请参考 doc/项目开发参考.md。
  *
  * 用法（PowerShell）：
  *   $env:DEPLOY_SSH_PASSWORD = "你的root密码"

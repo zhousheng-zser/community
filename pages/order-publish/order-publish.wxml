@@ -81,6 +81,21 @@
           confirm-type="done"
         />
       </view>
+      <!-- 联系方式 -->
+      <view class="remark-row">
+        <text class="remark-label">联系电话</text>
+        <input
+          class="remark-input"
+          type="number"
+          placeholder="填写您的手机号码"
+          placeholder-class="addr-ph"
+          value="{{helperForm.contactPhone}}"
+          bindinput="onHelperInput"
+          data-field="contactPhone"
+          maxlength="11"
+          confirm-type="done"
+        />
+      </view>
       <view class="submit-btn {{helperForm.pickup && helperForm.delivery ? '' : 'disabled'}}" bindtap="submitHelper">去发布</view>
       <text class="flow-tips">填写取送信息 › 支付服务费用 › 技工取送 › 完成</text>
     </view>
@@ -149,6 +164,22 @@
           value="{{form.price}}"
           bindinput="onPriceInput"
           data-field="formPrice"
+          confirm-type="done"
+        />
+      </view>
+
+      <!-- 联系方式 -->
+      <view class="form-row">
+        <view class="dot purple"></view>
+        <text class="time-label">联系电话</text>
+        <input
+          class="form-input-inline"
+          type="number"
+          placeholder="填写您的手机号码"
+          placeholder-class="addr-ph"
+          value="{{form.contactPhone}}"
+          bindinput="onContactPhoneInput"
+          maxlength="11"
           confirm-type="done"
         />
       </view>

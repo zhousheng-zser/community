@@ -134,10 +134,12 @@ const request = (method, url, data, contentType = 'application/json') => {
         resolve(body.data !== undefined ? body.data : body);
       },
       fail: (res) => {
+        const errorMsg = res.errMsg || '网络连接失败';
         wx.showToast({
-          title: '网络错误',
-        })
-        reject(res)
+          title: errorMsg.includes('timeout') ? '请求超时，请检查网络' : errorMsg.includes('fail to load') ? '无法连接到服务器' : '网络错误',
+          icon: 'none'
+        });
+        reject(res);
       }
     })
   })
@@ -645,6 +647,69 @@ const unwrapList = (res) => {
   return [];
 };
 
+/** ========== 本地集市位置缓存快捷操作（减少 pages/index/index.js 重复代码） ========== */
+
+const MARKET_KEYS = {
+  lat: 'market_user_lat',
+  lng: 'market_user_lng',
+  manual: 'market_user_location_manual',
+  refresh: 'market_refresh_after_address',
+  snapId: 'market_snap_address_id',
+  snapDk: 'market_snap_distance_km',
+  label: 'market_location_label'
+};
+
+/** 获取集市用户坐标 { lat, lng }，缺失或为空时返回 null */
+const getMarketUserCoords = () => {
+  const lat = wx.getStorageSync(MARKET_KEYS.lat);
+  const lng = wx.getStorageSync(MARKET_KEYS.lng);
+  if (lat == null || lng == null || lat === '' || lng === '') return null;
+  return { lat: Number(lat), lng: Number(lng) };
+};
+
+/** 设置集市用户坐标 */
+const setMarketUserCoords = (lat, lng) => {
+  wx.setStorageSync(MARKET_KEYS.lat, lat);
+  wx.setStorageSync(MARKET_KEYS.lng, lng);
+};
+
+/** 清除集市用户坐标 */
+const removeMarketUserCoords = () => {
+  wx.removeStorageSync(MARKET_KEYS.lat);
+  wx.removeStorageSync(MARKET_KEYS.lng);
+  wx.removeStorageSync(MARKET_KEYS.manual);
+};
+
+/** 清除集市快照信息 */
+const removeMarketSnapInfo = () => {
+  wx.removeStorageSync(MARKET_KEYS.snapId);
+  wx.removeStorageSync(MARKET_KEYS.snapDk);
+};
+
+/** 清除集市位置标签 */
+const removeMarketLocationLabel = () => {
+  wx.removeStorageSync(MARKET_KEYS.label);
+};
+
+/** 一键清除所有集市位置缓存（地址变更后调用） */
+const clearMarketLocationCache = () => {
+  wx.removeStorageSync(MARKET_KEYS.refresh);
+  removeMarketUserCoords();
+  removeMarketSnapInfo();
+  removeMarketLocationLabel();
+};
+
+/** 设置集市快照信息 */
+const setMarketSnapInfo = (id, dKm) => {
+  wx.setStorageSync(MARKET_KEYS.snapId, id);
+  wx.setStorageSync(MARKET_KEYS.snapDk, dKm);
+};
+
+/** 设置集市位置标签 */
+const setMarketLocationLabel = (label) => {
+  wx.setStorageSync(MARKET_KEYS.label, label);
+};
+
 module.exports = {
   formatTime,
   get,
@@ -666,5 +731,13 @@ module.exports = {
   normalizeShopProductRow,
   buildShopGoodsQuery,
   ensureUserCoordsForShop,
-  unwrapList
+  unwrapList,
+  getMarketUserCoords,
+  setMarketUserCoords,
+  removeMarketUserCoords,
+  removeMarketSnapInfo,
+  removeMarketLocationLabel,
+  clearMarketLocationCache,
+  setMarketSnapInfo,
+  setMarketLocationLabel
 }

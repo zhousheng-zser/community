@@ -21,6 +21,7 @@
         <view class="sheet-body">
           <view class="kv" wx:if="{{order.category}}"><text class="k">服务类型</text><text class="v">{{order.category}}</text></view>
           <view class="kv" wx:if="{{order.serviceTime}}"><text class="k">期望时间</text><text class="v">{{order.serviceTime}}</text></view>
+          <view class="kv" wx:if="{{order.contactPhone}}"><text class="k">联系电话</text><text class="v">{{order.contactPhoneDisplay || order.contactPhone}}</text></view>
           <view class="kv"><text class="k">备注</text><text class="v multiline">{{order.desc || '—'}}</text></view>
         </view>
       </view>

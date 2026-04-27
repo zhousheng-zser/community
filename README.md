@@ -25,5 +25,7 @@ npm run deploy:backend
 
 **安全说明**：`deploy_img.js` 已改为使用环境变量 `DEPLOY_SSH_PASSWORD`，勿把密码写进仓库。
 
+<!-- [开发阶段] 以下内容仅供参考，当前开发阶段请以 doc/项目开发参考.md 为准
 线上若仍为 `Cannot GET /api/v1/jd/...`：当前 3000 端口是**另一套社区主 API**（本仓库无其源码）。请按 **`doc/惠民卡_线上对接.md`**：Nginx 反代到 **`backend` + `pm2 start ecosystem.benefit.pm2.cjs`（3001）**，或在主 `app` 中 `require` **`backend/src/mountBenefitAlliance.js`**。
+-->
 

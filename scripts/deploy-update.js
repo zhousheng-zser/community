@@ -1,3 +1,5 @@
+// [开发阶段] 当前脚本为服务器端历史部署辅助脚本，路由注册已迁移至 backend/src/routes/index.js 显式挂载。
+// 开发阶段请参考 doc/项目开发参考.md。
 // This script updates the backend to register new routes and fix model associations
 const fs = require('fs');
 
@@ -24,6 +26,8 @@ const couponRoutes = require('./routes/couponRoutes');
 const benefitCoinRoutes = require('./routes/benefitCoinRoutes');
 const promoterRoutes = require('./routes/promoterRoutes');
 const miniProgramRoutes = require('./routes/miniProgramRoutes');
+const commissionRoutes = require('./routes/commissionRoutes');
+const partnerRoutes = require('./routes/partnerRoutes');
 `;
 
 const newRegistrations = `
@@ -32,6 +36,8 @@ app.use('/api/v1/coupons', couponRoutes);
 app.use('/api/v1/benefit-coin', benefitCoinRoutes);
 app.use('/api/v1/promoter', promoterRoutes);
 app.use('/api/v1/mini-programs', miniProgramRoutes);
+app.use('/api/v1/commission', commissionRoutes);
+app.use('/api/v1/partner', partnerRoutes);
 
 // File upload endpoint
 const upload = require('./utils/upload');
@@ -42,8 +48,8 @@ app.post('/api/v1/upload', authMiddleware, upload.single('file'), (req, res) => 
 });
 `;
 
-// Check if already registered
-if (idx.includes("require('./routes/chatRoutes')")) {
+// Check if already registered (all routes including new commission/partner)
+if (idx.includes("require('./routes/commissionRoutes')") && idx.includes("require('./routes/partnerRoutes')")) {
     console.log('Routes already registered, skipping');
 } else {
     // Find the position after the last app.use for routes

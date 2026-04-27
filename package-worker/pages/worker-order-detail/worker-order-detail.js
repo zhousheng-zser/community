@@ -15,6 +15,16 @@ function normalizePhotoList(arr) {
 
 function formatCheckInInfo(raw) {
   if (!raw || typeof raw !== 'object') return '';
+  // Check fulfillment_meta.check_ins (backend format)
+  const fm = raw.fulfillment_meta && typeof raw.fulfillment_meta === 'object' ? raw.fulfillment_meta : {};
+  const checkIns = fm.check_ins && Array.isArray(fm.check_ins) ? fm.check_ins : [];
+  if (checkIns.length > 0) {
+    const last = checkIns[checkIns.length - 1];
+    const t = last.at || last.created_at || '';
+    if (t) return `打卡时间：${t}`;
+    return `已打卡 ${checkIns.length} 次`;
+  }
+  // Fallback: old format
   const t =
     raw.check_in_at ||
     raw.check_in_time ||
@@ -27,7 +37,8 @@ function formatCheckInInfo(raw) {
 }
 
 function parseDetail(raw) {
-  const addr = raw.address || raw.service_address || (raw.user && raw.user.address) || '';
+  const snap = raw.address_snapshot && typeof raw.address_snapshot === 'object' ? raw.address_snapshot : null;
+  const addr = raw.address || raw.service_address || (snap && snap.detail) || (raw.user && raw.user.address) || '';
   const phone =
     raw.contact_phone ||
     raw.phone ||
@@ -124,8 +135,9 @@ Page({
     const canReject = bucket === 'pending_accept';
     const canComplete = bucket === 'pending_visit' || bucket === 'in_service';
     const showServeBlock = bucket === 'pending_visit' || bucket === 'in_service';
-    let beforeUrls = (raw && raw.before_photos) || (raw && raw.evidence_before) || [];
-    let afterUrls = (raw && raw.after_photos) || (raw && raw.evidence_after) || [];
+    const fm = (raw && raw.fulfillment_meta && typeof raw.fulfillment_meta === 'object') ? raw.fulfillment_meta : {};
+    let beforeUrls = (raw && raw.before_photos) || (raw && raw.evidence_before) || (fm.evidence && fm.evidence.before) || [];
+    let afterUrls = (raw && raw.after_photos) || (raw && raw.evidence_after) || (fm.evidence && fm.evidence.after) || [];
     beforeUrls = normalizePhotoList(Array.isArray(beforeUrls) ? beforeUrls : []);
     afterUrls = normalizePhotoList(Array.isArray(afterUrls) ? afterUrls : []);
     const checkInDisplay = formatCheckInInfo(raw);

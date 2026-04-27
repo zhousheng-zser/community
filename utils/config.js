@@ -3,14 +3,14 @@
  */
 const config = {
     // 当前使用的 API 基础地址
-    baseUrl: 'https://114.55.167.14:3000/api/v1',
+    baseUrl: 'https://192.168.110.50:3001/api/v1',
 
     // 静态资源（图片）基础地址，上传到服务器的图片均通过此前缀访问
-    imageBaseUrl: 'https://114.55.167.14:3000',
+    imageBaseUrl: 'https://192.168.110.50:3001',
 
     /**
-     * 已迁入后端 data/uploads/images 的一级目录；/img/<目录>/... 在 imgUrl 中转为 imageBaseUrl + /uploads/...（每段 encodeURIComponent）
-     * 见 doc/微信小程序静态图片访问说明_TMP迁入.md；有新目录上传后在此追加。
+     * [开发阶段] 已迁入后端 data/uploads/images 的一级目录；/img/<目录>/... 在 imgUrl 中转为 imageBaseUrl + /uploads/...（每段 encodeURIComponent）
+     * 开发阶段请参考 doc/项目开发参考.md，如有新目录上传后在此追加。
      */
     uploadsImageSubdirs: [
         'benefit_alliance',

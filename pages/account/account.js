@@ -97,5 +97,13 @@ Page({
 
   goRecords() {
     wx.navigateTo({ url: '/pages/wallet-transactions/wallet-transactions' });
+  },
+
+  goCommission() {
+    wx.navigateTo({ url: '/pages/commission-overview/commission-overview' });
+  },
+
+  goCommissionRecords() {
+    wx.navigateTo({ url: '/pages/commission-records/commission-records' });
   }
 })

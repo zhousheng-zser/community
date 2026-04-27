@@ -34,6 +34,7 @@ function parseDetail(raw, myUserId) {
 
   const serviceTime = r.service_time || r.expect_time || r.appointment_time || r.time || '';
   const reward = r.reward_amount != null ? r.reward_amount : r.amount;
+  const contactPhone = r.contact_phone || r.contactPhone || '';
   const rewardText =
     reward != null && reward !== '' ? (typeof reward === 'number' ? reward.toFixed(2) : String(reward)) : '';
   const lat = parseFloat(String(r.lat != null ? r.lat : r.latitude || ''), 10);
@@ -53,7 +54,11 @@ function parseDetail(raw, myUserId) {
     peerPhoneRaw = hel.phone || hel.mobile || r.helper_phone || '';
     peerName = hel.nickname || hel.name || '接单邻居';
   } else if (myRole === 'helper') {
-    peerPhoneRaw = pub.phone || pub.mobile || r.publisher_phone || '';
+    peerPhoneRaw = pub.phone || pub.mobile || r.publisher_phone || contactPhone || '';
+    peerName = pub.nickname || pub.name || '发布人';
+  } else {
+    // 未接单时，访客也能看到发布人留下的联系电话
+    peerPhoneRaw = contactPhone || pub.phone || pub.mobile || r.publisher_phone || '';
     peerName = pub.nickname || pub.name || '发布人';
   }
   return {
@@ -74,6 +79,8 @@ function parseDetail(raw, myUserId) {
     peerName,
     peerPhoneRaw,
     peerPhoneDisplay: maskPhone(peerPhoneRaw),
+    contactPhone,
+    contactPhoneDisplay: maskPhone(contactPhone),
     conversationId: r.conversation_id || r.conversationId || null,
     check_in_at: r.check_in_at || r.check_in_time,
     payStatus: r.pay_status || r.payStatus || 'unpaid',

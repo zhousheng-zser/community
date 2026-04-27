@@ -15,6 +15,9 @@
     <view wx:if="{{loading}}" class="loading-wrap">
       <text class="loading-text">加载中...</text>
     </view>
+    <view wx:elif="{{loadError}}" class="error-wrap">
+      <text class="error-text">⚠️ 订单加载失败，请下拉刷新后重试</text>
+    </view>
     <block wx:elif="{{list.length > 0}}">
       <view class="order-card" wx:for="{{list}}" wx:key="orderNo">
         <view class="order-card-head" bindtap="goDetail" data-orderno="{{item.orderNo}}">

@@ -210,8 +210,8 @@
 建议创建脚本，从前端 API 定义文件自动生成文档：
 
 ```bash
-# 示例命令
-node generate-api-doc.js --input api/ --output doc/backend/API_DOC.md
+# [开发阶段] 示例命令，当前开发阶段请以 doc/项目开发参考.md 为准
+# node generate-api-doc.js --input api/ --output doc/backend/API_DOC.md
 ```
 
 ### 6.2 接口版本管理
@@ -258,8 +258,9 @@ node generate-api-doc.js --input api/ --output doc/backend/API_DOC.md
 ### B. 相关文件
 
 - 前端 API 定义: `api/*.js`
-- 旧版文档: `doc/backend/API_DOC.md`
-- 新版文档: `doc/backend/API_DOC_Complete.md`
+- [开发阶段] 以下文档仅供参考，当前开发阶段请以 doc/项目开发参考.md 为准
+- ~~旧版文档: `doc/backend/API_DOC.md`~~
+- ~~新版文档: `doc/backend/API_DOC_Complete.md`~~
 
 ---
 

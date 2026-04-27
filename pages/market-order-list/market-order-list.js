@@ -25,7 +25,8 @@ Page({
     ],
     activeTab: 'all',
     list: [],
-    loading: false
+    loading: false,
+    loadError: false
   },
 
   onLoad() {
@@ -51,7 +52,7 @@ Page({
     }
 
     this.setData({ loading: true });
-    
+
     let queryStatus = this.data.activeTab === 'all' ? '' : this.data.activeTab;
     try {
       const params = { page: 1, page_size: 50 };
@@ -61,9 +62,13 @@ Page({
       const list = rawList.map(this.normalizeOrder);
       this.setData({ list, loading: false });
     } catch (e) {
-      console.log('订单加载失败，使用模拟数据', e);
-      this.setData({ loading: false });
-      this.mockLoad(queryStatus);
+      console.error('订单加载失败:', e);
+      this.setData({
+        loading: false,
+        list: [],
+        loadError: true
+      });
+      wx.showToast({ title: '加载失败', icon: 'none' });
     }
   },
 
@@ -88,21 +93,6 @@ Page({
     };
   },
 
-  mockLoad(queryStatus) {
-    const allMocks = [
-      { orderNo: 'ODR20261111', shopName: '新鲜果蔬超市', status: 'pending_payment', amount: '29.90', goods: [{name: '新鲜苹果 1kg', price: '29.90', quantity: 1}] },
-      { orderNo: 'ODR20262222', shopName: '美妆严选', status: 'pending_accept', amount: '129.00', goods: [{name: '保湿面霜', price: '129.00', quantity: 1}] },
-      { orderNo: 'ODR20262223', shopName: '美妆严选', status: 'pending_service', amount: '229.00', goods: [{name: '控油洗发水', price: '229.00', quantity: 1}] },
-      { orderNo: 'ODR20263333', shopName: '某某快餐', status: 'pending_receipt', amount: '59.00', goods: [{name: '外卖双人套餐', price: '59.00', quantity: 1}] },
-      { orderNo: 'ODR20264444', shopName: '家政服务中心', status: 'completed', amount: '199.00', goods: [{name: '日常保洁3小时', price: '199.00', quantity: 1}] },
-      { orderNo: 'ODR20265555', shopName: '数码小店', status: 'refunded', amount: '89.00', goods: [{name: '蓝牙耳机', price: '89.00', quantity: 1}] }
-    ];
-    let filtered = allMocks;
-    if (queryStatus) {
-      filtered = allMocks.filter(o => o.status === queryStatus);
-    }
-    this.setData({ list: filtered.map(this.normalizeOrder) });
-  },
 
   goDetail(e) {
     const orderNo = e.currentTarget.dataset.orderno;

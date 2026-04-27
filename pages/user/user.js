@@ -21,6 +21,7 @@ Page({
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
       { name: "惠民卡订单", icon: "benefit_card_order", url: "../benefit-orders/benefit-orders" },
       { name: "推客订单", icon: "promoter_order", url: "../promoter-orders/promoter-orders" },
+      { name: "合伙人中心", icon: "promoter_order", url: "../commission-overview/commission-overview" },
       { name: "组合套餐", icon: "combo_package", url: "../combo-orders/combo-orders" }
     ],
     communityMenus: [
@@ -81,7 +82,7 @@ Page({
   },
 
   computeRoleLabel(user) {
-    const roleMap = { admin: '管理员', promoter: '推客', user: '普通用户', worker: '技工', merchant: '服务商' };
+    const roleMap = { admin: '管理员', promoter: '推客', district_partner: '区县合伙人', market_partner: '市场合伙人', user: '普通用户', worker: '技工', merchant: '服务商' };
     const roles = rolePortals.normalizeRoles(user);
     if (roles.length <= 1) return roleMap[roles[0]] || '普通用户';
     return roles.map((r) => roleMap[r] || r).join('·');
