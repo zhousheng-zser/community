@@ -173,10 +173,17 @@ Page({
       wq.community_id = communityId;
     }
     try {
-      const wData = await api.core.getWorkerList(wq);
+      let wData = await api.core.getWorkerList(wq);
+      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工
+      if ((!wData || wData.length === 0) && wq.community_id != null) {
+        console.log('[refreshWorkerList] 带 community_id 返回空，尝试全量拉取');
+        wData = await api.core.getWorkerList({ page: 1, limit: 20 });
+      }
       if (wData && wData.length > 0) {
         const workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
         this.setData({ workerList });
+      } else {
+        console.log('[refreshWorkerList] core/workers 返回空列表');
       }
     } catch (e) {
       console.log('core/workers 刷新失败', e);
@@ -677,12 +684,22 @@ Page({
       if (communityId != null && communityId !== '') {
         wq.community_id = communityId;
       }
-      const wRes = await util.get('core/workers', wq);
-      const wData = unwrapList(wRes);
+      let wRes = await util.get('core/workers', wq);
+      let wData = unwrapList(wRes);
+      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工（避免小区无入驻时列表空白）
+      if (wData.length === 0 && wq.community_id != null) {
+        console.log('[index] core/workers 带 community_id 返回空，尝试全量拉取');
+        wRes = await util.get('core/workers', { page: 1, limit: 20 });
+        wData = unwrapList(wRes);
+      }
       if (wData.length > 0) {
         workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
+      } else {
+        console.log('[index] core/workers 返回空列表');
       }
-    } catch (e) { }
+    } catch (e) {
+      console.log('[index] core/workers 请求失败', e);
+    }
 
     // ===== 从数据库获取管家精选商品（建议按小区配置，传 community_id）=====
     try {

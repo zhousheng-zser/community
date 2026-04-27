@@ -126,8 +126,14 @@ Page({
       if (communityId != null && communityId !== '') {
         params.community_id = communityId;
       }
-      const list = await util.get('core/workers', params);
-      const arr = unwrapList(list);
+      let list = await util.get('core/workers', params);
+      let arr = unwrapList(list);
+      // 若带 community_id 过滤后未找到，尝试不带过滤拉取全部技工
+      if (!arr.find((x) => Number(x.id) === Number(id)) && params.community_id != null) {
+        console.log('[worker-detail] 带 community_id 未找到，尝试全量拉取');
+        list = await util.get('core/workers', { page: 1, limit: 50 });
+        arr = unwrapList(list);
+      }
       const found = arr.find((x) => Number(x.id) === Number(id));
       const normalized = this.normalizeWorker(found);
       if (normalized) return normalized;

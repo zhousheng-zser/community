@@ -65,13 +65,22 @@ Page({
       params.community_id = communityId;
     }
     try {
-      const res = await util.get('core/workers', params);
-      const rows = unwrapList(res);
+      let res = await util.get('core/workers', params);
+      let rows = unwrapList(res);
+      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工
+      if (rows.length === 0 && params.community_id != null) {
+        console.log('[classify] core/workers 带 community_id 返回空，尝试全量拉取');
+        res = await util.get('core/workers', { page: 1, limit: 50 });
+        rows = unwrapList(res);
+      }
       if (rows.length > 0) {
         this.setData({ workers: rows.map(mapWorkerForClassifyCard) });
+      } else {
+        console.log('[classify] core/workers 返回空列表');
+        this.setData({ workers: [] });
       }
     } catch (e) {
-      // 接口失败时清空，避免 mock 数据 ID 与后端真实数据不一致导致详情页错配
+      console.log('[classify] core/workers 请求失败', e);
       this.setData({ workers: [] });
     }
   },
