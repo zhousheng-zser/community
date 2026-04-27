@@ -58,14 +58,21 @@ Page({
     this.loadWorkers();
   },
   async loadWorkers() {
+    const app = getApp();
+    const communityId = (app.globalData.user || {}).communityId;
+    const params = { page: 1, limit: 50 };
+    if (communityId != null && communityId !== '') {
+      params.community_id = communityId;
+    }
     try {
-      const res = await util.get('core/workers', { page: 1, limit: 50 });
+      const res = await util.get('core/workers', params);
       const rows = unwrapList(res);
       if (rows.length > 0) {
         this.setData({ workers: rows.map(mapWorkerForClassifyCard) });
       }
     } catch (e) {
-      this.setData({ workers: MOCK_WORKER_ROWS.map(mapWorkerForClassifyCard) });
+      // 接口失败时清空，避免 mock 数据 ID 与后端真实数据不一致导致详情页错配
+      this.setData({ workers: [] });
     }
   },
   goBack() {

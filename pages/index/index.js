@@ -5,8 +5,9 @@ const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const geo = require('../../utils/geo.js');
 const api = require('../../api/index.js');
-const { imgUrl, pickMarketShopAvatarPath, unwrapList } = util;
+const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
+const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
@@ -185,13 +186,7 @@ Page({
   _maybeRefreshMarketAfterAddressChange() {
     const flag = wx.getStorageSync('market_refresh_after_address');
     if (!flag) return;
-    wx.removeStorageSync('market_refresh_after_address');
-    wx.removeStorageSync('market_user_lat');
-    wx.removeStorageSync('market_user_lng');
-    wx.removeStorageSync('market_user_location_manual');
-    wx.removeStorageSync('market_snap_address_id');
-    wx.removeStorageSync('market_snap_distance_km');
-    wx.removeStorageSync('market_location_label');
+    util.clearMarketLocationCache();
     const cat = this.data.activeMarketCat;
     this.switchMarketCategory(
       { currentTarget: { dataset: { code: cat } } },
@@ -237,10 +232,9 @@ Page({
   },
   /** 本地集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
   getMarketLocationCacheKey() {
-    const lat = wx.getStorageSync('market_user_lat');
-    const lng = wx.getStorageSync('market_user_lng');
-    if (lat == null || lng == null || lat === '' || lng === '') return 'noloc';
-    return `${Number(lat).toFixed(3)}_${Number(lng).toFixed(3)}`;
+    const coords = util.getMarketUserCoords();
+    if (!coords) return 'noloc';
+    return `${coords.lat.toFixed(3)}_${coords.lng.toFixed(3)}`;
   },
   cacheKeyForMarketCat(cat) {
     const sort = this.data.activeMarketSort || 'distance';
@@ -252,12 +246,11 @@ Page({
     const q = { ...extra };
     if (!q.page) q.page = 1;
     if (!q.page_size) q.page_size = 30;
-    const lat = wx.getStorageSync('market_user_lat');
-    const lng = wx.getStorageSync('market_user_lng');
-    const hasCoords = lat != null && lng != null && lat !== '' && lng !== '';
+    const coords = util.getMarketUserCoords();
+    const hasCoords = !!coords;
     if (hasCoords) {
-      q.user_lat = Number(lat);
-      q.user_lng = Number(lng);
+      q.user_lat = coords.lat;
+      q.user_lng = Number(coords.lng);
       q.radius_km = config.marketShopRadiusKm != null ? config.marketShopRadiusKm : 5;
       const sortMode = this.data.activeMarketSort || 'distance';
       q.sort = sortMode === 'comprehensive' ? 'comprehensive' : 'distance';
@@ -271,9 +264,7 @@ Page({
   async switchMarketSort(e) {
     const key = e.currentTarget.dataset.key;
     if (!key || key === this.data.activeMarketSort) return;
-    const lat = wx.getStorageSync('market_user_lat');
-    const lng = wx.getStorageSync('market_user_lng');
-    const hasCoords = lat != null && lng != null && lat !== '' && lng !== '';
+    const hasCoords = !!util.getMarketUserCoords();
     if (key === 'distance' && !hasCoords) {
       wx.showToast({ title: '需定位或默认地址坐标后可用距离排序', icon: 'none' });
       return;
@@ -306,17 +297,13 @@ Page({
   ensureMarketUserCoordsForList() {
     return new Promise((resolve) => {
       if (wx.getStorageSync('market_user_location_manual')) {
-        const lat = wx.getStorageSync('market_user_lat');
-        const lng = wx.getStorageSync('market_user_lng');
-        if (lat != null && lng != null && lat !== '' && lng !== '') {
+        if (util.getMarketUserCoords()) {
           resolve({ hasCoords: true });
           return;
         }
         wx.removeStorageSync('market_user_location_manual');
       }
-      const lat0 = wx.getStorageSync('market_user_lat');
-      const lng0 = wx.getStorageSync('market_user_lng');
-      if (lat0 != null && lng0 != null && lat0 !== '' && lng0 !== '') {
+      if (util.getMarketUserCoords()) {
         resolve({ hasCoords: true });
         return;
       }
@@ -333,22 +320,19 @@ Page({
               finalLat = snap.lat;
               finalLng = snap.lng;
               snapLabel = snap.label;
-              wx.setStorageSync('market_snap_address_id', snap.id);
-              wx.setStorageSync('market_snap_distance_km', snap.dKm);
+              util.setMarketSnapInfo(snap.id, snap.dKm);
             } else {
-              wx.removeStorageSync('market_snap_address_id');
-              wx.removeStorageSync('market_snap_distance_km');
+              util.removeMarketSnapInfo();
             }
           } catch (e) {
             /* 吸附失败则仍用 GPS */
           }
-          wx.setStorageSync('market_user_lat', finalLat);
-          wx.setStorageSync('market_user_lng', finalLng);
+          util.setMarketUserCoords(finalLat, finalLng);
           if (snapLabel) {
-            wx.setStorageSync('market_location_label', snapLabel);
+            util.setMarketLocationLabel(snapLabel);
             this.setData({ currentCity: snapLabel });
           } else {
-            wx.removeStorageSync('market_location_label');
+            util.removeMarketLocationLabel();
             this.setData({ currentCity: '已定位' });
           }
           resolve({ hasCoords: true });
@@ -358,10 +342,9 @@ Page({
             const list = await this.loadUserAddressesForSnap();
             const fallback = geo.getDefaultAddressCoords(list);
             if (fallback) {
-              wx.setStorageSync('market_user_lat', fallback.lat);
-              wx.setStorageSync('market_user_lng', fallback.lng);
-              wx.setStorageSync('market_location_label', fallback.label);
-              if (fallback.id != null) wx.setStorageSync('market_snap_address_id', fallback.id);
+              util.setMarketUserCoords(fallback.lat, fallback.lng);
+              util.setMarketLocationLabel(fallback.label);
+              if (fallback.id != null) util.setMarketSnapInfo(fallback.id, fallback.dKm);
               this.setData({ currentCity: fallback.label });
               resolve({ hasCoords: true });
               return;
@@ -369,11 +352,9 @@ Page({
           } catch (e) {
             /* ignore */
           }
-          wx.removeStorageSync('market_user_lat');
-          wx.removeStorageSync('market_user_lng');
-          wx.removeStorageSync('market_snap_address_id');
-          wx.removeStorageSync('market_snap_distance_km');
-          wx.removeStorageSync('market_location_label');
+          util.removeMarketUserCoords();
+          util.removeMarketSnapInfo();
+          util.removeMarketLocationLabel();
           resolve({ hasCoords: false });
         }
       });
@@ -403,7 +384,7 @@ Page({
       const list = Array.isArray(marketRes)
         ? marketRes
         : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
-      const mapped = Array.isArray(list) ? list.map(s => this.normalizeMarketShop(s)).filter(s => !!s.id) : [];
+      const mapped = Array.isArray(list) ? list.map(s => indexHelper.normalizeMarketShop(s)).filter(s => !!s.id) : [];
       const newCache = { ...cache, [ck]: mapped };
       this.setData({
         marketShops: mapped,
@@ -421,38 +402,6 @@ Page({
       });
     }
   },
-  normalizeMarketShop(item) {
-    const goodsRaw = Array.isArray(item.goods) ? item.goods : (Array.isArray(item.preview_goods) ? item.preview_goods : []);
-    const goods = goodsRaw.slice(0, 8).map((g, idx) => ({
-      id: g.id || g.goods_id || (idx + 1),
-      name: g.name || g.goods_name || '精选商品',
-      price: String(g.price || g.goods_price || '0'),
-      image: g.main_image || g.image ? imgUrl(g.main_image || g.image) : ''
-    }));
-    const soldCount = Number(item.sold_count || 0);
-    const deliveryText = item.delivery_desc
-      || (item.min_order_amount != null
-        ? `起送￥${item.min_order_amount}  配送费￥${item.delivery_fee || 0}`
-        : '起送￥0  免配送费');
-    let distanceLabel = '';
-    if (item.distance_km != null && item.distance_km !== '') {
-      const d = Number(item.distance_km);
-      if (!Number.isNaN(d)) distanceLabel = `距您${d.toFixed(1)}km`;
-    }
-    const coverPath = pickMarketShopAvatarPath(item);
-    return {
-      id: item.id,
-      cat: item.category || '本地集市',
-      name: item.name || item.shop_name || '社区店铺',
-      badge: item.delivery_type_text || item.delivery_type || '商家自送',
-      delivery: deliveryText,
-      sold: `已售${soldCount}`,
-      distanceLabel,
-      coverUrl: coverPath ? imgUrl(coverPath) : '',
-      ratingText: item.rating != null && item.rating !== '' ? `评分 ${item.rating}` : '',
-      goods
-    };
-  },
   onHomeSearchInput(e) {
     this.setData({ homeSearchKeyword: e.detail.value });
   },
@@ -469,11 +418,9 @@ Page({
     wx.chooseLocation({
       success: (res) => {
         wx.setStorageSync('market_user_location_manual', 1);
-        wx.setStorageSync('market_user_lat', res.latitude);
-        wx.setStorageSync('market_user_lng', res.longitude);
-        wx.removeStorageSync('market_snap_address_id');
-        wx.removeStorageSync('market_snap_distance_km');
-        wx.removeStorageSync('market_location_label');
+        util.setMarketUserCoords(res.latitude, res.longitude);
+        util.removeMarketSnapInfo();
+        util.removeMarketLocationLabel();
         this.setData({ marketShopsCacheByCat: {} });
         const city = res.address ? res.address.replace(/省.*/, '').replace(/市.*/, '').slice(0, 4) : (res.name ? res.name.slice(0, 4) : '已定位');
         this.setData({ currentCity: city || '已定位' });
@@ -688,11 +635,7 @@ Page({
       url: '../service/service?id=' + item.id
     }));
     let merchantList = mapMerchantList();
-    let workerList = [
-      { id: 1, name: '何志', service_count: 0 },
-      { id: 2, name: '余静', service_count: 1 },
-      { id: 3, name: '邓长超', service_count: 0 }
-    ].map(mapWorkerForHomeCard);
+    let workerList = [];
     let marketList = [
       { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
       { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
@@ -865,7 +808,7 @@ Page({
         ? marketRes
         : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
       if (Array.isArray(marketData) && marketData.length > 0) {
-        const mapped = marketData.map(this.normalizeMarketShop).filter(s => !!s.id);
+        const mapped = marketData.map(indexHelper.normalizeMarketShop).filter(s => !!s.id);
         if (mapped.length > 0) {
           mergedMarketShops = mapped;
           if (!mapped.some(s => s.cat === activeMarketCat)) {
@@ -1025,19 +968,28 @@ Page({
 
     let assistMarqueeList = [];
     try {
-      const feedRes = await util.get('neighbor-assist/orders/feed', { limit: 20 });
-      const rawFeed = unwrapList(feedRes);
-      assistMarqueeList = rawFeed
-        .map((x, i) => ({
+      const feedRes = await util.get('neighbor-assist/orders/my', { role: 'publisher', page: 1, limit: 10 });
+      const list = Array.isArray(feedRes) ? feedRes : (feedRes.list || feedRes.data?.list || []);
+      assistMarqueeList = list.slice(0, 10).map((x, i) => {
+        const fullText = String(x.content || x.title || x.remark || x.assist_type_label || '').slice(0, 40);
+        return {
           id: x.id != null ? x.id : `f${i}`,
-          text: String(x.content || x.title || x.summary || '').slice(0, 36)
-        }))
-        .filter((x) => x.text);
+          text: fullText,
+          assist_type: x.assist_type,
+          assist_type_label: x.assist_type_label,
+          amount: x.amount || x.reward_amount || '',
+          status: x.status,
+          status_text: x.status_text,
+          time: x.created_at
+        };
+      }).filter((x) => x.text);
     } catch (eFeed) {
       assistMarqueeList = [
-        { id: 'm1', text: '代取快递：菜鸟驿站 → 3 栋' },
-        { id: 'm2', text: '老人陪诊：市医院上午' },
-        { id: 'm3', text: '临时遛狗 30 分钟' }
+        { id: 999001, text: '代取快递：菜鸟驿站 → 3 栋', assist_type_label: '代取快递' },
+        { id: 999002, text: '老人陪诊：市医院上午', assist_type_label: '陪诊' },
+        { id: 999003, text: '临时遛狗 30 分钟', assist_type_label: '宠物喂养' },
+        { id: 999004, text: '帮拿快递：西门 → 5 栋', assist_type_label: '代取快递' },
+        { id: 999005, text: '宠物临时喂养 1 小时', assist_type_label: '宠物喂养' }
       ];
     }
 
@@ -1332,97 +1284,24 @@ Page({
       }
     })
   },
-  normalizeModuleGoods(item, i, extra = {}) {
-    const row = util.normalizeShopProductRow(item, i);
-    const id = item.id || item.goods_id || `${extra.module || 'mod'}_${i}`;
-    const rankRaw = item.rank != null ? item.rank : (i + 1);
-    return {
-      ...row,
-      id,
-      title: row.name,
-      rank: String(rankRaw).padStart(2, '0'),
-      distance_km: util.extractDistanceKmFromProduct(item)
-    };
-  },
-  normalizeModuleList(list, extra = {}) {
-    const arr = Array.isArray(list) ? list : this.pickModuleGoodsList(list);
-    return util.filterShopProductsByDistance(arr, 5).map((item, idx) => this.normalizeModuleGoods(item, idx, extra));
-  },
-  pickModuleGoodsList(module) {
-    if (!module || typeof module !== 'object') return [];
-    const candidates = [
-      module.goods_list,
-      module.goodsList,
-      module.goods,
-      module.products,
-      module.product_list,
-      module.productList,
-      module.items,
-      module.list,
-      module.rows,
-      module.records,
-      module.result,
-      module.data && module.data.goods_list,
-      module.data && module.data.goodsList,
-      module.data && module.data.goods,
-      module.data && module.data.products,
-      module.data && module.data.product_list,
-      module.data && module.data.productList,
-      module.data && module.data.items,
-      module.data && module.data.list,
-      module.data && module.data.rows,
-      module.data && module.data.records,
-      module.data && module.data.result
-    ];
-    for (let i = 0; i < candidates.length; i++) {
-      if (Array.isArray(candidates[i])) return candidates[i];
-    }
-    return [];
-  },
-  normalizeModuleGroups(groups) {
-    if (Array.isArray(groups)) return groups;
-    if (!groups || typeof groups !== 'object') return [];
-    return Object.keys(groups).map((key) => {
-      const value = groups[key];
-      if (Array.isArray(value)) {
-        return { module_name: key, goods_list: value };
-      }
-      if (value && typeof value === 'object') {
-        return {
-          module_name: value.module_name || value.name || value.title || key,
-          ...value
-        };
-      }
-      return { module_name: key, goods_list: [] };
-    });
-  },
-  unwrapLocalGoodsPayload(res) {
-    let payload = res && typeof res === 'object' ? res : {};
-    if (payload.data && typeof payload.data === 'object') payload = payload.data;
-    if (payload.data && typeof payload.data === 'object') payload = payload.data;
-    return payload;
-  },
-  buildLocalGoodsQuery(extra = {}) {
-    return util.buildShopGoodsQuery({ distance_km: 5, ...extra });
-  },
   async loadLocalGoodsModules() {
     await this.ensureMarketUserCoordsForList();
-    const res = await util.get('local-goods-home/modules', this.buildLocalGoodsQuery());
-    const payload = this.unwrapLocalGoodsPayload(res);
+    const res = await util.get('local-goods-home/modules', indexHelper.buildLocalGoodsQuery());
+    const payload = indexHelper.unwrapLocalGoodsPayload(res);
 
     const rawDaily = payload.daily_news || payload.dailyNews || [];
     const rawTop = payload.top_sales || payload.topSales || [];
     const rawPeriodic = payload.periodic_modules || payload.periodic || [];
     const rawFeed = payload.feed_modules || payload.feed || [];
 
-    const pushDailyNews = this.normalizeModuleList(rawDaily, { module: 'daily_news' }).slice(0, 4);
-    const pushTopSales = this.normalizeModuleList(rawTop, { module: 'top_sales' }).slice(0, 3);
+    const pushDailyNews = indexHelper.normalizeModuleList(rawDaily, { module: 'daily_news' }).slice(0, 4);
+    const pushTopSales = indexHelper.normalizeModuleList(rawTop, { module: 'top_sales' }).slice(0, 3);
 
     const pushPeriodicTabs = [];
     const pushPeriodicGoodsDict = {};
-    this.normalizeModuleGroups(rawPeriodic).forEach((m, idx) => {
+    indexHelper.normalizeModuleGroups(rawPeriodic).forEach((m, idx) => {
       const tab = m.module_name || m.name || m.title || `周期模块${idx + 1}`;
-      const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
+      const list = indexHelper.normalizeModuleList(indexHelper.pickModuleGoodsList(m), { module: tab });
       pushPeriodicTabs.push(tab);
       pushPeriodicGoodsDict[tab] = list;
     });
@@ -1434,10 +1313,10 @@ Page({
     const pushFeedGoodsDict = {};
     const feedPageByTab = {};
     const feedHasMoreByTab = {};
-    this.normalizeModuleGroups(rawFeed).forEach((m) => {
+    indexHelper.normalizeModuleGroups(rawFeed).forEach((m) => {
       const tab = m.module_name || m.name || m.title;
       if (!tab) return;
-      const list = this.normalizeModuleList(this.pickModuleGoodsList(m), { module: tab });
+      const list = indexHelper.normalizeModuleList(indexHelper.pickModuleGoodsList(m), { module: tab });
       pushFeedTabs.push(tab);
       pushFeedGoodsDict[tab] = list;
       feedPageByTab[tab] = Number(m.page || 1);
@@ -1495,14 +1374,14 @@ Page({
   async loadMoreFeedGoods(tabName) {
     const currentPage = Number((this.data.feedPageByTab || {})[tabName] || 1);
     const nextPage = currentPage + 1;
-    const q = this.buildLocalGoodsQuery({
+    const q = indexHelper.buildLocalGoodsQuery({
       module_name: tabName,
       page: nextPage,
       page_size: this.data.pageSize || 10
     });
     const res = await util.get('local-goods-home/feed-products', q);
     const payload = res && typeof res === 'object' ? (res.data || res) : {};
-    const list = this.normalizeModuleList(payload.list || payload.items || payload.goods_list || [], { module: tabName });
+    const list = indexHelper.normalizeModuleList(payload.list || payload.items || payload.goods_list || [], { module: tabName });
     const hasMore = !!payload.has_more;
     return { list, hasMore, page: nextPage };
   },

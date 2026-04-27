@@ -3,7 +3,7 @@ const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
-const { pickWorkerAvatar } = require('../../utils/workerApiMap.js');
+const { pickWorkerAvatar, genderToLabel } = require('../../utils/workerApiMap.js');
 
 const mockWorkers = [
   {
@@ -120,7 +120,13 @@ Page({
     } catch (e) {}
 
     try {
-      const list = await util.get('core/workers', { page: 1, limit: 50 });
+      const app = getApp();
+      const communityId = (app.globalData.user || {}).communityId;
+      const params = { page: 1, limit: 50 };
+      if (communityId != null && communityId !== '') {
+        params.community_id = communityId;
+      }
+      const list = await util.get('core/workers', params);
       const arr = unwrapList(list);
       const found = arr.find((x) => Number(x.id) === Number(id));
       const normalized = this.normalizeWorker(found);
@@ -144,17 +150,19 @@ Page({
     const mainDir =
       w.main_direction ||
       w.specialty ||
+      w.main_skill ||
       (Array.isArray(w.tags) && w.tags.length ? w.tags[0] : '') ||
-      '';
+      '到家服务';
+    const rawDesc = w.desc || w.resume || w.introduction || w.bio || w.intro || '';
     return {
       id: w.id,
-      name: w.name || w.real_name || w.nickname || "技工",
-      gender: w.gender || "",
-      region: w.region || w.city || w.hometown || "",
+      name: w.name || w.real_name || w.nickname || '技工',
+      gender: genderToLabel(w.gender),
+      region: w.region || w.city || w.hometown || '',
       serviceCount: Number(w.serviceCount || w.service_count || w.orders || 0) || 0,
       exp: Number(w.exp || w.work_years || w.workExp || 0) || 0,
-      desc: w.desc || w.resume || w.introduction || "",
-      mainDirection: mainDir,
+      desc: rawDesc,
+      mainDirection: String(mainDir).slice(0, 12),
       avatar: pickWorkerAvatar(w),
       tags: Array.isArray(w.tags) ? w.tags : []
     };
