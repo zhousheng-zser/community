@@ -1402,35 +1402,6 @@
   padding-bottom: 24rpx;
 }
 
-.benefit-alliance-tabs-scroll {
-  white-space: nowrap;
-  width: 100%;
-  margin-bottom: 8rpx;
-}
-
-.benefit-alliance-tabs-row {
-  display: inline-flex;
-  padding: 12rpx 16rpx 8rpx;
-  gap: 16rpx;
-}
-
-.benefit-alliance-tab {
-  flex-shrink: 0;
-  padding: 12rpx 28rpx;
-  font-size: 26rpx;
-  color: #555;
-  background: #fff;
-  border-radius: 999rpx;
-  border: 2rpx solid #e8e8e8;
-}
-
-.benefit-alliance-tab.active {
-  color: #fff;
-  font-weight: 700;
-  background: linear-gradient(90deg, #F97316 0%, #FB923C 100%);
-  border-color: transparent;
-}
-
 .benefit-hero-banner {
   position: relative;
   padding: 0;
@@ -1558,6 +1529,89 @@
   font-size: 22rpx;
   color: #888;
   line-height: 1.5;
+}
+
+/* ===== 竖向排版：惠民卡 ===== */
+.benefit-scroll {
+  height: 100vh;
+  padding-bottom: 120rpx;
+  box-sizing: border-box;
+}
+.benefit-section {
+  margin-bottom: 24rpx;
+}
+.benefit-section:last-child {
+  margin-bottom: 0;
+}
+
+/* 淘宝/美团占位色 */
+.benefit-brand-hero--tb {
+  background: linear-gradient(135deg, #ff5000 0%, #ff9000 100%);
+}
+.benefit-brand-hero--mt {
+  background: linear-gradient(135deg, #ffc300 0%, #ff6600 100%);
+}
+.benefit-brand-hero--mt .benefit-brand-hero-title,
+.benefit-brand-hero--mt .benefit-brand-hero-sub {
+  color: #1a1a1a;
+  text-shadow: 0 1rpx 0 rgba(255,255,255,0.35);
+}
+
+/* 占位提示 */
+.benefit-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 40rpx;
+  text-align: center;
+}
+.benefit-placeholder-text {
+  font-size: 30rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+.benefit-placeholder-sub {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 大牌列表 */
+.benefit-brand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  padding: 8rpx 0;
+}
+.benefit-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 20rpx;
+  background: #fafafa;
+  border-radius: 16rpx;
+}
+.benefit-brand-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.benefit-brand-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+.benefit-brand-desc {
+  font-size: 24rpx;
+  color: #888;
+}
+.benefit-brand-action {
+  flex-shrink: 0;
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+  color: #fff;
+  background: linear-gradient(90deg, #f97316 0%, #ea580c 100%);
+  border-radius: 999rpx;
 }
 
 .market-top-cats {

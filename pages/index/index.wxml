@@ -178,154 +178,130 @@
   </view>
 
   <view wx:elif="{{activeTab === '惠民卡'}}" class="benefit-card-page">
-    <scroll-view class="benefit-alliance-tabs-scroll" scroll-x="{{true}}" show-scrollbar="{{false}}">
-      <view class="benefit-alliance-tabs-row">
-        <view
-          wx:for="{{benefitAllianceTabs}}"
-          wx:key="key"
-          class="benefit-alliance-tab {{activeBenefitAlliance === item.key ? 'active' : ''}}"
-          bindtap="switchBenefitAllianceTab"
-          data-key="{{item.key}}"
-        >{{item.name}}</view>
+    <scroll-view scroll-y="{{true}}" class="benefit-scroll">
+      <!-- ===== 京东联盟 ===== -->
+      <view class="benefit-section">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{jdBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{jdHeroTitle || '惠民卡 · 京东联盟'}}</text>
+            <text class="benefit-hero-sub">{{jdHeroSubtitle || '京挑客 · 与流量联盟/京东联盟.md 推广链、标题一致'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">京东联盟精选</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{jdGoods}}" wx:key="id" bindtap="goToJDMiniprogram" data-sku-id="{{item.skuId}}" data-spread-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image src="{{item.image}}" mode="aspectFill"></image>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <text class="price" wx:if="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>领券价见京东</text>
+            </view>
+          </view>
+        </view>
+        <view class="card fuka-open-card benefit-cta-jd" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">
+          <view class="left">
+            <text class="title">去京东领券购买</text>
+            <text class="sub">与列表首条同款推广链（京东联盟小程序）</text>
+          </view>
+          <text class="go">GO ></text>
+        </view>
+      </view>
+
+      <!-- ===== 拼多多 ===== -->
+      <view class="benefit-section">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{pddBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light benefit-hero-mask-pdd">
+            <text class="benefit-hero-title">{{pddHeroTitle || '惠民卡 · 拼多多'}}</text>
+            <text class="benefit-hero-sub">{{pddHeroSubtitle || '多多进宝 · 券后价与 p.pinduoduo 推广链（与流量联盟文档对齐）'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">拼多多精选</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{pddGoods}}" wx:key="id" bindtap="goToPddBenefit" data-goods-id="{{item.goodsId}}" data-spread-url="{{item.spreadUrl}}" data-mini-path="{{item.miniPath}}">
+              <view class="fuka-goods-img-wrap">
+                <image src="{{item.image}}" mode="aspectFill"></image>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:else>￥{{item.price}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="card fuka-open-card benefit-cta-pdd" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">
+          <view class="left">
+            <text class="title">拼多多进宝精选</text>
+            <text class="sub">打开小程序或复制推广链接（与列表同款素材）</text>
+          </view>
+          <text class="go">GO ></text>
+        </view>
+      </view>
+
+      <!-- ===== 淘宝 ===== -->
+      <view class="benefit-section">
+        <view class="card benefit-brand-hero benefit-brand-hero--tb">
+          <text class="benefit-brand-hero-title">淘宝联盟</text>
+          <text class="benefit-brand-hero-sub">淘口令 · 优惠券 · 返利推广（即将上线）</text>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">淘宝精选</text>
+          </view>
+          <view class="benefit-placeholder">
+            <text class="benefit-placeholder-text">🛒 淘宝联盟商品接入中，敬请期待</text>
+            <text class="benefit-placeholder-sub">支持淘口令复制、优惠券领取、订单跟踪返利</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 美团 ===== -->
+      <view class="benefit-section">
+        <view class="card benefit-brand-hero benefit-brand-hero--mt">
+          <text class="benefit-brand-hero-title">美团联盟</text>
+          <text class="benefit-brand-hero-sub">外卖红包 · 到店优惠 · 团购返利（即将上线）</text>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">美团精选</text>
+          </view>
+          <view class="benefit-placeholder">
+            <text class="benefit-placeholder-text">🍔 美团联盟商品接入中，敬请期待</text>
+            <text class="benefit-placeholder-sub">支持外卖红包、到店团购、酒店旅游优惠</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 其他大牌优惠 ===== -->
+      <view class="benefit-section">
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">大牌餐饮优惠</text>
+          </view>
+          <view class="benefit-brand-list">
+            <view class="benefit-brand-row" wx:for="{{benefitBrandList}}" wx:key="key" bindtap="copyBrandKeyword" data-keyword="{{item.keyword}}">
+              <view class="benefit-brand-info">
+                <text class="benefit-brand-name">{{item.title}}</text>
+                <text class="benefit-brand-desc">{{item.sub}}</text>
+              </view>
+              <text class="benefit-brand-action">复制关键词</text>
+            </view>
+          </view>
+        </view>
       </view>
     </scroll-view>
-
-    <block wx:if="{{activeBenefitAlliance === 'jd'}}">
-      <view class="card benefit-hero-banner benefit-hero-banner--alliance">
-        <image src="{{jdBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
-        <view class="benefit-hero-mask benefit-hero-mask--light">
-          <text class="benefit-hero-title">{{jdHeroTitle || '惠民卡 · 京东联盟'}}</text>
-          <text class="benefit-hero-sub">{{jdHeroSubtitle || '京挑客 · 与流量联盟/京东联盟.md 推广链、标题一致'}}</text>
-        </view>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">京东联盟精选</text>
-        </view>
-        <view class="fuka-goods-grid">
-          <view class="fuka-goods-item" wx:for="{{jdGoods}}" wx:key="id" bindtap="goToJDMiniprogram" data-sku-id="{{item.skuId}}" data-spread-url="{{item.spreadUrl}}">
-            <view class="fuka-goods-img-wrap">
-              <image src="{{item.image}}" mode="aspectFill"></image>
-              <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
-            </view>
-            <text class="name">{{item.title}}</text>
-            <text class="price" wx:if="{{item.price}}">￥{{item.price}}</text>
-            <text class="price jd-price-hint" wx:else>领券价见京东</text>
-          </view>
-        </view>
-      </view>
-      <view class="card fuka-open-card benefit-cta-jd" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">
-        <view class="left">
-          <text class="title">去京东领券购买</text>
-          <text class="sub">与列表首条同款推广链（京东联盟小程序）</text>
-        </view>
-        <text class="go">GO ></text>
-      </view>
-    </block>
-
-    <block wx:elif="{{activeBenefitAlliance === 'pdd'}}">
-      <view class="card benefit-hero-banner benefit-hero-banner--alliance">
-        <image src="{{pddBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
-        <view class="benefit-hero-mask benefit-hero-mask--light benefit-hero-mask-pdd">
-          <text class="benefit-hero-title">{{pddHeroTitle || '惠民卡 · 拼多多'}}</text>
-          <text class="benefit-hero-sub">{{pddHeroSubtitle || '多多进宝 · 券后价与 p.pinduoduo 推广链（与流量联盟文档对齐）'}}</text>
-        </view>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">拼多多精选</text>
-        </view>
-        <view class="fuka-goods-grid">
-          <view
-            class="fuka-goods-item"
-            wx:for="{{pddGoods}}"
-            wx:key="id"
-            bindtap="goToPddBenefit"
-            data-goods-id="{{item.goodsId}}"
-            data-spread-url="{{item.spreadUrl}}"
-            data-mini-path="{{item.miniPath}}"
-          >
-            <view class="fuka-goods-img-wrap">
-              <image src="{{item.image}}" mode="aspectFill"></image>
-              <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
-            </view>
-            <text class="name">{{item.title}}</text>
-            <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
-              <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
-              <text class="price pdd-orig">￥{{item.price}}</text>
-            </view>
-            <text class="price" wx:else>￥{{item.price}}</text>
-          </view>
-        </view>
-      </view>
-      <view
-        class="card fuka-open-card benefit-cta-pdd"
-        bindtap="goToPddBenefit"
-        data-goods-id="{{pddEntry.goodsId}}"
-        data-spread-url="{{pddEntry.spreadUrl}}"
-        data-mini-path="{{pddEntry.miniPath}}"
-      >
-        <view class="left">
-          <text class="title">拼多多进宝精选</text>
-          <text class="sub">打开小程序或复制推广链接（与列表同款素材）</text>
-        </view>
-        <text class="go">GO ></text>
-      </view>
-    </block>
-
-    <block wx:elif="{{activeBenefitAlliance === 'kfc'}}">
-      <view class="card benefit-brand-hero benefit-brand-hero--kfc">
-        <text class="benefit-brand-hero-title">{{benefitBrandColumns.kfc.title}}</text>
-        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.kfc.sub}}</text>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">快捷入口</text>
-        </view>
-        <view class="benefit-brand-actions">
-          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.kfc.keyword}}">复制「{{benefitBrandColumns.kfc.keyword}}」去搜索</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
-        </view>
-        <text class="benefit-brand-footnote">{{benefitBrandColumns.kfc.hint}}</text>
-      </view>
-    </block>
-
-    <block wx:elif="{{activeBenefitAlliance === 'mcd'}}">
-      <view class="card benefit-brand-hero benefit-brand-hero--mcd">
-        <text class="benefit-brand-hero-title">{{benefitBrandColumns.mcd.title}}</text>
-        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.mcd.sub}}</text>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">快捷入口</text>
-        </view>
-        <view class="benefit-brand-actions">
-          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.mcd.keyword}}">复制「{{benefitBrandColumns.mcd.keyword}}」去搜索</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
-        </view>
-        <text class="benefit-brand-footnote">{{benefitBrandColumns.mcd.hint}}</text>
-      </view>
-    </block>
-
-    <block wx:elif="{{activeBenefitAlliance === 'starbucks'}}">
-      <view class="card benefit-brand-hero benefit-brand-hero--starbucks">
-        <text class="benefit-brand-hero-title">{{benefitBrandColumns.starbucks.title}}</text>
-        <text class="benefit-brand-hero-sub">{{benefitBrandColumns.starbucks.sub}}</text>
-      </view>
-      <view class="card section-card">
-        <view class="section-head">
-          <text class="title">快捷入口</text>
-        </view>
-        <view class="benefit-brand-actions">
-          <view class="benefit-brand-btn" bindtap="copyBrandKeyword" data-keyword="{{benefitBrandColumns.starbucks.keyword}}">复制「{{benefitBrandColumns.starbucks.keyword}}」去搜索</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToJDMiniprogram" data-sku-id="{{jdEntry.skuId}}" data-spread-url="{{jdEntry.spreadUrl}}">进入京东惠民专区</view>
-          <view class="benefit-brand-btn benefit-brand-btn--ghost" bindtap="goToPddBenefit" data-goods-id="{{pddEntry.goodsId}}" data-spread-url="{{pddEntry.spreadUrl}}" data-mini-path="{{pddEntry.miniPath}}">进入拼多多精选</view>
-        </view>
-        <text class="benefit-brand-footnote">{{benefitBrandColumns.starbucks.hint}}</text>
-      </view>
-    </block>
   </view>
 
   <view wx:elif="{{activeTab === '本地集市'}}">

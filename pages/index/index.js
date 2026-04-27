@@ -61,13 +61,6 @@ Page({
     jdBanner: "",
     jdHeroTitle: "",
     jdHeroSubtitle: "",
-    benefitAllianceTabs: [
-      { key: 'jd', name: '京东联盟' },
-      { key: 'pdd', name: '拼多多' },
-      { key: 'kfc', name: '肯德基' },
-      { key: 'mcd', name: '麦当劳' },
-      { key: 'starbucks', name: '星巴克' }
-    ],
     /** 大牌餐饮栏目：文案与搜索关键词，SKU 可在后台/本地清单后续挂载 */
     benefitBrandColumns: {
       kfc: {
@@ -89,7 +82,11 @@ Page({
         hint: '支持后续配置京东/拼多多联盟商品位。'
       }
     },
-    activeBenefitAlliance: 'jd',
+    benefitBrandList: [
+      { key: 'kfc', title: '肯德基', sub: '炸鸡汉堡 · 先领券再下单', keyword: '肯德基' },
+      { key: 'mcd', title: '麦当劳', sub: '巨无霸 · 麦乐送 · 惠民卡入口', keyword: '麦当劳' },
+      { key: 'starbucks', title: '星巴克', sub: '咖啡星享 · 券包与周边', keyword: '星巴克' }
+    ],
     pddGoods: [],
     pddBanner: '',
     pddHeroTitle: "",
@@ -1111,12 +1108,6 @@ Page({
       isLoadingMore: false
     });
   },
-  switchBenefitAllianceTab(e) {
-    const key = e.currentTarget.dataset.key;
-    if (!key || key === this.data.activeBenefitAlliance) return;
-    this.setData({ activeBenefitAlliance: key });
-  },
-
   copyBrandKeyword(e) {
     const kw = e.currentTarget.dataset.keyword ? String(e.currentTarget.dataset.keyword).trim() : '';
     if (!kw) return;
