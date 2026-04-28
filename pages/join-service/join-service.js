@@ -7,7 +7,7 @@ Page({
     submitting: false,
     industryList: ['家政保洁', '上门维修', '管道疏通', '家电维修', '搬家安装', '其他'],
     industryIndex: -1,
-    communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
+    communityList: [],
     communityIndex: -1,
     form: {
       shopName: '', logo: '', phone: '', inviteCode: '',
@@ -20,6 +20,23 @@ Page({
   onLoad() {
     const user = app.globalData.user || {};
     this.setData({ 'form.phone': user.userMobile || '' });
+    this.fetchCommunities();
+  },
+
+  fetchCommunities() {
+    util.get('core/communities')
+      .then((res) => {
+        const list = (res && res.list) || (res && res.data && res.data.list) || [];
+        const names = list.map(c => c.name).filter(Boolean);
+        if (names.length > 0) {
+          this.setData({ communityList: names });
+        } else {
+          this.setData({ communityList: ['其他'] });
+        }
+      })
+      .catch(() => {
+        this.setData({ communityList: ['其他'] });
+      });
   },
 
   onShow() {

@@ -131,6 +131,10 @@ Page({
     wx.redirectTo({ url: rp.workerTabUrl('worker-mine') });
   },
 
+  goServices() {
+    wx.navigateTo({ url: rp.workerTabUrl('worker-services') });
+  },
+
   goJoin() {
     wx.navigateTo({ url: '/pages/join-worker/join-worker' });
   },

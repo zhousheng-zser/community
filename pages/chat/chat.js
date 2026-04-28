@@ -10,6 +10,7 @@ Page({
     orderId: '',
     orderScene: '',
     myUserId: null,
+    myAvatar: '',
     history: [],
     inputText: '',
     scrollIntoView: '',
@@ -31,6 +32,7 @@ Page({
     const u = app.globalData.user || {};
     const sid = u.shop_id != null ? u.shop_id : u.shopId;
     const shopIdForApi = sid != null && sid !== '' ? sid : null;
+    const myAvatar = u.userPhoto || u.avatar_url || u.avatarUrl || '';
 
     this.setData({
       conversationId: options.conversationId,
@@ -39,6 +41,7 @@ Page({
       orderId: options.orderId ? String(options.orderId) : '',
       orderScene: options.orderScene ? String(options.orderScene) : '',
       myUserId: uid,
+      myAvatar,
       shopIdForApi
     });
     if (this.data.conversationId) {

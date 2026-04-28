@@ -180,6 +180,13 @@ Page({
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
         if (cid != null) app.globalData.user.communityId = cid;
+        // 同步头像、昵称等用户信息
+        const nickname = data.nickname || data.userName || data.name;
+        const avatar = data.avatar_url || data.avatarUrl || data.avatar || data.userPhoto;
+        const mobile = data.phone || data.userMobile || data.mobile;
+        if (nickname != null) app.globalData.user.userName = nickname;
+        if (avatar != null) app.globalData.user.userPhoto = avatar;
+        if (mobile != null) app.globalData.user.userMobile = mobile;
       }
       const user = app.globalData.user || {};
       const balanceValue = balance.getDisplayBalance(balance.BALANCE_TYPES.USER);

@@ -7,7 +7,7 @@ Page({
     submitting: false,
     categoryList: ['食品生鲜', '美妆洗护', '居家百货', '服装箱包', '母婴系列', '家用电器', '数码产品', '珠宝饰品', '旅游出行', '传统工艺'],
     categoryIndex: -1,
-    communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
+    communityList: [],
     communityIndex: -1,
     form: {
       contact: '', phone: '', shopName: '', category: '', address: '',
@@ -23,6 +23,23 @@ Page({
       'form.phone': user.userMobile || '',
       'form.contact': user.userName || ''
     });
+    this.fetchCommunities();
+  },
+
+  fetchCommunities() {
+    util.get('core/communities')
+      .then((res) => {
+        const list = (res && res.list) || (res && res.data && res.data.list) || [];
+        const names = list.map(c => c.name).filter(Boolean);
+        if (names.length > 0) {
+          this.setData({ communityList: names });
+        } else {
+          this.setData({ communityList: ['其他'] });
+        }
+      })
+      .catch(() => {
+        this.setData({ communityList: ['其他'] });
+      });
   },
 
   onShow() {

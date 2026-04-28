@@ -17,10 +17,19 @@
           <el-icon><Odometer /></el-icon>
           <span>数据大屏</span>
         </el-menu-item>
-        <el-menu-item index="/benefit-alliance-goods">
-          <el-icon><Discount /></el-icon>
-          <span>惠民卡·推广管理</span>
-        </el-menu-item>
+        <el-sub-menu index="/benefit-alliance-goods">
+          <template #title>
+            <el-icon><Discount /></el-icon>
+            <span>惠民卡·推广管理</span>
+          </template>
+          <el-menu-item index="/benefit-alliance-goods?platform=jd">惠民卡·京东</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=pdd">惠民卡·拼多多</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=taobao">惠民卡·淘宝</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=meituan">惠民卡·美团</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=shangou">惠民卡·闪购</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=shequn">惠民卡·社群</el-menu-item>
+          <el-menu-item index="/benefit-alliance-goods?platform=tuixiao">惠民卡·推销</el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/goods">
           <el-icon><Goods /></el-icon>
           <span>商品池管理</span>

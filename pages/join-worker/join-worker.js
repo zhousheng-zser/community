@@ -6,7 +6,7 @@ Page({
     maskedPhone: '',
     agreed: false,
     submitting: false,
-    communityList: ['阳光社区', '春风社区', '和谐社区', '幸福里', '翠竹苑', '其他'],
+    communityList: [],
     communityIndex: -1,
     industryList: ['家政保洁', '水电维修', '木工装修', '管道疏通', '家电维修', '搬运安装', '其他'],
     industryIndex: -1,
@@ -25,6 +25,23 @@ Page({
     const mobile = user.userMobile || '';
     const maskedPhone = mobile.length >= 11 ? mobile.slice(0, 3) + '****' + mobile.slice(7) : '';
     this.setData({ maskedPhone, 'form.phone': mobile });
+    this.fetchCommunities();
+  },
+
+  fetchCommunities() {
+    util.get('core/communities')
+      .then((res) => {
+        const list = (res && res.list) || (res && res.data && res.data.list) || [];
+        const names = list.map(c => c.name).filter(Boolean);
+        if (names.length > 0) {
+          this.setData({ communityList: names });
+        } else {
+          this.setData({ communityList: ['其他'] });
+        }
+      })
+      .catch(() => {
+        this.setData({ communityList: ['其他'] });
+      });
   },
 
   onShow() {

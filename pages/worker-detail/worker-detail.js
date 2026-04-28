@@ -65,10 +65,12 @@ Page({
     const worker = await this.loadWorker(id);
     let goods = mockGoods.map((g) => Object.assign({}, g));
     let reviews = [];
+    let hasRealServices = false;
     try {
       const svcRes = await util.get(`core/workers/${id}/services`, { page: 1, limit: 30 });
       const arr = unwrapList(svcRes);
       if (Array.isArray(arr) && arr.length > 0) {
+        hasRealServices = true;
         goods = arr.map((s) => {
           const title = (s.title || s.name || '').replace(/【.*?】/g, '').trim();
           const priceRaw = s.price != null ? s.price : '';
@@ -89,6 +91,26 @@ Page({
       }
     } catch (e) {
       console.log('core/workers/:id/services 未就绪', e);
+    }
+    // 若后端无数据，尝试从本地存储读取该技工自行上架的服务
+    if (!hasRealServices) {
+      try {
+        const localKey = 'worker_services_' + id;
+        const localList = wx.getStorageSync(localKey) || [];
+        if (Array.isArray(localList) && localList.length > 0) {
+          goods = localList.map((s) => {
+            const title = (s.name || '').replace(/【.*?】/g, '').trim();
+            return {
+              id: s.id,
+              name: title || '服务项目',
+              price: s.price || '',
+              image: listImageFromHome3(title, images.svcTidyCloset)
+            };
+          });
+        }
+      } catch (e2) {
+        console.log('读取本地服务失败', e2);
+      }
     }
 
     try {

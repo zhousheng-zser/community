@@ -96,7 +96,8 @@
         "pages/worker-home/worker-home",
         "pages/worker-orders/worker-orders",
         "pages/worker-order-detail/worker-order-detail",
-        "pages/worker-mine/worker-mine"
+        "pages/worker-mine/worker-mine",
+        "pages/worker-services/worker-services"
       ]
     },
     {

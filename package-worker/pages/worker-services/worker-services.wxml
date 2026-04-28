@@ -1,0 +1,46 @@
+<view class="container">
+  <view class="page-header">
+    <text class="page-title">我的服务</text>
+    <text class="page-desc">管理您在个人主页展示的服务项目</text>
+  </view>
+
+  <view class="toolbar">
+    <view class="btn-primary" bindtap="toggleForm">{{showForm ? '取消' : '+ 添加服务'}}</view>
+  </view>
+
+  <view class="form-card" wx:if="{{showForm}}">
+    <view class="form-row">
+      <text class="form-label">服务名称</text>
+      <input class="form-input" placeholder="如：空调清洗" value="{{form.name}}" data-key="name" bindinput="onInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">价格</text>
+      <input class="form-input" placeholder="如：99元/次" value="{{form.price}}" data-key="price" bindinput="onInput" />
+    </view>
+    <view class="form-row">
+      <text class="form-label">简介</text>
+      <textarea class="form-textarea" placeholder="简单描述服务内容" value="{{form.desc}}" data-key="desc" bindinput="onInput" />
+    </view>
+    <view class="form-actions">
+      <view class="btn-save" bindtap="saveForm">保存</view>
+    </view>
+  </view>
+
+  <view class="service-list" wx:if="{{list.length > 0}}">
+    <view class="service-item" wx:for="{{list}}" wx:key="id">
+      <view class="service-info">
+        <text class="service-name">{{item.name}}</text>
+        <text class="service-price" wx:if="{{item.price}}">{{item.price}}</text>
+        <text class="service-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+      </view>
+      <view class="service-actions">
+        <text class="action-edit" bindtap="editItem" data-id="{{item.id}}">编辑</text>
+        <text class="action-delete" bindtap="deleteItem" data-id="{{item.id}}">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{list.length === 0}}">
+    <text class="empty-text">暂无服务，点击上方按钮添加</text>
+  </view>
+</view>

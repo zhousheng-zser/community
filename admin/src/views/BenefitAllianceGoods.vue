@@ -173,10 +173,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '../utils/request'
 
+const route = useRoute()
 const loading = ref(false)
 const saving = ref(false)
 const tableData = ref([])
@@ -349,6 +351,10 @@ function onDelete(row) {
 }
 
 onMounted(() => {
+  const qPlatform = route.query.platform
+  if (qPlatform) {
+    filterPlatform.value = String(qPlatform)
+  }
   loadList()
 })
 </script>

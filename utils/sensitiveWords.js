@@ -68,16 +68,16 @@ async function checkSensitiveTextAsync(text) {
  */
 function checkSensitiveText(text) {
   if (!text) return { hasSensitive: false, words: [] };
-  
-  const words = getSensitiveWords();
+
+  const words = SENSITIVE_WORDS;
   const found = [];
-  
+
   for (const word of words) {
     if (text.includes(word)) {
       found.push(word);
     }
   }
-  
+
   return {
     hasSensitive: found.length > 0,
     words: found

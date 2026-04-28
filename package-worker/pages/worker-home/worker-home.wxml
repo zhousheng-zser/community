@@ -64,6 +64,16 @@
         </view>
         <text class="grid-btn-arrow">›</text>
       </view>
+      <view class="grid-btn" bindtap="goServices" wx:if="{{workerOk}}">
+        <view class="grid-btn-icon">
+          <image src="/img/home_categories/tidy.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">服务管理</text>
+          <text class="grid-btn-desc">上架与编辑服务项目</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
       <view class="grid-btn" bindtap="goJoin" wx:if="{{!workerOk}}">
         <view class="grid-btn-icon">
           <image src="/img/join_services/worker_join.png" mode="aspectFit"></image>

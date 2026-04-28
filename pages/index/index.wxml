@@ -631,10 +631,10 @@
       <text class="title">管家精选</text>
     </view>
     <view class="market-grid">
-      <navigator class="market-item" wx:for="{{marketList}}" wx:key="name" url="../goods-detail/goods-detail?id={{item.id}}">
+      <navigator class="market-item" wx:for="{{marketList}}" wx:key="id" url="../goods-detail/goods-detail?id={{item.id}}">
         <image src="{{item.image}}" mode="aspectFill"></image>
         <text class="name">{{item.name}}</text>
-        <text class="price">￥{{item.price}}/瓶</text>
+        <text class="price" wx:if="{{item.price}}">￥{{item.price}}</text>
       </navigator>
     </view>
   </view>

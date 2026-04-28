@@ -27,8 +27,7 @@
           <image class="chat-img" mode="widthFix" wx:if="{{item.msg_type === 'image'}}" src="{{item.content}}"></image>
           <view class="audio-bubble" wx:if="{{item.msg_type === 'audio'}}" bindtap="playAudio" data-url="{{item.content}}">▶ 语音</view>
         </view>
-        <image class="avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80"></image>
-        <!-- 实际项目中获取自己的真实头像，这里用固定占位 -->
+        <image class="avatar" src="{{myAvatar || '/img/placeholders/default-avatar.png'}}"></image>
       </view>
 
     </view>
