@@ -6,6 +6,9 @@
         <el-option label="拼多多" value="pdd" />
         <el-option label="淘宝" value="taobao" />
         <el-option label="美团" value="meituan" />
+        <el-option label="闪购" value="shangou" />
+        <el-option label="社群" value="shequn" />
+        <el-option label="推销" value="tuixiao" />
         <el-option label="品牌餐饮" value="brand" />
       </el-select>
       <el-select v-model="filterStatus" placeholder="全部状态" clearable style="width: 120px" @change="loadList">
@@ -94,6 +97,9 @@
             <el-option label="拼多多" value="pdd" />
             <el-option label="淘宝" value="taobao" />
             <el-option label="美团" value="meituan" />
+            <el-option label="闪购" value="shangou" />
+            <el-option label="社群" value="shequn" />
+            <el-option label="推销" value="tuixiao" />
             <el-option label="品牌餐饮" value="brand" />
           </el-select>
         </el-form-item>
@@ -212,12 +218,12 @@ const rules = {
 }
 
 function platformLabel(p) {
-  const map = { jd: '京东', pdd: '拼多多', taobao: '淘宝', meituan: '美团', brand: '品牌' }
+  const map = { jd: '京东', pdd: '拼多多', taobao: '淘宝', meituan: '美团', shangou: '闪购', shequn: '社群', tuixiao: '推销', brand: '品牌' }
   return map[p] || p
 }
 
 function platformTagType(p) {
-  const map = { jd: 'danger', pdd: 'warning', taobao: 'primary', meituan: 'success', brand: '' }
+  const map = { jd: 'danger', pdd: 'warning', taobao: 'primary', meituan: 'success', shangou: 'info', shequn: 'info', tuixiao: 'info', brand: '' }
   return map[p] || ''
 }
 

@@ -11,7 +11,12 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(50),
       allowNull: false,
       defaultValue: 'jd',
-      comment: '平台：jd京东 pdd拼多多 taobao淘宝 meituan美团 brand品牌餐饮 shangou闪购 shequn社群 tuixiao推销',
+      comment: '平台：jd/pdd/taobao/meituan/shangou/shequn/tuixiao/brand',
+    },
+    scene: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      defaultValue: 'benefit_card',
     },
     title: {
       type: DataTypes.STRING(200),
@@ -47,31 +52,26 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(100),
       allowNull: true,
       defaultValue: '',
-      comment: '京东SKU',
     },
     goods_id: {
       type: DataTypes.STRING(100),
       allowNull: true,
       defaultValue: '',
-      comment: '拼多多/淘宝商品ID',
     },
     spread_url: {
       type: DataTypes.STRING(500),
       allowNull: true,
       defaultValue: '',
-      comment: '推广链接',
     },
     mini_path: {
       type: DataTypes.STRING(500),
       allowNull: true,
       defaultValue: '',
-      comment: '小程序跳转路径',
     },
     keyword: {
       type: DataTypes.STRING(100),
       allowNull: true,
       defaultValue: '',
-      comment: '品牌关键词，大牌餐饮用',
     },
     sort_order: {
       type: DataTypes.INTEGER,
@@ -82,12 +82,6 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('active', 'inactive'),
       allowNull: false,
       defaultValue: 'active',
-    },
-    scene: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      defaultValue: 'benefit_card',
-      comment: '使用场景',
     },
   }, {
     tableName: 'benefit_alliance_goods',
