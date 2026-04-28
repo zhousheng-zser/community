@@ -75,6 +75,7 @@ Page({
   normalizeOrder(o) {
     const detail = (o && typeof o === 'object') ? o : {};
     const order = detail.order && typeof detail.order === 'object' ? detail.order : detail;
+    const shop = detail.shop && typeof detail.shop === 'object' ? detail.shop : {};
     const rawItems = Array.isArray(detail.items)
       ? detail.items
       : (Array.isArray(order.items) ? order.items : (Array.isArray(detail.goods) ? detail.goods : []));
@@ -92,8 +93,8 @@ Page({
     });
     return {
       orderNo: order.orderNo || order.order_no || detail.orderNo || detail.order_no,
-      shopName: order.shopName || order.shop_name || detail.shopName || detail.shop_name,
-      shopId: order.shopId || order.shop_id || detail.shopId || detail.shop_id,
+      shopName: shop.name || order.shopName || order.shop_name || detail.shopName || detail.shop_name,
+      shopId: shop.id || order.shopId || order.shop_id || detail.shopId || detail.shop_id,
       status,
       statusText: statusObj.text,
       statusClass: statusObj.class,
