@@ -1,11 +1,5 @@
-const { sequelize, MarketShop, MarketGood, MarketGoodSku, MarketOrder, MarketOrderItem } = require('../models');
+const { sequelize, MarketShop, MarketGood, MarketOrder, MarketOrderItem } = require('../models');
 const { Op } = require('sequelize');
-const {
-  resolveSkuId,
-  parseSpecs,
-  syncGoodStockFromSkus,
-  refreshPriceRangeForGood
-} = require('../utils/marketSku');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -45,13 +39,11 @@ function normalizeOrderItems(items) {
   for (const it of items) {
     if (!it || it.goods_id == null) continue;
     const gid = Number(it.goods_id);
-    const skuNum = resolveSkuId(it.sku_id);
     const q = Math.max(0, parseInt(it.quantity, 10) || 0);
     if (!q || !Number.isFinite(gid)) continue;
-    const key = skuNum != null ? `s:${skuNum}` : `g:${gid}`;
-    const prev = map.get(key) || { goods_id: gid, market_sku_id: skuNum, quantity: 0 };
+    const key = `g:${gid}`;
+    const prev = map.get(key) || { goods_id: gid, quantity: 0 };
     prev.quantity += q;
-    if (skuNum != null) prev.market_sku_id = skuNum;
     map.set(key, prev);
   }
   return [...map.values()];
@@ -90,41 +82,18 @@ async function loadShopOrErr(shopId) {
 async function resolveLinesForShop(normItems, shopId, transaction) {
   const lines = [];
   for (const it of normItems) {
-    let sku = null;
-    let good = null;
-    if (it.market_sku_id != null) {
-      sku = await MarketGoodSku.findOne({
-        where: { id: it.market_sku_id, status: 'active' },
-        include: [{ model: MarketGood, as: 'good', required: true }],
-        transaction
-      });
-      if (!sku || !sku.good || sku.good.shop_id !== shopId || sku.good.status !== 'on_sale' || sku.good.id !== it.goods_id) {
-        return { err: { code: 20011, msg: 'SKU 不存在或已下架' } };
-      }
-      good = sku.good;
-    } else {
-      good = await MarketGood.findOne({
-        where: { id: it.goods_id, shop_id: shopId, status: 'on_sale' },
-        transaction
-      });
-      if (!good) return { err: { code: 20011, msg: '商品不存在或已下架' } };
-      const skus = await MarketGoodSku.findAll({
-        where: { goods_id: good.id, status: 'active' },
-        transaction
-      });
-      if (skus.length !== 1) {
-        return { err: { code: 20011, msg: '请选择规格 sku_id' } };
-      }
-      sku = skus[0];
-    }
+    const good = await MarketGood.findOne({
+      where: { id: it.goods_id, shop_id: shopId, status: 'on_sale' },
+      transaction
+    });
+    if (!good) return { err: { code: 20011, msg: '商品不存在或已下架' } };
     lines.push({
       goods_id: good.id,
-      market_sku_id: sku.id,
+      market_sku_id: null,
       quantity: it.quantity,
-      unitPrice: Number(sku.price),
-      specs: parseSpecs(sku.specs),
-      good,
-      sku
+      unitPrice: Number(good.price),
+      specs: [],
+      good
     });
   }
   return { lines };
@@ -175,7 +144,7 @@ exports.preview = async (req, res) => {
         return bizError(res, e2.code, e2.msg);
       }
       for (const ln of lines) {
-        if (ln.sku.stock < ln.quantity) {
+        if (Number(ln.good.stock || 0) < ln.quantity) {
           await t.rollback();
           return bizError(res, 20012, `库存不足：${ln.good.name}`);
         }
@@ -243,19 +212,14 @@ exports.create = async (req, res) => {
 
     for (const ln of lines) {
       const q = ln.quantity;
-      const [affected] = await MarketGoodSku.update(
+      const [affected] = await MarketGood.update(
         { stock: sequelize.literal(`stock - ${q}`) },
-        { where: { id: ln.sku.id, stock: { [Op.gte]: q }, status: 'active' }, transaction: t }
+        { where: { id: ln.goods_id, stock: { [Op.gte]: q }, status: 'on_sale' }, transaction: t }
       );
       if (!affected) {
         await t.rollback();
         return bizError(res, 20012, `库存不足：${ln.good.name}`);
       }
-    }
-
-    for (const ln of lines) {
-      await syncGoodStockFromSkus(ln.goods_id, t);
-      await refreshPriceRangeForGood(ln.goods_id, t);
     }
 
     const amounts = calcAmountsFromLines(lines, shop.delivery_fee, 0);
@@ -430,19 +394,10 @@ exports.cancel = async (req, res) => {
     const items = await MarketOrderItem.findAll({ where: { order_no: order.order_no }, transaction: t });
 
     for (const it of items) {
-      if (it.market_sku_id) {
-        await MarketGoodSku.update(
-          { stock: sequelize.literal(`stock + ${it.quantity}`) },
-          { where: { id: it.market_sku_id }, transaction: t }
-        );
-        await syncGoodStockFromSkus(it.goods_id, t);
-        await refreshPriceRangeForGood(it.goods_id, t);
-      } else {
-        await MarketGood.update(
-          { stock: sequelize.literal(`stock + ${it.quantity}`) },
-          { where: { id: it.goods_id }, transaction: t }
-        );
-      }
+      await MarketGood.update(
+        { stock: sequelize.literal(`stock + ${it.quantity}`) },
+        { where: { id: it.goods_id }, transaction: t }
+      );
     }
 
     order.order_status = 'cancelled';

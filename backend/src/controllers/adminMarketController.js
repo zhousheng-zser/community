@@ -6,7 +6,6 @@ const {
     MarketPayTransaction,
     MarketShop,
     MarketGood,
-    MarketGoodSku,
     MarketApplication,
     MarketShopReview,
     ServiceProviderApplication,
@@ -16,7 +15,6 @@ const {
     ApprovalRecord,
     sequelize
 } = require('../models');
-const { refreshPriceRangeForGood } = require('../utils/marketSku');
 const { logAdminAction } = require('./adminAuditHelper');
 
 function hashSpPortalPassword(raw) {
@@ -271,10 +269,6 @@ exports.deleteShopCascade = async (req, res) => {
         const goodsIds = goodsRows.map(item => item.id);
 
         if (goodsIds.length > 0) {
-            await MarketGoodSku.destroy({
-                where: { goods_id: { [Op.in]: goodsIds } },
-                transaction: tx
-            });
             await MarketGood.destroy({
                 where: { id: { [Op.in]: goodsIds } },
                 transaction: tx
@@ -338,14 +332,6 @@ exports.createGood = async (req, res) => {
         const body = { shop_id: b.shop_id, goods_no: genGoodsNo(b.shop_id), category_key: b.category_key, name: b.name, price: b.price };
         goodWritableFields.forEach(f => { if (b[f] !== undefined && !['category_key', 'name', 'price'].includes(f)) body[f] = b[f]; });
         const row = await MarketGood.create(body);
-        await MarketGoodSku.create({
-            goods_id: row.id,
-            specs: [],
-            price: row.price,
-            stock: row.stock != null ? row.stock : 0,
-            status: 'active'
-        });
-        await refreshPriceRangeForGood(row.id, null);
         await logAdminAction(req, 'create_good', 'market_good', row.id, body);
         res.status(201).json({ message: '创建成功', data: row });
     } catch (e) {
@@ -360,16 +346,6 @@ exports.updateGood = async (req, res) => {
         const b = req.body || {};
         goodWritableFields.forEach(f => { if (b[f] !== undefined) row[f] = b[f]; });
         await row.save();
-        const skuCount = await MarketGoodSku.count({ where: { goods_id: row.id, status: 'active' } });
-        if (skuCount === 1) {
-            const sku = await MarketGoodSku.findOne({ where: { goods_id: row.id, status: 'active' } });
-            if (sku) {
-                if (b.price !== undefined) sku.price = row.price;
-                if (b.stock !== undefined) sku.stock = row.stock;
-                await sku.save();
-                await refreshPriceRangeForGood(row.id, null);
-            }
-        }
         await logAdminAction(req, 'update_good', 'market_good', row.id, b);
         res.json({ message: '更新成功', data: row });
     } catch (e) {

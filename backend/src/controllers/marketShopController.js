@@ -1,7 +1,6 @@
 const { Op } = require('sequelize');
-const { MarketShop, MarketShopCategory, MarketGood, MarketGoodSku, MarketShopReview, sequelize } = require('../models');
+const { MarketShop, MarketShopCategory, MarketGood, MarketShopReview, sequelize } = require('../models');
 const { normalizeShopCategory } = require('../constants/marketCategoryMap');
-const { buildSkuTreeFromRows } = require('../utils/marketSku');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -255,24 +254,15 @@ exports.getGoodsDetail = async (req, res) => {
     if (!goods || goods.status !== 'on_sale') {
       return res.status(404).json({ code: 20011, msg: '商品不存在或已下架', data: null });
     }
-    const skus = await MarketGoodSku.findAll({
-      where: { goods_id: goods.id, status: 'active' },
-      order: [['id', 'ASC']]
-    });
     const shop = await MarketShop.findByPk(goods.shop_id);
-    const { sku_tree, sku_list } = buildSkuTreeFromRows(skus);
+    const sku_tree = [];
+    const sku_list = [];
     const j = enrichGoodJson(goods.toJSON());
     const imgs = [];
     if (j.main_image) imgs.push(j.main_image);
     if (Array.isArray(j.images)) imgs.push(...j.images);
     const main_images = [...new Set(imgs.filter(Boolean))];
     let price_range = j.price_range;
-    if (!price_range && sku_list.length) {
-      const prices = sku_list.map((s) => Number(s.price));
-      const a = Math.min(...prices).toFixed(2);
-      const b = Math.max(...prices).toFixed(2);
-      price_range = a === b ? a : `${a}-${b}`;
-    }
     if (!price_range) price_range = j.price != null ? String(j.price) : '0';
 
     res.json(
