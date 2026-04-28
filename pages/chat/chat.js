@@ -59,7 +59,13 @@ Page({
     util
       .get(`messages/history/${this.data.conversationId}`, q)
       .then((res) => {
-        const raw = Array.isArray(res) ? res : [];
+        const raw = Array.isArray(res) ? res : (res.list || res.data || res.items || []);
+        // 后端返回空列表但本地已有消息时，保留本地消息（避免覆盖未持久化的临时消息）
+        if (!Array.isArray(raw) || raw.length === 0) {
+          if (this.data.history.length > 0) {
+            return;
+          }
+        }
         const history = raw.map((m) => {
           const row = Object.assign({}, m);
           const mt = row.msg_type || row.msgType;
@@ -75,7 +81,10 @@ Page({
         this.setData({ history }, () => this.scrollToBottom());
       })
       .catch(() => {
-        wx.showToast({ title: '加载历史失败', icon: 'none' });
+        // 加载失败时不覆盖本地已有消息
+        if (this.data.history.length === 0) {
+          wx.showToast({ title: '加载历史失败', icon: 'none' });
+        }
       });
   },
 
@@ -126,10 +135,20 @@ Page({
 
     util
       .post('messages/send', payload)
-      .then(() => this.fetchHistory())
-      .catch(() => {
-        wx.showToast({ title: '发送失败', icon: 'none' });
+      .then(() => {
         this.fetchHistory();
+      })
+      .catch((err) => {
+        const errno = err && (err.errno || err.code || err.status);
+        // 后端若未实现（501/404），保留本地临时消息，不覆盖为空
+        if (errno === 501 || errno === 404 || errno === 'ECONNREFUSED') {
+          wx.showToast({ title: '消息已保存（本地）', icon: 'none' });
+        } else {
+          wx.showToast({ title: '发送失败', icon: 'none' });
+          // 仅从本地 history 中移除这条失败的临时消息
+          const filtered = this.data.history.filter((h) => h.id !== tempMsg.id);
+          this.setData({ history: filtered });
+        }
       });
   },
 

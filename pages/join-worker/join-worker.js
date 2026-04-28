@@ -8,7 +8,7 @@ Page({
     submitting: false,
     communityList: [],
     communityIndex: -1,
-    industryList: ['家政保洁', '水电维修', '木工装修', '管道疏通', '家电维修', '搬运安装', '其他'],
+    industryList: ['整理收纳', '家修急事', '家电清洗', '开荒保洁', '除螨服务', '家具养护', '宝宝家事', '房屋修缮', '上门美业', '其他'],
     industryIndex: -1,
     educationList: ['初中及以下', '高中/中专', '大专', '本科', '硕士及以上'],
     educationIndex: -1,
@@ -157,8 +157,14 @@ Page({
         }
       });
 
-      await util.post('worker/apply', payload);
+      const res = await util.post('worker/apply', payload);
       wx.hideLoading();
+      // 提交成功后立即更新本地状态，避免用户返回"我的"页面后状态不同步
+      const app = getApp();
+      if (app.globalData.user) {
+        app.globalData.user.worker_status = 'pending';
+        app.globalData.user.workerStatus = 'pending';
+      }
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {

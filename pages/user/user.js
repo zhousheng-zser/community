@@ -92,7 +92,20 @@ Page({
     this.setData({ workbenchCollapsed: !this.data.workbenchCollapsed });
   },
 
-  goWorkerPortal() {
+  async goWorkerPortal() {
+    wx.showLoading({ title: '加载中', mask: true });
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const st = data.worker_status != null ? data.worker_status : data.workerStatus;
+        if (st != null) app.globalData.user.worker_status = st;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    wx.hideLoading();
+
     const user = app.globalData.user || {};
     if (!rolePortals.canUseWorkerPortal(user)) {
       const wStatus = user.worker_status || user.workerStatus;
@@ -106,7 +119,20 @@ Page({
     rolePortals.navigateToWorkerHome();
   },
 
-  goServiceProviderPortal() {
+  async goServiceProviderPortal() {
+    wx.showLoading({ title: '加载中', mask: true });
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const st = data.service_provider_status != null ? data.service_provider_status : data.serviceProviderStatus;
+        if (st != null) app.globalData.user.service_provider_status = st;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    wx.hideLoading();
+
     const user = app.globalData.user || {};
     if (rolePortals.canUseServiceProviderPortal(user) || rolePortals.canUseMerchantPortal(user)) {
       rolePortals.navigateToServiceProviderHome();
@@ -120,7 +146,20 @@ Page({
     }
   },
 
-  goMarketPortal() {
+  async goMarketPortal() {
+    wx.showLoading({ title: '加载中', mask: true });
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const st = data.merchant_status != null ? data.merchant_status : (data.merchantStatus || data.shop_status || data.shopStatus);
+        if (st != null) app.globalData.user.merchant_status = st;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    wx.hideLoading();
+
     const user = app.globalData.user || {};
     if (rolePortals.canUseMarketPortal(user)) {
       rolePortals.navigateToMarketHome();

@@ -175,6 +175,11 @@ Page({
 
       await util.post('market/merchant/apply', payload);
       wx.hideLoading();
+      const app = getApp();
+      if (app.globalData.user) {
+        app.globalData.user.merchant_status = 'pending';
+        app.globalData.user.merchantStatus = 'pending';
+      }
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
