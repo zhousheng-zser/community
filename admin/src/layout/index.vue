@@ -38,6 +38,10 @@
           <el-icon><Money /></el-icon>
           <span>佣金提现审核</span>
         </el-menu-item>
+        <el-menu-item index="/worker-applications">
+          <el-icon><User /></el-icon>
+          <span>技工入驻审核</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -72,7 +76,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount } from '@element-plus/icons-vue'
+import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()

@@ -12,6 +12,10 @@ Page({
     industryIndex: -1,
     educationList: ['初中及以下', '高中/中专', '大专', '本科', '硕士及以上'],
     educationIndex: -1,
+    showServiceForm: false,
+    editingServiceIdx: -1,
+    serviceForm: { name: '', price: '', desc: '' },
+    services: [],
     form: {
       avatar: '', realName: '', gender: '男', phone: '', hometown: '',
       idCard: '', address: '', inviteCode: '', education: '', workExp: '',
@@ -105,6 +109,65 @@ Page({
     this.setData({ ['form.' + e.currentTarget.dataset.key]: '' });
   },
 
+  // ===== 服务列表管理 =====
+  toggleServiceForm() {
+    this.setData({
+      showServiceForm: !this.data.showServiceForm,
+      editingServiceIdx: -1,
+      serviceForm: { name: '', price: '', desc: '' }
+    });
+  },
+
+  onServiceInput(e) {
+    const key = e.currentTarget.dataset.key;
+    this.setData({ ['serviceForm.' + key]: e.detail.value });
+  },
+
+  saveService() {
+    const { serviceForm, editingServiceIdx, services } = this.data;
+    if (!serviceForm.name.trim()) {
+      wx.showToast({ title: '请填写服务名称', icon: 'none' });
+      return;
+    }
+    const item = {
+      name: serviceForm.name.trim(),
+      price: serviceForm.price.trim(),
+      desc: serviceForm.desc.trim()
+    };
+    let next;
+    if (editingServiceIdx >= 0) {
+      next = services.map((s, i) => (i === editingServiceIdx ? item : s));
+    } else {
+      next = [...services, item];
+    }
+    this.setData({ services: next, showServiceForm: false, editingServiceIdx: -1, serviceForm: { name: '', price: '', desc: '' } });
+  },
+
+  editService(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const item = this.data.services[idx];
+    this.setData({
+      showServiceForm: true,
+      editingServiceIdx: idx,
+      serviceForm: { name: item.name, price: item.price, desc: item.desc || '' }
+    });
+  },
+
+  delService(e) {
+    const idx = e.currentTarget.dataset.idx;
+    wx.showModal({
+      title: '确认删除',
+      content: '删除该服务项目？',
+      success: (r) => {
+        if (r.confirm) {
+          const next = this.data.services.filter((_, i) => i !== idx);
+          this.setData({ services: next });
+        }
+      }
+    });
+  },
+
+
   async submit() {
     const { form, agreed, submitting } = this.data;
     if (submitting) return;
@@ -138,6 +201,7 @@ Page({
       certUrl = await uploadIfNeeded(certUrl);
 
       const certArr = certUrl ? [certUrl] : [];
+      const { services } = this.data;
       let payload = {
         name: form.realName,
         phone: form.phone,
@@ -147,7 +211,8 @@ Page({
         resume: form.resume || '',
         id_card_url: idCardUrl,
         work_photo_url: workPhotoUrl || '',
-        certificate_url: certArr
+        certificate_url: certArr,
+        services: services.length > 0 ? services : undefined
       };
 
       // 剔除所有空字符串或空数组属性，避免后端发生意外的序列化错误或默认值覆盖失败

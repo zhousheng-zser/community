@@ -4,6 +4,7 @@ const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
 const api = require('../../api/index.js');
 const balance = require('../../utils/balance.js');
+const localPrefs = require('../../utils/localPrefs.js');
 
 Page({
   data: {
@@ -214,6 +215,7 @@ Page({
 
   // 从服务端拉取用户完整资料（含余额）
   getProfile() {
+    const prevStatus = (app.globalData.user || {}).worker_status || (app.globalData.user || {}).workerStatus || '';
     api.user.getUserProfile().then((data) => {
       const cid = data.community_id != null ? data.community_id : data.communityId;
       if (app.globalData.user) {
@@ -228,6 +230,19 @@ Page({
         if (mobile != null) app.globalData.user.userMobile = mobile;
       }
       const user = app.globalData.user || {};
+      const newStatus = user.worker_status || user.workerStatus || '';
+      // 检测技工审核状态变更，推送系统通知
+      if (prevStatus === 'pending' && newStatus === 'approved') {
+        localPrefs.pushSystemNotice({
+          id: `worker_approved_${Date.now()}`,
+          title: '技工入驻审核通过',
+          content: '恭喜！您的技工入驻申请已通过审核，现在可以进入技工工作台开始接单了。',
+          time: new Date().toISOString()
+        });
+      } else if (prevStatus === 'pending' && newStatus === 'rejected') {
+        // 尝试获取驳回原因
+        this.fetchWorkerRejectReason();
+      }
       const balanceValue = balance.getDisplayBalance(balance.BALANCE_TYPES.USER);
       this.setData({
         balance: balanceValue,
@@ -236,6 +251,29 @@ Page({
       });
     }).catch(() => {
       this.setData({ balance: '0.00' });
+    });
+  },
+
+  // 获取技工申请驳回原因并推送通知
+  fetchWorkerRejectReason() {
+    util.get('worker/application/me').then((res) => {
+      const reason = res && res.data && res.data.reject_reason ? res.data.reject_reason : '';
+      const content = reason
+        ? `很遗憾，您的技工入驻申请未通过审核。\n驳回原因：${reason}\n请完善资料后重新提交。`
+        : '很遗憾，您的技工入驻申请未通过审核，请完善资料后重新提交。';
+      localPrefs.pushSystemNotice({
+        id: `worker_rejected_${Date.now()}`,
+        title: '技工入驻审核未通过',
+        content,
+        time: new Date().toISOString()
+      });
+    }).catch(() => {
+      localPrefs.pushSystemNotice({
+        id: `worker_rejected_${Date.now()}`,
+        title: '技工入驻审核未通过',
+        content: '很遗憾，您的技工入驻申请未通过审核，请完善资料后重新提交。',
+        time: new Date().toISOString()
+      });
     });
   },
 

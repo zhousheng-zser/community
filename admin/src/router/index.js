@@ -42,6 +42,12 @@ const routes = [
                 name: 'Finance',
                 component: () => import('../views/Finance.vue'),
                 meta: { title: '达人提现审核', icon: 'Money' }
+            },
+            {
+                path: 'worker-applications',
+                name: 'WorkerApplications',
+                component: () => import('../views/WorkerApplications.vue'),
+                meta: { title: '技工入驻审核', icon: 'User' }
             }
         ]
     }

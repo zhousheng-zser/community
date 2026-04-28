@@ -77,6 +77,52 @@
         <text class="form-arrow">›</text>
       </view>
     </picker>
+
+    <!-- 能提供的服务及价格 -->
+    <view class="service-list-section">
+      <view class="service-list-header">
+        <text class="form-label">能提供的服务及价格</text>
+        <text class="service-add-btn" bindtap="toggleServiceForm">+ 添加</text>
+      </view>
+      <view class="service-list" wx:if="{{services.length > 0}}">
+        <view class="service-item" wx:for="{{services}}" wx:key="index">
+          <view class="service-item-info">
+            <text class="service-item-name">{{item.name}}</text>
+            <text class="service-item-price" wx:if="{{item.price}}">{{item.price}}</text>
+            <text class="service-item-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+          </view>
+          <view class="service-item-actions">
+            <text class="service-edit" bindtap="editService" data-idx="{{index}}">编辑</text>
+            <text class="service-delete" bindtap="delService" data-idx="{{index}}">删除</text>
+          </view>
+        </view>
+      </view>
+      <view class="service-empty" wx:if="{{services.length === 0}}">
+        <text>请点击上方按钮添加您能提供的服务及价格</text>
+      </view>
+    </view>
+
+    <!-- 服务编辑弹窗 -->
+    <view class="service-form-mask" wx:if="{{showServiceForm}}" bindtap="toggleServiceForm"></view>
+    <view class="service-form-popup {{showServiceForm?'show':''}}">
+      <view class="service-form-title">{{editingServiceIdx >= 0 ? '编辑服务' : '添加服务'}}</view>
+      <view class="service-form-row">
+        <text class="service-form-label">服务名称</text>
+        <input class="service-form-input" placeholder="如：空调清洗" value="{{serviceForm.name}}" data-key="name" bindinput="onServiceInput"/>
+      </view>
+      <view class="service-form-row">
+        <text class="service-form-label">价格</text>
+        <input class="service-form-input" placeholder="如：99元/次" value="{{serviceForm.price}}" data-key="price" bindinput="onServiceInput"/>
+      </view>
+      <view class="service-form-row">
+        <text class="service-form-label">简介</text>
+        <textarea class="service-form-textarea" placeholder="简单描述服务内容" value="{{serviceForm.desc}}" data-key="desc" bindinput="onServiceInput" maxlength="100"></textarea>
+      </view>
+      <view class="service-form-actions">
+        <view class="service-form-btn cancel" bindtap="toggleServiceForm">取消</view>
+        <view class="service-form-btn save" bindtap="saveService">保存</view>
+      </view>
+    </view>
   </view>
 
   <!-- 个人履历 -->

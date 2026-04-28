@@ -22,8 +22,8 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res && typeof res.code === 'number' && res.code !== 200) {
-      return Promise.reject(new Error(res.message || '请求失败'))
+    if (res && typeof res.code === 'number' && res.code !== 200 && res.code !== 0) {
+      return Promise.reject(new Error(res.message || res.msg || '请求失败'))
     }
     return res
   },

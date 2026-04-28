@@ -254,6 +254,10 @@ Page({
       await util.post(path, body || {});
       wx.showToast({ title: '已提交', icon: 'success' });
       await this.load();
+      // 打卡成功后同步发送系统消息到聊天
+      if (path && path.includes('/check-in')) {
+        await this.sendCheckInMessageToChat();
+      }
     } catch (e) {
       const errno = e && (e.errno || e.code || e.status);
       const errmsg = (e && e.errmsg) || (e && e.message) || '失败';
@@ -264,6 +268,7 @@ Page({
           checkInDisplay: `已打卡 ${new Date().toLocaleString()}`,
           canCompleteService: true
         });
+        await this.sendCheckInMessageToChat();
         return;
       }
       if (path && path.includes('/complete') && (errno === 501 || errno === 404 || errno === 'ECONNREFUSED')) {
@@ -272,6 +277,31 @@ Page({
         return;
       }
       wx.showToast({ title: errmsg, icon: 'none' });
+    }
+  },
+
+  async sendCheckInMessageToChat() {
+    const { order, id } = this.data;
+    let cid = order.conversationId;
+    if (!cid) {
+      try {
+        const res = await util.post('neighbor-assist/conversations/ensure', { order_id: id });
+        cid = res && (res.conversation_id || res.id || res.conversationId);
+      } catch (e) {
+        cid = `order_${id}`;
+      }
+    }
+    if (!cid) return;
+    try {
+      const now = new Date();
+      const timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      await util.post('messages/send', {
+        conversationId: cid,
+        content: `【系统消息】接单邻居已于 ${timeStr} 到场打卡，开始为您提供服务。`,
+        msgType: 'text'
+      });
+    } catch (e) {
+      console.log('发送打卡系统消息失败', e);
     }
   },
 

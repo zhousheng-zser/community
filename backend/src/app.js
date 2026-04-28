@@ -10,6 +10,7 @@ const cors = require('cors');
 const path = require('path');
 
 const routes = require('./routes');
+const db = require('./models');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -52,9 +53,20 @@ app.use((err, req, res, next) => {
 
 // ── 启动 ───────────────────────────────────────────────────────────────────
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    console.log(`API base: http://localhost:${PORT}/api/v1`);
+  // 开发阶段自动同步模型（生产环境请使用 migrations）
+  const env = process.env.NODE_ENV || 'development';
+  db.sequelize.sync({ alter: env === 'development' }).then(() => {
+    console.log('[sequelize] Models synced');
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`API base: http://localhost:${PORT}/api/v1`);
+    });
+  }).catch((err) => {
+    console.error('[sequelize] Sync failed:', err.message);
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`API base: http://localhost:${PORT}/api/v1`);
+    });
   });
 }
 
