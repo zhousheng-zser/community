@@ -1,6 +1,8 @@
 <view class="detail-wrap">
   <view class="mock-banner" wx:if="{{isMock}}">演示模式 · 后端未返回时使用本地示例</view>
+
   <scroll-view class="detail-scroll" scroll-y="true">
+    <!-- 状态头部 -->
     <view class="detail-hero na-gradient">
       <view class="detail-hero-inner">
         <view class="detail-pill">{{order.statusText || '—'}}</view>
@@ -9,100 +11,155 @@
           <text class="detail-hero-no">单号 {{order.orderNo}}</text>
           <text class="detail-copy" bindtap="copyOrderNo">复制</text>
         </view>
-        <text class="detail-amount" wx:if="{{order.rewardText}}">悬赏 ¥{{order.rewardText}}</text>
-        <view class="pay-status-badge" wx:if="{{order.payStatus === 'unpaid'}}" style="display:inline-block;background:#fff3e6;color:#e67e22;padding:2px 10px;border-radius:10px;font-size:12px;margin-top:6px;">待支付</view>
-        <view class="pay-status-badge" wx:elif="{{order.payStatus === 'paid'}}" style="display:inline-block;background:#e8f5e9;color:#27ae60;padding:2px 10px;border-radius:10px;font-size:12px;margin-top:6px;">已支付</view>
+        <view class="detail-amount-row" wx:if="{{order.rewardText}}">
+          <text class="detail-amount-label">悬赏金额</text>
+          <text class="detail-amount">¥{{order.rewardText}}</text>
+        </view>
+        <view class="pay-status-badge" wx:if="{{order.payStatus === 'unpaid'}}">待支付</view>
+        <view class="pay-status-badge paid" wx:elif="{{order.payStatus === 'paid'}}">已支付</view>
       </view>
     </view>
 
     <view class="detail-sheet">
+      <!-- 需求信息 -->
       <view class="sheet-section">
-        <view class="sheet-head"><text class="sheet-title">需求信息</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">需求信息</text>
+        </view>
         <view class="sheet-body">
-          <view class="kv" wx:if="{{order.category}}"><text class="k">服务类型</text><text class="v">{{order.category}}</text></view>
-          <view class="kv" wx:if="{{order.serviceTime}}"><text class="k">期望时间</text><text class="v">{{order.serviceTime}}</text></view>
-          <view class="kv" wx:if="{{order.contactPhone}}"><text class="k">联系电话</text><text class="v">{{order.contactPhoneDisplay || order.contactPhone}}</text></view>
-          <view class="kv"><text class="k">备注</text><text class="v multiline">{{order.desc || '—'}}</text></view>
+          <view class="kv" wx:if="{{order.category}}">
+            <text class="k">服务类型</text>
+            <view class="v-tag"><text class="tag">{{order.category}}</text></view>
+          </view>
+          <view class="kv" wx:if="{{order.serviceTime}}">
+            <text class="k">期望时间</text>
+            <text class="v">{{order.serviceTime}}</text>
+          </view>
+          <view class="kv" wx:if="{{order.contactPhone}}">
+            <text class="k">联系电话</text>
+            <text class="v">{{order.contactPhoneDisplay || order.contactPhone}}</text>
+          </view>
+          <view class="kv">
+            <text class="k">备注</text>
+            <text class="v multiline">{{order.desc || '—'}}</text>
+          </view>
         </view>
       </view>
 
+      <!-- 地址 -->
       <view class="sheet-section">
-        <view class="sheet-head"><text class="sheet-title">地址</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">地址信息</text>
+        </view>
         <view class="sheet-body">
-          <view class="addr-row" wx:if="{{order.pickupAddress || order.deliveryAddress}}">
-            <view class="addr-dot pickup">取</view>
-            <text class="addr-text pickup-addr">{{order.pickupAddress || order.address || '—'}}</text>
+          <view class="addr-block" wx:if="{{order.pickupAddress || order.deliveryAddress}}">
+            <view class="addr-item">
+              <view class="addr-dot pickup">取</view>
+              <view class="addr-info">
+                <text class="addr-label">取货地址</text>
+                <text class="addr-text">{{order.pickupAddress || order.address || '—'}}</text>
+              </view>
+            </view>
+            <view class="addr-arrow"></view>
+            <view class="addr-item">
+              <view class="addr-dot delivery">送</view>
+              <view class="addr-info">
+                <text class="addr-label">送货地址</text>
+                <text class="addr-text">{{order.deliveryAddress || order.address || '—'}}</text>
+              </view>
+            </view>
           </view>
-          <view class="addr-row" wx:if="{{order.pickupAddress || order.deliveryAddress}}">
-            <view class="addr-dot delivery">送</view>
-            <text class="addr-text delivery-addr">{{order.deliveryAddress || order.address || '—'}}</text>
+
+          <view class="addr-block single" wx:elif="{{order.address}}">
+            <view class="addr-item">
+              <view class="addr-dot location">📍</view>
+              <view class="addr-info">
+                <text class="addr-label">服务地址</text>
+                <text class="addr-text">{{order.address}}</text>
+              </view>
+            </view>
           </view>
-          <text class="addr-text" wx:elif="{{order.address}}">{{order.address}}</text>
+
           <view class="btn-row-2">
-            <button class="sheet-btn ghost" bindtap="copyAddress">复制地址</button>
+            <button class="sheet-btn ghost" bindtap="copyAddress">📋 复制地址</button>
+            <button class="sheet-btn ghost" bindtap="openNav" wx:if="{{order.lat != null}}">🧭 导航</button>
           </view>
         </view>
       </view>
 
+      <!-- 对方信息 -->
       <view class="sheet-section" wx:if="{{order.peerName}}">
-        <view class="sheet-head"><text class="sheet-title">{{peerLabel}}</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">{{peerLabel}}</text>
+        </view>
         <view class="sheet-body">
-          <view class="kv"><text class="k">称呼</text><text class="v">{{order.peerName}}</text></view>
-          <view class="kv"><text class="k">手机</text><text class="v">{{order.peerPhoneDisplay || '—'}}</text></view>
-          <button class="call-big" bindtap="callPeer" wx:if="{{order.peerPhoneRaw}}">拨打电话</button>
+          <view class="peer-card">
+            <view class="peer-avatar">👤</view>
+            <view class="peer-info">
+              <text class="peer-name">{{order.peerName}}</text>
+              <text class="peer-phone">{{order.peerPhoneDisplay || '—'}}</text>
+            </view>
+          </view>
+          <button class="call-big" bindtap="callPeer" wx:if="{{order.peerPhoneRaw}}">📞 拨打电话</button>
         </view>
       </view>
 
+      <!-- 费用到账 -->
       <view class="sheet-section" wx:if="{{showFundsReceived}}">
-        <view class="sheet-head"><text class="sheet-title">费用到账</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">💰 费用到账</text>
+        </view>
         <view class="sheet-body">
-          <view class="kv"><text class="k">悬赏金额</text><text class="v" style="color:#27ae60;font-weight:bold;">¥{{order.rewardText}}</text></view>
-          <view class="kv"><text class="k">状态</text><text class="v" style="color:#27ae60;">已到账</text></view>
+          <view class="kv">
+            <text class="k">悬赏金额</text>
+            <text class="v highlight">¥{{order.rewardText}}</text>
+          </view>
+          <view class="kv">
+            <text class="k">到账状态</text>
+            <text class="v success">✅ 已到账</text>
+          </view>
         </view>
       </view>
 
+      <!-- 服务执行（接单方） -->
       <view class="sheet-section" wx:if="{{myRole === 'helper' && showServeBlock}}">
-        <view class="sheet-head"><text class="sheet-title">服务执行（接单方）</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">🔧 服务执行</text>
+          <text class="sheet-sub">接单方</text>
+        </view>
         <view class="sheet-body">
           <text class="serve-hint">到达服务地点附近后请先打卡，完成后提交「服务完成」等待发布人确认。</text>
           <view class="serve-item">
-            <text class="serve-item-title">到场打卡</text>
+            <text class="serve-item-title">📍 到场打卡</text>
             <text class="serve-item-desc" wx:if="{{checkInDisplay}}">{{checkInDisplay}}</text>
             <button class="sheet-btn block primary" bindtap="checkIn" disabled="{{checking}}" loading="{{checking}}">
               {{checking ? '定位中…' : '到场打卡'}}
             </button>
           </view>
-          <button
-            class="sheet-btn block ghost"
-            bindtap="completeService"
-            disabled="{{!canCompleteService}}"
-            wx:if="{{bucket === 'in_service'}}"
-          >提交服务完成</button>
+          <button class="sheet-btn block ghost" bindtap="completeService" disabled="{{!canCompleteService}}" wx:if="{{bucket === 'in_service'}}">✅ 提交服务完成</button>
         </view>
       </view>
 
+      <!-- 发布人操作 -->
       <view class="sheet-section" wx:if="{{myRole === 'publisher'}}">
-        <view class="sheet-head"><text class="sheet-title">发布人操作</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">📝 发布人操作</text>
+        </view>
         <view class="sheet-body">
-          <button
-            class="sheet-btn block primary"
-            bindtap="confirmDone"
-            wx:if="{{bucket === 'pending_confirm'}}"
-          >确认订单完成</button>
-          <button
-            class="sheet-btn block ghost"
-            bindtap="goReview"
-            wx:if="{{bucket === 'completed' && !reviewed}}"
-          >去评价</button>
-          <button class="sheet-btn block ghost" bindtap="openComplaint">投诉 / 纠纷</button>
+          <button class="sheet-btn block primary" bindtap="confirmDone" wx:if="{{bucket === 'pending_confirm'}}">✅ 确认订单完成</button>
+          <button class="sheet-btn block ghost" bindtap="goReview" wx:if="{{bucket === 'completed' && !reviewed}}">⭐ 去评价</button>
+          <button class="sheet-btn block ghost" bindtap="openComplaint">⚠️ 投诉 / 纠纷</button>
         </view>
       </view>
 
+      <!-- 沟通 -->
       <view class="sheet-section">
-        <view class="sheet-head"><text class="sheet-title">沟通</text></view>
+        <view class="sheet-head">
+          <text class="sheet-title">💬 沟通</text>
+        </view>
         <view class="sheet-body">
           <view class="waiting-text" wx:if="{{!order.peerName && !canCommunityGrab && myRole === 'publisher'}}">待接单</view>
-          <button class="sheet-btn block primary chat-btn" bindtap="openChat" wx:elif="{{order.peerName}}">文字 / 语音聊天</button>
+          <button class="sheet-btn block primary chat-btn" bindtap="openChat" wx:elif="{{order.peerName}}">💬 文字 / 语音聊天</button>
           <view class="waiting-text" wx:else>待接单</view>
         </view>
       </view>
@@ -110,26 +167,22 @@
   </scroll-view>
 
   <!-- 接单按钮 -->
-<view class="bottom-bar" wx:if="{{(myRole === 'helper' && bucket === 'pending_accept') || canAcceptOrder}}">
+  <view class="bottom-bar" wx:if="{{(myRole === 'helper' && bucket === 'pending_accept') || canAcceptOrder}}">
     <button class="bar-btn primary" bindtap="acceptOrder">接单</button>
   </view>
 
   <!-- 社区成员接单按钮 -->
-<view class="bottom-bar" wx:elif="{{canCommunityGrab}}">
+  <view class="bottom-bar" wx:elif="{{canCommunityGrab}}">
     <button class="bar-btn primary" bindtap="communityGrabOrder">邻里接单</button>
   </view>
 
-  <!-- 同社区成员接单（非发布人非接单人，且订单已支付待接单） -->
-<view class="bottom-bar" wx:elif="{{canCommunityGrab}}">
-    <button class="bar-btn primary" bindtap="communityGrab">接单</button>
-  </view>
-
   <!-- 发布人-待支付时显示支付和取消按钮 -->
-<view class="bottom-bar" wx:elif="{{canPay}}" style="display:flex;gap:12px;padding:12px 24px;">
-    <button class="bar-btn" bindtap="cancelOrder" style="flex:1;background:#fff;color:#e74c3c;border:1px solid #e74c3c;">取消订单</button>
-    <button class="bar-btn primary" bindtap="goPay" style="flex:2;">去支付</button>
+  <view class="bottom-bar multi" wx:elif="{{canPay}}">
+    <button class="bar-btn ghost" bindtap="cancelOrder">取消订单</button>
+    <button class="bar-btn primary" bindtap="goPay">去支付</button>
   </view>
 
+  <!-- 投诉弹窗 -->
   <view class="modal-mask" wx:if="{{complaintShow}}" catchtouchmove="noop">
     <view class="modal-box">
       <text class="modal-title">投诉 / 纠纷</text>
@@ -141,17 +194,12 @@
     </view>
   </view>
 
+  <!-- 评价弹窗 -->
   <view class="modal-mask" wx:if="{{reviewShow}}" catchtouchmove="noop">
     <view class="modal-box">
       <text class="modal-title">评价接单邻居</text>
       <view class="star-row">
-        <text
-          wx:for="{{[1,2,3,4,5]}}"
-          wx:key="*this"
-          class="star {{reviewScore >= item ? 'on' : ''}}"
-          bindtap="setReviewScore"
-          data-score="{{item}}"
-        >★</text>
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{reviewScore >= item ? 'on' : ''}}" bindtap="setReviewScore" data-score="{{item}}">★</text>
       </view>
       <textarea class="modal-ta" placeholder="选填评价内容" value="{{reviewText}}" bindinput="onReviewText" maxlength="300" />
       <view class="modal-actions">

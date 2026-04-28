@@ -422,8 +422,9 @@ Page({
         const res = await util.post('neighbor-assist/conversations/ensure', { order_id: id });
         cid = res && (res.conversation_id || res.id || res.conversationId);
       } catch (e) {
-        wx.showToast({ title: (e && e.errmsg) || '创建会话失败', icon: 'none' });
-        return;
+        // 后端若未实现 conversations/ensure，使用订单 ID 作为会话标识兜底
+        console.log('创建会话失败，使用订单ID作为会话ID', e);
+        cid = `order_${id}`;
       }
     }
     if (!cid) {

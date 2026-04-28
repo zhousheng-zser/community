@@ -1321,24 +1321,28 @@
 .fuka-goods-grid {
   display: flex;
   flex-wrap: wrap;
-  padding: 8rpx;
+  padding: 16rpx;
 }
 
 .fuka-goods-item {
   width: 50%;
   box-sizing: border-box;
-  padding: 8rpx;
+  padding: 10rpx;
+  display: flex;
+  flex-direction: column;
 }
 
 .fuka-goods-img-wrap {
   position: relative;
   width: 100%;
+  height: 210rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
 }
 
 .fuka-goods-img-wrap image {
   width: 100%;
-  height: 210rpx;
-  border-radius: 12rpx;
+  height: 100%;
   display: block;
 }
 
@@ -1355,14 +1359,20 @@
 }
 
 .fuka-goods-item .name {
-  display: block;
-  margin-top: 8rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 10rpx;
   font-size: 22rpx;
+  line-height: 1.35;
+  min-height: 60rpx;
 }
 
 .fuka-goods-item .price {
   display: block;
-  margin-top: 6rpx;
+  margin-top: 8rpx;
   color: #F97316;
 }
 

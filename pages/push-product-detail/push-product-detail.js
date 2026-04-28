@@ -328,7 +328,11 @@ Page({
   },
   handleBuyClick() {
     if (!this.data.shopAppId || this.data.shopAppId.startsWith('wx0000')) {
-      wx.showToast({ title: '当前商品暂不支持直接购买', icon: 'none' });
+      // 小店组件不可用，回退到标准商品详情购买页
+      wx.navigateTo({
+        url: `/pages/goods-detail/goods-detail?id=${this.data.productId}`
+      });
+      return;
     }
     this.setData({
       showStoreProduct: true

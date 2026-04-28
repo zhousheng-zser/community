@@ -61,6 +61,27 @@ Page({
     jdBanner: "",
     jdHeroTitle: "",
     jdHeroSubtitle: "",
+    /** 新增：美团 / 淘宝 / 闪购 / 社群 / 推销 */
+    mtGoods: [],
+    mtBanner: "",
+    mtHeroTitle: "",
+    mtHeroSubtitle: "",
+    tbGoods: [],
+    tbBanner: "",
+    tbHeroTitle: "",
+    tbHeroSubtitle: "",
+    sgGoods: [],
+    sgBanner: "",
+    sgHeroTitle: "",
+    sgHeroSubtitle: "",
+    sqGoods: [],
+    sqBanner: "",
+    sqHeroTitle: "",
+    sqHeroSubtitle: "",
+    txGoods: [],
+    txBanner: "",
+    txHeroTitle: "",
+    txHeroSubtitle: "",
     /** 大牌餐饮栏目：文案与搜索关键词，SKU 可在后台/本地清单后续挂载 */
     benefitBrandColumns: {
       kfc: {
@@ -956,6 +977,86 @@ Page({
       };
     }
 
+    // ===== 加载美团 / 淘宝 / 闪购 / 社群 / 推销 数据 =====
+    let mtGoods = [], tbGoods = [], sgGoods = [], sqGoods = [], txGoods = [];
+    let mtBanner = imgUrl(images.benefitJdAllianceHero);
+    let tbBanner = imgUrl(images.benefitJdAllianceHero);
+    let sgBanner = imgUrl(images.benefitJdAllianceHero);
+    let sqBanner = imgUrl(images.benefitJdAllianceHero);
+    let txBanner = imgUrl(images.benefitJdAllianceHero);
+    let mtHeroTitle = '', mtHeroSubtitle = '';
+    let tbHeroTitle = '', tbHeroSubtitle = '';
+    let sgHeroTitle = '', sgHeroSubtitle = '';
+    let sqHeroTitle = '', sqHeroSubtitle = '';
+    let txHeroTitle = '', txHeroSubtitle = '';
+
+    try {
+      const disp5 = await util.get('benefit-alliance/display', { scene: 'benefit_card' });
+      if (disp5 && disp5.meituan) {
+        if (disp5.meituan.image) mtBanner = imgUrl(disp5.meituan.image);
+        mtHeroTitle = disp5.meituan.title || '';
+        mtHeroSubtitle = disp5.meituan.subtitle || '';
+      }
+      if (disp5 && disp5.taobao) {
+        if (disp5.taobao.image) tbBanner = imgUrl(disp5.taobao.image);
+        tbHeroTitle = disp5.taobao.title || '';
+        tbHeroSubtitle = disp5.taobao.subtitle || '';
+      }
+      if (disp5 && disp5.shangou) {
+        if (disp5.shangou.image) sgBanner = imgUrl(disp5.shangou.image);
+        sgHeroTitle = disp5.shangou.title || '';
+        sgHeroSubtitle = disp5.shangou.subtitle || '';
+      }
+      if (disp5 && disp5.shequn) {
+        if (disp5.shequn.image) sqBanner = imgUrl(disp5.shequn.image);
+        sqHeroTitle = disp5.shequn.title || '';
+        sqHeroSubtitle = disp5.shequn.subtitle || '';
+      }
+      if (disp5 && disp5.tuixiao) {
+        if (disp5.tuixiao.image) txBanner = imgUrl(disp5.tuixiao.image);
+        txHeroTitle = disp5.tuixiao.title || '';
+        txHeroSubtitle = disp5.tuixiao.subtitle || '';
+      }
+    } catch (e) {
+      console.warn('[惠民卡] benefit-alliance/display(5platform) 失败', e && (e.errmsg || e.message || e));
+    }
+
+    const mapAllianceItem = (x) => ({
+      id: x.id || 0,
+      title: x.title || '',
+      subtitle: x.subtitle || '',
+      image: x.image ? imgUrl(x.image) : '',
+      price: x.price != null && x.price !== '' ? String(x.price) : '',
+      couponPrice: x.couponPrice || x.coupon_price || '',
+      rebateAmount: x.rebateAmount || x.rebate_amount || '',
+      spreadUrl: x.spreadUrl || x.spread_url || ''
+    });
+
+    try {
+      const mtRes = await util.get('benefit-alliance/goods', { platform: 'meituan', scene: 'benefit_card', limit: 8 });
+      mtGoods = pickAllianceList(mtRes).map(mapAllianceItem);
+    } catch (e) { console.warn('[惠民卡] meituan 加载失败', e); }
+
+    try {
+      const tbRes = await util.get('benefit-alliance/goods', { platform: 'taobao', scene: 'benefit_card', limit: 8 });
+      tbGoods = pickAllianceList(tbRes).map(mapAllianceItem);
+    } catch (e) { console.warn('[惠民卡] taobao 加载失败', e); }
+
+    try {
+      const sgRes = await util.get('benefit-alliance/goods', { platform: 'shangou', scene: 'benefit_card', limit: 8 });
+      sgGoods = pickAllianceList(sgRes).map(mapAllianceItem);
+    } catch (e) { console.warn('[惠民卡] shangou 加载失败', e); }
+
+    try {
+      const sqRes = await util.get('benefit-alliance/goods', { platform: 'shequn', scene: 'benefit_card', limit: 8 });
+      sqGoods = pickAllianceList(sqRes).map(mapAllianceItem);
+    } catch (e) { console.warn('[惠民卡] shequn 加载失败', e); }
+
+    try {
+      const txRes = await util.get('benefit-alliance/goods', { platform: 'tuixiao', scene: 'benefit_card', limit: 8 });
+      txGoods = pickAllianceList(txRes).map(mapAllianceItem);
+    } catch (e) { console.warn('[惠民卡] tuixiao 加载失败', e); }
+
     try {
       const pq = { limit: 8 };
       if (communityId != null && communityId !== '') pq.community_id = communityId;
@@ -1051,6 +1152,26 @@ Page({
       pddHeroTitle,
       pddHeroSubtitle,
       pddEntry,
+      mtGoods,
+      mtBanner,
+      mtHeroTitle,
+      mtHeroSubtitle,
+      tbGoods,
+      tbBanner,
+      tbHeroTitle,
+      tbHeroSubtitle,
+      sgGoods,
+      sgBanner,
+      sgHeroTitle,
+      sgHeroSubtitle,
+      sqGoods,
+      sqBanner,
+      sqHeroTitle,
+      sqHeroSubtitle,
+      txGoods,
+      txBanner,
+      txHeroTitle,
+      txHeroSubtitle,
       assistMarqueeList,
       marketTopCats,
       marketFilters: [
@@ -1127,6 +1248,10 @@ Page({
       data: u,
       success: () => wx.showToast({ title: toastTitle || '已复制', icon: 'none' })
     });
+  },
+  handleCopyBenefitLink(e) {
+    const url = e.currentTarget.dataset.url;
+    this.copyBenefitLink(url, '推广链接已复制');
   },
 
   /**

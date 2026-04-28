@@ -63,8 +63,6 @@ Page({
       });
       // 加载邀请人数
       this.loadInviteeCount();
-      // 绘制邀请码canvas
-      this.drawInviteCode(data.invite_code || '');
     } catch (e) {
       console.error('获取邀请码失败:', e);
       wx.showToast({ title: '获取邀请码失败', icon: 'none' });

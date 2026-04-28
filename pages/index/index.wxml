@@ -250,36 +250,172 @@
         </view>
       </view>
 
-      <!-- ===== 淘宝 ===== -->
-      <view class="benefit-section">
-        <view class="card benefit-brand-hero benefit-brand-hero--tb">
-          <text class="benefit-brand-hero-title">淘宝联盟</text>
-          <text class="benefit-brand-hero-sub">淘口令 · 优惠券 · 返利推广（即将上线）</text>
-        </view>
-        <view class="card section-card">
-          <view class="section-head">
-            <text class="title">淘宝精选</text>
-          </view>
-          <view class="benefit-placeholder">
-            <text class="benefit-placeholder-text">🛒 淘宝联盟商品接入中，敬请期待</text>
-            <text class="benefit-placeholder-sub">支持淘口令复制、优惠券领取、订单跟踪返利</text>
-          </view>
-        </view>
-      </view>
-
       <!-- ===== 美团 ===== -->
-      <view class="benefit-section">
-        <view class="card benefit-brand-hero benefit-brand-hero--mt">
-          <text class="benefit-brand-hero-title">美团联盟</text>
-          <text class="benefit-brand-hero-sub">外卖红包 · 到店优惠 · 团购返利（即将上线）</text>
+      <view class="benefit-section" wx:if="{{mtGoods.length > 0}}">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{mtBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{mtHeroTitle || '惠民卡 · 美团联盟'}}</text>
+            <text class="benefit-hero-sub">{{mtHeroSubtitle || '外卖红包 · 到店优惠 · 团购返利'}}</text>
+          </view>
         </view>
         <view class="card section-card">
           <view class="section-head">
             <text class="title">美团精选</text>
           </view>
-          <view class="benefit-placeholder">
-            <text class="benefit-placeholder-text">🍔 美团联盟商品接入中，敬请期待</text>
-            <text class="benefit-placeholder-sub">支持外卖红包、到店团购、酒店旅游优惠</text>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{mtGoods}}" wx:key="id" bindtap="handleCopyBenefitLink" data-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+                <view wx:else style="height:210rpx;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12rpx;">
+                  <text style="color:#999;font-size:24rpx;">美团活动</text>
+                </view>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:elif="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>{{item.subtitle || '点击复制推广链接'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 淘宝 ===== -->
+      <view class="benefit-section" wx:if="{{tbGoods.length > 0}}">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{tbBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{tbHeroTitle || '惠民卡 · 淘宝联盟'}}</text>
+            <text class="benefit-hero-sub">{{tbHeroSubtitle || '淘口令 · 优惠券 · 返利推广'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">淘宝精选</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{tbGoods}}" wx:key="id" bindtap="handleCopyBenefitLink" data-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+                <view wx:else style="height:210rpx;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12rpx;">
+                  <text style="color:#999;font-size:24rpx;">淘宝好物</text>
+                </view>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:elif="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>{{item.subtitle || '点击复制淘口令'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 闪购 ===== -->
+      <view class="benefit-section" wx:if="{{sgGoods.length > 0}}">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{sgBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{sgHeroTitle || '惠民卡 · 闪购专区'}}</text>
+            <text class="benefit-hero-sub">{{sgHeroSubtitle || '饿了么红包 · 淘宝闪购 · 超低价爆品'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">闪购精选</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{sgGoods}}" wx:key="id" bindtap="handleCopyBenefitLink" data-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+                <view wx:else style="height:210rpx;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12rpx;">
+                  <text style="color:#999;font-size:24rpx;">闪购活动</text>
+                </view>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:elif="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>{{item.subtitle || '点击复制推广链接'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 社群 ===== -->
+      <view class="benefit-section" wx:if="{{sqGoods.length > 0}}">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{sqBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{sqHeroTitle || '惠民卡 · 社群福利'}}</text>
+            <text class="benefit-hero-sub">{{sqHeroSubtitle || '社群专享 · 9.9元吃饱喝足'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">社群专享</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{sqGoods}}" wx:key="id" bindtap="handleCopyBenefitLink" data-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+                <view wx:else style="height:210rpx;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12rpx;">
+                  <text style="color:#999;font-size:24rpx;">社群福利</text>
+                </view>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:elif="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>{{item.subtitle || '点击复制推广链接'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- ===== 推销 ===== -->
+      <view class="benefit-section" wx:if="{{txGoods.length > 0}}">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{txBanner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{txHeroTitle || '惠民卡 · 精选推销'}}</text>
+            <text class="benefit-hero-sub">{{txHeroSubtitle || '一元外卖 · 夏日山海 · 会员权益'}}</text>
+          </view>
+        </view>
+        <view class="card section-card">
+          <view class="section-head">
+            <text class="title">精选推销</text>
+          </view>
+          <view class="fuka-goods-grid">
+            <view class="fuka-goods-item" wx:for="{{txGoods}}" wx:key="id" bindtap="handleCopyBenefitLink" data-url="{{item.spreadUrl}}">
+              <view class="fuka-goods-img-wrap">
+                <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+                <view wx:else style="height:210rpx;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:12rpx;">
+                  <text style="color:#999;font-size:24rpx;">精选活动</text>
+                </view>
+                <text class="comm" wx:if="{{item.rebateAmount}}">返￥{{item.rebateAmount}}</text>
+              </view>
+              <text class="name">{{item.title}}</text>
+              <view class="pdd-price-block" wx:if="{{item.couponPrice}}">
+                <text class="price pdd-coupon">券后￥{{item.couponPrice}}</text>
+                <text class="price pdd-orig">￥{{item.price}}</text>
+              </view>
+              <text class="price" wx:elif="{{item.price}}">￥{{item.price}}</text>
+              <text class="price jd-price-hint" wx:else>{{item.subtitle || '点击复制推广链接'}}</text>
+            </view>
           </view>
         </view>
       </view>

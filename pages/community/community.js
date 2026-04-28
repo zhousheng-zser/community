@@ -116,7 +116,7 @@ Page({
   },
   fetchAssistFeed() {
     util
-      .get('neighbor-assist/orders/public', { page: 1, limit: 12 })
+      .get('neighbor-assist/orders/community-pool', { page: 1, limit: 12 })
       .then((res) => {
         const list = res.list || res.items || res.data || res;
         const arr = Array.isArray(list) ? list : [];
@@ -128,13 +128,26 @@ Page({
         this.setData({ assistCards });
       })
       .catch(() => {
-        this.setData({
-          assistCards: [
-            { id: 'demo1', summary: '【演示】代取快递：菜鸟至 3 栋', status: '待接单' },
-            { id: 'demo2', summary: '【演示】帮忙遛狗 30 分钟', status: '待接单' }
-          ]
-        });
+        this.setData({ assistCards: [] });
       });
+  },
+
+  goPostDetail(e) {
+    const post = this.data.posts[e.currentTarget.dataset.index];
+    if (!post) return;
+    const assistOrderId = post.assist_order_id || post.order_id || post.assistOrderId;
+    if (assistOrderId) {
+      wx.navigateTo({
+        url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${assistOrderId}`
+      });
+      return;
+    }
+    wx.showModal({
+      title: '帖子详情',
+      content: post.content || '',
+      showCancel: false,
+      confirmText: '知道了'
+    });
   },
 
   goAssistDetail(e) {

@@ -1,32 +1,39 @@
 <view class='invite-page'>
+  <!-- 顶部信息区 -->
+  <view class='header-bg'></view>
+
   <!-- 用户信息 -->
   <view class='user-card'>
     <image class='avatar' src='{{userAvatar || "/img/placeholders/default-avatar.png"}}' mode='aspectFill'></image>
     <text class='nickname'>{{userNickname}}</text>
+    <text class='sub-title'>邀请好友加入社区</text>
   </view>
 
-  <!-- 二维码卡片 -->
-  <view class='qr-card'>
-    <text class='qr-title'>我的邀请码</text>
-    <view class='code-box' bindtap='copyInviteCode'>
-      <text class='invite-code'>{{inviteCode}}</text>
-      <text class='copy-hint'>点击复制</text>
+  <!-- 邀请码主卡片 -->
+  <view class='main-card'>
+    <view class='card-inner'>
+      <text class='card-label'>我的邀请码</text>
+      <view class='code-display' bindtap='copyInviteCode'>
+        <text class='invite-code'>{{inviteCode}}</text>
+        <view class='copy-badge'>
+          <text class='copy-icon'>📋</text>
+          <text class='copy-text'>点击复制</text>
+        </view>
+      </view>
+      <view class='divider'></view>
+      <text class='hint'>分享给朋友，发送邀请码即可绑定</text>
     </view>
-    <view class='qr-image-wrap'>
-      <canvas type='2d' id='qr-canvas' class='qr-canvas' style='width:300rpx;height:300rpx;'></canvas>
-    </view>
-    <text class='share-hint'>分享给朋友扫码或发送邀请码即可绑定</text>
   </view>
 
-  <!-- 我的邀请 -->
-  <view class='invite-stats'>
+  <!-- 统计数据 -->
+  <view class='stats-card'>
     <view class='stat-item'>
       <text class='stat-num'>{{inviteeCount}}</text>
-      <text class='stat-label'>已邀请人数</text>
+      <text class='stat-label'>已邀请</text>
     </view>
     <view class='stat-divider'></view>
     <view class='stat-item'>
-      <text class='stat-num'>{{hasInviter ? "已绑定" : "未绑定"}}</text>
+      <text class='stat-num {{hasInviter ? "bound" : ""}}'>{{hasInviter ? "已绑定" : "未绑定"}}</text>
       <text class='stat-label'>邀请关系</text>
     </view>
   </view>
@@ -39,8 +46,9 @@
 
   <!-- 扫码绑定 -->
   <view class='scan-section' wx:if="{{!binded}}">
-    <view class='scan-btn-wrap'>
-      <button class='scan-btn' bindtap='scanQRCode'>📷 扫一扫绑定邀请人</button>
+    <view class='scan-btn' bindtap='scanQRCode'>
+      <text class='scan-icon'>📷</text>
+      <text>扫一扫绑定邀请人</text>
     </view>
     <view class='manual-input' bindtap='manualInput'>
       <text class='manual-text'>手动输入邀请码</text>
@@ -49,11 +57,17 @@
 
   <!-- 已绑定提示 -->
   <view class='binded-section' wx:if="{{binded}}">
-    <view class='binded-hint'>✅ 已绑定邀请人，无法重复绑定</view>
+    <view class='binded-hint'>
+      <text class='binded-icon'>✅</text>
+      <text>已绑定邀请人，无法重复绑定</text>
+    </view>
   </view>
 
   <!-- 分享按钮 -->
-  <button class='share-btn' open-type='share'>📤 分享给朋友</button>
+  <button class='share-btn' open-type='share'>
+    <text class='share-icon'>📤</text>
+    <text>分享给朋友</text>
+  </button>
 
   <!-- 加载状态 -->
   <view class='loading' wx:if="{{loading}}">
