@@ -49,6 +49,14 @@ app.use((req, res, next) => {
 // 静态文件目录映射到项目内 data/uploads/images 目录（兼容 Linux 部署）
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '..', 'data', 'uploads', 'images')));
+app.get('/img/placeholders/:name', (req, res) => {
+    // 测试环境兜底占位图，避免前端引用历史占位路径时报 500
+    const onePxPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Zx1cAAAAASUVORK5CYII=';
+    const imageBuffer = Buffer.from(onePxPng, 'base64');
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.status(200).send(imageBuffer);
+});
 
 // 基础测试路由
 app.get('/', (req, res) => {
@@ -113,14 +121,26 @@ const userController = require('./controllers/userController');
 app.get('/api/v1/acount/info', userController.getAccountInfo);
 app.get('/api/v1/wx/user/coupon/:id', userController.getUserCoupons);
 
-// 通用单文件上传接口
-const upload = require('./utils/upload');
-app.post('/api/v1/upload', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: '请上传文件' });
-    }
-    res.json({ url: `/uploads/${req.file.filename}` });
-});
+// 本地集市商家入驻图片上传接口（统一 JSON 返回）
+const { uploadMarketImage, getImageMeta } = require('./utils/marketUpload');
+function handleUpload(req, res) {
+    const { width, height } = getImageMeta(req.file.path);
+    return res.json({
+        code: 0,
+        msg: 'ok',
+        data: {
+            url: `/uploads/${req.file.filename}`,
+            size: req.file.size,
+            mime_type: req.file.mimetype,
+            width,
+            height
+        }
+    });
+}
+// 新路径
+app.post('/api/v1/upload', uploadMarketImage, handleUpload);
+// 兼容小程序历史路径，避免前端命中非 JSON 响应
+app.post('/upload', uploadMarketImage, handleUpload);
 
 
 const https = require('https');

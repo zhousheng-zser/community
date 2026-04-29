@@ -407,8 +407,43 @@ exports.updateMarketApplication = async (req, res) => {
         const fromStatus = row.status;
         row.status = status;
         await row.save();
+        let shop = null;
+        if (status === 'approved') {
+            shop = await MarketShop.findOne({
+                where: { name: row.shop_name, contact_phone: row.phone },
+                order: [['id', 'DESC']]
+            });
+            if (!shop) {
+                const placeList = Array.isArray(row.place_photo_url) ? row.place_photo_url : [];
+                shop = await MarketShop.create({
+                    shop_no: genShopNo(),
+                    name: row.shop_name,
+                    category: row.category,
+                    logo_url: row.logo_url || null,
+                    cover_url: row.background_url || null,
+                    notice: row.description || null,
+                    address: row.address || null,
+                    contact_name: row.contact_name || null,
+                    contact_phone: row.phone || null,
+                    facade_image: placeList[0] || null,
+                    interior_image: placeList[1] || null,
+                    license_image: row.license_url || null,
+                    is_open: 1,
+                    is_active: 1
+                });
+            } else {
+                const changed = {};
+                if (!shop.logo_url && row.logo_url) changed.logo_url = row.logo_url;
+                if (!shop.cover_url && row.background_url) changed.cover_url = row.background_url;
+                if (!shop.license_image && row.license_url) changed.license_image = row.license_url;
+                if (!shop.address && row.address) changed.address = row.address;
+                if (!shop.contact_name && row.contact_name) changed.contact_name = row.contact_name;
+                if (!shop.contact_phone && row.phone) changed.contact_phone = row.phone;
+                if (Object.keys(changed).length) await shop.update(changed);
+            }
+        }
         await writeApproval('market_application', row.id, fromStatus, status, (req.admin && req.admin.sub) || 'admin', note);
-        res.json({ message: '操作成功', data: row });
+        res.json({ message: '操作成功', data: { ...row.get({ plain: true }), shop_id: shop ? shop.id : null } });
     } catch (e) {
         console.error('admin updateMarketApplication:', e);
         res.status(500).json({ error: '操作失败' });

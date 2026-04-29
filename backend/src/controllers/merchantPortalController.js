@@ -8,14 +8,23 @@ const {
   MarketGood,
   MarketOrder,
   MarketOrderItem,
+  MarketApplication,
   User,
   sequelize,
   MarketPayTransaction,
-  ApprovalRecord
+  ApprovalRecord,
+  Conversation,
+  UserConversation,
+  Message
 } = require('../models');
 
 function hashPassword(raw) {
   return crypto.createHash('sha256').update(String(raw)).digest('hex');
+}
+
+function signMerchantToken(payload) {
+  const secret = process.env.JWT_SECRET || 'default_secret';
+  return jwt.sign(payload, secret, { expiresIn: '7d' });
 }
 
 function ok(res, data) {
@@ -108,16 +117,13 @@ exports.login = async (req, res) => {
     if (!shop || !shop.is_active) {
       return res.status(403).json({ errno: 403, errmsg: '店铺不可用' });
     }
-    const secret = process.env.JWT_SECRET || 'default_secret';
-    const token = jwt.sign(
+    const token = signMerchantToken(
       {
         portal: 'merchant',
         shop_id: Number(acc.shop_id),
         merchant_account_id: acc.id,
         role: acc.role
       },
-      secret,
-      { expiresIn: '7d' }
     );
     acc.last_login_at = new Date();
     await acc.save().catch(() => {});
@@ -133,6 +139,74 @@ exports.login = async (req, res) => {
   } catch (e) {
     console.error('merchantPortal login', e);
     return res.status(500).json({ errno: 500, errmsg: '登录失败' });
+  }
+};
+
+/**
+ * POST /api/v1/market/merchant/token/exchange
+ * 使用用户登录态 JWT 换取 merchant token（仅已审核通过商家）
+ */
+exports.exchangeToken = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return bizErr(res, 401, '未登录', 401);
+
+    const latestApprovedApp = await MarketApplication.findOne({
+      where: { user_id: userId, status: 'approved' },
+      attributes: ['id', 'shop_name', 'phone', 'category', 'address', 'contact_name', 'description', 'logo_url', 'background_url', 'license_url', 'place_photo_url'],
+      order: [['created_at', 'DESC'], ['id', 'DESC']]
+    });
+    if (!latestApprovedApp) {
+      return bizErr(res, 403, '商家审核未通过，无法换取商户令牌', 403);
+    }
+
+    let shop = await MarketShop.findOne({
+      where: {
+        name: latestApprovedApp.shop_name,
+        contact_phone: latestApprovedApp.phone,
+        is_active: 1
+      },
+      attributes: ['id', 'name'],
+      order: [['id', 'DESC']]
+    });
+    if (!shop) {
+      const placeList = Array.isArray(latestApprovedApp.place_photo_url) ? latestApprovedApp.place_photo_url : [];
+      const shopNo = `EX${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`;
+      shop = await MarketShop.create({
+        shop_no: shopNo,
+        name: latestApprovedApp.shop_name,
+        category: latestApprovedApp.category || '其他',
+        logo_url: latestApprovedApp.logo_url || null,
+        cover_url: latestApprovedApp.background_url || null,
+        notice: latestApprovedApp.description || null,
+        address: latestApprovedApp.address || null,
+        contact_name: latestApprovedApp.contact_name || null,
+        contact_phone: latestApprovedApp.phone || null,
+        facade_image: placeList[0] || null,
+        interior_image: placeList[1] || null,
+        license_image: latestApprovedApp.license_url || null,
+        is_open: 1,
+        is_active: 1
+      });
+    }
+
+    const token = signMerchantToken({
+      portal: 'merchant',
+      shop_id: Number(shop.id),
+      merchant_account_id: null,
+      role: 'owner',
+      user_id: Number(userId),
+      via: 'user_token_exchange'
+    });
+
+    return ok(res, {
+      token,
+      shop: { id: shop.id, name: shop.name },
+      expires_in: 7 * 24 * 60 * 60
+    });
+  } catch (e) {
+    console.error('merchantPortal exchangeToken', e);
+    return res.status(500).json({ errno: 500, code: 500, msg: '换取商户令牌失败', data: null });
   }
 };
 
@@ -237,8 +311,15 @@ exports.shelf = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     if (!id) return bizErr(res, 400, '无效 id');
     const b = req.body || {};
-    const pub = b.published !== undefined ? b.published : b.is_published;
-    if (pub === undefined) return bizErr(res, 400, '缺少 published / is_published');
+    let pub;
+    if (b.published !== undefined) pub = b.published;
+    else if (b.is_published !== undefined) pub = b.is_published;
+    else if (b.on_shelf !== undefined) pub = b.on_shelf;
+    else if (b.status !== undefined) {
+      if (b.status === 'on_sale') pub = true;
+      else if (b.status === 'off_sale') pub = false;
+    }
+    if (pub === undefined) return bizErr(res, 400, '缺少 published / is_published / on_shelf / status');
     const on = pub === true || pub === 1 || pub === '1' || pub === 'true';
     const g = await MarketGood.findOne({ where: { id, shop_id: shopId } });
     if (!g) return bizErr(res, 404, '商品不存在', 404);
@@ -269,8 +350,132 @@ const MERCHANT_ORDER_ACTIONS = {
   accept: { from: ['pending_accept'], to: 'pending_service' },
   reject: { from: ['pending_accept'], to: 'cancelled' },
   dispatch: { from: ['pending_service'], to: 'pending_receipt' },
+  delivered: { from: ['pending_receipt'], to: 'pending_receipt' },
   complete: { from: ['pending_receipt'], to: 'completed' }
 };
+
+async function ensureOrderEventTable() {
+  await sequelize.query(
+    `CREATE TABLE IF NOT EXISTS market_order_events (
+      id BIGINT PRIMARY KEY AUTO_INCREMENT,
+      order_no VARCHAR(40) NOT NULL,
+      shop_id INT NOT NULL,
+      user_id INT NOT NULL,
+      action VARCHAR(32) NOT NULL,
+      title VARCHAR(100) NOT NULL,
+      note VARCHAR(255) NULL,
+      proof_images_json TEXT NULL,
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_order_no_created (order_no, created_at),
+      INDEX idx_user_created (user_id, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
+  );
+}
+
+async function appendOrderEvent(orderNo, shopId, userId, action, title, note, proofImages) {
+  await ensureOrderEventTable();
+  await sequelize.query(
+    `INSERT INTO market_order_events
+      (order_no, shop_id, user_id, action, title, note, proof_images_json, created_at)
+     VALUES
+      (:orderNo, :shopId, :userId, :action, :title, :note, :proofImages, NOW())`,
+    {
+      replacements: {
+        orderNo,
+        shopId,
+        userId,
+        action,
+        title,
+        note: note || null,
+        proofImages: proofImages ? JSON.stringify(proofImages) : null
+      }
+    }
+  );
+}
+
+async function loadOrderEvents(orderNo) {
+  await ensureOrderEventTable();
+  const rows = await sequelize.query(
+    `SELECT id, action, title, note, proof_images_json, created_at
+       FROM market_order_events
+      WHERE order_no = :orderNo
+      ORDER BY created_at ASC, id ASC`,
+    { replacements: { orderNo }, type: QueryTypes.SELECT }
+  );
+  return (rows || []).map((r) => {
+    let imgs = [];
+    if (r.proof_images_json) {
+      try { imgs = JSON.parse(r.proof_images_json); } catch (_e) {}
+    }
+    return {
+      id: r.id,
+      action: r.action,
+      title: r.title,
+      note: r.note || '',
+      proof_images: Array.isArray(imgs) ? imgs : [],
+      created_at: r.created_at
+    };
+  });
+}
+
+async function pushOrderNodeMessage(userId, orderNo, title, content) {
+  const t = await sequelize.transaction();
+  try {
+    let mapping = await UserConversation.findOne({
+      where: { user_id: userId, peer_id: userId, bot_type: 'logistics' },
+      transaction: t
+    });
+    let conversationId = mapping && mapping.conversation_id;
+    if (!conversationId) {
+      const conv = await Conversation.create(
+        { type: 'system', last_message_preview: content },
+        { transaction: t }
+      );
+      conversationId = conv.id;
+      if (mapping) {
+        mapping.conversation_id = conversationId;
+        await mapping.save({ transaction: t });
+      } else {
+        mapping = await UserConversation.create(
+          {
+            user_id: userId,
+            conversation_id: conversationId,
+            peer_id: userId,
+            bot_type: 'logistics',
+            unread_count: 0,
+            is_deleted: false
+          },
+          { transaction: t }
+        );
+      }
+    }
+    await Message.create(
+      {
+        conversation_id: conversationId,
+        sender_id: userId,
+        msg_type: 'logistics',
+        content: `${title}\n订单号:${orderNo}\n${content}`
+      },
+      { transaction: t }
+    );
+    await Conversation.update(
+      { last_message_preview: content, updated_at: new Date() },
+      { where: { id: conversationId }, transaction: t }
+    );
+    await UserConversation.update(
+      { is_deleted: false },
+      { where: { user_id: userId, conversation_id: conversationId }, transaction: t }
+    );
+    await UserConversation.increment(
+      'unread_count',
+      { by: 1, where: { user_id: userId, conversation_id: conversationId }, transaction: t }
+    );
+    await t.commit();
+  } catch (e) {
+    await t.rollback();
+    console.error('pushOrderNodeMessage error:', e);
+  }
+}
 
 async function writeMerchantApproval(orderNo, fromStatus, toStatus, operator, note) {
   try {
@@ -307,7 +512,14 @@ exports.getShop = async (req, res) => {
     const shop = await MarketShop.findByPk(shopId);
     if (!shop) return bizErr(res, 404, '店铺不存在', 404);
     const j = shop.get({ plain: true });
-    return ok(res, { shop: j });
+    return ok(res, {
+      shop: {
+        ...j,
+        phone: j.contact_phone || '',
+        description: j.notice || '',
+        community_id: null
+      }
+    });
   } catch (e) {
     console.error('merchantPortal getShop', e);
     return res.status(500).json({ errno: 500, code: 500, msg: '查询失败', data: null });
@@ -320,6 +532,12 @@ exports.patchShop = async (req, res) => {
     const shop = await MarketShop.findByPk(shopId);
     if (!shop) return bizErr(res, 404, '店铺不存在', 404);
     const b = req.body || {};
+    if (b.phone !== undefined && b.contact_phone === undefined) b.contact_phone = b.phone;
+    if (b.description !== undefined && b.notice === undefined) b.notice = b.description;
+    if (b.community_id !== undefined || b.communityId !== undefined) {
+      // 当前 market_shops 无 community_id 字段，先对齐请求兼容，返回稳定提示，避免静默成功
+      return bizErr(res, 400, 'community_id 暂不支持修改，请走入驻信息变更流程', 400);
+    }
     SHOP_PATCHABLE.forEach((k) => {
       if (b[k] !== undefined && b[k] !== null) {
         const max = SHOP_FIELD_MAX[k] || 255;
@@ -331,10 +549,56 @@ exports.patchShop = async (req, res) => {
       shop.is_open = v ? 1 : 0;
     }
     await shop.save();
-    return ok(res, { shop: shop.get({ plain: true }) });
+    const j = shop.get({ plain: true });
+    return ok(res, {
+      shop: {
+        ...j,
+        phone: j.contact_phone || '',
+        description: j.notice || '',
+        community_id: null
+      }
+    });
   } catch (e) {
     console.error('merchantPortal patchShop', e);
     return res.status(500).json({ errno: 500, code: 500, msg: '保存失败', data: null });
+  }
+};
+
+function normalizePlacePhotos(value) {
+  let arr = [];
+  if (Array.isArray(value)) arr = value;
+  else if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) arr = parsed;
+    } catch (_) {
+      arr = value.split(',').map((x) => x.trim()).filter(Boolean);
+    }
+  }
+  // 排序规则：按前端上传顺序（数组下标）稳定返回，同时去空值
+  return arr
+    .map((x) => (x == null ? '' : String(x).trim()))
+    .filter(Boolean);
+}
+
+exports.getApplication = async (req, res) => {
+  try {
+    const row = await MarketApplication.findOne({
+      where: { user_id: req.user.id },
+      order: [['created_at', 'DESC'], ['id', 'DESC']]
+    });
+    if (!row) return ok(res, { application: null });
+    const j = row.get({ plain: true });
+    const placePhotos = normalizePlacePhotos(j.place_photo_url);
+    return ok(res, {
+      application: {
+        ...j,
+        place_photo_url: placePhotos
+      }
+    });
+  } catch (e) {
+    console.error('merchantPortal getApplication', e);
+    return res.status(500).json({ errno: 500, code: 500, msg: '查询失败', data: null });
   }
 };
 
@@ -578,12 +842,19 @@ exports.getDashboard = async (req, res) => {
 exports.getOrderDetail = async (req, res) => {
   try {
     const shopId = req.merchantAuth.shop_id;
-    const orderNo = String(req.params.orderNo || '').trim();
+    const orderNo = String(req.params.orderNo || req.query.order_no || req.query.orderNo || '').trim();
     if (!orderNo) return bizErr(res, 400, '缺少订单号');
-    const order = await MarketOrder.findOne({
+    let order = await MarketOrder.findOne({
       where: { order_no: orderNo, shop_id: shopId },
       include: [{ model: User, as: 'buyer', attributes: ['id', 'nickname', 'phone'], required: false }]
     });
+    if (!order && process.env.DEBUG_SKIP_MERCHANT_TOKEN === '1') {
+      // 测试联调：放宽店铺过滤，避免调试态兜底店铺与订单归属不一致导致假 404
+      order = await MarketOrder.findOne({
+        where: { order_no: orderNo },
+        include: [{ model: User, as: 'buyer', attributes: ['id', 'nickname', 'phone'], required: false }]
+      });
+    }
     if (!order) return bizErr(res, 404, '订单不存在', 404);
     const j = order.get({ plain: true });
     const items = await MarketOrderItem.findAll({ where: { order_no: orderNo } });
@@ -624,6 +895,7 @@ exports.getOrderDetail = async (req, res) => {
     }
     if (j.cancelled_at) timeline.push({ at: j.cancelled_at, title: '订单关闭/取消', detail: j.cancel_reason || '' });
 
+    const fulfillmentEvents = await loadOrderEvents(orderNo);
     return ok(res, {
       order: {
         id: j.id,
@@ -652,7 +924,8 @@ exports.getOrderDetail = async (req, res) => {
       },
       items: itemRows,
       payments: payRows,
-      timeline
+      timeline,
+      fulfillment_events: fulfillmentEvents
     });
   } catch (e) {
     console.error('merchantPortal getOrderDetail', e);
@@ -665,6 +938,9 @@ exports.applyOrderAction = async (req, res) => {
     const shopId = req.merchantAuth.shop_id;
     const orderNo = String(req.params.orderNo || '').trim();
     const { action, note } = req.body || {};
+    const proofImages = Array.isArray(req.body && req.body.proof_images)
+      ? req.body.proof_images.slice(0, 6).map((x) => String(x || '').trim()).filter(Boolean)
+      : [];
     const config = MERCHANT_ORDER_ACTIONS[action];
     if (!config) return bizErr(res, 400, '不支持的操作');
     const row = await MarketOrder.findOne({ where: { order_no: orderNo, shop_id: shopId } });
@@ -673,18 +949,38 @@ exports.applyOrderAction = async (req, res) => {
       return bizErr(res, 400, `当前状态 ${row.order_status} 不可执行 ${action}`);
     }
     const fromStatus = row.order_status;
-    row.order_status = config.to;
+    if (action !== 'delivered') {
+      row.order_status = config.to;
+    }
     if (action === 'reject') {
       row.cancel_reason = note || '商家拒单';
       row.cancelled_at = new Date();
+      if (row.pay_status === 'paid' || row.pay_status === 'refund_pending') {
+        row.pay_status = 'refunded';
+      }
     }
     await row.save();
     await writeMerchantApproval(orderNo, fromStatus, row.order_status, `shop:${shopId}`, note);
+    const nodeTitleMap = {
+      accept: '商家已接单',
+      reject: '商家已拒单并退款',
+      dispatch: '商家已开始配送',
+      delivered: '商家已上门配送完成'
+    };
+    const nodeTitle = nodeTitleMap[action] || '订单状态更新';
+    await appendOrderEvent(orderNo, shopId, row.user_id, action, nodeTitle, note || '', proofImages);
+    await pushOrderNodeMessage(
+      row.user_id,
+      orderNo,
+      nodeTitle,
+      note || `当前状态：${ORDER_STATUS_TEXT[row.order_status] || row.order_status}`
+    );
     const j = row.get({ plain: true });
     return ok(res, {
       order_no: j.order_no,
       order_status: j.order_status,
-      order_status_text: ORDER_STATUS_TEXT[j.order_status] || j.order_status
+      order_status_text: ORDER_STATUS_TEXT[j.order_status] || j.order_status,
+      pay_status: j.pay_status
     });
   } catch (e) {
     console.error('merchantPortal applyOrderAction', e);
@@ -696,23 +992,37 @@ exports.createGood = async (req, res) => {
   try {
     const shopId = req.merchantAuth.shop_id;
     const b = req.body || {};
-    const name = String(b.name || '').trim();
+    const name = String(b.name || b.title || '').trim();
     if (!name) return bizErr(res, 400, '请填写商品名称');
     const price = Number(b.price);
     if (!Number.isFinite(price) || price < 0) return bizErr(res, 400, '价格无效');
-    const category_key = String(b.category_key || 'local').slice(0, 50);
+    const category_key = String(b.category_key || b.category || 'local').slice(0, 50);
+    const publishFlag =
+      b.published !== undefined ? b.published
+        : b.is_published !== undefined ? b.is_published
+          : b.on_shelf !== undefined ? b.on_shelf
+            : b.status !== undefined
+              ? (b.status === 'on_sale' ? true : (b.status === 'off_sale' ? false : undefined))
+              : undefined;
+    const isOnSale =
+      publishFlag === undefined
+        ? true
+        : (publishFlag === true || publishFlag === 1 || publishFlag === '1' || publishFlag === 'true');
     const g = await MarketGood.create({
       goods_no: genMerchantGoodsNo(shopId),
       shop_id: shopId,
       category_key,
       name,
       description: b.description != null ? String(b.description).slice(0, 2000) : '',
-      main_image: b.main_image != null ? String(b.main_image).slice(0, 255) : '',
+      main_image:
+        b.main_image != null
+          ? String(b.main_image).slice(0, 255)
+          : (b.image != null ? String(b.image).slice(0, 255) : ''),
       price,
       stock: Math.max(0, parseInt(b.stock, 10) || 0),
       safe_stock: Math.max(0, parseInt(b.safe_stock, 10) || 0),
       sort_order: parseInt(b.sort_order, 10) || 0,
-      status: b.status === 'on_sale' || b.on_shelf === true || b.on_shelf === '1' ? 'on_sale' : 'off_sale'
+      status: isOnSale ? 'on_sale' : 'off_sale'
     });
     return ok(res, { goods: mapGoodRow(g) });
   } catch (e) {

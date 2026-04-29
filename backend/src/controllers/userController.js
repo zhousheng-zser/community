@@ -1,4 +1,4 @@
-const { User, UserFollow, UserAddress } = require('../models');
+const { User, UserFollow, UserAddress, MarketApplication, MarketShop } = require('../models');
 
 exports.getProfile = async (req, res) => {
     try {
@@ -8,7 +8,42 @@ exports.getProfile = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
         }
-        res.json(user);
+        const latestMarketApplication = await MarketApplication.findOne({
+            where: { user_id: req.user.id },
+            attributes: ['id', 'status', 'shop_name', 'phone'],
+            order: [['created_at', 'DESC'], ['id', 'DESC']]
+        });
+
+        const merchantStatus = latestMarketApplication ? latestMarketApplication.status : null;
+        let shopId = null;
+        if (merchantStatus === 'approved' && latestMarketApplication) {
+            const shop = await MarketShop.findOne({
+                where: {
+                    name: latestMarketApplication.shop_name,
+                    contact_phone: latestMarketApplication.phone
+                },
+                attributes: ['id'],
+                order: [['id', 'DESC']]
+            });
+            shopId = shop ? shop.id : null;
+        }
+        const profile = user.get({ plain: true });
+        const roles = String(profile.role || '')
+            .split(',')
+            .map((v) => v.trim())
+            .filter(Boolean);
+        if (merchantStatus === 'approved' && !roles.includes('merchant')) {
+            roles.push('merchant');
+        }
+
+        res.json({
+            ...profile,
+            role: roles.join(','),
+            merchant_status: merchantStatus,
+            shop_status: merchantStatus,
+            shop_id: shopId,
+            merchant_application_id: latestMarketApplication ? latestMarketApplication.id : null
+        });
     } catch (error) {
         console.error('Get Profile Error:', error);
         res.status(500).json({ error: '服务器内部错误' });

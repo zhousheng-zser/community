@@ -7,6 +7,7 @@ const marketSearchController = require('../controllers/marketSearchController');
 const marketCartController = require('../controllers/marketCartController');
 const marketOrderController = require('../controllers/marketOrderController');
 const marketPaymentController = require('../controllers/marketPaymentController');
+const genRefundNo = () => `MR${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`;
 
 // 商家入驻申请
 router.post('/apply', authMiddleware, applicationController.marketApply);
@@ -71,13 +72,67 @@ router.post('/orders/:orderNo/confirm-receipt', authMiddleware, async (req, res)
 router.post('/orders/:orderNo/refund', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { MarketOrder, MarketRefundOrder } = require('../models');
+    const { MarketOrder, MarketRefundOrder, Conversation, UserConversation, Message, sequelize } = require('../models');
     const order = await MarketOrder.findOne({ where: { order_no: req.params.orderNo, user_id: userId } });
     if (!order) return res.status(404).json({ code: 404, msg: '订单不存在', data: null });
-    if (!['completed', 'pending_receipt', 'pending_service'].includes(order.order_status)) {
+    if (!['pending_accept', 'completed', 'pending_receipt', 'pending_service'].includes(order.order_status)) {
       return res.json({ code: 400, msg: '订单状态不允许退款', data: null });
     }
+    // 待接单阶段：直接退款并归档到已取消
+    if (order.order_status === 'pending_accept') {
+      const refund = await MarketRefundOrder.create({
+        refund_no: genRefundNo(),
+        order_id: order.id,
+        order_no: order.order_no,
+        user_id: userId,
+        shop_id: order.shop_id,
+        refund_amount: order.payable_amount,
+        reason: (req.body && req.body.reason) || '用户申请退款',
+        status: 'success'
+      });
+      order.pay_status = 'refunded';
+      order.order_status = 'cancelled';
+      order.cancel_reason = 'user_refund_before_accept';
+      order.cancelled_at = new Date();
+      await order.save();
+      // 推送一条消息节点到消息会话
+      try {
+        const t = await sequelize.transaction();
+        let mapping = await UserConversation.findOne({
+          where: { user_id: userId, peer_id: userId, bot_type: 'logistics' },
+          transaction: t
+        });
+        let conversationId = mapping && mapping.conversation_id;
+        if (!conversationId) {
+          const conv = await Conversation.create({ type: 'system', last_message_preview: '订单已退款' }, { transaction: t });
+          conversationId = conv.id;
+          if (mapping) {
+            mapping.conversation_id = conversationId;
+            await mapping.save({ transaction: t });
+          } else {
+            await UserConversation.create({
+              user_id: userId,
+              conversation_id: conversationId,
+              peer_id: userId,
+              bot_type: 'logistics',
+              unread_count: 0,
+              is_deleted: false
+            }, { transaction: t });
+          }
+        }
+        const content = `订单${order.order_no}已退款并取消`;
+        await Message.create({ conversation_id: conversationId, sender_id: userId, msg_type: 'logistics', content }, { transaction: t });
+        await Conversation.update({ last_message_preview: content, updated_at: new Date() }, { where: { id: conversationId }, transaction: t });
+        await UserConversation.update({ is_deleted: false }, { where: { user_id: userId, conversation_id: conversationId }, transaction: t });
+        await UserConversation.increment('unread_count', { by: 1, where: { user_id: userId, conversation_id: conversationId }, transaction: t });
+        await t.commit();
+      } catch (notifyErr) {
+        console.error('refund notify error:', notifyErr);
+      }
+      return res.json({ code: 0, msg: '退款成功', data: { refund_id: refund.id, order_status: order.order_status, pay_status: order.pay_status } });
+    }
     const refund = await MarketRefundOrder.create({
+      refund_no: genRefundNo(),
       order_id: order.id,
       order_no: order.order_no,
       user_id: userId,
