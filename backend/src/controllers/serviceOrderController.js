@@ -33,6 +33,27 @@ const SERVICE_ORDER_STATUS_TEXT = {
   closed: '已关闭'
 };
 
+/** 小程序首页九大分类：服务端 DB 若为测试占位数据或未上架时仍允许下单，支付后统一进「待派单」队列（由管理员分发） */
+const GROUP_FALLBACK_ALLOW_UNPUBLISHED = new Set([
+  'tidy',
+  'urgent_fix',
+  'appliance_clean',
+  'pioneer_clean',
+  'mite_remove',
+  'furniture_care',
+  'baby_home',
+  'house_repair',
+  'beauty_home'
+]);
+
+function parseMoneyFlexible(v, fallbackNaN = NaN) {
+  if (v == null || v === '') return fallbackNaN;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  const m = String(v).match(/[\d.]+/);
+  const n = m ? parseFloat(m[0]) : fallbackNaN;
+  return Number.isFinite(n) ? n : fallbackNaN;
+}
+
 function genOrderNo() {
   const r = Math.floor(Math.random() * 900000 + 100000);
   return `SO${Date.now()}${r}`;
@@ -119,7 +140,12 @@ exports.create = async (req, res) => {
     if (!service) return fail(res, 404, '服务不存在');
     const sj = service.toJSON();
     const pub = sj.is_published;
-    if (pub === 0 || pub === false) return fail(res, 400, '服务未上架');
+    const gk = body.group_key != null ? String(body.group_key).trim() : '';
+    if (pub === 0 || pub === false) {
+      if (!gk || !GROUP_FALLBACK_ALLOW_UNPUBLISHED.has(gk)) {
+        return fail(res, 400, '服务未上架');
+      }
+    }
 
     let snap = address_snapshot || null;
     if (!snap && address_id) {
@@ -143,9 +169,8 @@ exports.create = async (req, res) => {
     const q = qty != null ? parseInt(qty, 10) : 1;
     const qSafe = Number.isFinite(q) && q > 0 ? q : 1;
     let amount = Number(service.price) * qSafe;
-    if (goods_price != null && goods_price !== '') {
-      amount = Number(goods_price) * qSafe;
-    }
+    const parsedGoodsPrice = parseMoneyFlexible(goods_price, NaN);
+    if (Number.isFinite(parsedGoodsPrice)) amount = parsedGoodsPrice * qSafe;
     if (!Number.isFinite(amount) || amount < 0) amount = Number(service.price) * qSafe;
 
     let assigned_worker_id = null;

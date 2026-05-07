@@ -73,7 +73,10 @@ exports.listServiceOrders = async (req, res) => {
 exports.assignServiceOrder = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const worker_id = parseInt(req.body.worker_id, 10);
+    const worker_id =
+      req.body.worker_id != null && req.body.worker_id !== ''
+        ? parseInt(req.body.worker_id, 10)
+        : parseInt(req.body.worker_user_id, 10);
     if (!id || !worker_id) return fail(res, 400, '缺少 id 或 worker_id');
     if (!(await workerAssignable(worker_id))) return fail(res, 400, '技工不可派单');
     const order = await ServiceOrder.findByPk(id);
@@ -126,7 +129,10 @@ exports.listNeighborAssistOrders = async (req, res) => {
 exports.assignNeighborAssistOrder = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const worker_id = parseInt(req.body.worker_id, 10);
+    const worker_id =
+      req.body.worker_id != null && req.body.worker_id !== ''
+        ? parseInt(req.body.worker_id, 10)
+        : parseInt(req.body.worker_user_id, 10);
     if (!id || !worker_id) return fail(res, 400, '缺少 id 或 worker_id');
     if (!(await workerAssignable(worker_id))) return fail(res, 400, '技工不可派单');
     const order = await NeighborAssistOrder.findByPk(id);

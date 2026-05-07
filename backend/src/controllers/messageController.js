@@ -1,4 +1,4 @@
-const { Conversation, UserConversation, Message, User, sequelize } = require('../models');
+const { Conversation, UserConversation, Message, User, NeighborAssistOrder, sequelize } = require('../models');
 
 // 获取当前用户的消息列表 (Taobao-style Chat List)
 exports.getConversations = async (req, res) => {
@@ -280,6 +280,32 @@ exports.ensureOrderConversation = async (req, res) => {
             peerId = Number(body.merchant_user_id || 0);
         } else if (channel === 'worker_customer') {
             peerId = Number(body.worker_user_id || 0);
+        } else if (channel === 'neighbor_assist') {
+            if (!NeighborAssistOrder) {
+                await t.rollback();
+                return res.status(503).json({ errcode: 503, errmsg: '邻里帮模块未加载' });
+            }
+            const orderIdNum = Number(body.order_id || 0);
+            if (!orderIdNum) {
+                await t.rollback();
+                return res.status(400).json({ errcode: 400, errmsg: '缺少 order_id' });
+            }
+            const ordRow = await NeighborAssistOrder.findByPk(orderIdNum, { transaction: t });
+            if (!ordRow) {
+                await t.rollback();
+                return res.status(404).json({ errcode: 404, errmsg: '订单不存在' });
+            }
+            const publisherId = Number(ordRow.user_id);
+            const helperIdRaw = ordRow.assigned_worker_id != null ? Number(ordRow.assigned_worker_id) : 0;
+            if (!helperIdRaw) {
+                await t.rollback();
+                return res.status(400).json({ errcode: 400, errmsg: '订单尚未指派邻居，暂时无法会话' });
+            }
+            if (me !== publisherId && me !== helperIdRaw) {
+                await t.rollback();
+                return res.status(403).json({ errcode: 403, errmsg: '无权参与该会话' });
+            }
+            peerId = me === publisherId ? helperIdRaw : publisherId;
         }
 
         if (!peerId) {
