@@ -96,7 +96,9 @@ app.use('/api/v1/market/shop', merchantPortalRoutes);
 app.use('/api/v1/market/merchant/customers', require('./routes/merchantCustomerRoutes'));
 app.use('/api/v1/market/merchant/marketing', require('./routes/merchantMarketingRoutes'));
 app.use('/api/v1/market/merchant/refunds', require('./routes/merchantRefundRoutes'));
-app.use('/api/v1/service-provider', require('./routes/serviceProviderRoutes'));
+// 服务商路由：同时挂载到 /service-provider（兼容旧路径）和 /service-provider-portal
+// 使用门户路由（含 /me, /dashboard, /orders 等完整功能）
+app.use('/api/v1/service-provider', serviceProviderPortalRoutes);
 app.use('/api/v1/market', require('./routes/marketRoutes'));
 app.use('/api/v1/activities', require('./routes/activityRoutes'));
 app.use('/api/v1/feedback', require('./routes/feedbackRoutes'));

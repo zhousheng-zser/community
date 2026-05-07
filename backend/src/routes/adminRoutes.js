@@ -105,4 +105,17 @@ router.post('/local-goods-home/items', adminLocalGoodsHomeController.createItem)
 router.put('/local-goods-home/items/:id', adminLocalGoodsHomeController.updateItem);
 router.delete('/local-goods-home/items/:id', adminLocalGoodsHomeController.deleteItem);
 
+
+// ---- 直约服务商管理 ----
+router.get('/service-providers', adminMarketController.listServiceProviders);
+router.post('/service-providers', adminMarketController.createServiceProvider);
+router.get('/service-providers/:id', adminMarketController.getServiceProvider);
+router.put('/service-providers/:id', adminMarketController.updateServiceProvider);
+router.get('/service-providers/:id/services', adminMarketController.listSpServices);
+router.get('/sp-services', adminMarketController.listAllSpServices);
+router.post('/service-providers/:id/services', adminMarketController.createSpService);
+router.put('/service-providers/:id/services/:sid', adminMarketController.updateSpService);
+router.delete('/service-providers/:id/services/:sid', adminMarketController.deleteSpService);
+router.get('/sp-orders', adminMarketController.listSpOrders);
+
 module.exports = router;

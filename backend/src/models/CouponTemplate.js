@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
     issued_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     valid_from: DataTypes.DATE,
     valid_to: DataTypes.DATE,
-    status: { type: DataTypes.ENUM('active', 'inactive'), allowNull: false, defaultValue: 'active' }
+    status: { type: DataTypes.ENUM('active', 'inactive'), allowNull: false, defaultValue: 'active' },
+    service_provider_id: { type: DataTypes.INTEGER, allowNull: true }
   }, {
     sequelize,
     modelName: 'CouponTemplate',

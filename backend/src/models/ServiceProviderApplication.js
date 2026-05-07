@@ -16,7 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     environment_url: DataTypes.JSON,
     id_card_url: { type: DataTypes.STRING(255), allowNull: false },
     certificate_url: DataTypes.JSON,
-    status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' }
+    status: { type: DataTypes.ENUM('pending', 'approved', 'rejected'), defaultValue: 'pending' },
+    reviewed_by: DataTypes.STRING(64),
+    reviewed_at: DataTypes.DATE,
+    reject_reason: DataTypes.STRING(500)
   }, {
     sequelize,
     modelName: 'ServiceProviderApplication',
@@ -24,6 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true,
     timestamps: true,
     createdAt: 'created_at',
+    // 兼容历史库：部分环境该表不存在 updated_at 列
     updatedAt: false
   });
   return ServiceProviderApplication;

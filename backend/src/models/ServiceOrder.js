@@ -32,7 +32,10 @@ module.exports = (sequelize, DataTypes) => {
     contact_phone: { type: DataTypes.STRING(20), allowNull: true },
     goods_name: { type: DataTypes.STRING(200), allowNull: true },
     qty: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 1 },
-    provider_user_id: { type: DataTypes.INTEGER, allowNull: true }
+    provider_user_id: { type: DataTypes.INTEGER, allowNull: true },
+    completed_at: { type: DataTypes.DATE, allowNull: true },
+    paid_at: { type: DataTypes.DATE, allowNull: true },
+    cancelled_at: { type: DataTypes.DATE, allowNull: true }
   }, {
     sequelize,
     modelName: 'ServiceOrder',

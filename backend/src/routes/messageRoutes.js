@@ -20,6 +20,8 @@ router.delete('/conversations/:conversationId', messageController.deleteConversa
 // 给某个人发送私聊消息 (自动新建房间或唤起原有隐藏房间)
 router.post('/send', messageController.sendMessage);
 
+router.post('/order-conversation/ensure', messageController.ensureOrderConversation);
+
 // 管理员系统广播 (比如："活动优惠"、"交易物流")
 // 真实场景下应单独建 adminMiddleware 保护，这里为了测试先行放入通用路由
 router.post('/broadcast', messageController.broadcastSystemMessage);

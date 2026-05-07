@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '../layout/MainLayout.vue'
 
+const isDev = import.meta.env.DEV
+
 const routes = [
   { path: '/login', name: 'Login', component: () => import('../views/Login.vue'), meta: { public: true } },
+  ...(isDev ? [{ path: '/dev-entry', name: 'DevEntry', component: () => import('../views/DevEntry.vue'), meta: { public: true } }] : []),
   {
     path: '/',
     component: MainLayout,

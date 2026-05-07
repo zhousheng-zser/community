@@ -23,7 +23,9 @@
           <el-menu-item index="/ops-hub">运营快捷入口</el-menu-item>
           <el-menu-item index="/system-status">系统状态</el-menu-item>
           <el-menu-item index="/worker-applications">技工入驻</el-menu-item>
-          <el-menu-item index="/service-provider-applications">服务商入驻</el-menu-item>
+                  <el-menu-item index="/service-providers">直约服务商管理</el-menu-item>
+        <el-menu-item index="/service-provider-applications">服务商入驻</el-menu-item>
+          <el-menu-item index="/market-applications">店铺入驻审核</el-menu-item>
           <el-menu-item index="/home-service-dispatch">九州派单（到家+帮帮）</el-menu-item>
           <el-menu-item index="/community-featured">管家精选</el-menu-item>
         </el-sub-menu>
@@ -33,7 +35,6 @@
             <el-icon><Shop /></el-icon>
             <span>本地集市</span>
           </template>
-          <el-menu-item index="/market-applications">店铺入驻审核</el-menu-item>
           <el-menu-item index="/market-orders">订单</el-menu-item>
           <el-menu-item index="/order-fulfillment">订单履约</el-menu-item>
           <el-menu-item index="/market-payments">支付流水</el-menu-item>

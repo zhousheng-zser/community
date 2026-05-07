@@ -1,25 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/serviceProviderPortalAuthMiddleware');
-const { WorkerProfile, User, ServiceOrder, sequelize } = require('../models');
+const { WorkerProfile, User, ServiceOrder, ServiceProviderProfile } = require('../models');
 const { Op } = require('sequelize');
 
 router.use(auth);
 
+// 获取当前服务商的技工列表
+// 注：当前 WorkerProfile 无 service_provider_id 字段，
+// 通过社区匹配来查找
 router.get('/list', async (req, res) => {
   try {
-    const spId = req.user.id;
+    const spId = req.spPortal.provider_user_id;
     const { page = 1, limit = 20, keyword, status } = req.query;
     const offset = (page - 1) * limit;
-    const where = { service_provider_id: spId };
+
+    // 获取服务商档案以确定社区
+    const spProf = await ServiceProviderProfile.findOne({
+      where: { user_id: spId, status: 'active' }
+    });
+
+    const where = {};
+    if (spProf && spProf.community_id) {
+      where.community_id = spProf.community_id;
+    }
+    if (status) where.status = status;
 
     if (keyword) {
       where[Op.or] = [
-        { '$User.nickname$': { [Op.like]: `%${keyword}%` } },
-        { '$User.phone$': { [Op.like]: `%${keyword}%` } }
+        { real_name: { [Op.like]: `%${keyword}%` } },
+        { phone: { [Op.like]: `%${keyword}%` } }
       ];
     }
-    if (status) where.status = status;
 
     const { count, rows } = await WorkerProfile.findAndCountAll({
       where,
@@ -37,9 +49,8 @@ router.get('/list', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const spId = req.user.id;
     const worker = await WorkerProfile.findOne({
-      where: { id: req.params.id, service_provider_id: spId },
+      where: { id: req.params.id },
       include: [{ model: User, as: 'user' }]
     });
     if (!worker) return res.status(404).json({ code: -1, message: '技工不存在' });
@@ -51,10 +62,9 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id/status', async (req, res) => {
   try {
-    const spId = req.user.id;
     const { status } = req.body;
     const worker = await WorkerProfile.findOne({
-      where: { id: req.params.id, service_provider_id: spId }
+      where: { id: req.params.id }
     });
     if (!worker) return res.status(404).json({ code: -1, message: '技工不存在' });
     await worker.update({ status });
@@ -66,17 +76,19 @@ router.put('/:id/status', async (req, res) => {
 
 router.get('/:id/stats', async (req, res) => {
   try {
-    const spId = req.user.id;
     const workerId = req.params.id;
-    
+    const worker = await WorkerProfile.findByPk(workerId);
+    if (!worker) return res.status(404).json({ code: -1, message: '技工不存在' });
+
+    // ServiceOrder 使用 assigned_worker_id 关联技工
     const totalOrders = await ServiceOrder.count({
-      where: { worker_id: workerId, service_provider_id: spId }
+      where: { assigned_worker_id: worker.user_id }
     });
     const completedOrders = await ServiceOrder.count({
-      where: { worker_id: workerId, service_provider_id: spId, status: 'completed' }
+      where: { assigned_worker_id: worker.user_id, status: 'completed' }
     });
-    const totalIncome = await ServiceOrder.sum('total_amount', {
-      where: { worker_id: workerId, service_provider_id: spId, status: 'completed' }
+    const totalIncome = await ServiceOrder.sum('amount', {
+      where: { assigned_worker_id: worker.user_id, status: 'completed' }
     }) || 0;
 
     res.json({

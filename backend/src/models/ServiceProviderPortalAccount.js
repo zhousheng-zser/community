@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   ServiceProviderPortalAccount.init({
-    profile_id: { type: DataTypes.INTEGER, allowNull: false, unique: true },
+    profile_id: { type: DataTypes.INTEGER, allowNull: false },
     username: { type: DataTypes.STRING(80), allowNull: false, unique: true },
     password_hash: { type: DataTypes.STRING(255), allowNull: false },
     role: {

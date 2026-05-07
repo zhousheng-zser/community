@@ -144,14 +144,38 @@ async function doAccept() {
 async function doCheckIn() {
   acting.value = true
   try {
-    await request.post(`/service-provider-portal/orders/${route.params.id}/check-in`, {
-      latitude: 30.2741,
-      longitude: 120.1551,
-      accuracy: 20
-    })
+    let payload
+    if (navigator.geolocation) {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
+      })
+      payload = {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: pos.coords.accuracy
+      }
+    } else {
+      // 降级：开发联调兜底坐标（杭州西湖）
+      payload = { latitude: 30.2741, longitude: 120.1551, accuracy: 20 }
+    }
+    await request.post(`/service-provider-portal/orders/${route.params.id}/check-in`, payload)
     ElMessage.success('已记录打卡')
     await load()
   } catch (e) {
+    // 定位失败时仍允许使用兜底坐标打卡
+    if (e.code === 1 || e.code === 2 || e.code === 3) {
+      try {
+        await request.post(`/service-provider-portal/orders/${route.params.id}/check-in`, {
+          latitude: 30.2741, longitude: 120.1551, accuracy: 20
+        })
+        ElMessage.success('已记录打卡（使用兜底坐标）')
+        await load()
+        return
+      } catch (err) {
+        ElMessage.error(err.message || '打卡失败')
+        return
+      }
+    }
     ElMessage.error(e.message || '失败')
   } finally {
     acting.value = false

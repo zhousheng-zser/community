@@ -234,8 +234,8 @@ exports.createBundle = async (req, res) => {
       commId = u && u.community_id != null ? Number(u.community_id) : null;
     }
     const pj = prof.toJSON ? prof.toJSON() : prof;
-    if (pj.community_id != null) {
-      if (commId == null || Number(pj.community_id) !== Number(commId)) {
+    if (pj.community_id != null && commId != null) {
+      if (Number(pj.community_id) !== Number(commId)) {
         return fail(res, 400, '服务商不接该小区');
       }
     }
@@ -276,7 +276,7 @@ exports.createBundle = async (req, res) => {
       remark: remark || null,
       status: 'pending_pay',
       pay_status: 'unpaid',
-      provider_user_id: parseInt(provider_id, 10),
+      provider_user_id: prof.user_id || parseInt(provider_id, 10),
       order_no: genOrderNo(),
       contact_name: contact_name || null,
       contact_phone: contact_phone || null,

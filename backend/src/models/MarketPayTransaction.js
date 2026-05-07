@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     notify_raw: DataTypes.JSON,
     notify_count: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
     last_notify_at: DataTypes.DATE,
-    paid_at: DataTypes.DATE
+    paid_at: DataTypes.DATE,
+    order_type: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'market' }
   }, {
     sequelize,
     modelName: 'MarketPayTransaction',

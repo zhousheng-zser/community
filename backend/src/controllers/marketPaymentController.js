@@ -330,12 +330,29 @@ exports.payCallback = async (req, res) => {
       tx.paid_at = plain.success_time ? new Date(plain.success_time) : new Date();
       await tx.save();
 
-      const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
-      if (order && order.pay_status !== 'paid') {
-        order.pay_status = 'paid';
-        order.order_status = 'pending_accept';
-        order.paid_at = tx.paid_at;
-        await order.save();
+      // 根据订单号前缀区分订单类型：MK=本地集市, SO=到家服务
+      if (tx.order_no && tx.order_no.startsWith('SO')) {
+        const { ServiceOrder } = require('../models');
+        const order = await ServiceOrder.findOne({ where: { order_no: tx.order_no } });
+        if (order && order.pay_status !== 'paid') {
+          order.pay_status = 'paid';
+          if (order.assigned_worker_id) {
+            order.status = 'pending_worker_accept';
+          } else if (order.provider_user_id) {
+            order.status = 'pending_accept';
+          } else {
+            order.status = 'paid_pending_dispatch';
+          }
+          await order.save();
+        }
+      } else {
+        const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
+        if (order && order.pay_status !== 'paid') {
+          order.pay_status = 'paid';
+          order.order_status = 'pending_accept';
+          order.paid_at = tx.paid_at;
+          await order.save();
+        }
       }
 
       return res.status(200).json(wechat.wechatSuccessBody());
@@ -379,12 +396,29 @@ exports.payCallback = async (req, res) => {
     tx.paid_at = paid_at ? new Date(paid_at) : new Date();
     await tx.save();
 
-    const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
-    if (order && order.pay_status !== 'paid') {
-      order.pay_status = 'paid';
-      order.order_status = 'pending_accept';
-      order.paid_at = tx.paid_at;
-      await order.save();
+    // 根据订单号前缀区分订单类型
+    if (tx.order_no && tx.order_no.startsWith('SO')) {
+      const { ServiceOrder } = require('../models');
+      const order = await ServiceOrder.findOne({ where: { order_no: tx.order_no } });
+      if (order && order.pay_status !== 'paid') {
+        order.pay_status = 'paid';
+        if (order.assigned_worker_id) {
+          order.status = 'pending_worker_accept';
+        } else if (order.provider_user_id) {
+          order.status = 'pending_accept';
+        } else {
+          order.status = 'paid_pending_dispatch';
+        }
+        await order.save();
+      }
+    } else {
+      const order = await MarketOrder.findOne({ where: { order_no: tx.order_no } });
+      if (order && order.pay_status !== 'paid') {
+        order.pay_status = 'paid';
+        order.order_status = 'pending_accept';
+        order.paid_at = tx.paid_at;
+        await order.save();
+      }
     }
 
     return res.json({ code: 0, msg: 'SUCCESS', data: null });
