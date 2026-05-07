@@ -1,6 +1,6 @@
 const http = require('http');
 
-const BASE_URL = 'http://192.168.110.50:3001';
+const BASE_URL = 'http://8.136.29.208:3001';
 const API = `${BASE_URL}/api/v1`;
 const results = [];
 
@@ -41,9 +41,9 @@ function request(method, path, body = null) {
 
 function log(testName, result) {
     const pass = result.statusCode === 200 && (
-        !result.data || 
-        result.data.errno === 0 || 
-        result.data.code === 0 || 
+        !result.data ||
+        result.data.errno === 0 ||
+        result.data.code === 0 ||
         result.data.message === '获取成功' ||
         result.data.message
     );

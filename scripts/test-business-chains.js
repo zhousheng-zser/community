@@ -2,7 +2,7 @@
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const JWT = 'jwt_key_cwsgwbd';
-const BASE = 'http://192.168.110.50:3002/api/v1';
+const BASE = 'http://8.136.29.208:3002/api/v1';
 
 let N = 0, P = 0, F = 0;
 const fails = [];
@@ -17,7 +17,7 @@ function req(method, path, body, tok) {
     const opts = { method, hostname: u.hostname, port: u.port, path: u.pathname + u.search, headers: h };
     const rq = http.request(opts, (res) => {
       let d = ''; res.on('data', c => d += c);
-      res.on('end', () => { try { resolve({ ...JSON.parse(d) }); } catch(e) { resolve({ raw: d }); } });
+      res.on('end', () => { try { resolve({ ...JSON.parse(d) }); } catch (e) { resolve({ raw: d }); } });
     });
     rq.on('error', reject); rq.setTimeout(15000, () => { rq.destroy(); reject(new Error('T')); });
     if (payload) rq.write(payload); rq.end();
@@ -29,7 +29,7 @@ const TA = { id: 1, t: token(1) };
 const TB = { id: 2, t: token(2) };
 
 async function t(name, fn) {
-  N++; try { await fn(); P++; console.log('  [PASS] ' + name); } catch(e) { F++; fails.push(name); console.log('  [FAIL] ' + name + ': ' + e.message); }
+  N++; try { await fn(); P++; console.log('  [PASS] ' + name); } catch (e) { F++; fails.push(name); console.log('  [FAIL] ' + name + ': ' + e.message); }
 }
 function A(c, m) { if (!c) throw new Error(m); }
 

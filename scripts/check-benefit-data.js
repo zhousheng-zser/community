@@ -5,7 +5,7 @@ const mysql = require('mysql2/promise');
 
 async function main() {
   const connection = await mysql.createConnection({
-    host: '192.168.110.50',
+    host: '8.136.29.208',
     user: 'root',
     password: 'CommunityPwd123!',
     database: 'community_db',
@@ -73,7 +73,7 @@ async function main() {
 main().catch((err) => {
   console.error('连接失败:', err.message);
   console.log('\n请确认:');
-  console.log('  1. MySQL 服务器 192.168.110.50:3306 可访问');
+  console.log('  1. MySQL 服务器 8.136.29.208:3306 可访问');
   console.log('  2. 密码正确');
   console.log('  3. 数据库 community_db 存在\n');
   process.exit(1);

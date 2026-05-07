@@ -7,7 +7,7 @@
 const axios = require('axios');
 
 // 配置区
-const BASE_URL = 'https://192.168.110.50:3001/api/v1';
+const BASE_URL = 'https://8.136.29.208:3001/api/v1';
 
 // [重要] 如果模拟登录失败（因为需要真实微信 code），请手动从小程序开发者工具的 Storage 中复制 token 填入此处
 const MANUAL_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwib3BlbmlkIjoib3IwVmYzUmxWTG96VExLVWhScVYwbjlfZUFsNCIsImlhdCI6MTc3MzI4OTYyMiwiZXhwIjoxNzczODk0NDIyfQ.6Y22Xy-KjHBbz-11oyzR9uS3o1amVSyRs3KCmIX6PLc';
@@ -69,7 +69,7 @@ async function runTest() {
         const listAllRes = await axios.get(`${BASE_URL}/posts`);
         const allPosts = listAllRes.data.data || listAllRes.data;
         console.log(`✅ 全量列表拉取成功，共 ${allPosts.length} 条数据`);
-        
+
         if (allPosts.length > 0) {
             console.log('🧐 第一个帖子的原始字段结构:', JSON.stringify(Object.keys(allPosts[0])));
             console.log('🧐 第一个帖子的完整数据对象:', JSON.stringify(allPosts[0]));

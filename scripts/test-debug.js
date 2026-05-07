@@ -6,7 +6,7 @@ const TOKEN = jwt.sign({ id: 1, openid: 't1', token_version: 0 }, JWT, { expires
 
 function req(method, path, body) {
   return new Promise((resolve, reject) => {
-    const url = new URL(path, 'http://192.168.110.50:3002/api/v1');
+    const url = new URL(path, 'http://8.136.29.208:3002/api/v1');
     console.log('REQ:', method, url.pathname + url.search);
     const payload = body ? JSON.stringify(body) : null;
     const opts = {

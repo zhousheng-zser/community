@@ -17,7 +17,7 @@ function init() {
     if (saved && Object.values(ENV).includes(saved)) {
       _currentEnv = saved;
     }
-  } catch (e) {}
+  } catch (e) { }
   return _currentEnv;
 }
 
@@ -31,7 +31,7 @@ function setEnv(env) {
     _currentEnv = env;
     try {
       wx.setStorageSync('app_env', env);
-    } catch (e) {}
+    } catch (e) { }
   }
 }
 
@@ -65,7 +65,7 @@ function getApiBaseUrl() {
     case ENV.TESTING:
       return 'https://test-api.yourdomain.com';
     default:
-      return 'https://192.168.110.50:3001';
+      return 'https://8.136.29.208:3001';
   }
 }
 

@@ -4,7 +4,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize('community_db', 'root', 'CommunityPwd123!', {
-  host: '192.168.110.50',
+  host: '8.136.29.208',
   dialect: 'mysql',
   logging: console.log
 });
@@ -29,7 +29,7 @@ async function createTestData() {
     console.log('[2] 创建商家账号...');
     const crypto = require('crypto');
     const passwordHash = crypto.createHash('sha256').update('merchant123').digest('hex');
-    
+
     await sequelize.query(`
       INSERT INTO MerchantAccounts (username, password_hash, phone, status, created_at, updated_at)
       VALUES ('merchant_test', '${passwordHash}', '13800138001', 'active', NOW(), NOW())

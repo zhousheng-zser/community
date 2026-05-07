@@ -1,13 +1,13 @@
 const http = require('http');
 
-const BASE_URL = 'http://192.168.110.50:3001';
+const BASE_URL = 'http://8.136.29.208:3001';
 const results = [];
 
 function testImage(path) {
     return new Promise((resolve) => {
         const encodedPath = encodeURI(path);
         const req = http.request({
-            hostname: '192.168.110.50',
+            hostname: '8.136.29.208',
             port: 3001,
             path: encodedPath,
             method: 'GET',

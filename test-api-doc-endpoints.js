@@ -4,7 +4,7 @@
  */
 const http = require('http');
 
-const BASE_URL = 'http://192.168.110.50:3001';
+const BASE_URL = 'http://8.136.29.208:3001';
 const API_PREFIX = '/api/v1';
 
 // 测试结果统计
@@ -18,22 +18,22 @@ const results = {
 const endpoints = [
   // 健康检查
   { method: 'GET', path: '/', description: '健康检查' },
-  
+
   // 1. 认证模块
   { method: 'GET', path: `${API_PREFIX}/auth/wx/getkey/test_code`, description: '获取 key (兼容接口)', skip: true, reason: '需要有效 code' },
   { method: 'POST', path: `${API_PREFIX}/auth/login`, description: '登录/注册', skip: true, reason: '需要有效 code' },
-  
+
   // 2. 社区帖子
   { method: 'GET', path: `${API_PREFIX}/posts/`, description: '获取帖子列表 (公共)' },
-  
+
   // 3. 核心数据
   { method: 'GET', path: `${API_PREFIX}/core/banners`, description: '获取 Banner 列表' },
   { method: 'GET', path: `${API_PREFIX}/core/categories`, description: '获取服务类目列表' },
   { method: 'GET', path: `${API_PREFIX}/core/services/hot`, description: '获取热门服务' },
-  
+
   // 7. 公共接口
   { method: 'POST', path: `${API_PREFIX}/upload`, description: '文件上传', skip: true, reason: '需要文件' },
-  
+
   // 7.1 惠民卡联盟
   { method: 'GET', path: `${API_PREFIX}/benefit/display`, description: '联盟顶栏展示' },
   { method: 'GET', path: `${API_PREFIX}/jd/benefit/goods`, description: '京东联盟商品列表' },
@@ -111,9 +111,9 @@ async function testEndpoint(endpoint) {
 
   try {
     const result = await makeRequest(endpoint.method, endpoint.path);
-    
+
     const success = result.statusCode >= 200 && result.statusCode < 400 && !result.error;
-    
+
     const record = {
       ...endpoint,
       statusCode: result.statusCode,

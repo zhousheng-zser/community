@@ -12,4 +12,4 @@ conn.on('ready', () => {
       conn.end();
     });
   });
-}).connect({ host: '192.168.110.50', username: 'cw', readyTimeout: 10000 });
+}).connect({ host: '8.136.29.208', username: 'cw', readyTimeout: 10000 });

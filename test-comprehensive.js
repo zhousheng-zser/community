@@ -6,7 +6,7 @@
 
 const http = require('http');
 
-const BASE_URL = 'http://192.168.110.50:3001';
+const BASE_URL = 'http://8.136.29.208:3001';
 const API_PREFIX = '/api/v1';
 
 // 测试数据存储
@@ -39,7 +39,7 @@ function writeTestResult(testName, status, message) {
   const reset = '\x1b[0m';
   const color = colors[status] || reset;
   console.log(`${color}[${status}] ${testName}: ${message}${reset}`);
-  
+
   if (status === 'PASS') testResults.pass++;
   else if (status === 'FAIL') {
     testResults.fail++;
@@ -61,11 +61,11 @@ function apiRequest(method, path, body = null, token = null) {
         'Accept': 'application/json'
       }
     };
-    
+
     if (token) {
       options.headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const req = http.request(options, (res) => {
       let data = '';
       res.on('data', (chunk) => { data += chunk; });
@@ -86,15 +86,15 @@ function apiRequest(method, path, body = null, token = null) {
         }
       });
     });
-    
+
     req.on('error', (err) => {
       reject(err);
     });
-    
+
     if (body) {
       req.write(JSON.stringify(body));
     }
-    
+
     req.end();
   });
 }
@@ -106,7 +106,7 @@ async function testBasicEndpoints() {
   console.log('\n========================================');
   console.log('测试 1: 基础接口测试（公共接口）');
   console.log('========================================\n');
-  
+
   // 1.1 健康检查
   try {
     const res = await apiRequest('GET', '/');
@@ -114,16 +114,16 @@ async function testBasicEndpoints() {
   } catch (e) {
     writeTestResult('健康检查', 'FAIL', e.message);
   }
-  
+
   // 1.2 轮播图
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/core/banners`);
-    writeTestResult('轮播图列表', res.status === 200 ? 'PASS' : 'FAIL', 
+    writeTestResult('轮播图列表', res.status === 200 ? 'PASS' : 'FAIL',
       `返回 ${res.status}, 数据: ${JSON.stringify(res.data).substring(0, 100)}`);
   } catch (e) {
     writeTestResult('轮播图列表', 'FAIL', e.message);
   }
-  
+
   // 1.3 服务分类
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/core/categories`);
@@ -132,7 +132,7 @@ async function testBasicEndpoints() {
   } catch (e) {
     writeTestResult('服务分类', 'FAIL', e.message);
   }
-  
+
   // 1.4 热门服务
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/core/services/hot`);
@@ -141,7 +141,7 @@ async function testBasicEndpoints() {
   } catch (e) {
     writeTestResult('热门服务', 'FAIL', e.message);
   }
-  
+
   // 1.5 店铺列表
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/market/shops`);
@@ -156,7 +156,7 @@ async function testBasicEndpoints() {
   } catch (e) {
     writeTestResult('店铺列表', 'FAIL', e.message);
   }
-  
+
   // 1.6 帖子列表
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/posts`);
@@ -165,7 +165,7 @@ async function testBasicEndpoints() {
   } catch (e) {
     writeTestResult('帖子列表', 'FAIL', e.message);
   }
-  
+
   // 1.7 惠民卡展示
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/benefit/display`);
@@ -183,7 +183,7 @@ async function testUserAuth() {
   console.log('\n========================================');
   console.log('测试 2: 用户认证测试');
   console.log('========================================\n');
-  
+
   // 2.1 用户注册
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/auth/register`, {
@@ -196,7 +196,7 @@ async function testUserAuth() {
   } catch (e) {
     writeTestResult('用户注册', 'WARN', `可能已存在: ${e.message}`);
   }
-  
+
   // 2.2 用户登录（账号密码）
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/auth/login`, {
@@ -212,7 +212,7 @@ async function testUserAuth() {
   } catch (e) {
     writeTestResult('用户登录', 'FAIL', e.message);
   }
-  
+
   // 2.3 获取用户信息
   if (testData.userToken) {
     try {
@@ -232,7 +232,7 @@ async function testMerchantAuth() {
   console.log('\n========================================');
   console.log('测试 3: 商家认证与店铺管理');
   console.log('========================================\n');
-  
+
   // 3.1 商家登录
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/merchant-portal/login`, {
@@ -248,7 +248,7 @@ async function testMerchantAuth() {
   } catch (e) {
     writeTestResult('商家登录', 'FAIL', e.message);
   }
-  
+
   // 3.2 商家dashboard
   if (testData.merchantToken) {
     try {
@@ -258,7 +258,7 @@ async function testMerchantAuth() {
     } catch (e) {
       writeTestResult('商家Dashboard', 'FAIL', e.message);
     }
-    
+
     // 3.3 商家商品列表
     try {
       const res = await apiRequest('GET', `${API_PREFIX}/market/merchant/goods`, null, testData.merchantToken);
@@ -267,7 +267,7 @@ async function testMerchantAuth() {
     } catch (e) {
       writeTestResult('商家商品列表', 'FAIL', e.message);
     }
-    
+
     // 3.4 商家订单列表
     try {
       const res = await apiRequest('GET', `${API_PREFIX}/market/merchant/orders`, null, testData.merchantToken);
@@ -286,7 +286,7 @@ async function testWorkerAuth() {
   console.log('\n========================================');
   console.log('测试 4: 技工认证与服务订单');
   console.log('========================================\n');
-  
+
   // 4.1 技工登录
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/worker-portal/login`, {
@@ -302,7 +302,7 @@ async function testWorkerAuth() {
   } catch (e) {
     writeTestResult('技工登录', 'FAIL', e.message);
   }
-  
+
   // 4.2 技工服务订单列表
   if (testData.workerToken) {
     try {
@@ -322,7 +322,7 @@ async function testAdminAuth() {
   console.log('\n========================================');
   console.log('测试 5: 管理员认证与后台管理');
   console.log('========================================\n');
-  
+
   // 5.1 管理员登录
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/auth/admin/login`, {
@@ -338,7 +338,7 @@ async function testAdminAuth() {
   } catch (e) {
     writeTestResult('管理员登录', 'FAIL', e.message);
   }
-  
+
   // 5.2 管理员查看订单
   if (testData.adminToken) {
     try {
@@ -348,7 +348,7 @@ async function testAdminAuth() {
     } catch (e) {
       writeTestResult('管理员订单列表', 'FAIL', e.message);
     }
-    
+
     // 5.3 管理员查看退款
     try {
       const res = await apiRequest('GET', `${API_PREFIX}/admin/refunds`, null, testData.adminToken);
@@ -367,12 +367,12 @@ async function testOrderFlow() {
   console.log('\n========================================');
   console.log('测试 6: 完整下单流程测试');
   console.log('========================================\n');
-  
+
   if (!testData.userToken) {
     writeTestResult('下单流程', 'WARN', '用户未登录，跳过下单测试');
     return;
   }
-  
+
   // 6.1 获取商品详情
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/market/goods/1`);
@@ -386,7 +386,7 @@ async function testOrderFlow() {
     writeTestResult('商品详情', 'FAIL', e.message);
     return;
   }
-  
+
   // 6.2 加入购物车
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/market/cart/items`, {
@@ -399,7 +399,7 @@ async function testOrderFlow() {
   } catch (e) {
     writeTestResult('加入购物车', 'FAIL', e.message);
   }
-  
+
   // 6.3 查看购物车
   try {
     const res = await apiRequest('GET', `${API_PREFIX}/market/cart`, null, testData.userToken);
@@ -408,7 +408,7 @@ async function testOrderFlow() {
   } catch (e) {
     writeTestResult('查看购物车', 'FAIL', e.message);
   }
-  
+
   // 6.4 订单预览
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/market/orders/preview`, {
@@ -419,7 +419,7 @@ async function testOrderFlow() {
   } catch (e) {
     writeTestResult('订单预览', 'FAIL', e.message);
   }
-  
+
   // 6.5 创建订单
   try {
     const res = await apiRequest('POST', `${API_PREFIX}/market/orders`, {
@@ -427,7 +427,7 @@ async function testOrderFlow() {
       address_id: 1,
       remark: '全链路测试订单'
     }, testData.userToken);
-    
+
     if (res.status === 200 || res.status === 201) {
       testData.orderNo = res.data.order_no || res.data.orderNo;
       testData.orderId = res.data.id;

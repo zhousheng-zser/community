@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const dirToProcess = path.join(__dirname);
-const remoteUrl = 'https://192.168.110.50:3001/img/';
+const remoteUrl = 'https://8.136.29.208:3001/img/';
 
 function walk(dir, callback) {
   fs.readdir(dir, (err, list) => {
@@ -34,7 +34,7 @@ walk(dirToProcess, (filePath) => {
       const quote = match[0]; // ' or "
       return quote + remoteUrl + p1 + quote;
     });
-    
+
     // Also handle relative imports if any: e.g. ../../img/
     newData = newData.replace(/['"](\.\.\/)+img\/(.*?)['"]/g, (match, p1, p2) => {
       modified = true;

@@ -4,7 +4,7 @@
  * Tests: Auth, Neighbor Assist, Market Shopping, Service Orders, Messages, User Profile
  */
 const http = require('http');
-const BASE = 'http://192.168.110.50:3001';
+const BASE = 'http://8.136.29.208:3001';
 const R = { pass: 0, fail: 0, warn: 0, errors: [] };
 
 function api(method, path, body, token) {
