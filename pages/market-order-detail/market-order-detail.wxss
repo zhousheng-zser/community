@@ -4,7 +4,7 @@
   min-height: 100vh;
 }
 .status-head {
-  background: #FF7700;
+  background: #000000;
   padding: 40rpx;
   color: #fff;
 }
@@ -19,7 +19,7 @@
   padding: 30rpx;
 }
 
-/* 物流入口 */
+/* 鐗╂祦鍏ュ彛 */
 .logistics-preview {
   display: flex;
   align-items: center;
@@ -49,7 +49,7 @@
   color: #ccc;
 }
 
-/* 信息块 */
+/* 淇℃伅鍧?*/
 .sectionTitle {
   font-size: 32rpx;
   font-weight: bold;
@@ -82,7 +82,7 @@
   border-radius: 4rpx;
 }
 
-/* 商品卡 */
+/* 鍟嗗搧鍗?*/
 .shop-title {
   display: flex;
   justify-content: space-between;
@@ -175,7 +175,7 @@
   font-size: 36rpx;
 }
 
-/* 底部功能盘 */
+/* 搴曢儴鍔熻兘鐩?*/
 .countdown-row {
   background: #fff7e6;
   border-radius: 8rpx;
@@ -217,6 +217,7 @@
   background: #fff;
 }
 .bottomBar .primary {
-  background-color: #FF7700;
+  background-color: #000000;
   color: #fff;
 }
+

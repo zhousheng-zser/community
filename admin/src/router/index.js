@@ -48,6 +48,12 @@ const routes = [
                 name: 'WorkerApplications',
                 component: () => import('../views/WorkerApplications.vue'),
                 meta: { title: '技工入驻审核', icon: 'User' }
+            },
+            {
+                path: 'service-providers',
+                name: 'ServiceProviders',
+                component: () => import('../views/ServiceProviders.vue'),
+                meta: { title: '直约服务商管理', icon: 'Shop' }
             }
         ]
     }

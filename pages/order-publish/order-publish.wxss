@@ -154,6 +154,12 @@ page { background: #fdf3ef; }
   border-bottom: 1rpx solid #f2f2f2;
   gap: 16rpx;
 }
+.field-icon {
+  font-size: 30rpx;
+  width: 36rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
 .remark-label { font-size: 28rpx; color: #666; flex-shrink: 0; width: 80rpx; }
 .remark-input { flex: 1; font-size: 28rpx; color: #333; }
 

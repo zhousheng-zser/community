@@ -5,12 +5,12 @@ page {
 .periodic-page {
   min-height: 100vh;
   position: relative;
-  /* 默认兜底背景 */
+  /* 榛樿鍏滃簳鑳屾櫙 */
   background: #f5f6f8;
 }
 
 /* ==================================
-   1. 通用顶部框架 (头部渐变与大字)
+   1. 閫氱敤椤堕儴妗嗘灦 (澶撮儴娓愬彉涓庡ぇ瀛?
 ================================== */
 .hero-header {
   position: relative;
@@ -46,7 +46,7 @@ page {
   color: #fff;
 }
 
-/* 背景字母修饰 - 透水印效果 */
+/* 鑳屾櫙瀛楁瘝淇グ - 閫忔按鍗版晥鏋?*/
 .bg-deco-text {
   position: absolute;
   top: 140rpx;
@@ -55,12 +55,12 @@ page {
   font-size: 180rpx;
   font-weight: 900;
   font-style: italic;
-  color: rgba(255, 255, 255, 0.08); /* 半透作为背景元素 */
+  color: rgba(255, 255, 255, 0.08); /* 鍗婇€忎綔涓鸿儗鏅厓绱?*/
   z-index: 1;
   white-space: nowrap;
 }
 
-/* 中间正标题与角标区域 */
+/* 涓棿姝ｆ爣棰樹笌瑙掓爣鍖哄煙 */
 .title-zone {
   position: relative;
   z-index: 10;
@@ -78,7 +78,7 @@ page {
   margin-bottom: 20rpx;
 }
 
-/* 双菱形装饰副标题 */
+/* 鍙岃彵褰㈣楗板壇鏍囬 */
 .sub-title-bar {
   display: flex;
   align-items: center;
@@ -99,40 +99,40 @@ page {
 
 
 /* ==================================
-   2. 三种主题色的特化处理
+   2. 涓夌涓婚鑹茬殑鐗瑰寲澶勭悊
 ================================== */
-/* A. 今日主推：蓝紫发散星光 */
+/* A. 浠婃棩涓绘帹锛氳摑绱彂鏁ｆ槦鍏?*/
 .theme-today .hero-header {
   background: linear-gradient(135deg, #6c4af5 0%, #1e3a8a 100%);
 }
 .theme-today .main-title {
-  color: #ffd447; /* 黄金标题 */
+  color: #ffd447; /* 榛勯噾鏍囬 */
 }
 .theme-today .sub-text {
   color: #d1d5db;
 }
 
-/* B. 本周热卖：黑金暗夜风 */
+/* B. 鏈懆鐑崠锛氶粦閲戞殫澶滈 */
 .theme-week .hero-header {
   background: linear-gradient(180deg, #111111 0%, #291c12 100%);
 }
-/* 本周热卖的背景色是深色系，直接改量 */
+/* 鏈懆鐑崠鐨勮儗鏅壊鏄繁鑹茬郴锛岀洿鎺ユ敼閲?*/
 .theme-week .bg-deco-text {
   color: rgba(255, 100, 0, 0.06); 
   text-shadow: 0 0 30rpx rgba(255,90,0,0.4);
 }
 .theme-week .main-title {
   color: #fff;
-  text-shadow: 0 4rpx 12rpx #ff6600; /* 火焰发光字 */
+  text-shadow: 0 4rpx 12rpx #ff6600; /* 鐏劙鍙戝厜瀛?*/
 }
 .theme-week .sub-title-bar {
   background: linear-gradient(90deg, rgba(30,30,30,0) 0%, rgba(200,150,80,0.2) 50%, rgba(30,30,30,0) 100%);
 }
 .theme-week .sub-text {
-  color: #dcb380; /* 旧金色 */
+  color: #dcb380; /* 鏃ч噾鑹?*/
 }
 
-/* C. 本月排行：紫水晶冷淡风 */
+/* C. 鏈湀鎺掕锛氱传姘存櫠鍐锋贰椋?*/
 .theme-month .hero-header {
   background: linear-gradient(135deg, #d8b4fe 0%, #a78bfa 100%);
 }
@@ -150,11 +150,11 @@ page {
 }
 
 /* ==================================
-   3. 全局商品垂直列表区
+   3. 鍏ㄥ眬鍟嗗搧鍨傜洿鍒楄〃鍖?
 ================================== */
 .list-container {
   padding: 0 24rpx 60rpx;
-  margin-top: -60rpx; /* 向上穿透盖住海报 */
+  margin-top: -60rpx; /* 鍚戜笂绌块€忕洊浣忔捣鎶?*/
   position: relative;
   z-index: 30;
 }
@@ -165,10 +165,10 @@ page {
   padding: 24rpx;
   margin-bottom: 24rpx;
   box-shadow: 0 6rpx 24rpx rgba(0,0,0,0.06);
-  position: relative; /* 为左上角的徽标定位 */
+  position: relative; /* 涓哄乏涓婅鐨勫窘鏍囧畾浣?*/
 }
 
-/* 左上角粘附的红色榜单签 */
+/* 宸︿笂瑙掔矘闄勭殑绾㈣壊姒滃崟绛?*/
 .badge {
   position: absolute;
   top: 0;
@@ -181,7 +181,7 @@ page {
   z-index: 5;
 }
 
-/* 内层水平包裹 (左图右字) */
+/* 鍐呭眰姘村钩鍖呰９ (宸﹀浘鍙冲瓧) */
 .main-info {
   display: flex;
 }
@@ -213,7 +213,7 @@ page {
   line-height: 1.4;
 }
 
-/* 底部价格与动作区 */
+/* 搴曢儴浠锋牸涓庡姩浣滃尯 */
 .g-bottom {
   margin-top: 20rpx;
 }
@@ -237,7 +237,7 @@ page {
   align-items: center;
   border: 2rpx solid #FF7700;
   border-radius: 8rpx;
-  overflow: hidden; /* 切割两侧不同颜色 */
+  overflow: hidden; /* 鍒囧壊涓や晶涓嶅悓棰滆壊 */
 }
 
 .comm-box {
@@ -250,7 +250,7 @@ page {
 }
 
 .buy-btn {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   font-size: 24rpx;
   padding: 6rpx 20rpx;
@@ -258,7 +258,7 @@ page {
 }
 
 /* ==================================
-   4. 底部推荐理由行
+   4. 搴曢儴鎺ㄨ崘鐞嗙敱琛?
 ================================== */
 .reason-row {
   border-top: 2rpx dashed #eee;
@@ -295,3 +295,4 @@ page {
   font-size: 28rpx;
   padding: 80rpx 0;
 }
+

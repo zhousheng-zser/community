@@ -181,7 +181,7 @@
   transform: translateX(-50%);
   width: 40rpx;
   height: 6rpx;
-  background: #FF7700;
+  background: #000000;
   border-radius: 4rpx;
 }
 
@@ -220,7 +220,7 @@
   transform: translateY(-50%);
   width: 8rpx;
   height: 30rpx;
-  background: #FF7700;
+  background: #000000;
   border-radius: 0 4rpx 4rpx 0;
 }
 
@@ -340,7 +340,7 @@
 }
 
 .step-btn.plus {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
 }
 
@@ -445,7 +445,7 @@
   background: #f1f1f1;
 }
 
-/* 购物车 */
+/* 璐墿杞?*/
 .bottom-bar {
   position: fixed;
   bottom: 30rpx;
@@ -483,7 +483,7 @@
 }
 
 .cart-icon-wrap.active {
-  background: #FF7700;
+  background: #000000;
 }
 
 .cart-icon {
@@ -494,7 +494,7 @@
   position: absolute;
   top: -10rpx;
   right: -10rpx;
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   font-size: 20rpx;
   padding: 2rpx 10rpx;
@@ -542,11 +542,11 @@
 }
 
 .settle.active {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
 }
 
-/* 购物车弹窗 */
+/* 璐墿杞﹀脊绐?*/
 .cart-mask {
   position: fixed;
   top: 0;
@@ -565,12 +565,12 @@
   background: #fff;
   z-index: 950;
   border-radius: 24rpx 24rpx 0 0;
-  padding-bottom: 160rpx; /* 留出 bottom bar 的空间 */
+  padding-bottom: 160rpx; /* 鐣欏嚭 bottom bar 鐨勭┖闂?*/
   transition: transform 0.3s ease;
 }
 
 .cart-popup.show {
-  transform: translateY(-600rpx); /* 将弹窗推起 */
+  transform: translateY(-600rpx); /* 灏嗗脊绐楁帹璧?*/
   bottom: 0; 
 }
 
@@ -626,3 +626,4 @@
   font-weight: bold;
   margin: 0 40rpx;
 }
+

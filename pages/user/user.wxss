@@ -7,9 +7,9 @@ page {
   min-height: 100vh;
 }
 
-/* ===== 顶部渐变头部 ===== */
+/* ===== 椤堕儴娓愬彉澶撮儴 ===== */
 .mine-header {
-  background: linear-gradient(180deg, #FF7A00 0%, #FF9E3D 100%);
+  background: #000000;
   padding: 24rpx 28rpx 0;
   border-radius: 0 0 40rpx 40rpx;
   position: relative;
@@ -121,7 +121,7 @@ page {
   color: rgba(255,255,255,0.9);
 }
 
-/* Stats 统计行 */
+/* Stats 缁熻琛?*/
 .header-stats {
   display: flex;
   background: transparent;
@@ -169,7 +169,7 @@ page {
   align-self: center;
 }
 
-/* ===== 钱包/收益卡 ===== */
+/* ===== 閽卞寘/鏀剁泭鍗?===== */
 .wallet-card {
   display: flex;
   justify-content: space-between;
@@ -235,12 +235,12 @@ page {
   margin-top: 8rpx;
   padding: 8rpx 24rpx;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, #FF7A00, #FFA033);
+  background: #000000;
   color: #fff;
   font-size: 22rpx;
 }
 
-/* ===== 通用卡片 ===== */
+/* ===== 閫氱敤鍗＄墖 ===== */
 .card {
   margin: 16rpx 24rpx 0;
   border-radius: 24rpx;
@@ -272,7 +272,7 @@ page {
   font-weight: 400;
 }
 
-/* ===== 工作台入口（技工 / 商家分包）===== */
+/* ===== 宸ヤ綔鍙板叆鍙ｏ紙鎶€宸?/ 鍟嗗鍒嗗寘锛?==== */
 .workbench-head-left {
   flex: 1;
   display: flex;
@@ -360,7 +360,7 @@ page {
   color: #888;
 }
 
-/* ===== 图标网格（订单区） ===== */
+/* ===== 鍥炬爣缃戞牸锛堣鍗曞尯锛?===== */
 .menu-grid {
   display: flex;
   flex-wrap: wrap;
@@ -400,7 +400,7 @@ page {
   text-align: center;
 }
 
-/* ===== 列表菜单（社区 / 其他服务） ===== */
+/* ===== 鍒楄〃鑿滃崟锛堢ぞ鍖?/ 鍏朵粬鏈嶅姟锛?===== */
 .list-menu {
   margin-top: 8rpx;
 }
@@ -445,7 +445,7 @@ page {
   font-weight: 300;
 }
 
-/* ===== 加入卡片 ===== */
+/* ===== 鍔犲叆鍗＄墖 ===== */
 .join-grid {
   display: flex;
   gap: 16rpx;
@@ -499,7 +499,8 @@ page {
   font-size: 18rpx;
 }
 
-/* ===== 底部占位 ===== */
+/* ===== 搴曢儴鍗犱綅 ===== */
 .bottom-space {
   height: 130rpx;
 }
+

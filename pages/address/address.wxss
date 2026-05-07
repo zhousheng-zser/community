@@ -2,7 +2,7 @@
 page { background: #f5f5f5; }
 .addr-page { min-height: 100vh; padding-bottom: 160rpx; }
 
-/* ===== 地址卡片 ===== */
+/* ===== 鍦板潃鍗＄墖 ===== */
 .addr-list { padding: 20rpx 24rpx 0; }
 
 .addr-card {
@@ -105,7 +105,7 @@ page { background: #f5f5f5; }
 .foot-btn.danger { color: #f64e4e; }
 .foot-icon { font-size: 26rpx; }
 
-/* ===== 空状态 ===== */
+/* ===== 绌虹姸鎬?===== */
 .empty-wrap {
   display: flex;
   flex-direction: column;
@@ -117,7 +117,7 @@ page { background: #f5f5f5; }
 .empty-title { font-size: 32rpx; font-weight: 700; color: #333; margin-bottom: 12rpx; }
 .empty-sub { font-size: 26rpx; color: #aaa; }
 
-/* ===== 底部新增按钮 ===== */
+/* ===== 搴曢儴鏂板鎸夐挳 ===== */
 .add-bar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -140,7 +140,7 @@ page { background: #f5f5f5; }
 .add-icon { font-size: 36rpx; color: #fff; font-weight: 300; }
 .add-text { font-size: 32rpx; font-weight: 600; color: #fff; }
 
-/* ===== 弹窗 ===== */
+/* ===== 寮圭獥 ===== */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.45); z-index: 200;
@@ -171,7 +171,7 @@ page { background: #f5f5f5; }
 
 .modal-body { flex: 1; overflow: hidden; padding: 0 32rpx; }
 
-/* 表单行 */
+/* 琛ㄥ崟琛?*/
 .form-row {
   display: flex;
   align-items: center;
@@ -224,7 +224,7 @@ page { background: #f5f5f5; }
   text-align: right;
 }
 
-/* 标签选择 */
+/* 鏍囩閫夋嫨 */
 .tag-list { display: flex; gap: 16rpx; flex-wrap: wrap; flex: 1; }
 .tag-item {
   padding: 8rpx 28rpx;
@@ -239,7 +239,7 @@ page { background: #f5f5f5; }
   color: #f64e4e;
 }
 
-/* 底部保存 */
+/* 搴曢儴淇濆瓨 */
 .modal-footer {
   padding: 20rpx 32rpx 48rpx;
   flex-shrink: 0;
@@ -263,7 +263,7 @@ page { background: #f5f5f5; }
   color: #fff;
 }
 
-/* ===== PICK MODE 样式 ===== */
+/* ===== PICK MODE 鏍峰紡 ===== */
 .pick-wrap {
   padding: 24rpx 24rpx 0;
 }
@@ -339,7 +339,7 @@ page { background: #f5f5f5; }
 
 .radio-dot.checked {
   border-color: #FF7A00;
-  background: #FF7A00;
+  background: #000000;
   box-shadow: inset 0 0 0 6rpx #fff;
 }
 
@@ -358,3 +358,4 @@ page { background: #f5f5f5; }
   justify-content: center;
   box-shadow: 0 8rpx 24rpx rgba(192,57,43,0.35);
 }
+

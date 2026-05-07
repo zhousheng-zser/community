@@ -1,60 +1,161 @@
-<view class="sp-home-page">
-  <view class="sp-header">
-    <image class="sp-avatar" src="{{userPhoto}}" mode="aspectFill" />
-    <view class="sp-info">
-      <text class="sp-greeting">{{greeting}}，{{displayName}}</text>
-      <text class="sp-role">服务商工作台</text>
+<view class="portal-page">
+  <view class="portal-top merchant-gradient sph-hero">
+    <view class="sph-row">
+      <image class="sph-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="sph-text">
+        <text class="sph-greet">{{greeting}}，{{displayName}}</text>
+        <text class="portal-sub sph-sub">{{shopName ? shopName + ' · 直约到家服务' : '直约到家 · 服务项目与订单'}}</text>
+      </view>
     </view>
-    <view class="sp-balance-box">
-      <text class="sp-balance-label">服务商结算</text>
-      <text class="sp-balance-amount">¥{{balanceText}}</text>
+    <text class="portal-title sph-title">服务商工作台</text>
+  </view>
+
+  <view class="portal-banner {{spOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">
+    {{bannerText}}
+    <view wx:if="{{!spOk}}" bindtap="goJoin" style="margin-top:10rpx;">
+      <button style="background:#ff9800;color:#fff;border:none;padding:10rpx 24rpx;border-radius:8rpx;font-size:26rpx;display:inline-block;">去入驻</button>
     </view>
   </view>
 
-  <view class="sp-banner {{spOk ? 'sp-ok' : 'sp-warn'}}" style="margin:12px;padding:10px 14px;background:{{spOk ? '#e8f5e9' : '#fff3e0'}};border-radius:8px;">
-    <text style="font-size:13px;color:{{spOk ? '#2e7d32' : '#e65100'}};">{{bannerText}}</text>
-    <view class="sp-go-join" wx:if="{{!spOk}}" bindtap="goJoin" style="margin-top:8px;">
-      <button class="sp-btn" style="background:#ff9800;color:#fff;border:none;padding:8px 16px;border-radius:6px;font-size:13px;">去入驻</button>
+  <view class="sph-stat" wx:if="{{spOk}}">
+    <view class="sph-stat-item" bindtap="goOrders">
+      <text class="sph-stat-num {{stats.pendingOrders > 0 ? 'highlight' : ''}}">{{stats.pendingOrders}}</text>
+      <text class="sph-stat-label">待接单</text>
+    </view>
+    <view class="sph-stat-item" bindtap="goOrders">
+      <text class="sph-stat-num">{{stats.inService}}</text>
+      <text class="sph-stat-label">服务中</text>
+    </view>
+    <view class="sph-stat-item" bindtap="goOrders">
+      <text class="sph-stat-num">{{stats.completed}}</text>
+      <text class="sph-stat-label">已完成</text>
+    </view>
+    <view class="sph-stat-item" bindtap="goServices">
+      <text class="sph-stat-num">{{stats.totalServices}}</text>
+      <text class="sph-stat-label">服务项目</text>
     </view>
   </view>
 
-  <view class="sp-stats">
-    <view class="sp-stat-item">
-      <text class="sp-stat-num">{{stats.pendingOrders}}</text>
-      <text class="sp-stat-label">待接单</text>
-    </view>
-    <view class="sp-stat-item">
-      <text class="sp-stat-num">{{stats.dispatching}}</text>
-      <text class="sp-stat-label">派单中</text>
-    </view>
-    <view class="sp-stat-item">
-      <text class="sp-stat-num">{{stats.inProgress}}</text>
-      <text class="sp-stat-label">服务中</text>
-    </view>
-    <view class="sp-stat-item">
-      <text class="sp-stat-num">{{stats.completed}}</text>
-      <text class="sp-stat-label">已完成</text>
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-card" wx:if="{{spOk}}">
+    <view class="card-title">经营中心</view>
+    <view class="grid-2 sph-grid">
+      <view class="grid-btn" bindtap="goQualification">
+        <view class="grid-btn-icon">
+          <image src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">入驻资质</text>
+          <text class="grid-btn-desc">门店信息 · 营业执照 · 服务范围 · 资质认证</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goServices">
+        <view class="grid-btn-icon">
+          <image src="/img/join_services/service_provider.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">服务项目管理</text>
+          <text class="grid-btn-desc">上下架 · 预约量 · 服务定价</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goOrders">
+        <view class="grid-btn-icon">
+          <image src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">服务订单</text>
+          <text class="grid-btn-desc">接单 · 到达打卡 · 完成服务</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goSettings">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/settings.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">门店设置</text>
+          <text class="grid-btn-desc">{{spOk ? '联系人与门店资料' : '入驻通过后可使用'}}</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goShop">
+        <view class="grid-btn-icon">
+          <image src="/img/market_icons/home.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">门店预览</text>
+          <text class="grid-btn-desc">用户端服务商店铺页</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goAccount">
+        <view class="grid-btn-icon">
+          <image src="/img/local_goods_icons/money.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">资金与对账</text>
+          <text class="grid-btn-desc">余额 ¥{{balanceText}} · 结算提现</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
     </view>
   </view>
 
-  <view class="sp-menu">
-    <view class="sp-menu-item" bindtap="goOrders">
-      <image class="sp-menu-icon" src="/img/order-0.png" mode="aspectFit" />
-      <text class="sp-menu-text">服务订单</text>
-    </view>
-    <view class="sp-menu-item" bindtap="goDispatch">
-      <image class="sp-menu-icon" src="/img/dispatch.png" mode="aspectFit" />
-      <text class="sp-menu-text">派单管理</text>
-    </view>
-    <view class="sp-menu-item" bindtap="goServices">
-      <image class="sp-menu-icon" src="/img/service.png" mode="aspectFit" />
-      <text class="sp-menu-text">服务项目</text>
-    </view>
-    <view class="sp-menu-item" bindtap="goMine">
-      <image class="sp-menu-icon" src="/img/user-0.png" mode="aspectFit" />
-      <text class="sp-menu-text">账户中心</text>
+  <view class="portal-card sph-section" wx:if="{{spOk}}">
+    <view class="card-title">服务上下架</view>
+    <view class="sph-link-list">
+      <view class="sph-link-item" bindtap="goServiceShelfUp">
+        <image class="sph-link-ico" src="/img/service.png" mode="aspectFit"></image>
+        <view class="sph-link-main">
+          <text class="sph-link-title">上架管理</text>
+          <text class="sph-link-desc">仅已下架服务，打开开关即可上架</text>
+        </view>
+        <text class="sph-link-arrow">›</text>
+      </view>
+      <view class="sph-link-item" bindtap="goServiceShelfDown">
+        <image class="sph-link-ico" src="/img/market_icons/home.png" mode="aspectFit"></image>
+        <view class="sph-link-main">
+          <text class="sph-link-title">下架管理</text>
+          <text class="sph-link-desc">仅在售服务，关闭开关即可下架</text>
+        </view>
+        <text class="sph-link-arrow">›</text>
+      </view>
     </view>
   </view>
 
-  <view class="sp-back-btn" bindtap="backUser">返回用户端</view>
+  <view class="portal-card sph-section" wx:if="{{!spOk}}">
+    <view class="card-title">快捷入口</view>
+    <view class="sph-link-list">
+      <view class="sph-link-item" bindtap="goJoin">
+        <image class="sph-link-ico" src="/img/join_services/market_merchant.png" mode="aspectFit"></image>
+        <view class="sph-link-main">
+          <text class="sph-link-title">申请成为服务商</text>
+          <text class="sph-link-desc">填写资质信息，审核通过后即可接单</text>
+        </view>
+        <text class="sph-link-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="portal-tabbar pt-bar-4">
+    <view class="pt-item pt-on">
+      <image class="pt-ico" src="/img/home-1.png" mode="aspectFit"></image>
+      <text>首页</text>
+    </view>
+    <view class="pt-item" bindtap="goOrders">
+      <image class="pt-ico" src="/img/order-0.png" mode="aspectFit"></image>
+      <text>订单</text>
+    </view>
+    <view class="pt-item" bindtap="goServices">
+      <image class="pt-ico" src="/img/join_services/service_provider.png" mode="aspectFit"></image>
+      <text>服务</text>
+    </view>
+    <view class="pt-item" bindtap="goMine">
+      <image class="pt-ico" src="/img/user-0.png" mode="aspectFit"></image>
+      <text>我的</text>
+    </view>
+  </view>
 </view>

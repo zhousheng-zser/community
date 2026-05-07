@@ -7,5 +7,6 @@
 .po-title { display: block; font-size: 28rpx; }
 .po-sub { font-size: 24rpx; color: #b45309; margin-top: 8rpx; }
 .po-empty { padding: 60rpx 32rpx; text-align: center; color: #666; font-size: 26rpx; }
-.po-btn { margin-top: 24rpx; background: #ff7a00; color: #fff; border-radius: 999rpx; }
+.po-btn { margin-top: 24rpx; background: #000000; color: #fff; border-radius: 999rpx; }
 .po-btn.ghost { background: #fff; color: #ff7a00; border: 1rpx solid #ff7a00; }
+

@@ -28,7 +28,7 @@
   background: #f9f9f9;
 }
 .mode-item.active {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   font-weight: bold;
 }
@@ -178,7 +178,7 @@
   font-weight: bold;
 }
 .submit-btn {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   border-radius: 40rpx;
   height: 80rpx;
@@ -190,3 +190,4 @@
 .submit-btn.disabled {
   background: #ccc;
 }
+

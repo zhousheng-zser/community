@@ -3,7 +3,7 @@
   min-height: 100vh;
 }
 
-/* Tab 栏 */
+/* Tab 鏍?*/
 .tab-bar {
   display: flex;
   background: #fff;
@@ -33,11 +33,11 @@
   transform: translateX(-50%);
   width: 60rpx;
   height: 6rpx;
-  background: #ff7a00;
+  background: #000000;
   border-radius: 3rpx;
 }
 
-/* 记录列表 */
+/* 璁板綍鍒楄〃 */
 .record-list {
   padding: 20rpx;
 }
@@ -109,7 +109,7 @@
   color: #999;
 }
 
-/* 空状态 */
+/* 绌虹姸鎬?*/
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -133,3 +133,4 @@
   font-size: 24rpx;
   color: #999;
 }
+

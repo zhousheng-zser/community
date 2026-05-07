@@ -26,6 +26,9 @@
   </view>
 
   <view class="mg-toolbar">
+    <view class="mg-create-row">
+      <button class="create-btn" size="mini" bindtap="goCreate">新增商品并上架</button>
+    </view>
     <view class="search-bar mg-search">
       <text class="search-icon">⌕</text>
       <input
@@ -112,6 +115,7 @@
       <image class="empty-icon" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>
       <view class="empty-title">暂无商品</view>
       <view class="empty-tip">{{emptyTip}}</view>
+      <button class="create-btn empty-create-btn" size="mini" bindtap="goCreate">去新增商品</button>
     </view>
   </view>
 

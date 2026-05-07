@@ -35,7 +35,7 @@
 
 .pub-btn {
   margin-top: 32rpx;
-  background: #ff7a00;
+  background: #000000;
   color: #fff;
   font-size: 28rpx;
   border-radius: 999rpx;
@@ -102,3 +102,4 @@
   font-size: 28rpx;
   color: #e54d42;
 }
+

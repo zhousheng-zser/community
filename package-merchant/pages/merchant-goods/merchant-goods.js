@@ -2,6 +2,7 @@ const util = require('../../../utils/util.js');
 const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
 const mshop = require('../../../utils/merchantShopContext.js');
+const api = require('../../../api/index.js');
 
 function mapGoodsRow(g) {
   const id = g.id;
@@ -10,6 +11,7 @@ function mapGoodsRow(g) {
   const sales = g.sales_count != null ? g.sales_count : g.sales != null ? g.sales : 0;
   const safe = g.safe_stock != null ? g.safe_stock : g.low_stock_threshold != null ? g.low_stock_threshold : 5;
   const onShelf =
+    g.status === 'on_sale' ||
     g.is_published === 1 ||
     g.is_published === true ||
     g.on_shelf === true ||
@@ -75,8 +77,7 @@ Page({
   },
 
   onShow() {
-    this.applyShopContext();
-    this.load();
+    this.bootstrapShopContextAndLoad();
   },
 
   applyShopContext() {
@@ -89,6 +90,22 @@ Page({
       shopWarnText = '未绑定店铺，请先在「店铺入驻与资质」中完成绑定，以便只管理本店商品';
     }
     this.setData({ shopId, shopName, shopBannerText, shopWarnText });
+  },
+
+  async bootstrapShopContextAndLoad() {
+    this.applyShopContext();
+    const { shopId } = this.data;
+    if (shopId == null || shopId === '') {
+      try {
+        const resp = await api.merchant.getShop();
+        const shop = (resp && (resp.shop || resp.data || resp)) || {};
+        mshop.syncBoundShop(getApp(), shop);
+        this.applyShopContext();
+      } catch (e) {
+        // ignore: keep current warning text
+      }
+    }
+    this.load();
   },
 
   clearShelfMode() {
@@ -118,6 +135,12 @@ Page({
     const mode = e.currentTarget.dataset.mode || 'sales';
     this.setData({ sortMode: mode });
     this.applyList();
+  },
+
+  goCreate() {
+    wx.navigateTo({
+      url: '/package-merchant/pages/merchant-goods-edit/merchant-goods-edit?mode=create'
+    });
   },
 
   applyList() {
@@ -174,21 +197,15 @@ Page({
 
   async submitRestock(id, qty) {
     try {
-      await util.post(`market/merchant/goods/${id}/restock`, { quantity: qty, qty });
+      await api.merchant.restockGoods(id, { quantity: qty, qty });
       wx.showToast({ title: '已提交补货', icon: 'success' });
       await this.load();
     } catch (e1) {
-      try {
-        await util.post(`market/shop/goods/${id}/restock`, { quantity: qty });
-        wx.showToast({ title: '已提交补货', icon: 'success' });
-        await this.load();
-      } catch (e2) {
-        wx.showModal({
-          title: '补货接口未就绪',
-          content: '请先在电脑端商家后台入库，或联系运营配置接口。',
-          showCancel: false
-        });
-      }
+      wx.showModal({
+        title: '补货失败',
+        content: (e1 && e1.errmsg) || '请稍后重试',
+        showCancel: false
+      });
     }
   },
 
@@ -268,17 +285,15 @@ Page({
 
   async submitShelf(id, published) {
     try {
-      await util.post(`market/merchant/goods/${id}/shelf`, { published, is_published: published ? 1 : 0 });
+      await api.merchant.shelfGoods(id, {
+        status: published ? 'on_sale' : 'off_sale',
+        published,
+        is_published: published ? 1 : 0
+      });
       wx.showToast({ title: published ? '已上架' : '已下架', icon: 'success' });
       await this.load();
     } catch (err) {
-      try {
-        await util.post(`market/shop/goods/${id}/shelf`, { published });
-        wx.showToast({ title: published ? '已上架' : '已下架', icon: 'success' });
-        await this.load();
-      } catch (e2) {
-        wx.showToast({ title: (e2 && e2.errmsg) || '接口待上线', icon: 'none' });
-      }
+      wx.showToast({ title: (err && err.errmsg) || '上下架失败', icon: 'none' });
     }
   },
 

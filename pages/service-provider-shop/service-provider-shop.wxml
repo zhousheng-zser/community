@@ -1,7 +1,15 @@
 <view class="sps-page">
   <view class="sps-head" wx:if="{{providerName}}">
-    <text class="sps-title">{{providerName}}</text>
-    <text class="sps-sub">勾选一项或多项服务打包下单</text>
+    <image wx:if="{{providerCover}}" class="sps-cover-banner" src="{{providerCover}}" mode="aspectFill"></image>
+    <view class="sps-head-info">
+      <text class="sps-title">{{providerName}}</text>
+      <text class="sps-sub" wx:if="{{providerDesc}}">{{providerDesc}}</text>
+      <view class="sps-contact" wx:if="{{providerPhone}}" bindtap="callProvider">
+        <text class="sps-contact-icon">📞</text>
+        <text class="sps-contact-tel">{{providerPhone}}</text>
+      </view>
+    </view>
+    <view class="sps-tip">勾选服务加入购物车，可打包下单</view>
   </view>
 
   <view wx:if="{{loading}}" class="sps-loading">加载中…</view>
@@ -9,16 +17,20 @@
   <block wx:else>
     <view wx:for="{{groups}}" wx:for-item="grp" wx:key="group_key" class="sps-group">
       <text class="sps-group-title">{{grp.group_label || grp.group_key}}</text>
-      <view class="sps-line" wx:for="{{grp.items}}" wx:for-item="line" wx:key="service_id">
+      <view class="sps-line {{line.unsupported ? 'sps-line-off' : ''}}" wx:for="{{grp.items}}" wx:for-item="line" wx:key="service_id">
         <image class="sps-cover" src="{{line.cover}}" mode="aspectFill"></image>
         <view class="sps-mid">
           <text class="sps-line-title">{{line.title}}</text>
-          <text class="sps-line-price">￥{{line.priceText}}</text>
+          <text class="sps-line-sub" wx:if="{{line.sub || line.desc}}">{{line.sub || line.desc}}</text>
+          <view class="sps-line-price-row">
+            <text class="sps-line-price">￥{{line.priceText}}</text>
+            <text class="sps-line-status-off" wx:if="{{line.saleStatusText}}">{{line.saleStatusText}}</text>
+          </view>
         </view>
         <view class="sps-qty">
           <view class="sps-qb" data-gk="{{grp.group_key}}" data-sid="{{line.service_id}}" bindtap="decLine">−</view>
           <text class="sps-qn">{{cart[line.cartKey] || 0}}</text>
-          <view class="sps-qb" data-gk="{{grp.group_key}}" data-sid="{{line.service_id}}" bindtap="incLine">+</view>
+          <view class="sps-qb {{line.unsupported ? 'sps-qb-disabled' : ''}}" data-gk="{{grp.group_key}}" data-sid="{{line.service_id}}" data-unsupported="{{line.unsupported}}" bindtap="incLine">+</view>
         </view>
       </view>
     </view>

@@ -109,11 +109,19 @@ Page({
   },
 
   doSendText(text) {
+    this._doSendTextInternal(text);
+  },
+
+  async _doSendTextInternal(text) {
+    const peerId = await this.ensurePeerIdForSend();
     const payload = {
       conversationId: this.data.conversationId,
       content: text,
       msgType: 'text'
     };
+    if (peerId != null && peerId !== '') {
+      payload.peerId = Number(peerId);
+    }
     if (this.data.shopIdForApi != null) {
       payload.shop_id = this.data.shopIdForApi;
     }
@@ -152,6 +160,43 @@ Page({
       });
   },
 
+  async ensurePeerIdForSend() {
+    if (this.data.peerId != null && this.data.peerId !== '') return this.data.peerId;
+
+    const cid = String(this.data.conversationId || '');
+    if (cid) {
+      try {
+        const convRes = await util.get('messages/conversations');
+        const list = Array.isArray(convRes) ? convRes : (convRes.list || convRes.data || []);
+        const hit = (list || []).find((item) => {
+          const rowCid = String(
+            item.conversation_id ||
+            item.conversationId ||
+            (item.conversation && item.conversation.id) ||
+            ''
+          );
+          return rowCid === cid;
+        });
+        if (hit) {
+          const pid = hit.peer_id || hit.peerId || (hit.peerUser && hit.peerUser.id);
+          if (pid != null && pid !== '') {
+            this.setData({ peerId: String(pid) });
+            return pid;
+          }
+        }
+      } catch (e) {}
+    }
+
+    const mine = Number(this.data.myUserId || 0);
+    const history = Array.isArray(this.data.history) ? this.data.history : [];
+    const peerMsg = history.find((m) => m && Number(m.sender_id) !== mine && m.sender_id != null);
+    if (peerMsg) {
+      this.setData({ peerId: String(peerMsg.sender_id) });
+      return peerMsg.sender_id;
+    }
+    return null;
+  },
+
   sendImage() {
     wx.chooseImage({
       count: 1,
@@ -166,15 +211,19 @@ Page({
         }
         util
           .uploadFile('messages/upload', tempFilePath, 'file', formData)
-          .then((data) => {
+          .then(async (data) => {
             let path = data.url || data.path;
             if (!path) throw new Error('no url');
             const displayUrl = util.imgUrl(path);
+            const peerId = await this.ensurePeerIdForSend();
             const payload = {
               conversationId: this.data.conversationId,
               content: displayUrl,
               msgType: 'image'
             };
+            if (peerId != null && peerId !== '') {
+              payload.peerId = Number(peerId);
+            }
             if (this.data.shopIdForApi != null) {
               payload.shop_id = this.data.shopIdForApi;
             }
@@ -226,15 +275,17 @@ Page({
         if (this.data.shopIdForApi != null) formData.shop_id = String(this.data.shopIdForApi);
         util
           .uploadFile('messages/upload', p, 'file', formData)
-          .then((data) => {
+          .then(async (data) => {
             let path = data.url || data.path;
             if (!path) throw new Error('no url');
             const displayUrl = util.imgUrl(path);
+            const peerId = await this.ensurePeerIdForSend();
             const payload = {
               conversationId: this.data.conversationId,
               content: displayUrl,
               msgType: 'audio'
             };
+            if (peerId != null && peerId !== '') payload.peerId = Number(peerId);
             if (this.data.shopIdForApi != null) payload.shop_id = this.data.shopIdForApi;
             return util.post('messages/send', payload);
           })

@@ -26,16 +26,20 @@
   <!-- 服务卡片列表 -->
   <view class="service-list">
     <view
-      class="service-card"
+      class="service-card {{item.unsupported ? 'service-card-off' : ''}}"
       wx:for="{{filteredServices}}"
       wx:key="id"
       bindtap="goServiceDetail"
       data-id="{{item.id}}"
+      data-unsupported="{{item.unsupported}}"
     >
       <image src="{{item.image}}" mode="aspectFill" lazy-load></image>
       <view class="info">
         <text class="s-title">{{item.title}}</text>
-        <text class="s-price">{{item.price}}</text>
+        <view class="s-price-row">
+          <text class="s-price">{{item.price}}</text>
+          <text class="s-status-off" wx:if="{{item.saleStatusText}}">{{item.saleStatusText}}</text>
+        </view>
         <text class="s-meta">{{item.sold}}</text>
       </view>
     </view>

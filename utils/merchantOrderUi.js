@@ -56,13 +56,17 @@ function enrichItem(o) {
     (o.user && (o.user.userName || o.user.nickName)) ||
     '';
   const timeDisplay = formatTimeLine(time) || '—';
-  const buyerUserId = o.buyer_user_id != null ? o.buyer_user_id : o.buyer_id;
+  const buyerUserId =
+    o.buyer_user_id != null ? o.buyer_user_id
+      : (o.buyer_id != null ? o.buyer_id
+        : (o.user_id != null ? o.user_id : (o.user && o.user.id != null ? o.user.id : null)));
   const riderUserId = o.rider_user_id != null ? o.rider_user_id : o.delivery_user_id;
   const riderName = o.rider_name || o.delivery_name || '';
   return {
     id: rowId,
     orderNo,
     statusText,
+    orderStatus: o.order_status || o.status || '',
     title,
     time,
     timeDisplay,

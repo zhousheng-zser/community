@@ -1,7 +1,11 @@
-const { baseUrl } = require('../../utils/config.js');
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
-const { imgUrl } = require('../../utils/util.js');
+
+function toNumberOrNull(v) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
 
 Page({
   data: {
@@ -159,11 +163,7 @@ Page({
       name,
       icon: icons[idx % icons.length]
     }));
-    const services = config.services.map((item) => ({
-      ...item,
-      sold: "已售0 好评率100%",
-      image: item.image || images.homeCleaning
-    }));
+    const services = config.services.map((item) => this.decorateService(item));
 
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
@@ -174,39 +174,44 @@ Page({
     });
     this.filterServices("hot");
 
-    // 尝试从后端拉取真实数据（含图片）
-    wx.request({
-      url: `${baseUrl}/core/service-groups/${key}`,
-      success: (res) => {
-        if (res.statusCode !== 200 || !res.data || !res.data.data) return;
-        const { categories: apiCats, services: apiSvcs } = res.data.data;
-        if (!apiCats || !apiCats.length || !apiSvcs || !apiSvcs.length) return;
+    // [后端接口暂未实现且返回测试脏数据，暂时禁用覆盖，使用本地配置数据]
+    this.setData({ loading: false });
+  },
 
-        const priceUnit = config.priceUnit || '次';
-        const newCategories = apiCats.map((cat, idx) => ({
-          key: idx === 0 ? "hot" : cat.name,
-          name: cat.name,
-          icon: cat.icon_url || icons[idx % icons.length]
-        }));
-        const newServices = apiSvcs.map(item => ({
-          id: item.id,
-          category: item.category ? item.category.name : '',
-          title: item.title,
-          price: `${Math.round(item.price)}元/${priceUnit}`,
-          image: listImageFromHome3(
-            item.title,
-            item.cover_image ? imgUrl(item.cover_image) : '/img/placeholders/home_cleaning.png'
-          ),
-          sold: `已售${item.sales_count || 0} 好评率100%`
-        }));
+  decorateService(item) {
+    const unsupported = this.isServiceUnsupported(item);
+    return {
+      ...item,
+      sold: item.sold || "已售0 好评率100%",
+      image: item.image || images.homeCleaning,
+      unsupported,
+      saleStatusText: unsupported ? '不可提供' : ''
+    };
+  },
 
-        this.setData({ categories: newCategories, services: newServices, loading: false });
-        this.filterServices(this.data.activeCategory);
-      },
-      complete: () => {
-        this.setData({ loading: false });
-      }
-    });
+  getCurrentCommunityId() {
+    const gd = getApp().globalData || {};
+    return toNumberOrNull(
+      gd.communityId || gd.community_id || wx.getStorageSync('community_id') || wx.getStorageSync('communityId')
+    );
+  },
+
+  isServiceUnsupported(item) {
+    if (!item || typeof item !== 'object') return false;
+    if (item.community_supported === false) return true;
+    if (item.supported === false || item.is_available === false) return true;
+    const communityId = this.getCurrentCommunityId();
+    const allow = Array.isArray(item.supported_community_ids) ? item.supported_community_ids : item.supportedCommunityIds;
+    if (Array.isArray(allow) && allow.length > 0 && communityId != null) {
+      const allowSet = allow.map((x) => Number(x)).filter((x) => Number.isFinite(x));
+      if (allowSet.length > 0 && !allowSet.includes(communityId)) return true;
+    }
+    const deny = Array.isArray(item.blocked_community_ids) ? item.blocked_community_ids : item.blockedCommunityIds;
+    if (Array.isArray(deny) && deny.length > 0 && communityId != null) {
+      const denySet = deny.map((x) => Number(x)).filter((x) => Number.isFinite(x));
+      if (denySet.includes(communityId)) return true;
+    }
+    return false;
   },
 
   goBack() {
@@ -234,6 +239,10 @@ Page({
   },
 
   goServiceDetail(e) {
+    if (e.currentTarget.dataset.unsupported) {
+      wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
+      return;
+    }
     const key = this._groupKey || 'tidy';
     const sid = e.currentTarget.dataset.id;
     wx.navigateTo({

@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
 Page({
   data: {
@@ -9,11 +10,12 @@ Page({
     categoryIndex: -1,
     communityList: [],
     communityIndex: -1,
+    placePhotoCount: 0,
     form: {
       contact: '', phone: '', shopName: '', category: '', address: '',
       lat: 0, lng: 0,
       intro: '', promoter: '', creditCode: '', bizName: '', legalPerson: '',
-      signboard: '', indoor: '', bizLicense: '', community: ''
+      signboard: '', indoor: '', bizLicense: '', community: '', placePhotos: []
     }
   },
 
@@ -27,18 +29,27 @@ Page({
   },
 
   fetchCommunities() {
-    util.get('core/communities')
+    const applyNames = (res) => {
+      const list = (res && res.list) || (res && res.data && res.data.list) || (Array.isArray(res && res.data) ? res.data : []) || [];
+      const names = list.map((c) => c.name || c.community_name || c.title).filter(Boolean);
+      if (names.length > 0) {
+        this.setData({ communityList: names });
+        return true;
+      }
+      return false;
+    };
+    util.get('geo/communities')
       .then((res) => {
-        const list = (res && res.list) || (res && res.data && res.data.list) || [];
-        const names = list.map(c => c.name).filter(Boolean);
-        if (names.length > 0) {
-          this.setData({ communityList: names });
-        } else {
-          this.setData({ communityList: ['其他'] });
-        }
+        if (!applyNames(res)) this.setData({ communityList: ['其他'] });
       })
       .catch(() => {
-        this.setData({ communityList: ['其他'] });
+        util.get('core/communities')
+          .then((res2) => {
+            if (!applyNames(res2)) this.setData({ communityList: ['其他'] });
+          })
+          .catch(() => {
+            this.setData({ communityList: ['其他'] });
+          });
       });
   },
 
@@ -94,25 +105,128 @@ Page({
   },
 
   chooseSignboard() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.signboard': r.tempFiles[0].tempFilePath });
-    }});
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      success: async (r) => {
+        const path = r.tempFiles[0].tempFilePath;
+        const compressed = await this.ensureUploadableImage(path);
+        this.setData({ 'form.signboard': compressed });
+      }
+    });
   },
 
   chooseIndoor() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.indoor': r.tempFiles[0].tempFilePath });
-    }});
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      success: async (r) => {
+        const path = r.tempFiles[0].tempFilePath;
+        const compressed = await this.ensureUploadableImage(path);
+        this.setData({ 'form.indoor': compressed });
+      }
+    });
   },
 
   chooseBizLicense() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.bizLicense': r.tempFiles[0].tempFilePath });
-    }});
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      success: async (r) => {
+        const path = r.tempFiles[0].tempFilePath;
+        const compressed = await this.ensureUploadableImage(path);
+        this.setData({ 'form.bizLicense': compressed });
+      }
+    });
+  },
+
+  choosePlacePhotos() {
+    const current = this.data.form.placePhotos || [];
+    const remain = 5 - current.length;
+    if (remain <= 0) {
+      wx.showToast({ title: '实地照最多上传5张', icon: 'none' });
+      return;
+    }
+    wx.chooseMedia({
+      count: remain,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      success: async (r) => {
+        const files = (r.tempFiles || []).map((f) => f.tempFilePath).filter(Boolean);
+        const compressedList = [];
+        for (let i = 0; i < files.length; i++) {
+          try {
+            compressedList.push(await this.ensureUploadableImage(files[i]));
+          } catch (e) {
+            console.log('compress place photo failed', e);
+          }
+        }
+        const merged = current.concat(compressedList).slice(0, 5);
+        this.setData({ 'form.placePhotos': merged, placePhotoCount: merged.length });
+      }
+    });
+  },
+
+  delPlacePhoto(e) {
+    const idx = Number(e.currentTarget.dataset.idx);
+    const list = (this.data.form.placePhotos || []).slice();
+    if (Number.isNaN(idx) || idx < 0 || idx >= list.length) return;
+    list.splice(idx, 1);
+    this.setData({ 'form.placePhotos': list, placePhotoCount: list.length });
   },
 
   delField(e) {
     this.setData({ ['form.' + e.currentTarget.dataset.key]: '' });
+  },
+
+  getFileSize(path) {
+    return new Promise((resolve) => {
+      if (!path) {
+        resolve(Number.MAX_SAFE_INTEGER);
+        return;
+      }
+      wx.getFileInfo({
+        filePath: path,
+        success: (res) => resolve(Number(res.size || 0)),
+        fail: () => resolve(Number.MAX_SAFE_INTEGER)
+      });
+    });
+  },
+
+  compressImage(path, quality) {
+    return new Promise((resolve, reject) => {
+      wx.compressImage({
+        src: path,
+        quality,
+        success: (res) => resolve(res.tempFilePath || path),
+        fail: reject
+      });
+    });
+  },
+
+  async ensureUploadableImage(path) {
+    if (!path || /^https?:\/\//i.test(path) || path.includes('/uploads/')) return path;
+    let current = path;
+    let size = await this.getFileSize(current);
+    if (size <= MAX_UPLOAD_BYTES) return current;
+
+    const qualities = [85, 75, 65, 55, 45, 35];
+    for (let i = 0; i < qualities.length; i++) {
+      try {
+        current = await this.compressImage(current, qualities[i]);
+        size = await this.getFileSize(current);
+        if (size <= MAX_UPLOAD_BYTES) return current;
+      } catch (e) {
+        console.log('compress image failed', e);
+        break;
+      }
+    }
+    const finalSize = await this.getFileSize(current);
+    if (finalSize > MAX_UPLOAD_BYTES) throw new Error('IMAGE_TOO_LARGE');
+    return current;
   },
 
   async submit() {
@@ -123,7 +237,10 @@ Page({
     if (!form.shopName) return wx.showToast({ title: '请填写商家名称', icon: 'none' });
     if (!form.category) return wx.showToast({ title: '请选择商家分类', icon: 'none' });
     if (!form.address) return wx.showToast({ title: '请填写详细地址', icon: 'none' });
-    if (!form.signboard && !form.bizLicense) return wx.showToast({ title: '请上传至少一张证件照片', icon: 'none' });
+    if (!form.signboard) return wx.showToast({ title: '请上传品牌logo', icon: 'none' });
+    if (!form.indoor) return wx.showToast({ title: '请上传商家背景图', icon: 'none' });
+    if (!form.bizLicense) return wx.showToast({ title: '请上传执照照片/从业资格证', icon: 'none' });
+    if (!Array.isArray(form.placePhotos) || form.placePhotos.length < 2) return wx.showToast({ title: '请至少上传2张实地照', icon: 'none' });
     if (!agreed) return wx.showToast({ title: '请先同意入驻协议', icon: 'none' });
     this.setData({ submitting: true });
     wx.showLoading({ title: '图片上传中...', mask: true });
@@ -131,23 +248,44 @@ Page({
       const uploadIfNeeded = async (path) => {
         if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
         if (path.includes('/uploads/')) return path;
-        const res = await util.uploadFile('upload', path, 'file');
-        return (res && res.url) ? res.url : res;
+        let finalPath = await this.ensureUploadableImage(path);
+
+        // 上传失败时自动再压缩重试（最多2次）
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            const res = await util.uploadFile('upload', finalPath, 'file');
+            return (res && res.url) ? res.url : res;
+          } catch (uploadErr) {
+            const code = Number(uploadErr && uploadErr.code);
+            const msg = String((uploadErr && (uploadErr.msg || uploadErr.errmsg)) || '');
+            const raw = String((uploadErr && uploadErr.raw) || '');
+            const isTooLarge = code === 40013 || /File too large|文件过大/i.test(msg) || /MulterError:\s*File too large/i.test(raw);
+            if (!isTooLarge || attempt >= 2) throw uploadErr;
+            try {
+              finalPath = await this.compressImage(finalPath, 25 - attempt * 5);
+              finalPath = await this.ensureUploadableImage(finalPath);
+            } catch (compressErr) {
+              console.log('retry compress failed', compressErr);
+              throw uploadErr;
+            }
+          }
+        }
+        throw new Error('UPLOAD_RETRY_FAILED');
       };
 
-      let placePhotoUrl = [];
-      let licenseUrl = '';
-
-      if (form.signboard) placePhotoUrl.push(await uploadIfNeeded(form.signboard));
-      wx.showLoading({ title: '稍等...', mask: true });
-      if (form.indoor) placePhotoUrl.push(await uploadIfNeeded(form.indoor));
-      if (form.bizLicense) licenseUrl = await uploadIfNeeded(form.bizLicense);
+      const logoUrl = await uploadIfNeeded(form.signboard);
+      wx.showLoading({ title: '上传背景图...', mask: true });
+      const backgroundUrl = await uploadIfNeeded(form.indoor);
+      wx.showLoading({ title: '上传执照...', mask: true });
+      const licenseUrl = await uploadIfNeeded(form.bizLicense);
+      wx.showLoading({ title: '上传实地照...', mask: true });
+      const placePhotoUrl = [];
+      for (let i = 0; i < form.placePhotos.length; i++) {
+        placePhotoUrl.push(await uploadIfNeeded(form.placePhotos[i]));
+      }
 
       wx.showLoading({ title: '提交数据中...', mask: true });
-      
-      let logoUrl = form.signboard ? await uploadIfNeeded(form.signboard) : '';
-      let backgroundUrl = form.indoor ? await uploadIfNeeded(form.indoor) : '';
-      
+
       let payload = {
         contact_name: form.contact, 
         phone: form.phone, 
@@ -173,7 +311,7 @@ Page({
         }
       });
 
-      await util.post('market/merchant/apply', payload);
+      await util.post('market/apply', payload);
       wx.hideLoading();
       const app = getApp();
       if (app.globalData.user) {
@@ -184,7 +322,17 @@ Page({
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
       wx.hideLoading();
-      wx.showToast({ title: (err && err.errmsg) || '提交失败，请重试', icon: 'none' });
+      const code = Number(err && err.code);
+      const msg = (err && (err.msg || err.errmsg)) || '';
+      if (code === 40013 || err.message === 'IMAGE_TOO_LARGE') {
+        wx.showToast({ title: '图片超过2MB，请更换后重试', icon: 'none' });
+      } else if (code === 40014) {
+        wx.showToast({ title: '仅支持 jpg/jpeg/png/webp', icon: 'none' });
+      } else if (code === 40015) {
+        wx.showToast({ title: '上传文件字段异常，请重试', icon: 'none' });
+      } else {
+        wx.showToast({ title: msg || '提交失败，请重试', icon: 'none' });
+      }
       this.setData({ submitting: false });
     }
   }

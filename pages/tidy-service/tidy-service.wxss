@@ -94,6 +94,10 @@ page {
   align-items: flex-start;
 }
 
+.service-card-off {
+  opacity: 0.92;
+}
+
 .service-card image {
   width: 168rpx;
   height: 126rpx;
@@ -124,6 +128,21 @@ page {
   color: #f5860f;
   font-size: 36rpx;
   font-weight: 700;
+}
+
+.s-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.s-status-off {
+  font-size: 24rpx;
+  color: #d93025;
+  background: #fce8e6;
+  border: 1rpx solid #f6c7c3;
+  border-radius: 999rpx;
+  padding: 4rpx 12rpx;
 }
 
 .s-meta {

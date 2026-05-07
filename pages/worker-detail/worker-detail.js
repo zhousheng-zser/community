@@ -3,49 +3,29 @@ const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
-const { pickWorkerAvatar, genderToLabel } = require('../../utils/workerApiMap.js');
+const { pickWorkerAvatar, genderToLabel, FALLBACK_WORKER_ROWS, FALLBACK_WORKER_GOODS } = require('../../utils/workerApiMap.js');
 
-const mockWorkers = [
-  {
-    id: 1,
-    name: "何志",
-    region: "四川巴中",
-    gender: "♂",
-    serviceCount: 0,
-    exp: 4,
-    desc: "主要从事建筑回收，全品类建材可回收",
-    tags: ["组长", "上门回收"],
-    avatar: workerAvatarUrl(1)
-  },
-  {
-    id: 2,
-    name: "余静",
-    region: "四川",
-    gender: "♀",
-    serviceCount: 1,
-    exp: 20,
-    desc: "我为人热情大方，乐于助人，喜欢家里整洁，给人舒适的感觉。",
-    tags: ["擅长", "衣柜收纳", "宠物喂养", "陪护作业"],
-    avatar: workerAvatarUrl(2)
-  },
-  {
-    id: 3,
-    name: "邓长超",
-    region: "四川",
-    gender: "♂",
-    serviceCount: 0,
-    exp: 0,
-    desc: "可接送小孩、家政保洁、简单维修等上门服务。",
-    tags: ["组长", "宠物喂养", "宠物搭遛", "衣柜干洗"],
-    avatar: workerAvatarUrl(3)
-  }
-];
+const mockWorkers = FALLBACK_WORKER_ROWS.map(w => ({
+  id: w.id,
+  name: w.name,
+  region: w.region || '',
+  gender: w.gender || '',
+  serviceCount: w.service_count || 0,
+  exp: w.exp || 0,
+  desc: w.desc || '',
+  tags: Array.isArray(w.tags) ? w.tags : [],
+  avatar: workerAvatarUrl(w.id)
+}));
 
-const mockGoods = [
-  { id: 1,  name: "衣橱整理收纳（2小时）",  price: "196/份", image: listImageFromHome3("衣橱整理收纳（2小时）", images.svcTidyCloset) },
-  { id: 57, name: "地毯深度清洗（1小时）",  price: "159/次", image: listImageFromHome3("地毯深度清洗（1小时）", images.svcCarpet) },
-  { id: 14, name: "马桶疏通",               price: "158/次", image: listImageFromHome3("马桶疏通", images.svcRepairWater) }
-];
+function getMockGoods(workerId) {
+  const arr = FALLBACK_WORKER_GOODS[workerId] || FALLBACK_WORKER_GOODS[1] || [];
+  return arr.map(g => ({
+    id: g.id,
+    name: g.name.replace(/【.*?】/g, '').trim() || g.name,
+    price: String(g.price || '').replace('元', ''),
+    image: listImageFromHome3(g.name, images.svcTidyCloset)
+  }));
+}
 
 Page({
   data: {
@@ -63,7 +43,7 @@ Page({
   },
   async loadData(id) {
     const worker = await this.loadWorker(id);
-    let goods = mockGoods.map((g) => Object.assign({}, g));
+    let goods = getMockGoods(id);
     let reviews = [];
     let hasRealServices = false;
     try {

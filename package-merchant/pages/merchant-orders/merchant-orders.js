@@ -5,6 +5,18 @@ const rp = require('../../../utils/rolePortals.js');
 const merchantOrderUi = require('../../../utils/merchantOrderUi.js');
 const merchantOrderMock = require('../../../utils/merchantOrderMock.js');
 const workerOrderUi = require('../../../utils/workerOrderUi.js');
+const api = require('../../../api/index.js');
+
+function getCurrentLocation() {
+  return new Promise((resolve, reject) => {
+    wx.getLocation({
+      type: 'gcj02',
+      isHighAccuracy: true,
+      success: (loc) => resolve(loc || {}),
+      fail: (err) => reject(err || new Error('getLocation failed'))
+    });
+  });
+}
 
 Page({
   data: {
@@ -210,7 +222,7 @@ Page({
         if (res.confirm) {
           try {
             wx.showLoading({ title: '处理中', mask: true });
-            await util.post(`market/merchant/orders/${orderNo}/accept`, {});
+            await api.merchant.acceptOrder(orderNo);
             wx.hideLoading();
             wx.showToast({ title: '接单成功', icon: 'success' });
             this.load();
@@ -251,7 +263,7 @@ Page({
         if (res.confirm) {
           try {
             wx.showLoading({ title: '处理中', mask: true });
-            await util.post(`market/merchant/orders/${orderNo}/cancel`, {});
+            await api.merchant.cancelOrder(orderNo);
             wx.hideLoading();
             wx.showToast({ title: '订单已取消', icon: 'success' });
             this.load();
@@ -264,9 +276,180 @@ Page({
     });
   },
 
+  rejectOrder(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.showModal({
+      title: '确认不接单',
+      content: '不接单将直接退款并通知用户，确认继续？',
+      confirmColor: '#e74c3c',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中', mask: true });
+            await api.merchant.orderAction(orderNo, { action: 'reject', note: '商家不接单' });
+            wx.hideLoading();
+            wx.showToast({ title: '已拒单并退款', icon: 'success' });
+            this.load();
+          } catch (err) {
+            wx.hideLoading();
+            wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  },
+
+  startDelivery(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.showModal({
+      title: '开始配送',
+      content: '确认开始配送吗？',
+      success: async (res) => {
+        if (res.confirm) {
+          try {
+            wx.showLoading({ title: '处理中', mask: true });
+            await api.merchant.startDelivery(orderNo, { note: '商家已开始配送' });
+            wx.hideLoading();
+            wx.showToast({ title: '已开始配送', icon: 'success' });
+            this.load();
+          } catch (err) {
+            wx.hideLoading();
+            wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  },
+
+  completeDelivery(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.navigateTo({
+      url: `/package-merchant/pages/merchant-ship/merchant-ship?orderNo=${encodeURIComponent(orderNo)}&mode=delivered`
+    });
+  },
+
+  // ── 直约服务商专属操作（directServiceScene 模式）────────────────────────
+  spAcceptOrder(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '确认接单', content: '接单后请尽快安排上门服务', confirmText: '接单',
+      success: async (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '处理中', mask: true });
+        try {
+          await api.serviceProvider.acceptOrder(id);
+          wx.hideLoading();
+          wx.showToast({ title: '已接单', icon: 'success' });
+          this.load();
+        } catch (err) { wx.hideLoading(); wx.showToast({ title: (err && err.errmsg) || '接单失败', icon: 'none' }); }
+      }
+    });
+  },
+
+  spRejectOrder(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '确认拒单', content: '拒单后将自动退款给用户，确认拒单？', confirmText: '拒单', confirmColor: '#e74c3c',
+      success: async (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '处理中', mask: true });
+        try {
+          await api.serviceProvider.orderAction(id, { action: 'reject' });
+          wx.hideLoading();
+          wx.showToast({ title: '已拒单并退款', icon: 'success' });
+          this.load();
+        } catch (err) { wx.hideLoading(); wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' }); }
+      }
+    });
+  },
+
+  spStartService(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '确认到达', content: '确认您已到达服务现场，开始服务？',
+      success: async (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '处理中', mask: true });
+        try {
+          const loc = await getCurrentLocation();
+          const payload = {
+            note: '服务商已到达服务现场',
+            latitude: Number(loc.latitude),
+            longitude: Number(loc.longitude),
+            accuracy: Number(loc.accuracy || 0)
+          };
+          if (!Number.isFinite(payload.latitude) || !Number.isFinite(payload.longitude)) {
+            throw { errmsg: '定位失败，请开启定位权限后重试' };
+          }
+          await api.serviceProvider.checkIn(id, payload);
+          wx.hideLoading();
+          wx.showToast({ title: '已开始服务', icon: 'success' });
+          this.load();
+        } catch (err) { wx.hideLoading(); wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' }); }
+      }
+    });
+  },
+
+  spCompleteService(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.chooseImage({
+      count: 3, sizeType: ['compressed'], sourceType: ['camera', 'album'],
+      success: async (res) => {
+        const paths = (res.tempFilePaths || []).filter(Boolean);
+        if (!paths.length) return;
+        wx.showLoading({ title: '上传中', mask: true });
+        try {
+          const uploaded = [];
+          for (const p of paths) {
+            try {
+              const url = await util.uploadFile(p, 'service-provider-portal/upload');
+              if (url) uploaded.push(url);
+            } catch (e2) { console.warn('proof upload fail', e2); }
+          }
+          await api.serviceProvider.orderAction(id, { action: 'complete', proof_images: uploaded });
+          wx.hideLoading();
+          wx.showToast({ title: '服务已完成', icon: 'success' });
+          this.load();
+        } catch (err) { wx.hideLoading(); wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' }); }
+      }
+    });
+  },
+  // ── end SP actions ────────────────────────────────────────────────────────
+
   _enrichDirectServiceRow(o) {
-    const w = workerOrderUi.enrichOrderItem(o);
-    const orderNo = o.order_no || o.orderNo || o.id;
+    const SP_STATUS_TEXT = {
+      pending_pay: '待支付',
+      pending_accept: '待接单',
+      paid_pending_dispatch: '待上门',
+      dispatched: '已派单',
+      in_service: '服务中',
+      pending_user_confirm: '待确认完成',
+      completed: '已完成',
+      cancelled: '已取消',
+      closed: '已关闭',
+      refunded: '已退款'
+    };
+    // bucket 与 workerOrderUi.TAB_DEF 的 key 对齐，用于 tab 筛选和卡片颜色
+    const SP_STATUS_BUCKET = {
+      pending_pay: 'unpaid',
+      pending_accept: 'pending_accept',
+      paid_pending_dispatch: 'pending_visit',
+      dispatched: 'pending_visit',
+      in_service: 'in_service',
+      pending_user_confirm: 'done',
+      completed: 'done',
+      cancelled: 'cancel',
+      closed: 'cancel',
+      refunded: 'cancel'
+    };
+    const status = o.status || '';
+    const statusText = SP_STATUS_TEXT[status] || o.status_text || status;
+    const bucket = SP_STATUS_BUCKET[status] || 'pending';
+    const orderNo = o.order_no || o.orderNo || String(o.id);
+    const title = o.service_title || o.title || o.goods_name || '到家服务';
     const rawAmt = o.pay_amount != null ? o.pay_amount : o.amount;
     let amount = '';
     if (rawAmt != null && rawAmt !== '') {
@@ -279,16 +462,17 @@ Page({
         ? String(time).slice(0, 16).replace('T', ' ')
         : String(time || '').replace('T', ' ');
     const buyerHint =
-      o.contact_name || (o.user && (o.user.userName || o.user.nickName)) || '';
+      o.contact_name || (o.buyer && (o.buyer.nickname || o.buyer.phone)) || '';
     const buyerUserId = o.user_id != null ? o.user_id : o.buyer_user_id;
     return {
       id: o.id,
       orderNo,
-      statusText: w.statusText,
-      title: w.title,
+      statusText,
+      status,          // 保留原始 status 供操作按钮判断
+      title,
       time,
       timeDisplay: timeDisplay || '—',
-      bucket: w.bucket,
+      bucket,
       amount,
       qtyText: '',
       buyerHint,
@@ -319,7 +503,8 @@ Page({
       if (this._directServiceScene) {
         let res;
         try {
-          res = await util.get('merchant/service-orders', { page: 1, limit: 100 });
+          // 使用服务商工作台 API 获取订单（与 sp-orders.js 统一接口）
+          res = await api.serviceProvider.getOrders({ page: 1, limit: 100 });
         } catch (e1) {
           if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
             res = { list: [] };
@@ -335,11 +520,11 @@ Page({
       }
       let res;
       try {
-        res = await util.get('market/merchant/orders', { page: 1, limit: 100 });
+        res = await api.merchant.getOrders({ page: 1, limit: 100 });
       } catch (e1) {
         if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
           try {
-            res = await util.get('market/shop/orders', { page: 1, limit: 100 });
+            res = await api.merchant.getShopOrderList({ page: 1, limit: 100 });
           } catch (e2) {
             throw e2;
           }

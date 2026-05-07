@@ -24,9 +24,9 @@ page {
   box-sizing: border-box;
 }
 
-/* ===== 状态头部 ===== */
+/* ===== 鐘舵€佸ご閮?===== */
 .na-gradient {
-  background: linear-gradient(135deg, #ff7700 0%, #ff8a3d 50%, #ff6b35 100%);
+  background: #000000;
   padding: 40rpx 32rpx 56rpx;
   border-radius: 0 0 40rpx 40rpx;
 }
@@ -108,7 +108,7 @@ page {
   color: #27ae60;
 }
 
-/* ===== 信息卡片 ===== */
+/* ===== 淇℃伅鍗＄墖 ===== */
 .detail-sheet {
   margin: -24rpx 24rpx 0;
   position: relative;
@@ -146,7 +146,7 @@ page {
   padding: 8rpx 28rpx 28rpx;
 }
 
-/* 键值对 */
+/* 閿€煎 */
 .kv {
   display: flex;
   padding: 14rpx 0;
@@ -198,7 +198,7 @@ page {
   font-weight: 600;
 }
 
-/* 地址信息 */
+/* 鍦板潃淇℃伅 */
 .addr-block {
   background: #fafafa;
   border-radius: 16rpx;
@@ -230,7 +230,7 @@ page {
 }
 
 .addr-dot.pickup {
-  background: #ff7700;
+  background: #000000;
 }
 
 .addr-dot.delivery {
@@ -267,7 +267,7 @@ page {
   line-height: 1.5;
 }
 
-/* 对方信息卡片 */
+/* 瀵规柟淇℃伅鍗＄墖 */
 .peer-card {
   display: flex;
   align-items: center;
@@ -308,7 +308,7 @@ page {
   margin-top: 8rpx;
 }
 
-/* 按钮 */
+/* 鎸夐挳 */
 .btn-row-2 {
   display: flex;
   gap: 20rpx;
@@ -334,7 +334,7 @@ page {
 }
 
 .sheet-btn.primary {
-  background: linear-gradient(135deg, #ff7700, #ff9e3d);
+  background: #000000;
   color: #fff;
   font-weight: 600;
   box-shadow: 0 4rpx 16rpx rgba(255, 119, 0, 0.25);
@@ -359,7 +359,7 @@ page {
   border: none;
 }
 
-/* 服务执行 */
+/* 鏈嶅姟鎵ц */
 .serve-hint {
   font-size: 24rpx;
   color: #999;
@@ -389,7 +389,7 @@ page {
   margin-top: 8rpx;
 }
 
-/* 底部操作栏 */
+/* 搴曢儴鎿嶄綔鏍?*/
 .bottom-bar {
   position: fixed;
   left: 0;
@@ -431,12 +431,12 @@ page {
 }
 
 .bar-btn.primary {
-  background: linear-gradient(135deg, #ff7700, #ff9e3d);
+  background: #000000;
   color: #fff;
   box-shadow: 0 4rpx 16rpx rgba(255, 119, 0, 0.3);
 }
 
-/* 弹窗 */
+/* 寮圭獥 */
 .modal-mask {
   position: fixed;
   left: 0;
@@ -499,7 +499,7 @@ page {
 }
 
 .modal-btn.primary {
-  background: linear-gradient(135deg, #ff7700, #ff9e3d);
+  background: #000000;
   color: #fff;
 }
 
@@ -530,3 +530,4 @@ page {
   background: #fafafa;
   border-radius: 12rpx;
 }
+

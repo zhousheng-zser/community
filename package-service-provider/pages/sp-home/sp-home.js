@@ -1,6 +1,8 @@
 const app = getApp();
 const util = require('../../../utils/util.js');
 const rp = require('../../../utils/rolePortals.js');
+const api = require('../../../api/index.js');
+const spCtx = require('../../../utils/spContext.js');
 const balance = require('../../../utils/balance.js');
 
 const DEF_AVATAR =
@@ -19,61 +21,80 @@ Page({
     bannerText: '',
     greeting: '你好',
     displayName: '服务商',
+    shopName: '',
     userPhoto: DEF_AVATAR,
     balanceText: '0.00',
     stats: {
       pendingOrders: 0,
-      dispatching: 0,
-      inProgress: 0,
-      completed: 0
+      inService: 0,
+      completed: 0,
+      totalServices: 0
     },
     loading: false
   },
 
   onShow() {
-    this.refresh();
-    this.loadBalance();
-    this.loadStats();
+    this.checkSPStatus();
   },
 
   onPullDownRefresh() {
-    this.refresh();
+    this.checkSPStatus();
     this.loadBalance();
     this.loadStats();
     wx.stopPullDownRefresh();
   },
 
-  refresh() {
-    const user = app.globalData.user || {};
-    const spOk = rp.canUseServiceProviderPortal(user);
-    let bannerText = '';
-    if (!spOk) {
-      const st = user.service_provider_status || user.serviceProviderStatus;
-      if (st === 'pending' || st === 'reviewing') {
-        bannerText = '服务商入驻审核中，通过后可使用本工作台';
-      } else if (st === 'rejected') {
-        bannerText = '入驻未通过，请重新提交资料';
-      } else {
-        bannerText = '请先完成服务商入驻，审核通过后可使用本工作台';
-      }
-    } else {
-      bannerText = '您已具备服务商身份，可管理服务订单';
+  async checkSPStatus() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      this.setData({ spOk: false });
+      return;
     }
-    this.setData({
-      spOk,
-      bannerText,
-      greeting: getGreeting(),
-      displayName: user.userName || '服务商',
-      userPhoto: user.userPhoto || DEF_AVATAR
-    });
+    const user = app.globalData.user || {};
+    const roles = user.roles || user.roleList || [];
+    const hasRole = Array.isArray(roles)
+      ? roles.some(r => String(r).includes('service_provider'))
+      : (user.service_provider_status === 'approved' || user.service_provider_status === 'active');
+
+    // Try to load profile to verify
+    try {
+      const res = await api.serviceProvider.getProfile();
+      const profile = spCtx.normalizeProfilePayload(res);
+      if (profile && profile.status === 'active') {
+        spCtx.syncBoundProfile(app, profile);
+        this.setData({
+          spOk: true,
+          shopName: profile.shop_name || '',
+          displayName: profile.contact_name || user.userName || '服务商',
+          userPhoto: user.userPhoto || DEF_AVATAR,
+          bannerText: `欢迎使用服务商工作台，管理您的服务与订单`,
+          greeting: getGreeting()
+        });
+        this.loadBalance();
+        this.loadStats();
+        return;
+      }
+    } catch (e) {}
+
+    // Fallback: check local role
+    if (hasRole || user.service_provider_status) {
+      this.setData({
+        spOk: true,
+        displayName: user.userName || '服务商',
+        userPhoto: user.userPhoto || DEF_AVATAR,
+        bannerText: '欢迎使用服务商工作台，管理您的服务与订单',
+        greeting: getGreeting()
+      });
+      this.loadBalance();
+      this.loadStats();
+    } else {
+      this.setData({ spOk: false, greeting: getGreeting(), displayName: user.userName || '用户' });
+    }
   },
 
   async loadBalance() {
     const token = wx.getStorageSync('token');
-    if (!token) {
-      this.setData({ balanceText: '' });
-      return;
-    }
+    if (!token) { this.setData({ balanceText: '' }); return; }
     try {
       const b = await balance.fetchBalanceFromServer(balance.BALANCE_TYPES.SERVICE_PROVIDER);
       this.setData({ balanceText: balance.formatBalance(b) });
@@ -85,60 +106,48 @@ Page({
 
   async loadStats() {
     const token = wx.getStorageSync('token');
-    if (!token) {
-      this.setData({ stats: { pendingOrders: 0, dispatching: 0, inProgress: 0, completed: 0 } });
-      return;
-    }
+    if (!token) { this.setData({ stats: { pendingOrders: 0, inService: 0, completed: 0, totalServices: 0 } }); return; }
     this.setData({ loading: true });
     try {
-      const res = await util.get('service-provider/orders/stats');
-      const data = res && res.data !== undefined ? res.data : res;
+      const [statsRes, servicesRes] = await Promise.allSettled([
+        api.serviceProvider.getDashboard(),
+        api.serviceProvider.getServices({ page: 1, limit: 1 })
+      ]);
+      const data = statsRes.status === 'fulfilled'
+        ? (statsRes.value && statsRes.value.data !== undefined ? statsRes.value.data : statsRes.value) || {}
+        : {};
+      const svcTotal = servicesRes.status === 'fulfilled'
+        ? ((servicesRes.value && (servicesRes.value.total || (servicesRes.value.data && servicesRes.value.data.total))) || 0)
+        : 0;
       this.setData({
         stats: {
-          pendingOrders: data.pending_orders || data.pendingOrders || 0,
-          dispatching: data.dispatching || 0,
-          inProgress: data.in_progress || data.inProgress || 0,
-          completed: data.completed || 0
+          pendingOrders: data.pending_orders || data.pendingOrders || data.pending || 0,
+          inService: data.in_service || data.inService || data.in_progress || 0,
+          completed: data.completed || data.completed_today || 0,
+          totalServices: svcTotal
         },
         loading: false
       });
     } catch (e) {
-      this.setData({
-        stats: { pendingOrders: 0, dispatching: 0, inProgress: 0, completed: 0 },
-        loading: false
-      });
+      this.setData({ stats: { pendingOrders: 0, inService: 0, completed: 0, totalServices: 0 }, loading: false });
     }
   },
 
-  goJoin() {
-    wx.navigateTo({ url: '/pages/join-service/join-service' });
+  goJoin() { wx.navigateTo({ url: '/pages/join-service/join-service' }); },
+  goOrders() { wx.navigateTo({ url: '/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service' }); },
+  goDispatch() { wx.navigateTo({ url: '/package-service-provider/pages/sp-dispatch/sp-dispatch' }); },
+  goServices() { wx.navigateTo({ url: '/package-service-provider/pages/sp-services/sp-services' }); },
+  goMine() { wx.navigateTo({ url: '/package-service-provider/pages/sp-mine/sp-mine' }); },
+  goSettings() { wx.navigateTo({ url: '/package-service-provider/pages/sp-settings/sp-settings' }); },
+  goQualification() { wx.navigateTo({ url: '/package-service-provider/pages/sp-qualification/sp-qualification' }); },
+  goServiceShelfUp() { wx.navigateTo({ url: '/package-service-provider/pages/sp-services/sp-services?mode=up' }); },
+  goServiceShelfDown() { wx.navigateTo({ url: '/package-service-provider/pages/sp-services/sp-services?mode=down' }); },
+  goShop() {
+    const profile = spCtx.getBoundProfile(app);
+    const pid = profile && (profile.id || profile.profile_id);
+    if (!pid) { wx.showToast({ title: '暂未绑定门店', icon: 'none' }); return; }
+    wx.navigateTo({ url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(pid))}` });
   },
-
-  goOrders() {
-    wx.navigateTo({
-      url: '/package-service-provider/pages/sp-orders/sp-orders'
-    });
-  },
-
-  goDispatch() {
-    wx.navigateTo({
-      url: '/package-service-provider/pages/sp-dispatch/sp-dispatch'
-    });
-  },
-
-  goServices() {
-    wx.navigateTo({
-      url: '/package-service-provider/pages/sp-services/sp-services'
-    });
-  },
-
-  goMine() {
-    wx.navigateTo({
-      url: '/package-service-provider/pages/sp-mine/sp-mine'
-    });
-  },
-
-  backUser() {
-    rp.backToUserTab();
-  }
+  goAccount() { wx.navigateTo({ url: '/pages/account/account' }); },
+  backUser() { rp.backToUserTab(); }
 });

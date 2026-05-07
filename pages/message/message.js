@@ -161,9 +161,10 @@ Page({
             });
             return;
         }
-        const name = item.peerUser
-            ? item.peerUser.nickname
-            : (item.peer_id == 0 ? '系统消息' : '会话');
+        const botNames = { logistics: '订单物流通知', event: '活动优惠', notices: '系统公告' };
+        const name = item.bot_type
+            ? (botNames[item.bot_type] || '系统通知')
+            : (item.peerUser ? item.peerUser.nickname : (item.peer_id == 0 ? '系统消息' : '会话'));
         const title = item.title || name;
         const q = [
             `conversationId=${item.conversation_id}`,

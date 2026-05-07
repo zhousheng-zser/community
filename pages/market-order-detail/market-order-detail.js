@@ -1,3 +1,4 @@
+const app = getApp();
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 const orderTimeout = require('../../utils/orderTimeout.js');
@@ -6,10 +7,11 @@ const env = require('../../utils/env.js');
 const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
-  pending_shipment: { text: '待发货', class: 'primary' },
   pending_service: { text: '备货中', class: 'primary' },
   pending_receipt: { text: '待收货', class: 'primary' },
-  pending_review: { text: '待评价', class: 'primary' },
+  paid: { text: '待接单', class: 'primary' },
+  delivering: { text: '待收货', class: 'primary' },
+  closed: { text: '已取消', class: 'cancel' },
   completed: { text: '已完成', class: 'done' },
   cancelled: { text: '已取消', class: 'cancel' },
   refunded: { text: '已退款', class: 'cancel' },
@@ -21,11 +23,16 @@ const STATUS_MAP = {
 
 Page({
   data: {
+    fromMerchant: false,
+    contactRoleText: '联系商家',
     orderNo: '',
     status: '',
     statusText: '',
     shopName: '',
     shopId: '',
+    buyerUserId: null,
+    buyerName: '',
+    fulfillmentEvents: [],
     items: [],
     
     // 金额信息
@@ -58,6 +65,11 @@ Page({
   },
 
   onLoad(options) {
+    const fromMerchant = options.from === 'merchant';
+    this.setData({
+      fromMerchant,
+      contactRoleText: fromMerchant ? '联系买家' : '联系商家'
+    });
     if (options.orderNo) {
       this.setData({ orderNo: options.orderNo });
       this.loadOrderDetail();
@@ -93,6 +105,7 @@ Page({
     const refundStatus = order.refundStatus || order.refund_status || detail.refundStatus || detail.refund_status || '';
     const statusObj = STATUS_MAP[status] || { text: status || '未知订单状态' };
     const refundObj = refundStatus ? (STATUS_MAP[refundStatus] || { text: refundStatus }) : null;
+    const rawEvents = Array.isArray(detail.fulfillment_events) ? detail.fulfillment_events : [];
 
     this.setData({
       orderNo: order.orderNo || order.order_no || detail.orderNo || detail.order_no,
@@ -100,6 +113,15 @@ Page({
       statusText: refundObj ? refundObj.text : statusObj.text,
       shopName: shop.name || order.shopName || order.shop_name || detail.shopName || detail.shop_name || '社区精选商家',
       shopId: shop.id || order.shopId || order.shop_id || detail.shopId || detail.shop_id,
+      buyerUserId: order.buyer_user_id || detail.buyer_user_id || order.user_id || detail.user_id || null,
+      buyerName: order.buyer_name || detail.buyer_name || order.receiver_name || detail.receiver_name || '',
+      fulfillmentEvents: rawEvents.map((ev) => ({
+        id: ev.id || `${ev.action || 'node'}_${ev.created_at || ''}`,
+        title: ev.title || ev.action || '订单节点',
+        note: ev.note || '',
+        createdAt: ev.created_at || '',
+        proofImages: Array.isArray(ev.proof_images) ? ev.proof_images : []
+      })),
       
       goodsAmount: String(order.goods_amount || detail.goods_amount || '0.00'),
       deliveryFee: String(order.delivery_fee || detail.delivery_fee || '0.00'),
@@ -261,6 +283,76 @@ Page({
   },
 
   async contactMerchant() {
+    if (this.data.fromMerchant) {
+      this.contactBuyer();
+      return;
+    }
+    const shopId = this.data.shopId;
+    if (!shopId) {
+      wx.showToast({ title: '暂无商家信息', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '打开会话', mask: true });
+    try {
+      const res = await util.post('messages/order-conversation/ensure', {
+        order_no: this.data.orderNo,
+        shop_id: shopId,
+        channel: 'shop_buyer'
+      });
+      wx.hideLoading();
+      const data = res && res.data !== undefined ? res.data : res;
+      const cid = data && data.conversation_id;
+      if (!cid) throw new Error('NO_CONVERSATION_ID');
+      wx.navigateTo({
+        url: `/pages/chat/chat?conversationId=${cid}&name=${encodeURIComponent(this.data.shopName || '商家')}&orderNo=${encodeURIComponent(this.data.orderNo)}`
+      });
+    } catch (err) {
+      wx.hideLoading();
+      // 回退电话，保证可联系
+      try {
+        const contactRes = await api.market.getShopContact(shopId);
+        const phone = contactRes.phone || contactRes.contact_phone;
+        if (phone) {
+          wx.makePhoneCall({ phoneNumber: phone });
+          return;
+        }
+      } catch (e) {}
+      wx.showToast({ title: '获取商家信息失败', icon: 'none' });
+    }
+  },
+
+  async contactBuyer() {
+    const shopId = app.globalData.user && (app.globalData.user.shop_id || app.globalData.user.shopId);
+    if (!shopId) {
+      wx.showToast({ title: '请先绑定店铺', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '打开会话', mask: true });
+    try {
+      const res = await util.post('messages/order-conversation/ensure', {
+        order_no: this.data.orderNo,
+        shop_id: shopId,
+        channel: 'shop_buyer',
+        buyer_user_id: this.data.buyerUserId,
+        buyer_name: this.data.buyerName || ''
+      });
+      wx.hideLoading();
+      const data = res && res.data !== undefined ? res.data : res;
+      const cid = data && data.conversation_id;
+      if (!cid) {
+        wx.showToast({ title: '无法建立会话', icon: 'none' });
+        return;
+      }
+      wx.navigateTo({
+        url: `/pages/chat/chat?conversationId=${cid}&name=${encodeURIComponent(this.data.buyerName || '买家')}&orderNo=${encodeURIComponent(this.data.orderNo)}`
+      });
+    } catch (err) {
+      wx.hideLoading();
+      wx.showToast({ title: '暂无法打开会话', icon: 'none' });
+    }
+  },
+
+  async contactMerchantByPhone() {
     if (!this.data.shopId) {
       wx.showToast({ title: '暂无商家信息', icon: 'none' });
       return;

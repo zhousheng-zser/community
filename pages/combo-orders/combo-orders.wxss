@@ -1,3 +1,4 @@
 .co-page { padding: 48rpx; min-height: 100vh; background: #f5f5f5; }
 .co-tip { font-size: 28rpx; color: #555; line-height: 1.6; }
-.co-btn { margin-top: 40rpx; background: #ff7a00; color: #fff; border-radius: 999rpx; }
+.co-btn { margin-top: 40rpx; background: #000000; color: #fff; border-radius: 999rpx; }
+

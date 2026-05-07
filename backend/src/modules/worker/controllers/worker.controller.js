@@ -1,4 +1,5 @@
-const { WorkerApplication } = require('../../../models');
+const db = require('../../../models');
+const { WorkerApplication, ServiceOrder } = db;
 
 // POST /worker/apply
 exports.apply = async (req, res) => {
@@ -105,37 +106,312 @@ exports.getMyApplication = async (req, res) => {
   }
 };
 
+function getWorkerUserId(req) {
+  return req.user && req.user.id ? Number(req.user.id) : 0;
+}
+
+function normalizeWorkerOrder(row) {
+  if (!row) return null;
+  let evidenceImages = [];
+  try { evidenceImages = JSON.parse(row.evidence_images || '[]'); } catch (e) {}
+  return {
+    id: row.id,
+    order_no: row.order_no,
+    orderNo: row.order_no,
+    user_id: row.user_id,
+    customer_user_id: row.user_id,
+    provider_id: row.provider_id,
+    service_id: row.service_id,
+    service_title: row.service_title_snapshot || '',
+    title: row.service_title_snapshot || '',
+    worker_id: row.worker_id,
+    worker_user_id: row.worker_user_id,
+    status: row.status,
+    pay_status: row.pay_status,
+    pay_amount: Number(row.pay_amount || row.amount || 0).toFixed(2),
+    amount: Number(row.pay_amount || row.amount || 0).toFixed(2),
+    contact_name: row.contact_name || '',
+    contact_phone: row.contact_phone || '',
+    address: row.address || row.service_address || '',
+    service_address: row.service_address || row.address || '',
+    appointment_time: row.appointment_time || row.book_time || '',
+    book_time: row.book_time || row.appointment_time || '',
+    remark: row.remark || '',
+    cancel_reason: row.cancel_reason || '',
+    check_in_at: row.check_in_at,
+    check_in_location: row.check_in_location || '',
+    evidence_images: evidenceImages,
+    evidence_note: row.evidence_note || '',
+    completed_at: row.completed_at,
+    paid_at: row.paid_at,
+    cancelled_at: row.cancelled_at,
+    created_at: row.created_at,
+    updated_at: row.updated_at
+  };
+}
+
 // GET /worker/service-orders
 exports.getOrders = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const query = req.query || {};
+    const page = Math.max(parseInt(query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(query.limit, 10) || 20, 1), 100);
+    const offset = (page - 1) * limit;
+    const where = { worker_user_id: userId };
+    if (query.status) where.status = String(query.status);
+    const { count, rows } = await ServiceOrder.findAndCountAll({
+      where,
+      order: [['created_at', 'DESC']],
+      limit,
+      offset
+    });
+    return res.json({ code: 0, data: { list: rows.map(normalizeWorkerOrder), total: count, page, limit } });
+  } catch (err) {
+    console.error('[worker/orders]', err);
+    return res.status(500).json({ code: 1, msg: '获取订单列表失败' });
+  }
 };
 
 // GET /worker/service-orders/:id
 exports.getOrderDetail = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    return res.json({ code: 0, data: { order: normalizeWorkerOrder(row) } });
+  } catch (err) {
+    console.error('[worker/order/detail]', err);
+    return res.status(500).json({ code: 1, msg: '获取订单详情失败' });
+  }
 };
 
 // POST /worker/service-orders/:id/accept
 exports.acceptOrder = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    if (row.status !== 'dispatched') return res.status(400).json({ code: 1, msg: '当前状态不可接单' });
+    await row.update({ status: 'in_service', worker_user_id: userId });
+    return res.json({ code: 0, data: { id: row.id, status: row.status }, msg: '接单成功' });
+  } catch (err) {
+    console.error('[worker/order/accept]', err);
+    return res.status(500).json({ code: 1, msg: '接单失败' });
+  }
 };
 
 // POST /worker/service-orders/:id/reject
 exports.rejectOrder = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    if (row.status !== 'dispatched') return res.status(400).json({ code: 1, msg: '当前状态不可拒单' });
+    const note = String((req.body || {}).reason || '技工拒单').trim();
+    await row.update({
+      status: 'cancelled',
+      pay_status: row.pay_status === 'paid' ? 'refunded' : row.pay_status,
+      cancel_reason: note,
+      cancelled_at: new Date()
+    });
+    return res.json({ code: 0, data: { id: row.id, status: row.status }, msg: '已拒单' });
+  } catch (err) {
+    console.error('[worker/order/reject]', err);
+    return res.status(500).json({ code: 1, msg: '拒单失败' });
+  }
 };
 
 // POST /worker/service-orders/:id/check-in
 exports.checkIn = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    if (!['dispatched', 'in_service'].includes(String(row.status))) {
+      return res.status(400).json({ code: 1, msg: '当前状态不可打卡' });
+    }
+    const body = req.body || {};
+    const location = body.location || body.check_in_location || '';
+    await row.update({
+      status: 'in_service',
+      check_in_at: new Date(),
+      check_in_location: location,
+      worker_user_id: userId
+    });
+    return res.json({ code: 0, data: { id: row.id, status: row.status, check_in_at: row.check_in_at }, msg: '打卡成功' });
+  } catch (err) {
+    console.error('[worker/order/check-in]', err);
+    return res.status(500).json({ code: 1, msg: '打卡失败' });
+  }
 };
 
 // POST /worker/service-orders/:id/evidence
 exports.uploadEvidence = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    if (!['in_service', 'dispatched'].includes(String(row.status))) {
+      return res.status(400).json({ code: 1, msg: '当前状态不可上传凭证' });
+    }
+    const body = req.body || {};
+    const images = Array.isArray(body.urls) ? body.urls : (Array.isArray(body.proof_images) ? body.proof_images : []);
+    const note = String(body.note || '').trim();
+    let existing = [];
+    try { existing = JSON.parse(row.evidence_images || '[]'); } catch (e) {}
+    const merged = Array.isArray(existing) ? existing.concat(images) : images;
+    await row.update({ evidence_images: JSON.stringify(merged.slice(0, 10)), evidence_note: note || row.evidence_note || '' });
+    return res.json({ code: 0, data: { id: row.id, evidence_images: merged.slice(0, 10) }, msg: '上传成功' });
+  } catch (err) {
+    console.error('[worker/order/evidence]', err);
+    return res.status(500).json({ code: 1, msg: '上传凭证失败' });
+  }
 };
 
 // POST /worker/service-orders/:id/complete
 exports.completeOrder = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = getWorkerUserId(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效订单ID' });
+    const row = await ServiceOrder.findOne({ where: { id, worker_user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
+    if (!['in_service', 'dispatched'].includes(String(row.status))) {
+      return res.status(400).json({ code: 1, msg: '当前状态不可完成' });
+    }
+    await row.update({ status: 'pending_user_confirm', completed_at: new Date() });
+    return res.json({ code: 0, data: { id: row.id, status: row.status }, msg: '服务已完成' });
+  } catch (err) {
+    console.error('[worker/order/complete]', err);
+    return res.status(500).json({ code: 1, msg: '完成服务失败' });
+  }
+};
+
+// ===== 技工服务管理 =====
+
+const db = require('../../../models');
+const WorkerService = db.WorkerService;
+
+// GET /worker/services
+exports.getMyServices = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    let limit = parseInt(req.query.limit, 10) || 20;
+    limit = Math.min(Math.max(limit, 1), 50);
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await WorkerService.findAndCountAll({
+      where: { user_id: userId },
+      order: [['created_at', 'DESC']],
+      limit,
+      offset
+    });
+
+    return res.json({
+      code: 0,
+      data: {
+        list: rows,
+        total: count,
+        page,
+        limit
+      }
+    });
+  } catch (err) {
+    console.error('[worker/services] error:', err);
+    return res.status(500).json({ code: 1, msg: '查询失败' });
+  }
+};
+
+// POST /worker/services
+exports.createService = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    const { name, price, desc } = req.body || {};
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ code: 1, msg: '服务名称不能为空' });
+    }
+
+    const row = await WorkerService.create({
+      user_id: userId,
+      name: String(name).trim(),
+      price: price != null ? String(price) : null,
+      desc: desc || null,
+      status: 'active'
+    });
+
+    return res.json({ code: 0, msg: '创建成功', data: row });
+  } catch (err) {
+    console.error('[worker/services/create] error:', err);
+    return res.status(500).json({ code: 1, msg: '创建失败' });
+  }
+};
+
+// PATCH /worker/services/:id
+exports.updateService = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效服务ID' });
+
+    const row = await WorkerService.findOne({ where: { id, user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '服务不存在' });
+
+    const { name, price, desc, status } = req.body || {};
+    const updateData = {};
+    if (name !== undefined) updateData.name = String(name).trim();
+    if (price !== undefined) updateData.price = price != null ? String(price) : null;
+    if (desc !== undefined) updateData.desc = desc || null;
+    if (status !== undefined) updateData.status = status;
+
+    await row.update(updateData);
+    return res.json({ code: 0, msg: '更新成功', data: row });
+  } catch (err) {
+    console.error('[worker/services/update] error:', err);
+    return res.status(500).json({ code: 1, msg: '更新失败' });
+  }
+};
+
+// POST /worker/services/:id/delete
+exports.deleteService = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ code: 1, msg: '无效服务ID' });
+
+    const row = await WorkerService.findOne({ where: { id, user_id: userId } });
+    if (!row) return res.status(404).json({ code: 1, msg: '服务不存在' });
+
+    await row.destroy();
+    return res.json({ code: 0, msg: '删除成功' });
+  } catch (err) {
+    console.error('[worker/services/delete] error:', err);
+    return res.status(500).json({ code: 1, msg: '删除失败' });
+  }
 };

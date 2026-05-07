@@ -84,6 +84,23 @@
   margin-top: 8rpx;
 }
 
+.mk-create-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6rpx 14rpx 10rpx;
+}
+
+.mk-create-btn {
+  margin: 0;
+  font-size: 24rpx;
+  line-height: 56rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  border: 1rpx solid #15803d;
+}
+
 .mk-link-list {
   padding: 0 8rpx 16rpx;
 }
@@ -119,14 +136,15 @@
   font-size: 30rpx;
   font-weight: 700;
   color: #166534;
+  line-height: 1.4;
 }
 
 .mk-link-desc {
   display: block;
-  margin-top: 6rpx;
+  margin-top: 8rpx;
   font-size: 24rpx;
   color: #4d7c5f;
-  line-height: 1.4;
+  line-height: 1.55;
 }
 
 .mk-link-arrow {

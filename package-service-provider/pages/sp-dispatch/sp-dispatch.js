@@ -44,7 +44,7 @@ Page({
   async loadWorkers() {
     this.setData({ workersLoading: true });
     try {
-      const res = await util.get('core/workers', { status: 'approved', page: 1, limit: 100 });
+      const res = await util.get('service-provider/workers/list', { status: 'approved', page: 1, limit: 100 });
       const raw = res && res.data !== undefined ? res.data : res;
       const list = (raw.list || raw || []).map(w => ({
         id: w.id,
@@ -143,7 +143,7 @@ Page({
   },
 
   goOrders() {
-    wx.redirectTo({ url: '/package-service-provider/pages/sp-orders/sp-orders' });
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service' });
   },
 
   goServices() {

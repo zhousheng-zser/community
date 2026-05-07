@@ -32,7 +32,7 @@
   <view class="card goods-card">
     <view class="shop-title" bindtap="contactMerchant">
       <text>🏪 {{shopName || '平台严选商家'}}</text>
-      <text class="arrow">联系商家 ></text>
+      <text class="arrow">{{contactRoleText}} ></text>
     </view>
     <view class="item" wx:for="{{items}}" wx:key="id">
       <image class="img" mode="aspectFill" src="{{item.image}}"></image>
@@ -79,20 +79,43 @@
     </view>
   </view>
 
+  <view class="card" wx:if="{{fulfillmentEvents.length}}">
+    <text class="sectionTitle">履约节点</text>
+    <view class="row" wx:for="{{fulfillmentEvents}}" wx:key="id">
+      <view class="value">
+        <text>{{item.title}}</text>
+        <text class="muted" wx:if="{{item.createdAt}}"> {{item.createdAt}}</text>
+        <view wx:if="{{item.note}}" class="muted">{{item.note}}</view>
+        <view wx:if="{{item.proofImages.length}}">
+          <image wx:for="{{item.proofImages}}" wx:key="*this" src="{{item}}" mode="aspectFill" style="width:120rpx;height:120rpx;border-radius:8rpx;margin:8rpx 8rpx 0 0;"></image>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <view class="bottomBar">
     <block wx:if="{{status === 'pending_payment'}}">
       <button class="cancelBtn ghost" bindtap="cancelOrder">取消订单</button>
       <button class="payBtn primary" bindtap="payNow">立即支付</button>
     </block>
 
+    <block wx:if="{{status === 'pending_accept'}}">
+      <button class="ghost" bindtap="contactMerchant">{{contactRoleText}}</button>
+      <button class="ghost" bindtap="applyRefund">申请退款</button>
+    </block>
+
+    <block wx:if="{{status === 'pending_service'}}">
+      <button class="ghost" bindtap="contactMerchant">{{contactRoleText}}</button>
+    </block>
+
     <block wx:if="{{status === 'pending_shipment'}}">
-      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="ghost" bindtap="contactMerchant">{{contactRoleText}}</button>
       <button class="ghost" bindtap="applyRefund">申请退款</button>
     </block>
 
     <block wx:if="{{status === 'pending_receipt'}}">
       <button class="ghost" bindtap="viewLogistics">查看物流</button>
-      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="ghost" bindtap="contactMerchant">{{contactRoleText}}</button>
       <button class="primary" bindtap="confirmReceipt">确认收货</button>
     </block>
 
@@ -104,7 +127,7 @@
 
     <block wx:if="{{status === 'after_sales'}}">
       <button class="ghost" bindtap="contactCustomerService">联系客服</button>
-      <button class="ghost" bindtap="contactMerchant">联系商家</button>
+      <button class="ghost" bindtap="contactMerchant">{{contactRoleText}}</button>
       <button class="ghost" wx:if="{{refundStatus==='pending'}}" bindtap="cancelRefund">取消售后</button>
     </block>
   </view>

@@ -179,33 +179,19 @@ Page({
       return;
     }
 
-    const tryServiceOrder = () => {
-      const body = {
-        address: fullAddress,
-        contact_name: contactName,
-        contact_phone: contactPhone,
-        goods_name: product.name,
-        goods_price: product.price,
-        qty,
-        remark: this.data.remark || ''
-      };
-      if (userId) body.user_id = userId;
-      if (workerId) body.worker_id = Number(workerId);
-      if (serviceId) body.service_id = Number(serviceId);
-      if (groupKey) body.group_key = groupKey;
-      return util.post('service-orders', body);
+    const body = {
+      address: fullAddress,
+      contact_name: contactName,
+      contact_phone: contactPhone,
+      goods_name: product.name,
+      goods_price: product.price,
+      qty,
+      remark: this.data.remark || ''
     };
-
-    const fallbackLegacy = () =>
-      util.post('api/order/save', {
-        userId,
-        address: fullAddress,
-        orderUser: contactName,
-        userTele: contactPhone,
-        goodsName: product.name,
-        goodsPrice: product.price,
-        orderState: 1
-      });
+    if (userId) body.user_id = userId;
+    if (workerId) body.worker_id = Number(workerId);
+    if (serviceId) body.service_id = Number(serviceId);
+    if (groupKey) body.group_key = groupKey;
 
     const doneOk = (data) => {
       wx.hideLoading();
@@ -217,16 +203,12 @@ Page({
       }
     };
 
-    tryServiceOrder()
+    util.post('service-orders', body)
       .then((data) => doneOk(data))
-      .catch(() => {
-        fallbackLegacy()
-          .then((data) => doneOk(data))
-          .catch(() => {
-            wx.hideLoading();
-            wx.showToast({ title: '下单成功', icon: 'success' });
-            setTimeout(() => wx.navigateBack(), 1500);
-          });
+      .catch((e) => {
+        wx.hideLoading();
+        const msg = (e && e.errmsg) || (e && e.msg) || '下单失败，请重试';
+        wx.showToast({ title: msg, icon: 'none' });
       });
   },
 });

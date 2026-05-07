@@ -88,9 +88,12 @@ router.use('/neighbor-assist', neighborAssistRoutes);
 router.use('/worker', workerRoutes);
 router.use('/merchant', merchantRoutes);
 router.use('/service-provider', serviceProviderRoutes);
+router.use('/service-provider-portal', serviceProviderRoutes); // 兼容旧路径
 router.use('/community', communityRoutes);
 router.use('/service-order', serviceOrderRoutes);
+router.use('/service-orders', serviceOrderRoutes); // 兼容前端复数路径
 router.use('/message', messageRoutes);
+router.use('/messages', messageRoutes); // 兼容前端复数路径
 
 // ── 文件上传（独立端点） ─────────────────────────────────────────────────
 // 注：上传端点通常需要 multipart 解析，此处保留结构，

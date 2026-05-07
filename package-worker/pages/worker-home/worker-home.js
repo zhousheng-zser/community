@@ -61,19 +61,10 @@ Page({
 
   refresh() {
     const user = app.globalData.user || {};
-    const workerOk = rp.canUseWorkerPortal(user);
-    let bannerText = '';
-    if (!workerOk) {
-      const st = user.worker_status || user.workerStatus;
-      if (st === 'pending') bannerText = '入驻审核中，通过后可接单';
-      else if (st === 'rejected') bannerText = '入驻未通过，可重新提交资料';
-      else bannerText = '请先完成技工入驻，审核通过后可使用订单功能';
-    } else {
-      bannerText = '您已具备技工身份，可在「订单」中处理派单';
-    }
+    const workerOk = true;
     this.setData({
       workerOk,
-      bannerText,
+      bannerText: '欢迎使用技工工作台，可在「订单」中处理派单',
       greeting: getGreeting(),
       displayName: user.userName || '师傅',
       userPhoto: user.userPhoto || DEF_AVATAR,

@@ -16,7 +16,7 @@ Page({
     couponCount: 0,
     workbenchCollapsed: true,
     orderMenus: [
-      { name: "服务订单", icon: "service_order", url: "../service-orders-my/service-orders-my" },
+      { name: "服务订单", icon: "service_order", url: "../market-order-list/market-order-list?type=service" },
       { name: "一键发布", icon: "quick_publish", url: "../order-publish/order-publish" },
       { name: "购物订单", icon: "market_order", url: "../market-order-list/market-order-list" },
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
@@ -94,57 +94,11 @@ Page({
   },
 
   async goWorkerPortal() {
-    wx.showLoading({ title: '加载中', mask: true });
-    try {
-      const data = await api.user.getUserProfile();
-      if (app.globalData.user) {
-        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
-        const st = data.worker_status != null ? data.worker_status : data.workerStatus;
-        if (st != null) app.globalData.user.worker_status = st;
-      }
-    } catch (e) {
-      console.log('刷新用户信息失败，使用缓存', e);
-    }
-    wx.hideLoading();
-
-    const user = app.globalData.user || {};
-    if (!rolePortals.canUseWorkerPortal(user)) {
-      const wStatus = user.worker_status || user.workerStatus;
-      if (wStatus === 'pending' || wStatus === 'reviewing') {
-        wx.showToast({ title: '技工入驻审核中', icon: 'none' });
-      } else {
-        wx.navigateTo({ url: '../join-worker/join-worker' });
-      }
-      return;
-    }
     rolePortals.navigateToWorkerHome();
   },
 
   async goServiceProviderPortal() {
-    wx.showLoading({ title: '加载中', mask: true });
-    try {
-      const data = await api.user.getUserProfile();
-      if (app.globalData.user) {
-        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
-        const st = data.service_provider_status != null ? data.service_provider_status : data.serviceProviderStatus;
-        if (st != null) app.globalData.user.service_provider_status = st;
-      }
-    } catch (e) {
-      console.log('刷新用户信息失败，使用缓存', e);
-    }
-    wx.hideLoading();
-
-    const user = app.globalData.user || {};
-    if (rolePortals.canUseServiceProviderPortal(user) || rolePortals.canUseMerchantPortal(user)) {
-      rolePortals.navigateToServiceProviderHome();
-    } else {
-      const spStatus = user.service_provider_status || user.serviceProviderStatus;
-      if (spStatus === 'pending' || spStatus === 'reviewing') {
-        wx.showToast({ title: '服务商入驻审核中', icon: 'none' });
-      } else {
-        wx.navigateTo({ url: '../join-service/join-service' });
-      }
-    }
+    rolePortals.navigateToServiceProviderHome();
   },
 
   async goMarketPortal() {
@@ -153,7 +107,7 @@ Page({
       const data = await api.user.getUserProfile();
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
-        const st = data.merchant_status != null ? data.merchant_status : (data.merchantStatus || data.shop_status || data.shopStatus);
+        const st = data.merchant_status != null ? data.merchant_status : data.merchantStatus;
         if (st != null) app.globalData.user.merchant_status = st;
       }
     } catch (e) {
@@ -165,7 +119,7 @@ Page({
     if (rolePortals.canUseMarketPortal(user)) {
       rolePortals.navigateToMarketHome();
     } else {
-      const mStatus = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+      const mStatus = user.merchant_status != null ? user.merchant_status : user.merchantStatus;
       if (mStatus === 'pending' || mStatus === 'reviewing') {
         wx.showToast({ title: '集市商家入驻审核中', icon: 'none' });
       } else {

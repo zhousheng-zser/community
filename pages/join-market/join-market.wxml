@@ -81,6 +81,20 @@
         <text class="orange-link" bindtap="comingSoon">查看执照照片/从业资格证样例</text>
       </view>
     </view>
+    <view class="place-photo-head">
+      <text class="place-photo-title required">额外实地照（2~5张）</text>
+      <text class="place-photo-tip">仅用于 place_photo_url，不包含上方三张固定业务图</text>
+    </view>
+    <view class="place-photo-grid">
+      <view class="place-photo-item" wx:for="{{form.placePhotos}}" wx:key="index">
+        <image src="{{item}}" mode="aspectFill"></image>
+        <view class="cert-del" catchtap="delPlacePhoto" data-idx="{{index}}">✕</view>
+      </view>
+      <view class="place-photo-add" wx:if="{{placePhotoCount < 5}}" bindtap="choosePlacePhotos">
+        <text class="cert-plus">＋</text>
+        <text class="place-add-text">添加实地照</text>
+      </view>
+    </view>
   </view>
 
   <!-- 资质信息 -->

@@ -145,6 +145,14 @@ Page({
       name: c.category_name || c.name
     })).filter(c => c.key);
 
+    // 兼容商家后台新增商品使用了“未在店铺分类表登记”的 category_key，避免商品被前端分类筛掉
+    const knownKeys = new Set(baseCats.map((c) => c.key));
+    Object.keys(grouped).forEach((k) => {
+      if (!knownKeys.has(k)) {
+        baseCats.push({ key: k, name: k === 'local' ? '其他' : k });
+      }
+    });
+
     if (baseCats.length === 0) {
       baseCats = Object.keys(grouped).map((key) => ({ key, name: key }));
     }

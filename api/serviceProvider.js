@@ -1,184 +1,77 @@
 /**
- * 服务商后台模块 API
- * 对应后端文档：八、服务商后台模块
+ * 直约服务商后台模块 API
+ * 后端路径前缀: /service-provider（兼容 /service-provider-portal）
+ * 认证: 普通用户 JWT
  */
 const { get, post, patch } = require('../utils/util.js');
 
-/**
- * 获取个人信息
- * GET /service-provider-portal/me
- */
-const getProfile = () => {
-  return get('/service-provider-portal/me');
-};
+const BASE = '/service-provider';
 
-/**
- * 更新个人信息
- * PATCH /service-provider-portal/profile
- */
-const updateProfile = (data) => {
-  return patch('/service-provider-portal/profile', data);
-};
+/** 获取服务商个人信息（含 profile_id、shop_name 等） */
+const getProfile = () => get(`${BASE}/me`);
 
-/**
- * 获取仪表盘数据
- * GET /service-provider-portal/dashboard
- */
-const getDashboard = () => {
-  return get('/service-provider-portal/dashboard');
-};
+/** 更新服务商信息 */
+const updateProfile = (data) => patch(`${BASE}/profile`, data);
 
-/**
- * 获取服务分类
- * GET /service-provider-portal/categories
- */
-const getCategories = () => {
-  return get('/service-provider-portal/categories');
-};
+/** 获取仪表盘统计 */
+const getDashboard = () => get(`${BASE}/dashboard`);
 
-/**
- * 获取服务列表
- * GET /service-provider-portal/services
- */
-const getServices = (params) => {
-  return get('/service-provider-portal/services', params);
-};
+/** 获取服务分类列表 */
+const getCategories = () => get(`${BASE}/categories`);
 
-/**
- * 创建服务
- * POST /service-provider-portal/services
- */
-const createService = (data) => {
-  return post('/service-provider-portal/services', data);
-};
+/* ──── 服务项目管理 ──── */
 
-/**
- * 获取服务详情
- * GET /service-provider-portal/services/:id
- */
-const getServiceDetail = (id) => {
-  return get(`/service-provider-portal/services/${id}`);
-};
+/** 获取服务列表 */
+const getServices = (params) => get(`${BASE}/services`, params);
 
-/**
- * 更新服务
- * PATCH /service-provider-portal/services/:id
- */
-const updateService = (id, data) => {
-  return patch(`/service-provider-portal/services/${id}`, data);
-};
+/** 创建服务 */
+const createService = (data) => post(`${BASE}/services`, data);
 
-/**
- * 获取订单列表
- * GET /service-provider-portal/orders
- */
-const getOrders = (params) => {
-  return get('/service-provider-portal/orders', params);
-};
+/** 获取服务详情 */
+const getServiceDetail = (id) => get(`${BASE}/services/${id}`);
 
-/**
- * 获取订单详情
- * GET /service-provider-portal/orders/:id
- */
-const getOrderDetail = (id) => {
-  return get(`/service-provider-portal/orders/${id}`);
-};
+/** 更新服务 */
+const updateService = (id, data) => patch(`${BASE}/services/${id}`, data);
 
-/**
- * 接单
- * POST /service-provider-portal/orders/:id/accept
- */
-const acceptOrder = (id) => {
-  return post(`/service-provider-portal/orders/${id}/accept`);
-};
+/** 上/下架服务 POST /services/:id/shelf */
+const shelfService = (id, data) => post(`${BASE}/services/${id}/shelf`, data || {});
 
-/**
- * 打卡
- * POST /service-provider-portal/orders/:id/check-in
- */
-const checkIn = (id, data) => {
-  return post(`/service-provider-portal/orders/${id}/check-in`, data);
-};
+/* ──── 订单管理 ──── */
 
-/**
- * 上传凭证
- * POST /service-provider-portal/orders/:id/evidence
- */
-const uploadEvidence = (id, data) => {
-  return post(`/service-provider-portal/orders/${id}/evidence`, data);
-};
+/** 获取订单列表 */
+const getOrders = (params) => get(`${BASE}/orders`, params);
 
-/**
- * 完成订单
- * POST /service-provider-portal/orders/:id/complete
- */
-const completeOrder = (id) => {
-  return post(`/service-provider-portal/orders/${id}/complete`);
-};
+/** 获取订单详情 */
+const getOrderDetail = (id) => get(`${BASE}/orders/${id}`);
 
-/**
- * 获取技工列表
- * GET /service-provider-portal/workers/list
- */
-const getWorkers = (params) => {
-  return get('/service-provider-portal/workers/list', params);
-};
+/** 统一订单操作 POST /orders/:id/action */
+const orderAction = (id, data) => post(`${BASE}/orders/${id}/action`, data);
 
-/**
- * 获取技工详情
- * GET /service-provider-portal/workers/:id
- */
-const getWorkerDetail = (id) => {
-  return get(`/service-provider-portal/workers/${id}`);
-};
+/** 接单 */
+const acceptOrder = (id) => orderAction(id, { action: 'accept' });
 
-/**
- * 更新技工状态
- * PUT /service-provider-portal/workers/:id/status
- */
-const updateWorkerStatus = (id, data) => {
-  return post(`/service-provider-portal/workers/${id}/status`, data);
-};
+/** 打卡（到达现场） */
+const checkIn = (id, data) => orderAction(id, Object.assign({ action: 'check-in' }, data || {}));
 
-/**
- * 获取技工统计
- * GET /service-provider-portal/workers/:id/stats
- */
-const getWorkerStats = (id) => {
-  return get(`/service-provider-portal/workers/${id}/stats`);
-};
+/** 上传凭证 */
+const uploadEvidence = (id, data) => orderAction(id, Object.assign({ action: 'evidence' }, data || {}));
 
-/**
- * 收入汇总
- * GET /service-provider-portal/finance/income/summary
- */
-const getIncomeSummary = (params) => {
-  return get('/service-provider-portal/finance/income/summary', params);
-};
+/** 完成服务 */
+const completeOrder = (id, data) => orderAction(id, Object.assign({ action: 'complete' }, data || {}));
 
-/**
- * 收入明细列表
- * GET /service-provider-portal/finance/income/list
- */
-const getIncomeList = (params) => {
-  return get('/service-provider-portal/finance/income/list', params);
-};
+/* ──── 技工管理 ──── */
 
-/**
- * 每日收入统计
- * GET /service-provider-portal/finance/income/daily
- */
-const getIncomeDaily = (params) => {
-  return get('/service-provider-portal/finance/income/daily', params);
-};
+const getWorkers = (params) => get(`${BASE}/workers/list`, params);
+const getWorkerDetail = (id) => get(`${BASE}/workers/${id}`);
+const updateWorkerStatus = (id, data) => post(`${BASE}/workers/${id}/status`, data);
+const getWorkerStats = (id) => get(`${BASE}/workers/${id}/stats`);
 
-/**
- * 获取账户余额
- * GET /service-provider-portal/finance/balance
- */
-const getBalance = () => {
-  return get('/service-provider-portal/finance/balance');
-};
+/* ──── 财务 ──── */
+
+const getIncomeSummary = (params) => get(`${BASE}/finance/income/summary`, params);
+const getIncomeList = (params) => get(`${BASE}/finance/income/list`, params);
+const getIncomeDaily = (params) => get(`${BASE}/finance/income/daily`, params);
+const getBalance = () => get(`${BASE}/finance/balance`);
 
 module.exports = {
   getProfile,
@@ -189,8 +82,10 @@ module.exports = {
   createService,
   getServiceDetail,
   updateService,
+  shelfService,
   getOrders,
   getOrderDetail,
+  orderAction,
   acceptOrder,
   checkIn,
   uploadEvidence,

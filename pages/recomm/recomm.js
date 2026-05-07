@@ -7,7 +7,7 @@ Page({
     activeServiceTab: 'take',
     activeTabConfig: getTabByKey('take'),
     // 当前 tab 表单（WXML 只访问这个，不用动态 key）
-    currentForm: { from: '', to: '', remark: '' },
+    currentForm: { from: '', to: '', remark: '', price: '' },
     // 各 tab 表单缓存
     _cache: {},
     history: [
@@ -34,7 +34,7 @@ Page({
       [this.data.activeServiceTab]: Object.assign({}, this.data.currentForm)
     });
     // 读取目标 tab 缓存
-    const form = cache[key] || { from: '', to: '', remark: '' };
+    const form = cache[key] || { from: '', to: '', remark: '', price: '' };
     const tab = getTabByKey(key);
     this.setData({
       activeServiceTab: key,
@@ -55,32 +55,47 @@ Page({
     wx.navigateTo({ url: `../address/address?mode=pick&field=currentForm.${field}` });
   },
 
-  doSubmit() {
+  async doSubmit() {
     const { currentForm, activeTabConfig } = this.data;
     const block = getSubmitBlockReason(activeTabConfig, currentForm);
     if (block) {
       return wx.showToast({ title: block, icon: 'none' });
     }
 
+    const rewardAmount = currentForm.price && parseFloat(currentForm.price) > 0 ? parseFloat(currentForm.price) : null;
+    const content = currentForm.remark || `${currentForm.from} → ${currentForm.to}`;
+
     wx.showLoading({ title: '发布中...' });
-    util.post('neighbor-assist', {
-      category: activeTabConfig.title,
-      content: currentForm.remark || '',
-      address: currentForm.from || currentForm.to,
-      pickup_address: currentForm.from,
-      delivery_address: currentForm.to,
-      reward: 0
-    })
-      .then(() => {
-        wx.hideLoading();
-        wx.showToast({ title: '发布成功！', icon: 'success' });
-        this.setData({ currentForm: { from: '', to: '', remark: '' } });
-      })
-      .catch((err) => {
-        wx.hideLoading();
-        const msg = (err && err.errmsg) || '发布失败，请重试';
-        wx.showToast({ title: msg, icon: 'none' });
+    try {
+      const res = await util.post('neighbor-assist/orders', {
+        assist_type: activeTabConfig.key,
+        origin_address_snapshot: { address: currentForm.from, detail: currentForm.from },
+        destination_address_snapshot: { address: currentForm.to || currentForm.from, detail: currentForm.to || currentForm.from },
+        content: content,
+        remark: content,
+        community_id: 1,
+        reward_amount: rewardAmount
       });
+
+      const orderId = res && (res.id || res.order_id);
+      wx.hideLoading();
+      wx.showToast({ title: '发布成功', icon: 'success' });
+
+      // 尝试支付
+      if (orderId) {
+        try {
+          await util.post(`neighbor-assist/orders/${orderId}/pay`);
+        } catch (payErr) {
+          console.warn('支付失败但订单已创建:', payErr);
+        }
+      }
+
+      this.setData({ currentForm: { from: '', to: '', remark: '', price: '' } });
+    } catch (err) {
+      wx.hideLoading();
+      const msg = (err && err.errmsg) || '发布失败，请重试';
+      wx.showToast({ title: msg, icon: 'none' });
+    }
   },
 
   goBack() {

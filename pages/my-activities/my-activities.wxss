@@ -3,7 +3,7 @@ page { background: #f5f5f5; }
 .act-tab-bar { display: flex; background: #fff; padding: 0 20rpx; border-bottom: 1rpx solid #eee; }
 .act-tab { flex: 1; text-align: center; padding: 28rpx 0; font-size: 28rpx; color: #888; position: relative; }
 .act-tab.active { color: #FF7A00; font-weight: 700; }
-.act-tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50rpx; height: 6rpx; border-radius: 3rpx; background: #FF7A00; }
+.act-tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50rpx; height: 6rpx; border-radius: 3rpx; background: #000000; }
 .act-content { padding: 20rpx; }
 .act-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 200rpx 0; }
 .act-empty-icon { font-size: 110rpx; opacity: 0.25; }
@@ -16,3 +16,4 @@ page { background: #f5f5f5; }
 .act-time { display: block; font-size: 22rpx; color: #999; margin-top: 8rpx; }
 .act-status { display: inline-block; margin-top: 16rpx; padding: 4rpx 14rpx; border-radius: 20rpx; font-size: 22rpx; background: #f0f0f0; color: #888; }
 .act-status.pending { background: #fff0e0; color: #f87c00; }
+

@@ -16,7 +16,7 @@
         <text class="sp-label">服务项目管理</text>
         <text class="sp-arrow">›</text>
       </navigator>
-      <navigator class="sp-row" url="/package-service-provider/pages/sp-orders/sp-orders">
+      <navigator class="sp-row" url="/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service">
         <text class="sp-label">服务订单</text>
         <text class="sp-arrow">›</text>
       </navigator>
@@ -30,8 +30,12 @@
   <view class="sp-card">
     <view class="sp-card-title">账户</view>
     <view class="sp-block">
-      <navigator class="sp-row" url="/pages/join-service/join-service">
+      <navigator class="sp-row" url="/package-service-provider/pages/sp-qualification/sp-qualification">
         <text class="sp-label">入驻与资质</text>
+        <text class="sp-arrow">›</text>
+      </navigator>
+      <navigator class="sp-row" url="/package-service-provider/pages/sp-settings/sp-settings">
+        <text class="sp-label">门店设置</text>
         <text class="sp-arrow">›</text>
       </navigator>
       <navigator class="sp-row" url="/pages/account/account">
@@ -40,10 +44,6 @@
       </navigator>
       <navigator class="sp-row" url="/pages/message/message">
         <text class="sp-label">消息通知</text>
-        <text class="sp-arrow">›</text>
-      </navigator>
-      <navigator class="sp-row" url="/pages/settings/settings">
-        <text class="sp-label">设置</text>
         <text class="sp-arrow">›</text>
       </navigator>
     </view>
@@ -61,11 +61,11 @@
       <text>订单</text>
     </view>
     <view class="sp-tabbar-item" bindtap="goDispatch">
-      <image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <image class="sp-tabbar-icon" src="/img/other_services/platform_service.png" mode="aspectFit" />
       <text>派单</text>
     </view>
     <view class="sp-tabbar-item" bindtap="goServices">
-      <image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" />
+      <image class="sp-tabbar-icon" src="/img/join_services/service_provider.png" mode="aspectFit" />
       <text>服务</text>
     </view>
     <view class="sp-tabbar-item sp-tabbar-on">

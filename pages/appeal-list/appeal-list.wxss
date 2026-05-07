@@ -1,9 +1,10 @@
 .al-page { padding: 24rpx; min-height: 100vh; background: #f5f5f5; box-sizing: border-box; }
 .al-form { background: #fff; padding: 24rpx; border-radius: 12rpx; margin-bottom: 24rpx; }
 .al-input { width: 100%; min-height: 200rpx; font-size: 28rpx; }
-.al-btn { margin-top: 20rpx; background: #ff7a00; color: #fff; border-radius: 12rpx; }
+.al-btn { margin-top: 20rpx; background: #000000; color: #fff; border-radius: 12rpx; }
 .al-head { font-size: 26rpx; font-weight: 600; margin-bottom: 12rpx; }
 .al-item { background: #fff; padding: 20rpx; border-radius: 12rpx; margin-bottom: 12rpx; }
 .al-status { display: block; font-size: 22rpx; color: #ff7a00; margin-bottom: 8rpx; }
 .al-text { font-size: 26rpx; color: #333; }
 .al-empty { text-align: center; color: #999; padding: 40rpx; }
+

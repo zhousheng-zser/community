@@ -74,13 +74,13 @@
         <text class="grid-btn-arrow">›</text>
       </view>
 
-      <view class="grid-btn" bindtap="goMine">
+      <view class="grid-btn" bindtap="goSettings">
         <view class="grid-btn-icon">
           <image src="/img/other_services/settings.png" mode="aspectFit"></image>
         </view>
         <view class="grid-btn-main">
-          <text class="grid-btn-title">店铺账户</text>
-          <text class="grid-btn-desc">{{merchantOk ? '资料与设置' : '入驻通过后可使用'}}</text>
+          <text class="grid-btn-title">店铺设置</text>
+          <text class="grid-btn-desc">{{merchantOk ? '联系人与门店资料' : '入驻通过后可使用'}}</text>
         </view>
         <text class="grid-btn-arrow">›</text>
       </view>

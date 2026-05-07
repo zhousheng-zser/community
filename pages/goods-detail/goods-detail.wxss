@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-/* 顶部轮播 */
+/* 椤堕儴杞挱 */
 .goods-swiper {
   width: 100%;
   height: 750rpx;
@@ -20,7 +20,7 @@
   height: 100%;
 }
 
-/* 基础信息卡片 */
+/* 鍩虹淇℃伅鍗＄墖 */
 .info-card {
   background: #fff;
   padding: 30rpx;
@@ -52,7 +52,7 @@
   line-height: 1.4;
 }
 
-/* 规格选择段 & 商家卡片 */
+/* 瑙勬牸閫夋嫨娈?& 鍟嗗鍗＄墖 */
 .card {
   background: #fff;
   padding: 30rpx;
@@ -100,7 +100,7 @@
   color: #FF7700;
 }
 
-/* 详情卡片 */
+/* 璇︽儏鍗＄墖 */
 .detail-card {
   padding: 30rpx 0;
 }
@@ -122,7 +122,7 @@
   margin: 10rpx 0;
 }
 
-/* 底部操作条 */
+/* 搴曢儴鎿嶄綔鏉?*/
 .bottom-space {
   height: 120rpx;
 }
@@ -195,12 +195,12 @@
   color: #fff;
 }
 .buy-now {
-  background: linear-gradient(90deg, #FF7700, #FF4B00);
+  background: #000000;
   color: #fff;
 }
 
 
-/* ================= 模态遮罩 ================= */
+/* ================= 妯℃€侀伄缃?================= */
 .mask {
   position: fixed;
   top: 0;
@@ -211,7 +211,7 @@
   z-index: 100;
 }
 
-/* ================= SKU半屏弹窗 ================= */
+/* ================= SKU鍗婂睆寮圭獥 ================= */
 .sku-popup {
   position: fixed;
   bottom: 0;
@@ -341,14 +341,14 @@
 .confirm-btn {
   width: 100%;
   border-radius: 40rpx;
-  background: linear-gradient(90deg, #FF7700, #FF4B00);
+  background: #000000;
   color: #fff;
   font-size: 32rpx;
   height: 80rpx;
   line-height: 80rpx;
 }
 
-/* ================= 门店私有购物车抽屉 ================= */
+/* ================= 闂ㄥ簵绉佹湁璐墿杞︽娊灞?================= */
 .cart-drawer {
   position: fixed;
   bottom: 0;
@@ -356,7 +356,7 @@
   width: 100%;
   background: #fff;
   border-radius: 24rpx 24rpx 0 0;
-  z-index: 102; /* 高于底栏，但低于SKU弹窗的逻辑如果分开，目前它有独立遮罩 */
+  z-index: 102; /* 楂樹簬搴曟爮锛屼絾浣庝簬SKU寮圭獥鐨勯€昏緫濡傛灉鍒嗗紑锛岀洰鍓嶅畠鏈夌嫭绔嬮伄缃?*/
   transform: translateY(100%);
   transition: transform 0.3s ease;
   padding-bottom: env(safe-area-inset-bottom);
@@ -427,7 +427,7 @@
   height: 44rpx;
   line-height: 40rpx;
   font-size: 32rpx;
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   border-radius: 50%;
 }
@@ -459,10 +459,11 @@
 }
 .cfoot-right {
   width: 240rpx;
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   font-size: 32rpx;
   font-weight: bold;
   line-height: 100rpx;
   text-align: center;
 }
+

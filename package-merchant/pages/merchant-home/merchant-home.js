@@ -57,7 +57,7 @@ Page({
     const merchantOk = rp.canUseMerchantPortal(user);
     let bannerText = '';
     if (!merchantOk) {
-      const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+      const st = user.merchant_status != null ? user.merchant_status : user.merchantStatus;
       if (st === 'pending') bannerText = '商家入驻审核中，通过后可管理订单';
       else if (st === 'rejected') bannerText = '入驻未通过，可重新提交资料';
       else bannerText = '请先完成集市商家入驻，审核通过后可使用本工作台';
@@ -82,7 +82,7 @@ Page({
     try {
       let res;
       try {
-        res = await api.merchant.getOrderList({ page: 1, limit: 100 });
+        res = await api.merchant.getOrders({ page: 1, limit: 100 });
       } catch (e1) {
         if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
           res = await api.merchant.getShopOrderList({ page: 1, limit: 100 });
@@ -118,7 +118,7 @@ Page({
       const goodsParams = mshop.goodsListQuery(shopId);
       let res;
       try {
-        res = await api.merchant.getGoodsList(goodsParams);
+        res = await api.merchant.getGoods(goodsParams);
       } catch (e1) {
         if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
           res = await api.merchant.getShopGoodsList(goodsParams);
@@ -168,12 +168,16 @@ Page({
     wx.redirectTo({ url: rp.merchantTabUrl('merchant-mine') });
   },
 
+  goSettings() {
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-settings/merchant-settings' });
+  },
+
   goService() {
     wx.redirectTo({ url: rp.merchantTabUrl('merchant-service') });
   },
 
   goJoin() {
-    wx.navigateTo({ url: '/pages/join-market/join-market' });
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-qualification/merchant-qualification' });
   },
 
   goAccount() {
@@ -189,7 +193,12 @@ Page({
   },
 
   goMarketShop() {
-    wx.navigateTo({ url: '/pages/market-shop/market-shop' });
+    const { shopId } = mshop.getBoundShop(app);
+    if (!shopId) {
+      wx.showToast({ title: '暂未绑定店铺', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/market-shop/market-shop?id=${encodeURIComponent(String(shopId))}` });
   },
 
   backUser() {

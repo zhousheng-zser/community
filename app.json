@@ -19,6 +19,7 @@
     "pages/order-detail/order-detail",
     "pages/order-confrim/order-confrim",
     "pages/service-provider-shop/service-provider-shop",
+    "pages/service-provider-list/service-provider-list",
     "pages/service/service",
     "pages/push-channel/push-channel",
     "pages/push-goods-list/push-goods-list",
@@ -113,7 +114,9 @@
     "pages/merchant-ship/merchant-ship",
     "pages/merchant-refund-handle/merchant-refund-handle",
     "pages/merchant-dispatch/merchant-dispatch",
-    "pages/merchant-arbitrate/merchant-arbitrate"
+    "pages/merchant-arbitrate/merchant-arbitrate",
+    "pages/merchant-settings/merchant-settings",
+    "pages/merchant-qualification/merchant-qualification"
       ]
     },
     {
@@ -131,7 +134,10 @@
         "pages/sp-orders/sp-orders",
         "pages/sp-dispatch/sp-dispatch",
         "pages/sp-services/sp-services",
-        "pages/sp-mine/sp-mine"
+        "pages/sp-services-edit/sp-services-edit",
+        "pages/sp-mine/sp-mine",
+        "pages/sp-settings/sp-settings",
+        "pages/sp-qualification/sp-qualification"
       ]
     },
     {
@@ -146,7 +152,7 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#FF7A00",
+    "navigationBarBackgroundColor": "#000000",
     "navigationBarTitleText": "社区服务",
     "navigationBarTextStyle": "white"
   },
@@ -154,7 +160,7 @@
     "custom": true,
     "color": "#8d8d8d",
     "selectedColor": "#FF7A00",
-    "backgroundColor": "#fff",
+    "backgroundColor": "#ffffff",
     "list": [
       {
         "iconPath": "/img/home-0.png",

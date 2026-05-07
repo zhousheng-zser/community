@@ -46,6 +46,7 @@ const broadcastMessage = (data) => {
 
 module.exports = {
   getConversations,
+  getConversationList: getConversations,
   getConversationMessages,
   deleteConversation,
   sendMessage,

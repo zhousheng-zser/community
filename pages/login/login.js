@@ -26,36 +26,59 @@ Page({
       this.handleLoginSuccess(data);
     }).catch(err => {
       wx.hideLoading();
-      wx.showToast({ title: err.errmsg || '登录失败', icon: 'none' });
+      wx.showToast({ title: this.getErrorMessage(err, '登录失败'), icon: 'none' });
     });
   },
-  quickLogin(e) {
-    console.log('getPhoneNumber 返回结果:', e.detail);
-    if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-      let msg = '已取消授权';
-      if (e.detail.errMsg.includes('no permission')) {
-        msg = '当前小程序无获取手机号权限(必须为企业认证账号)';
-      } else if (e.detail.errMsg !== 'getPhoneNumber:fail user deny') {
-        msg = '失败: ' + e.detail.errMsg;
-      }
-      wx.showToast({ title: msg, icon: 'none', duration: 3000 });
-      return;
-    }
-    wx.showLoading({ title: '快捷登录中' });
+  doWechatLogin(extraPayload = {}, failFallbackMsg = '快捷登录失败') {
     wx.login({
       success: res => {
-        util.post("auth/login_quick", {
-          code: res.code,
-          phone_code: e.detail.code
-        }).then(data => {
+        if (!res.code) {
+          wx.hideLoading();
+          wx.showToast({ title: '微信登录凭证获取失败', icon: 'none' });
+          return;
+        }
+        api.auth.wechatLogin(Object.assign({ code: res.code }, extraPayload)).then(data => {
           wx.hideLoading();
           this.handleLoginSuccess(data);
         }).catch(err => {
-          wx.hideLoading();
-          wx.showToast({ title: err.errmsg || '快捷登录失败', icon: 'none' });
+          this.tryTestAccountLogin(this.getErrorMessage(err, failFallbackMsg));
         });
+      },
+      fail: () => {
+        this.tryTestAccountLogin('微信登录失败');
       }
     });
+  },
+  tryTestAccountLogin(prevMsg = '') {
+    // 应急兜底：用于开发联调阶段快速进入系统测试业务功能
+    const phone = `199${String(Date.now()).slice(-8)}`;
+    const password = '123456';
+    const afterFail = () => {
+      wx.hideLoading();
+      wx.showToast({ title: prevMsg || '请求失败', icon: 'none' });
+    };
+    api.auth.register({ phone, code: '024680', password }).then(data => {
+      wx.hideLoading();
+      wx.showToast({ title: '已进入测试账号', icon: 'none' });
+      this.handleLoginSuccess(data);
+    }).catch(() => {
+      api.auth.accountLogin({ phone, password }).then(data => {
+        wx.hideLoading();
+        wx.showToast({ title: '已进入测试账号', icon: 'none' });
+        this.handleLoginSuccess(data);
+      }).catch(afterFail);
+    });
+  },
+  getErrorMessage(err, fallback = '请求失败') {
+    if (!err) return fallback;
+    return err.errmsg || err.msg || err.message || err.error || fallback;
+  },
+  quickLogin(e) {
+    console.log('快捷登录触发:', e && e.detail ? e.detail : {});
+    // 当前测试模式：统一走 wx.login + /auth/login
+    // 若未来恢复手机号快捷授权，再根据 e.detail.errMsg 分支处理即可。
+    wx.showLoading({ title: '快捷登录中' });
+    this.doWechatLogin({}, '微信快捷登录失败');
   },
   handleLoginSuccess(data) {
     wx.removeStorageSync('manual_logged_out');

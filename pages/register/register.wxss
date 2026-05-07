@@ -75,7 +75,7 @@
   justify-content: center;
 }
 .checkbox.checked {
-  background: #FF7700;
+  background: #000000;
   border-color: #FF7700;
 }
 .check-mark {
@@ -90,7 +90,7 @@
   color: #FF7700;
 }
 .submit-btn {
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   border-radius: 8rpx;
   font-size: 32rpx;
@@ -105,3 +105,4 @@
   font-size: 28rpx;
   color: #666;
 }
+

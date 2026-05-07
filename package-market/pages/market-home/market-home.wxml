@@ -103,6 +103,9 @@
 
   <view class="portal-card mk-section">
     <view class="card-title">商品上下架</view>
+    <view class="mk-create-row">
+      <button class="mk-create-btn" size="mini" bindtap="goCreateGoods">新增商品并上架</button>
+    </view>
     <view class="mk-link-list">
       <view class="mk-link-item" bindtap="goGoodsShelfUp">
         <image class="mk-link-ico" src="/img/market_icons/supermarket.png" mode="aspectFit"></image>

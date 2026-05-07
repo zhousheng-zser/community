@@ -55,6 +55,7 @@
       </view>
       <!-- 备注 -->
       <view class="remark-row">
+        <text class="field-icon">📝</text>
         <text class="remark-label">备注</text>
         <input
           class="remark-input"
@@ -68,6 +69,7 @@
       </view>
       <!-- 悬赏价格 -->
       <view class="remark-row">
+        <text class="field-icon">💰</text>
         <text class="remark-label">悬赏金额</text>
         <text class="currency-symbol">¥</text>
         <input
@@ -83,6 +85,7 @@
       </view>
       <!-- 联系方式 -->
       <view class="remark-row">
+        <text class="field-icon">📞</text>
         <text class="remark-label">联系电话</text>
         <input
           class="remark-input"

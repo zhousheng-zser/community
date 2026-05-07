@@ -110,8 +110,8 @@ Page({
       wx.showToast({ title: '缺少订单', icon: 'none' });
       return;
     }
-    this._portal = options.portal === 'merchant' ? 'merchant' : 'worker';
-    this._apiPrefix = this._portal === 'merchant' ? 'merchant/service-orders' : 'worker/service-orders';
+    this._portal = options.portal === 'merchant' ? 'merchant' : (options.portal === 'sp' ? 'sp' : 'worker');
+    this._apiPrefix = this._portal === 'merchant' ? 'merchant/service-orders' : (this._portal === 'sp' ? 'service-provider/orders' : 'worker/service-orders');
     this.setData({ id: String(id) });
   },
 
@@ -411,7 +411,7 @@ Page({
         if (res.confirm) {
           const { id } = this.data;
           const prefix = this._apiPrefix || 'worker/service-orders';
-          const reason = this._portal === 'merchant' ? '服务商拒单' : '技工拒单';
+          const reason = this._portal === 'merchant' || this._portal === 'sp' ? '服务商拒单' : '技工拒单';
           this.postAction(`${prefix}/${id}/reject`, { reason });
         }
       }
@@ -453,7 +453,7 @@ Page({
     }
     wx.showLoading({ title: '打开会话', mask: true });
     try {
-      const isMerchant = this._portal === 'merchant';
+      const isMerchant = this._portal === 'merchant' || this._portal === 'sp';
       const body = isMerchant
         ? {
             order_no: orderNo,

@@ -1,8 +1,15 @@
 /**
  * 商家后台模块 API（集市商家端）
  * 对应后端文档：九、商家后台模块
+ *
+ * [注意] 已取消独立商户令牌机制，所有接口使用普通用户 JWT 鉴权。
+ * exchangeMerchantToken / ensureMerchantSession 保留导出但为空操作，避免外部引用报错。
  */
 const { get, post, patch } = require('../utils/util.js');
+
+// 保留空操作，兼容外部引用
+const exchangeMerchantToken = async () => ({ token: '', expires_in: 7200 });
+const ensureMerchantSession = async () => true;
 
 /**
  * 获取仪表盘数据
@@ -34,6 +41,9 @@ const updateShop = (data) => {
  */
 const getGoods = (params) => {
   return get('/market/merchant/goods', params);
+};
+const getShopGoodsList = (params) => {
+  return get('/market/shop/goods', params);
 };
 
 /**
@@ -83,6 +93,9 @@ const shelfGoods = (id, data) => {
 const getOrders = (params) => {
   return get('/market/merchant/orders', params);
 };
+const getShopOrderList = (params) => {
+  return get('/market/shop/orders', params);
+};
 
 /**
  * 获取订单详情
@@ -98,6 +111,26 @@ const getOrderDetail = (orderNo) => {
  */
 const orderAction = (orderNo, data) => {
   return post(`/market/merchant/orders/${orderNo}/action`, data);
+};
+const acceptOrder = (orderNo) => {
+  return orderAction(orderNo, { action: 'accept' }).catch(() => post(`/market/merchant/orders/${orderNo}/accept`, {}));
+};
+const cancelOrder = (orderNo) => {
+  return orderAction(orderNo, { action: 'reject' }).catch(() => post(`/market/merchant/orders/${orderNo}/cancel`, {}));
+};
+const shipOrder = (orderNo, data) => {
+  const payload = data && typeof data === 'object' ? data : {};
+  return orderAction(orderNo, Object.assign({ action: 'dispatch' }, payload))
+    .catch(() => post(`/market/merchant/orders/${orderNo}/ship`, payload));
+};
+const startDelivery = (orderNo, data) => {
+  const payload = data && typeof data === 'object' ? data : {};
+  return orderAction(orderNo, Object.assign({ action: 'dispatch' }, payload));
+};
+const completeDelivery = (orderNo, data) => {
+  const payload = data && typeof data === 'object' ? data : {};
+  return orderAction(orderNo, Object.assign({ action: 'delivered' }, payload))
+    .catch(() => orderAction(orderNo, Object.assign({ action: 'complete_delivery' }, payload)));
 };
 
 /**
@@ -213,18 +246,27 @@ const getRefundStats = () => {
 };
 
 module.exports = {
+  exchangeMerchantToken,
+  ensureMerchantSession,
   getDashboard,
   getShop,
   updateShop,
   getGoods,
+  getShopGoodsList,
   createGoods,
   getGoodsDetail,
   updateGoods,
   restockGoods,
   shelfGoods,
   getOrders,
+  getShopOrderList,
   getOrderDetail,
   orderAction,
+  acceptOrder,
+  cancelOrder,
+  shipOrder,
+  startDelivery,
+  completeDelivery,
   getPayments,
   getCustomers,
   getCustomerOrders,

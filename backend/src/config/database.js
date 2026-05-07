@@ -21,8 +21,9 @@ module.exports = {
     define: {
       underscored: true,
       timestamps: true,
-      createdAt: 'created_at',
-      updatedAt: 'updated_at'
+      // 当前线上 Users 等历史表使用 createdAt/updatedAt（驼峰），此处需对齐
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt'
     },
     pool: {
       max: 10,
@@ -42,8 +43,8 @@ module.exports = {
     define: {
       underscored: true,
       timestamps: true,
-      createdAt: 'created_at',
-      updatedAt: 'updated_at'
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt'
     },
     pool: {
       max: 20,

@@ -2,7 +2,7 @@
  * 技工端模块 API
  * 对应后端文档：十、技工端模块
  */
-const { get, post } = require('../utils/util.js');
+const { get, post, patch } = require('../utils/util.js');
 
 /**
  * 获取订单列表
@@ -60,6 +60,40 @@ const completeOrder = (id) => {
   return post(`/worker/service-orders/${id}/complete`);
 };
 
+// ===== 服务管理 =====
+
+/**
+ * 获取我的服务列表
+ * GET /worker/services
+ */
+const getMyServices = (params) => {
+  return get('/worker/services', params);
+};
+
+/**
+ * 创建服务
+ * POST /worker/services
+ */
+const createService = (data) => {
+  return post('/worker/services', data);
+};
+
+/**
+ * 更新服务
+ * PATCH /worker/services/:id
+ */
+const updateService = (id, data) => {
+  return patch(`/worker/services/${id}`, data);
+};
+
+/**
+ * 删除服务
+ * POST /worker/services/:id/delete
+ */
+const deleteService = (id) => {
+  return post(`/worker/services/${id}/delete`);
+};
+
 module.exports = {
   getOrders,
   getOrderDetail,
@@ -67,5 +101,9 @@ module.exports = {
   rejectOrder,
   checkIn,
   uploadEvidence,
-  completeOrder
+  completeOrder,
+  getMyServices,
+  createService,
+  updateService,
+  deleteService
 };

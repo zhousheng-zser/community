@@ -90,7 +90,7 @@
 }
 
 .submit-btn {
-  background: linear-gradient(90deg, #FF9F43 0%, #FF7A00 100%);
+  background: #000000;
   color: #fff;
   border-radius: 44rpx;
   font-size: 32rpx;
@@ -105,3 +105,4 @@
   color: #999 !important;
   box-shadow: none;
 }
+

@@ -73,7 +73,12 @@ Page({
     } catch (e) {}
 
     service = service || mockMap[id] || mockMap[1];
+    const resolvedServiceId =
+      (service && service.id != null && service.id !== '')
+        ? Number(service.id)
+        : Number(this.data.serviceId);
     this.setData({
+      serviceId: Number.isFinite(resolvedServiceId) ? resolvedServiceId : this.data.serviceId,
       service,
       specs: [service.spec],
       detailImages: service.detailImages,

@@ -10,7 +10,7 @@
   padding: 80rpx;
 }
 .hero {
-  background: linear-gradient(135deg, #ff8a3d, #ea580c);
+  background: #000000;
   border-radius: 20rpx;
   padding: 32rpx;
   color: #fff;
@@ -64,7 +64,7 @@
   font-size: 28rpx;
 }
 .btn.primary {
-  background: #ff7a00;
+  background: #000000;
   color: #fff;
 }
 .btn.ghost {
@@ -118,10 +118,11 @@
   border-radius: 12rpx;
 }
 .modal-btn.primary {
-  background: #ff7a00;
+  background: #000000;
   color: #fff;
 }
 .modal-btn.ghost {
   background: #f3f4f6;
   color: #374151;
 }
+

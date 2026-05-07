@@ -9,8 +9,13 @@ const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
-const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
+const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
+const { applyHomeCategoryAvailability } = require('../../utils/homeCategoryAvailability.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
+
+// 首页「直约技工」本地兜底数据（后端 core/workers 不可用时的展示）
+const FALLBACK_WORKERS = FALLBACK_WORKER_ROWS.map(mapWorkerForHomeCard);
+
 Page({
   data: {
     noOrderTip: "您还没有订单",
@@ -201,10 +206,12 @@ Page({
         const workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
         this.setData({ workerList });
       } else {
-        console.log('[refreshWorkerList] core/workers 返回空列表');
+        console.log('[refreshWorkerList] core/workers 返回空列表，使用本地兜底');
+        this.setData({ workerList: FALLBACK_WORKERS });
       }
     } catch (e) {
-      console.log('core/workers 刷新失败', e);
+      console.log('core/workers 刷新失败，使用本地兜底', e);
+      this.setData({ workerList: FALLBACK_WORKERS });
     }
   },
   /** 地址页保存/编辑/删除/设默认后，清空本地集市缓存并重拉当前分类店铺 */
@@ -475,6 +482,15 @@ Page({
     wx.switchTab({ url: '/pages/community/community' });
   },
 
+  goServiceProviderPortal() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: '/package-service-provider/pages/sp-home/sp-home' });
+  },
+
   jumpToMiniProgram(e) {
     const idx = e.currentTarget.dataset.idx;
     const mp = this.data.thirdPartyMiniPrograms[idx];
@@ -519,6 +535,18 @@ Page({
     const shopId = e.currentTarget.dataset.shopId || '';
     wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + encodeURIComponent(shopId) + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price) });
   },
+
+  onTapHomeCategory(e) {
+    const ds = e.currentTarget.dataset || {};
+    const unsupported = ds.unsupported === true || ds.unsupported === 'true';
+    if (unsupported) {
+      wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
+      return;
+    }
+    const url = ds.url;
+    if (!url) return;
+    wx.navigateTo({ url });
+  },
   async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
     const communityId = (app.globalData.user || {}).communityId;
@@ -545,30 +573,31 @@ Page({
 
     const mapHomeIcon = (rows) => rows.map((r) => ({ ...r, icon: imgUrl(r.icon) }));
     // 与「直约服务商」卡片一致的暖灰底 + 橙色系点缀（无图标时 emoji 兜底仍保持同色系）
-    const categoryList = mapHomeIcon([
-      { name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#fff4eb", url: "../tidy-service/tidy-service?key=tidy" },
-      { name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e6", url: "../tidy-service/tidy-service?key=urgent_fix" },
-      { name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#fff7ed", url: "../tidy-service/tidy-service?key=appliance_clean" },
-      { name: "开荒保洁", icon: "/img/home_categories/pioneer_clean.png", emoji: "🧹", bgColor: "#ffedd5", url: "../tidy-service/tidy-service?key=pioneer_clean" },
-      { name: "除螨服务", icon: "/img/home_categories/mite_remove.png", emoji: "🌿", bgColor: "#fff5eb", url: "../tidy-service/tidy-service?key=mite_remove" },
-      { name: "家具养护", icon: "/img/home_categories/furniture_care.png", emoji: "🪑", bgColor: "#ffeee6", url: "../tidy-service/tidy-service?key=furniture_care" },
-      { name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff8f0", url: "../tidy-service/tidy-service?key=baby_home" },
-      { name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#ffe8dc", url: "../tidy-service/tidy-service?key=house_repair" },
-      { name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffeadf", url: "../tidy-service/tidy-service?key=beauty_home" }
+    // groupKey 与 tidy-service 页的 key 一致，用于本小区热卖数据推导「不可提供」
+    let categoryList = mapHomeIcon([
+      { groupKey: 'tidy', name: "整理收纳", icon: "/img/home_categories/tidy.png", emoji: "🗂", bgColor: "#fff4eb", url: "../tidy-service/tidy-service?key=tidy" },
+      { groupKey: 'urgent_fix', name: "家修急事", icon: "/img/home_categories/urgent_fix.png", emoji: "🔧", bgColor: "#fff0e6", url: "../tidy-service/tidy-service?key=urgent_fix" },
+      { groupKey: 'appliance_clean', name: "家电清洗", icon: "/img/home_categories/appliance_clean.png", emoji: "🫧", bgColor: "#fff7ed", url: "../tidy-service/tidy-service?key=appliance_clean" },
+      { groupKey: 'pioneer_clean', name: "开荒保洁", icon: "/img/home_categories/pioneer_clean.png", emoji: "🧹", bgColor: "#ffedd5", url: "../tidy-service/tidy-service?key=pioneer_clean" },
+      { groupKey: 'mite_remove', name: "除螨服务", icon: "/img/home_categories/mite_remove.png", emoji: "🌿", bgColor: "#fff5eb", url: "../tidy-service/tidy-service?key=mite_remove" },
+      { groupKey: 'furniture_care', name: "家具养护", icon: "/img/home_categories/furniture_care.png", emoji: "🪑", bgColor: "#ffeee6", url: "../tidy-service/tidy-service?key=furniture_care" },
+      { groupKey: 'baby_home', name: "宝宝家事", icon: "/img/home_categories/baby_home.png", emoji: "👶", bgColor: "#fff8f0", url: "../tidy-service/tidy-service?key=baby_home" },
+      { groupKey: 'house_repair', name: "房屋修缮", icon: "/img/home_categories/house_repair.png", emoji: "🏠", bgColor: "#ffe8dc", url: "../tidy-service/tidy-service?key=house_repair" },
+      { groupKey: 'beauty_home', name: "上门美业", icon: "/img/home_categories/beauty_home.png", emoji: "💄", bgColor: "#ffeadf", url: "../tidy-service/tidy-service?key=beauty_home" }
     ]);
     const quickActions = mapHomeIcon([
-      { name: "直约服务商", icon: "/img/home_icons2/merchant_direct.png", emoji: "🏪", bgColor: "#fff0e0" },
+      { name: "直约服务商", icon: "/img/home_icons2/merchant_direct.png", emoji: "🏪", bgColor: "#fff0e0", url: "../service-provider-list/service-provider-list" },
       { name: "直约技工", icon: "/img/home_icons2/worker_direct.png", emoji: "🔨", bgColor: "#e8f5e0" },
       { name: "秒杀", icon: "/img/home_icons2/miaosha.png", emoji: "⚡", bgColor: "#fff5e0" },
       { name: "领券", icon: "/img/home_icons2/coupon.png", emoji: "🎫", bgColor: "#ffe0ee" },
       { name: "家事积分商城", icon: "/img/home_icons2/points.png", emoji: "🎯", bgColor: "#e0eeff" }
     ]);
     const knowledgeList = mapHomeIcon([
-      { name: "代取", icon: "/img/home_icons2/pickup.png", emoji: "📦", bgColor: "#ede8ff", url: "../recomm/recomm?type=take" },
-      { name: "接送小孩", icon: "/img/home_icons2/child_pickup.png", emoji: "🚗", bgColor: "#e0f3ff", url: "../recomm/recomm?type=child" },
-      { name: "陪诊", icon: "/img/home_icons2/escort.png", emoji: "🏥", bgColor: "#ffe0e0", url: "../recomm/recomm?type=escort" },
-      { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../recomm/recomm?type=trash" },
-      { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../recomm/recomm?type=pet" }
+      { name: "代取", icon: "/img/home_icons2/pickup.png", emoji: "📦", bgColor: "#ede8ff", url: "../order-publish/order-publish?tab=邻里帮帮&category=代取" },
+      { name: "接送小孩", icon: "/img/home_icons2/child_pickup.png", emoji: "🚗", bgColor: "#e0f3ff", url: "../order-publish/order-publish?tab=邻里帮帮&category=接送小孩" },
+      { name: "陪诊", icon: "/img/home_icons2/escort.png", emoji: "🏥", bgColor: "#ffe0e0", url: "../order-publish/order-publish?tab=邻里帮帮&category=陪诊" },
+      { name: "代扔垃圾", icon: "/img/home_icons2/trash_proxy.png", emoji: "♻️", bgColor: "#e4ffe0", url: "../order-publish/order-publish?tab=邻里帮帮&category=代扔垃圾" },
+      { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../order-publish/order-publish?tab=邻里帮帮&category=宠物喂养" }
     ]);
 
     // 加载第三方小程序配置
@@ -589,21 +618,31 @@ Page({
     }
     // ===== 小区热卖榜：优先 core/community/hot，回退 core/services/hot =====
     const hotRankFallback = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', '上新'];
+    const serviceImageFallbackPool = [
+      images.svcTile,
+      images.svcWall,
+      images.svcWaterproof,
+      images.svcFloor,
+      images.svcAircon,
+      images.svcWasher,
+      images.svcHood,
+      images.hotClean
+    ];
     const mapHotRows = (rows) => {
       if (!Array.isArray(rows) || rows.length === 0) return null;
       return rows.slice(0, 6).map((s, i) => {
         const rawTitle = s.title || s.name || '';
         const title = rawTitle.replace(/【.*?】/g, '').trim();
         const it = String(s.item_type || 'service').toLowerCase();
+        const imgByTitle = listImageFromHome3(rawTitle, '');
+        const imgByCover = s.cover_image ? imgUrl(s.cover_image) : '';
+        const fallbackImage = imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean);
         return {
           id: s.id,
           itemType: it === 'shop' ? 'shop' : 'service',
           name: title || '热门项',
           price: String(s.price != null ? s.price : ''),
-          image: listImageFromHome3(
-            rawTitle,
-            s.cover_image ? imgUrl(s.cover_image) : ''
-          ),
+          image: imgByTitle || imgByCover || fallbackImage,
           rank: s.rank != null && s.rank !== '' ? String(s.rank) : (hotRankFallback[i] || '热门')
         };
       });
@@ -621,42 +660,56 @@ Page({
       { id: 3, remarkC: images.svcWasher, goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
       { id: 4, remarkC: images.svcHood, goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
+    const filterHotRowsForCategory = (rows) => {
+      if (!Array.isArray(rows)) return [];
+      return rows.filter((r) => r && typeof r === 'object' && String(r.item_type || r.itemType || 'service').toLowerCase() !== 'shop');
+    };
+    let rawHotForCategory = [];
     if (!config.useCuratedHomeHotList) {
       let mappedHot = null;
       try {
-        const q = { limit: 10 };
+        const q = { limit: 80 };
         if (communityId != null && communityId !== '') q.community_id = communityId;
         const commRes = await util.get('core/community/hot', q);
         const services = commRes && (commRes.services || commRes.service_list);
         if (Array.isArray(services) && services.length > 0) {
+          rawHotForCategory = filterHotRowsForCategory(services);
           mappedHot = mapHotRows(services);
         } else {
           const flat = unwrapList(commRes);
-          if (flat.length > 0) mappedHot = mapHotRows(flat);
+          if (flat.length > 0) {
+            rawHotForCategory = filterHotRowsForCategory(flat);
+            mappedHot = mapHotRows(flat);
+          }
         }
       } catch (e) {
         console.log('core/community/hot 不可用', e);
       }
       if (!mappedHot) {
         try {
-          const hotQ = { limit: 10 };
+          const hotQ = { limit: 80 };
           if (communityId != null && communityId !== '') hotQ.community_id = communityId;
           const hotRes = await util.get('core/services/hot', hotQ);
           const hotData = unwrapList(hotRes);
-          if (hotData.length > 0) mappedHot = mapHotRows(hotData);
+          if (hotData.length > 0) {
+            rawHotForCategory = filterHotRowsForCategory(hotData);
+            mappedHot = mapHotRows(hotData);
+          }
         } catch (e2) {
           console.log('core/services/hot 不可用', e2);
         }
       }
       if (mappedHot) hotList = mappedHot;
     }
+    categoryList = applyHomeCategoryAvailability(categoryList, rawHotForCategory);
 
     const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
-    const mapMerchantList = () => goods.map((item) => ({
+    const mapMerchantList = () => goods.map((item, i) => ({
       id: item.id,
       name: item.goodsTitle,
       sub: '服务' + item.id + '单',
-      image: item.remarkC ? imgUrl(item.remarkC) : '',
+      // 测试期固定给可展示图片，避免后端返回坏链/空链导致卡片无图
+      image: imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean),
       url: '../service/service?id=' + item.id
     }));
     let merchantList = mapMerchantList();
@@ -713,10 +766,12 @@ Page({
       if (wData.length > 0) {
         workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
       } else {
-        console.log('[index] core/workers 返回空列表');
+        console.log('[index] core/workers 返回空列表，使用本地兜底');
+        workerList = FALLBACK_WORKERS;
       }
     } catch (e) {
-      console.log('[index] core/workers 请求失败', e);
+      console.log('[index] core/workers 请求失败，使用本地兜底', e);
+      workerList = FALLBACK_WORKERS;
     }
 
     // ===== 从数据库获取管家精选商品（建议按小区配置，传 community_id）=====
@@ -1063,16 +1118,18 @@ Page({
       const pr = await util.get('core/service-providers', pq);
       const plist = unwrapList(pr);
       if (plist.length > 0) {
-        merchantList = plist.slice(0, 8).map((p) => {
+        merchantList = plist.slice(0, 8).map((p, i) => {
           const pid = p.id != null ? p.id : p.provider_id;
+          // 优先用后端返回的真实封面图，回退到本地图库
+          const realCover = p.cover_image || p.shop_front_url || p.avatar_url || p.avatar || '';
+          const image = realCover
+            ? imgUrl(realCover)
+            : imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean);
           return {
             id: pid,
             name: p.name || p.shop_name || p.display_name || '服务商',
-            sub:
-              p.subtitle ||
-              p.tagline ||
-              (p.service_count != null ? `服务${p.service_count}单` : '直约到家'),
-            image: p.avatar_url || p.cover_image || p.logo_url ? imgUrl(p.avatar_url || p.cover_image || p.logo_url) : '',
+            sub: p.subtitle || p.tagline || (p.service_count != null ? `服务${p.service_count}单` : '直约到家'),
+            image,
             url: '../service-provider-shop/service-provider-shop?provider_id=' + encodeURIComponent(pid)
           };
         });

@@ -20,8 +20,13 @@ router.post('/goods/:id/shelf', ctrl.toggleShelf);
 
 // 7.3 订单管理
 router.get('/orders', ctrl.getOrders);
+router.get('/shop/orders', ctrl.getOrders); // 兼容旧前端
 router.get('/orders/:orderNo', ctrl.getOrderDetail);
 router.post('/orders/:orderNo/action', ctrl.orderAction);
+router.post('/orders/:orderNo/accept', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'accept' }); next(); }, ctrl.orderAction);
+router.post('/orders/:orderNo/cancel', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'reject' }); next(); }, ctrl.orderAction);
+router.post('/orders/:orderNo/ship', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'dispatch' }); next(); }, ctrl.orderAction);
+router.post('/orders/:orderNo/complete-delivery', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'delivered' }); next(); }, ctrl.orderAction);
 router.get('/payments', ctrl.getPayments);
 
 // 7.4 客户管理

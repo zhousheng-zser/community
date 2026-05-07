@@ -58,17 +58,27 @@ Page({
     recentList: []
   },
 
-  onLoad() {
+  onLoad(options) {
     const now = new Date();
     const ranges = buildTimeRanges();
     const monthIdx = now.getMonth();
     const dayCount = getDaysInMonth(now.getFullYear(), now.getMonth() + 1);
-    // 当月实际天数
     ranges[2] = Array.from({ length: dayCount }, (_, i) => pad(i + 1) + '日');
-    this.setData({
+
+    const updates = {
       timeRanges: ranges,
       timeIndexes: [0, monthIdx, now.getDate() - 1, 8]
-    });
+    };
+
+    // 支持从外部传入默认 tab 和分类
+    if (options.tab === '邻里帮帮' || options.tab === '一键发布') {
+      updates.activeMainTab = options.tab;
+    }
+    if (options.category && this.data.categories.includes(options.category)) {
+      updates.activeCategory = options.category;
+    }
+
+    this.setData(updates);
     this.loadRecentList();
   },
 

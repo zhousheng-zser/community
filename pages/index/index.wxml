@@ -500,16 +500,24 @@
   <view wx:else>
   <view class="card panel-grid">
     <view class="service-grid">
-      <navigator class="service-item" wx:for="{{categoryList}}" wx:key="name" url="{{item.url}}">
-        <view class="svc-icon-wrap svc-home-cat" style="{{item.icon ? '' : 'background:' + item.bgColor + ';'}}">
+      <view
+        class="service-item home-cat-cell"
+        wx:for="{{categoryList}}"
+        wx:key="groupKey"
+        catchtap="onTapHomeCategory"
+        data-url="{{item.url}}"
+        data-unsupported="{{item.unsupported}}"
+      >
+        <view class="svc-icon-wrap svc-home-cat {{item.unsupported ? 'svc-home-cat-off' : ''}}" style="{{item.icon ? '' : 'background:' + item.bgColor + ';'}}">
           <image wx:if="{{item.icon}}" class="svc-icon-img" src="{{item.icon}}" mode="aspectFill" />
           <text wx:else class="svc-emoji">{{item.emoji}}</text>
         </view>
         <text class="svc-home-cat-label">{{item.name}}</text>
-      </navigator>
+        <text class="svc-home-cat-status-off" wx:if="{{item.saleStatusText}}">{{item.saleStatusText}}</text>
+      </view>
     </view>
     <view class="quick-nav">
-      <navigator class="quick-item" wx:for="{{quickActions}}" wx:key="name" url="../classify/classify">
+      <navigator class="quick-item" wx:for="{{quickActions}}" wx:key="name" url="{{item.url || '../classify/classify'}}">
         <view class="quick-icon-wrap" style="background:{{item.icon ? 'transparent' : item.bgColor}}">
           <image wx:if="{{item.icon}}" class="quick-icon-img" src="{{item.icon}}" mode="aspectFit" />
           <text wx:else class="quick-emoji">{{item.emoji}}</text>
@@ -590,7 +598,10 @@
   <view class="card section-card">
     <view class="section-head">
       <text class="title">直约服务商</text>
-      <navigator class="more" url="../classify/classify">查看全部 ></navigator>
+      <view class="section-head-actions">
+        <view class="portal-entry-btn" bindtap="goServiceProviderPortal">进入工作台</view>
+        <navigator class="more" url="../classify/classify">全部 ></navigator>
+      </view>
     </view>
     <view class="merchant-list">
       <navigator class="merchant-item" wx:for="{{merchantList}}" wx:key="id" url="{{item.url}}">

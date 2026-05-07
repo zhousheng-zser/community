@@ -15,7 +15,7 @@
     </view>
 
     <button class="primary-btn login-btn" bindtap="doLogin">登录</button>
-    <button class="wechat-btn" open-type="getPhoneNumber" bindgetphonenumber="quickLogin">
+    <button class="wechat-btn" bindtap="quickLogin">
       <image class="wechat-icon" src="/img/icon-wechat.png" mode="aspectFit"></image>微信快捷登录
     </button>
   </view>

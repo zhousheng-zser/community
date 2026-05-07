@@ -1,10 +1,83 @@
 const util = require('../../utils/util.js');
 const { unwrapList } = util;
+const app = getApp();
 
 function moneyText(v) {
   if (v == null || v === '') return '0';
   const n = Number(v);
   return Number.isFinite(n) ? n.toFixed(2) : String(v);
+}
+
+function toBool(v) {
+  if (v === true || v === 1 || v === '1') return true;
+  if (v === false || v === 0 || v === '0') return false;
+  if (typeof v === 'string') {
+    const s = v.trim().toLowerCase();
+    if (s === 'true' || s === 'yes' || s === 'y') return true;
+    if (s === 'false' || s === 'no' || s === 'n') return false;
+  }
+  return null;
+}
+
+function toInt(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? parseInt(n, 10) : null;
+}
+
+function normalizeIdList(v) {
+  if (!Array.isArray(v)) return [];
+  return v.map((x) => toInt(x)).filter((x) => x != null);
+}
+
+function getCurrentCommunityId() {
+  const gd = app.globalData || {};
+  return toInt(gd.communityId || gd.community_id || wx.getStorageSync('community_id') || wx.getStorageSync('communityId'));
+}
+
+function resolveSaleState(line) {
+  const status = String(line.status || '').trim();
+  const onShelfRaw = toBool(line.on_shelf != null ? line.on_shelf : line.onShelf);
+  const isPublishedRaw = toBool(
+    line.is_published != null ? line.is_published
+      : (line.isPublished != null ? line.isPublished : line.published)
+  );
+
+  const hasSaleField = status || onShelfRaw != null || isPublishedRaw != null;
+  let unsupportedBySale = false;
+  if (hasSaleField) {
+    if (status && status !== 'on_sale') unsupportedBySale = true;
+    if (onShelfRaw === false) unsupportedBySale = true;
+    if (isPublishedRaw === false) unsupportedBySale = true;
+  }
+
+  const communityId = getCurrentCommunityId();
+  const allow = normalizeIdList(
+    line.supported_community_ids != null ? line.supported_community_ids
+      : (line.supportedCommunityIds != null ? line.supportedCommunityIds : line.community_ids)
+  );
+  const deny = normalizeIdList(
+    line.blocked_community_ids != null ? line.blocked_community_ids
+      : (line.blockedCommunityIds != null ? line.blockedCommunityIds : line.unsupported_community_ids)
+  );
+  const communitySupported = toBool(
+    line.community_supported != null ? line.community_supported
+      : (line.communitySupported != null ? line.communitySupported : line.is_available)
+  );
+  let unsupportedByCommunity = false;
+  if (communitySupported === false) unsupportedByCommunity = true;
+  if (communityId != null) {
+    if (allow.length > 0 && !allow.includes(communityId)) unsupportedByCommunity = true;
+    if (deny.includes(communityId)) unsupportedByCommunity = true;
+  }
+
+  const unsupported = unsupportedBySale || unsupportedByCommunity;
+  return {
+    status,
+    onShelf: onShelfRaw,
+    isPublished: isPublishedRaw,
+    unsupported,
+    saleStatusText: unsupported ? '不可提供' : ''
+  };
 }
 
 function normalizeCatalogGroups(raw, imgUrlFn) {
@@ -16,13 +89,21 @@ function normalizeCatalogGroups(raw, imgUrlFn) {
     const items = (itemsIn || []).map((line) => {
       const sid = line.service_id != null ? line.service_id : line.id;
       const cartKey = `${gk}:${sid}`;
+      const sale = resolveSaleState(line);
       return {
         service_id: sid,
         title: line.title || line.name || line.goodsTitle || '服务',
+        sub: line.sub_title || line.subtitle || '',
+        desc: line.description ? String(line.description).slice(0, 60) : '',
         price: line.price,
         priceText: moneyText(line.price),
         cover: imgUrlFn(line.cover_image || line.image || '/img/placeholders/home_cleaning.png'),
-        cartKey
+        cartKey,
+        unsupported: sale.unsupported,
+        saleStatusText: sale.saleStatusText,
+        status: sale.status,
+        on_shelf: sale.onShelf,
+        is_published: sale.isPublished
       };
     });
     return { group_key: gk, group_label: gl, items };
@@ -34,6 +115,9 @@ Page({
     loading: true,
     providerId: '',
     providerName: '',
+    providerCover: '',
+    providerDesc: '',
+    providerPhone: '',
     groups: [],
     cart: {},
     totalText: '0'
@@ -65,8 +149,10 @@ Page({
       }
       const d = detail && detail.data && typeof detail.data === 'object' ? detail.data : detail;
       const inner = d && d.provider ? d.provider : d;
-      const name =
-        (inner && (inner.name || inner.shop_name || inner.display_name)) || '服务商';
+      const name = (inner && (inner.name || inner.shop_name || inner.display_name)) || '服务商';
+      const cover = imgUrl(inner && (inner.cover_image || inner.shop_front_url || inner.avatar_url || inner.avatar) || '');
+      const desc = (inner && (inner.description || inner.subtitle || inner.tagline)) || '';
+      const phone = (inner && inner.phone) || '';
 
       let groups = [];
       try {
@@ -83,7 +169,7 @@ Page({
       if (!groups.length) {
         groups = await this._fallbackCatalog(imgUrl);
       }
-      this.setData({ providerName: name, groups, loading: false });
+      this.setData({ providerName: name, providerCover: cover, providerDesc: desc, providerPhone: phone, groups, loading: false });
       this._recalcTotal();
     } catch (e) {
       this.setData({ loading: false });
@@ -99,13 +185,19 @@ Page({
       const items = rows.map((s) => {
         const sid = s.id;
         const gk = s.group_key || 'tidy';
+        const sale = resolveSaleState(s);
         return {
           service_id: sid,
           title: (s.title || s.name || '').replace(/【.*?】/g, '').trim() || '服务',
           price: s.price,
           priceText: moneyText(s.price),
           cover: imgUrl(s.cover_image || s.image || '/img/placeholders/home_cleaning.png'),
-          cartKey: `${gk}:${sid}`
+          cartKey: `${gk}:${sid}`,
+          unsupported: sale.unsupported,
+          saleStatusText: sale.saleStatusText,
+          status: sale.status,
+          on_shelf: sale.onShelf,
+          is_published: sale.isPublished
         };
       });
       return [{ group_key: 'hot', group_label: '热门服务', items }];
@@ -121,6 +213,11 @@ Page({
   incLine(e) {
     const gk = e.currentTarget.dataset.gk;
     const sid = e.currentTarget.dataset.sid;
+    const unsupported = !!e.currentTarget.dataset.unsupported;
+    if (unsupported) {
+      wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
+      return;
+    }
     const key = this.cartKey(gk, sid);
     const cart = Object.assign({}, this.data.cart);
     const n = (cart[key] || 0) + 1;
@@ -156,13 +253,24 @@ Page({
     this.setData({ totalText: moneyText(sum) });
   },
 
+  callProvider() {
+    const phone = this.data.providerPhone;
+    if (!phone) return;
+    wx.makePhoneCall({ phoneNumber: phone });
+  },
+
   checkout() {
     const { providerId, providerName, groups, cart } = this.data;
     const items = [];
+    const blockedTitles = [];
     (groups || []).forEach((grp) => {
       (grp.items || []).forEach((line) => {
         const q = cart[line.cartKey] || 0;
         if (q > 0) {
+          if (line.unsupported) {
+            blockedTitles.push(line.title || '服务');
+            return;
+          }
           items.push({
             service_id: line.service_id,
             group_key: grp.group_key,
@@ -173,6 +281,10 @@ Page({
         }
       });
     });
+    if (blockedTitles.length) {
+      wx.showToast({ title: `含不可提供服务：${blockedTitles[0]}`, icon: 'none' });
+      return;
+    }
     if (!items.length) {
       wx.showToast({ title: '请选择服务', icon: 'none' });
       return;

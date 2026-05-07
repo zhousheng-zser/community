@@ -46,7 +46,7 @@
 }
 
 .rl-btn {
-  background: #ff7a00;
+  background: #000000;
   color: #fff;
   font-size: 30rpx;
   border-radius: 12rpx;
@@ -59,3 +59,4 @@
   color: #999;
   text-align: center;
 }
+

@@ -8,7 +8,7 @@ page {
 }
 
 .top-wrap {
-  background: linear-gradient(180deg, #FF9F43 0%, #FF7A00 100%);
+  background: #000000;
   padding: 28rpx 32rpx 0;
   color: #fff;
 }
@@ -163,7 +163,7 @@ page {
   background: #fff;
 }
 
-/* ===== 一键发布 Tab 按钮 ===== */
+/* ===== 涓€閿彂甯?Tab 鎸夐挳 ===== */
 .publish-tab {
   position: relative;
   margin-bottom: 12rpx;
@@ -187,7 +187,7 @@ page {
   position: absolute;
   top: -18rpx;
   right: -8rpx;
-  background: #FF7700;
+  background: #000000;
   color: #fff;
   font-size: 18rpx;
   padding: 4rpx 12rpx;
@@ -196,7 +196,7 @@ page {
   line-height: 1.4;
 }
 
-/* ===== 底部悬浮发帖按钮 ===== */
+/* ===== 搴曢儴鎮诞鍙戝笘鎸夐挳 ===== */
 .fab-post {
   position: fixed;
   right: 36rpx;
@@ -404,7 +404,7 @@ page {
   font-size: 32rpx;
 }
 
-/* ===== 评论面板 ===== */
+/* ===== 璇勮闈㈡澘 ===== */
 .cp-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -464,7 +464,7 @@ page {
   font-size: 28rpx;
 }
 
-/* 已选图片行 */
+/* 宸查€夊浘鐗囪 */
 .cp-img-list {
   display: flex;
   gap: 16rpx;
@@ -500,7 +500,7 @@ page {
   justify-content: center;
 }
 
-/* 工具栏 */
+/* 宸ュ叿鏍?*/
 .cp-toolbar {
   display: flex;
   align-items: center;
@@ -573,7 +573,7 @@ page {
 .assist-tag {
   font-size: 22rpx;
   color: #fff;
-  background: #ff7a00;
+  background: #000000;
   padding: 6rpx 14rpx;
   border-radius: 8rpx;
   margin-right: 16rpx;
@@ -604,3 +604,4 @@ page {
   color: #cbd5e1;
   flex-shrink: 0;
 }
+

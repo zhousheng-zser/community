@@ -1,5 +1,5 @@
 <view class="ship-page">
-  <view class="ship-section">
+  <view class="ship-section" wx:if="{{mode === 'dispatch'}}">
     <view class="section-title">配送方式</view>
     <picker mode="selector" range="{{['平台骑手配送', '自行发货']}}" value="{{logisticsType === 'platform_rider' ? 0 : 1}}" bindchange="onLogisticsTypeChange">
       <view class="picker-cell">
@@ -9,7 +9,7 @@
     </picker>
   </view>
 
-  <view class="ship-section" wx:if="{{logisticsType === 'self'}}">
+  <view class="ship-section" wx:if="{{mode === 'dispatch' && logisticsType === 'self'}}">
     <view class="section-title">快递信息</view>
     <view class="input-group">
       <view class="input-label">快递公司</view>
@@ -28,12 +28,25 @@
 
   <view class="ship-section">
     <view class="section-title">备注（选填）</view>
-    <textarea class="remark-area" placeholder="可填写发货备注信息" value="{{remark}}" bindinput="onRemarkInput" maxlength="200" />
+    <textarea class="remark-area" placeholder="{{mode === 'delivered' ? '可填写配送完成备注' : '可填写发货备注信息'}}" value="{{remark}}" bindinput="onRemarkInput" maxlength="200" />
+  </view>
+
+  <view class="ship-section" wx:if="{{mode === 'delivered'}}">
+    <view class="section-title">配送完成照片（至少1张）</view>
+    <view class="proof-list">
+      <view class="proof-item add" bindtap="chooseDeliveryProof" wx:if="{{deliveryProofImages.length < 3}}">
+        <text>+ 上传</text>
+      </view>
+      <view class="proof-item" wx:for="{{deliveryProofImages}}" wx:key="*this">
+        <image class="proof-img" src="{{item}}" mode="aspectFill"></image>
+        <text class="proof-del" data-idx="{{index}}" bindtap="removeDeliveryProof">×</text>
+      </view>
+    </view>
   </view>
 
   <view class="ship-footer">
     <button class="submit-btn" bindtap="submitShip" disabled="{{submitting}}">
-      {{submitting ? '提交中...' : '确认发货'}}
+      {{submitting ? '提交中...' : (mode === 'delivered' ? '确认上门配送完成' : '确认开始配送')}}
     </button>
   </view>
 </view>

@@ -11,6 +11,7 @@ router.get('/search', ctrl.search);
 router.get('/shops', ctrl.getShops);
 router.get('/shops/:shopId', ctrl.getShopDetail);
 router.get('/shops/:shopId/goods', ctrl.getShopGoods);
+router.get('/shop/goods', ctrl.getShopGoodsCompat); // 兼容前端 fallback 调用
 router.get('/goods/:goodsId', ctrl.getGoodsDetail);
 router.get('/shops/:shopId/contact', ctrl.getShopContact);
 
@@ -24,7 +25,9 @@ router.delete('/cart', authMiddleware, ctrl.clearCart);
 // 6.4 订单管理
 router.post('/orders/preview', authMiddleware, ctrl.previewOrder);
 router.post('/orders', authMiddleware, ctrl.createOrder);
+router.post('/order/create', authMiddleware, ctrl.createOrder); // 兼容旧前端
 router.get('/orders', authMiddleware, ctrl.getMyOrders);
+router.get('/orders/my', authMiddleware, ctrl.getMyOrders); // 兼容旧前端
 router.get('/orders/:orderNo', authMiddleware, ctrl.getOrderDetail);
 router.post('/orders/:orderNo/cancel', authMiddleware, ctrl.cancelOrder);
 router.delete('/orders/:orderNo', authMiddleware, ctrl.deleteOrder);
@@ -41,5 +44,9 @@ router.post('/orders/:orderNo/confirm-receipt', authMiddleware, ctrl.confirmRece
 router.post('/orders/:orderNo/refund', authMiddleware, ctrl.applyRefund);
 router.get('/orders/:orderNo/refund', authMiddleware, ctrl.getRefundDetail);
 router.post('/orders/:orderNo/refund/cancel', authMiddleware, ctrl.cancelRefund);
+
+// 6.7 管理后台
+router.get('/admin/shops', authMiddleware, ctrl.getAdminShopList);
+router.post('/admin/shops/:id/review', authMiddleware, ctrl.reviewShop);
 
 module.exports = router;

@@ -27,6 +27,14 @@ function isToday(iso) {
   );
 }
 
+function hasMerchantRole(user) {
+  if (!user) return false;
+  const roleRaw = user.role;
+  if (Array.isArray(roleRaw)) return roleRaw.includes('merchant');
+  if (typeof roleRaw === 'string') return roleRaw.split(',').map((x) => x.trim()).includes('merchant');
+  return false;
+}
+
 Page({
   data: {
     marketOk: false,
@@ -41,14 +49,22 @@ Page({
 
   onShow() {
     this.refresh();
-    this.loadOrderStats();
-    this.loadGoodsStats();
+    if (this.data.marketOk && hasMerchantRole(app.globalData.user || {})) {
+      this.loadOrderStats();
+      this.loadGoodsStats();
+    } else {
+      this.setData({ orderStats: null, goodsCount: 0, lowStockCount: 0 });
+    }
   },
 
   onPullDownRefresh() {
     this.refresh();
-    this.loadOrderStats();
-    this.loadGoodsStats();
+    if (this.data.marketOk && hasMerchantRole(app.globalData.user || {})) {
+      this.loadOrderStats();
+      this.loadGoodsStats();
+    } else {
+      this.setData({ orderStats: null, goodsCount: 0, lowStockCount: 0 });
+    }
     wx.stopPullDownRefresh();
   },
 
@@ -57,7 +73,7 @@ Page({
     const marketOk = rp.canUseMarketPortal(user);
     let bannerText = '';
     if (!marketOk) {
-      const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+      const st = user.merchant_status != null ? user.merchant_status : user.merchantStatus;
       if (st === 'pending') bannerText = '集市商家入驻审核中，通过后可管理订单';
       else if (st === 'rejected') bannerText = '入驻未通过，可重新提交资料';
       else bannerText = '请先完成集市商家入驻，审核通过后可使用本工作台';
@@ -80,16 +96,7 @@ Page({
       return;
     }
     try {
-      let res;
-      try {
-        res = await api.merchant.getOrderList({ page: 1, limit: 100 });
-      } catch (e1) {
-        if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
-          res = await api.merchant.getShopOrderList({ page: 1, limit: 100 });
-        } else {
-          throw e1;
-        }
-      }
+      let res = await api.merchant.getOrders({ page: 1, limit: 100 });
       const raw = unwrapList(res);
       let today = 0;
       raw.forEach((o) => {
@@ -116,16 +123,7 @@ Page({
     try {
       const { shopId } = mshop.getBoundShop(app);
       const goodsParams = mshop.goodsListQuery(shopId);
-      let res;
-      try {
-        res = await api.merchant.getGoodsList(goodsParams);
-      } catch (e1) {
-        if (e1 && (Number(e1.errno) === 404 || Number(e1.errno) === 501)) {
-          res = await api.merchant.getShopGoodsList(goodsParams);
-        } else {
-          throw e1;
-        }
-      }
+      let res = await api.merchant.getGoods(goodsParams);
       let raw = unwrapList(res);
       raw = mshop.filterGoodsByShop(raw, shopId);
       const safeDef = 5;
@@ -149,15 +147,15 @@ Page({
   },
 
   goOrders() {
-    wx.navigateTo({ url: '/pages/market-order-list/market-order-list' });
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-orders/merchant-orders' });
   },
 
   goMine() {
-    wx.navigateTo({ url: '/pages/join-market/join-market' });
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-settings/merchant-settings' });
   },
 
   goJoin() {
-    wx.navigateTo({ url: '/pages/join-market/join-market' });
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-qualification/merchant-qualification' });
   },
 
   goAccount() {
@@ -165,7 +163,12 @@ Page({
   },
 
   goMarketShop() {
-    wx.navigateTo({ url: '/pages/market-shop/market-shop' });
+    const { shopId } = mshop.getBoundShop(app);
+    if (!shopId) {
+      wx.showToast({ title: '暂未绑定店铺', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/market-shop/market-shop?id=${encodeURIComponent(String(shopId))}` });
   },
 
   goGoodsShelfUp() {
@@ -174,6 +177,10 @@ Page({
 
   goGoodsShelfDown() {
     wx.navigateTo({ url: '/package-merchant/pages/merchant-goods/merchant-goods?mode=down' });
+  },
+
+  goCreateGoods() {
+    wx.navigateTo({ url: '/package-merchant/pages/merchant-goods-edit/merchant-goods-edit?mode=create' });
   },
 
   backUser() {

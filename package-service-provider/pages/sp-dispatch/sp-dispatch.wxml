@@ -97,11 +97,11 @@
       <text>订单</text>
     </view>
     <view class="sp-tabbar-item sp-tabbar-on">
-      <image class="sp-tabbar-icon" src="/img/dispatch.png" mode="aspectFit" />
+      <image class="sp-tabbar-icon" src="/img/other_services/platform_service.png" mode="aspectFit" />
       <text>派单</text>
     </view>
     <view class="sp-tabbar-item" bindtap="goServices">
-      <image class="sp-tabbar-icon" src="/img/service.png" mode="aspectFit" />
+      <image class="sp-tabbar-icon" src="/img/join_services/service_provider.png" mode="aspectFit" />
       <text>服务</text>
     </view>
     <view class="sp-tabbar-item" bindtap="goMine">

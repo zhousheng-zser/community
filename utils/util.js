@@ -78,6 +78,10 @@ const request = (method, url, data, contentType = 'application/json') => {
 
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
+    // DEBUG: 打印请求信息
+    if (url.includes('service-orders') || url.includes('service-order')) {
+      console.log('[DEBUG request]', method, url, 'data=', JSON.stringify(data));
+    }
     wx.request({
       url: finalUrl,
       method,
@@ -178,7 +182,19 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
         'Authorization': token ? 'Bearer ' + token : ''
       },
       success: (res) => {
-        const data = typeof res.data === 'string' ? JSON.parse(res.data) : res.data;
+        let data = res.data;
+        if (typeof res.data === 'string') {
+          try {
+            data = JSON.parse(res.data);
+          } catch (e) {
+            data = {
+              code: res.statusCode || 500,
+              msg: 'UPLOAD_NON_JSON_RESPONSE',
+              errmsg: 'UPLOAD_NON_JSON_RESPONSE',
+              raw: String(res.data || '')
+            };
+          }
+        }
         if (res.statusCode === 401) {
           try {
             wx.removeStorageSync('token');
@@ -194,7 +210,7 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
         if (res.statusCode === 200 || res.statusCode === 201) {
           resolve(data.data !== undefined ? data.data : data)
         } else {
-          reject(data)
+          reject(Object.assign({ statusCode: res.statusCode }, data))
         }
       },
       fail: (res) => {

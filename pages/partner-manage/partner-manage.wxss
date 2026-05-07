@@ -24,7 +24,7 @@
   margin-bottom: 16rpx;
 }
 
-/* 角色列表 */
+/* 瑙掕壊鍒楄〃 */
 .role-list {
   display: flex;
   flex-direction: column;
@@ -76,13 +76,13 @@
 }
 
 .btn-apply {
-  background: #ff7a00;
+  background: #000000;
   color: #fff;
   margin-top: 20rpx;
   border-radius: 8rpx;
 }
 
-/* 上游关系 */
+/* 涓婃父鍏崇郴 */
 .chain-card {
   display: flex;
   flex-direction: column;
@@ -129,7 +129,7 @@
   font-size: 24rpx;
 }
 
-/* 下线 */
+/* 涓嬬嚎 */
 .downline-card {
   display: flex;
   flex-direction: column;
@@ -173,7 +173,7 @@
   margin-top: 8rpx;
 }
 
-/* 推广工具 */
+/* 鎺ㄥ箍宸ュ叿 */
 .tool-card {
   display: flex;
   flex-direction: column;
@@ -205,7 +205,7 @@
   margin-top: 4rpx;
 }
 
-/* 说明 */
+/* 璇存槑 */
 .notice-card {
   display: flex;
   flex-direction: column;
@@ -217,3 +217,4 @@
   color: #666;
   line-height: 1.6;
 }
+

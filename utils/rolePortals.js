@@ -21,13 +21,9 @@ function hasRole(user, role) {
   return normalizeRoles(user).indexOf(role) !== -1;
 }
 
-/** 是否具备技工工作台能力：仅审核通过状态或管理员 */
+/** 是否具备技工工作台能力：登录即可使用 */
 function canUseWorkerPortal(user) {
-  if (!user) return false;
-  if (hasRole(user, 'admin')) return true;
-  const st = user.worker_status || user.workerStatus;
-  if (st === 'approved' || st === 1 || st === 'approved_worker') return true;
-  return false;
+  return !!user;
 }
 
 /** 是否具备商家工作台能力 */
@@ -43,18 +39,14 @@ function canUseMerchantPortal(user) {
 function canUseMarketPortal(user) {
   if (!user) return false;
   if (hasRole(user, 'admin')) return true;
-  const st = user.merchant_status || user.merchantStatus || user.shop_status || user.shopStatus;
+  const st = user.merchant_status != null ? user.merchant_status : user.merchantStatus;
   if (st === 'approved' || st === 'active' || st === 1) return true;
   return false;
 }
 
-/** 是否具备服务商工作台能力（独立于集市商家） */
+/** 是否具备服务商工作台能力（独立于集市商家）：登录即可使用 */
 function canUseServiceProviderPortal(user) {
-  if (!user) return false;
-  if (hasRole(user, 'admin')) return true;
-  const st = user.service_provider_status || user.serviceProviderStatus;
-  if (st === 'approved' || st === 'active' || st === 1) return true;
-  return false;
+  return !!user;
 }
 
 /** 是否具备推广者能力 */

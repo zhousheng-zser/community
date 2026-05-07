@@ -12,7 +12,7 @@
   </scroll-view>
 
   <view class="order-content">
-    <view wx:if="{{loading}}" class="loading-wrap">
+    <view wx:if="{{loading && list.length === 0}}" class="loading-wrap">
       <text class="loading-text">加载中...</text>
     </view>
     <view wx:elif="{{loadError}}" class="error-wrap">
@@ -20,64 +20,91 @@
     </view>
     <block wx:elif="{{list.length > 0}}">
       <view class="order-card" wx:for="{{list}}" wx:key="orderNo">
-        <view class="order-card-head" bindtap="goDetail" data-orderno="{{item.orderNo}}">
-          <text class="order-shop-name">{{item.shopName || '集市商家'}}</text>
+        <view class="order-card-head" bindtap="goDetail" data-id="{{item.id}}" data-orderno="{{item.orderNo}}">
+          <text class="order-shop-name">{{orderType === 'service' ? item.providerName : (item.shopName || '集市商家')}}</text>
           <text class="order-status {{item.statusClass}}">{{item.statusText}}</text>
         </view>
-        
-        <view class="order-goods-list" bindtap="goDetail" data-orderno="{{item.orderNo}}">
-          <view class="order-goods-item" wx:for="{{item.goods}}" wx:key="id" wx:for-item="g">
-            <image class="goods-img" src="{{g.image}}" mode="aspectFill"></image>
-            <view class="goods-info">
-              <text class="g-name">{{g.name}}</text>
-              <view class="g-price-row">
-                <text class="g-price">￥{{g.price}}</text>
-                <text class="g-qty">x{{g.quantity}}</text>
+
+        <!-- 集市订单：商品列表 -->
+        <block wx:if="{{orderType === 'market'}}">
+          <view class="order-goods-list" bindtap="goDetail" data-id="{{item.id}}" data-orderno="{{item.orderNo}}">
+            <view class="order-goods-item" wx:for="{{item.goods}}" wx:key="id" wx:for-item="g">
+              <image class="goods-img" src="{{g.image}}" mode="aspectFill"></image>
+              <view class="goods-info">
+                <text class="g-name">{{g.name}}</text>
+                <view class="g-price-row">
+                  <text class="g-price">￥{{g.price}}</text>
+                  <text class="g-qty">x{{g.quantity}}</text>
+                </view>
               </view>
             </view>
           </view>
-        </view>
+          <view class="order-meta">
+            <text>共{{item.totalQuantity}}件商品 实付: <text class="sum-price">￥{{item.amount}}</text></text>
+          </view>
+        </block>
 
-        <view class="order-meta">
-          <text>共{{item.totalQuantity}}件商品 实付: <text class="sum-price">￥{{item.amount}}</text></text>
-        </view>
+        <!-- 服务订单：服务信息 -->
+        <block wx:if="{{orderType === 'service'}}">
+          <view class="order-goods-list" bindtap="goDetail" data-id="{{item.id}}" data-orderno="{{item.orderNo}}">
+            <view class="order-goods-item">
+              <image class="goods-img" src="{{item.image}}" mode="aspectFill"></image>
+              <view class="goods-info">
+                <text class="g-name">{{item.title}}</text>
+                <view class="g-price-row">
+                  <text class="g-price">￥{{item.amount}}</text>
+                </view>
+                <text class="g-qty" wx:if="{{item.time}}">{{item.time}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="order-meta">
+            <text>实付: <text class="sum-price">￥{{item.amount}}</text></text>
+          </view>
+        </block>
 
         <view class="order-card-foot">
           <!-- 待付款 -->
-          <block wx:if="{{item.status === 'pending_payment'}}">
-            <button class="action-btn cancel" catchtap="cancelOrder" data-id="{{item.orderNo}}">取消订单</button>
-            <button class="action-btn primary" catchtap="payOrder" data-id="{{item.orderNo}}">去支付</button>
-          </block>
-          
-          <!-- 待接单 -->
-          <block wx:if="{{item.status === 'pending_accept'}}">
-            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}">联系商家</button>
-            <button class="action-btn default" catchtap="applyRefund" data-id="{{item.orderNo}}">申请退款</button>
-          </block>
-          
-          <!-- 待服务/备货中 -->
-          <block wx:if="{{item.status === 'pending_service'}}">
-            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}">联系商家</button>
+          <block wx:if="{{item.status === 'pending_payment' || item.status === 'pending_pay'}}">
+            <button class="action-btn cancel" catchtap="cancelOrder" data-id="{{item.id || item.orderNo}}">取消订单</button>
+            <button class="action-btn primary" catchtap="payOrder" data-id="{{item.id || item.orderNo}}">去支付</button>
           </block>
 
-          <!-- 待收货 -->
+          <!-- 待接单 -->
+          <block wx:if="{{item.status === 'pending_accept' || item.status === 'pending_worker_accept'}}">
+            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}" data-orderno="{{item.orderNo}}" data-workeruid="{{item.workerUserId}}" data-merchantuid="{{item.merchantUserId}}">联系商家</button>
+            <button class="action-btn default" wx:if="{{orderType === 'market'}}" catchtap="applyRefund" data-id="{{item.orderNo}}">申请退款</button>
+          </block>
+
+          <!-- 待服务/备货中 / 已派单 / 服务中 -->
+          <block wx:if="{{item.status === 'pending_service' || item.status === 'dispatched' || item.status === 'in_service'}}">
+            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}" data-orderno="{{item.orderNo}}" data-workeruid="{{item.workerUserId}}" data-merchantuid="{{item.merchantUserId}}">联系商家</button>
+          </block>
+
+          <!-- 待收货（仅market） -->
           <block wx:if="{{item.status === 'pending_receipt'}}">
             <button class="action-btn" catchtap="viewLogistics" data-id="{{item.orderNo}}">跟踪骑手</button>
-            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}">联系商家</button>
+            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}">联系商家</button>
             <button class="action-btn primary" catchtap="confirmReceipt" data-id="{{item.orderNo}}">确认收货</button>
           </block>
 
-          <!-- 已完成/已取消/已退款 -> 纯展示或再来一单 -->
+          <!-- 待确认（仅service） -->
+          <block wx:if="{{item.status === 'pending_user_confirm'}}">
+            <button class="action-btn" catchtap="contactMerchant" data-orderno="{{item.orderNo}}" data-workeruid="{{item.workerUserId}}" data-merchantuid="{{item.merchantUserId}}">联系商家</button>
+            <button class="action-btn primary" catchtap="confirmComplete" data-id="{{item.id}}">确认完成</button>
+          </block>
+
+          <!-- 已完成/已取消/已退款 -->
           <block wx:if="{{item.status === 'completed' || item.status === 'cancelled' || item.status === 'refunded'}}">
-            <button class="action-btn default" catchtap="buyAgain" data-id="{{item.orderNo}}">再来一单</button>
-            <button class="action-btn" catchtap="deleteOrder" data-id="{{item.orderNo}}">删除订单</button>
+            <button class="action-btn default" wx:if="{{orderType === 'market'}}" catchtap="buyAgain" data-id="{{item.orderNo}}">再来一单</button>
+            <button class="action-btn" catchtap="deleteOrder" data-id="{{item.id || item.orderNo}}">删除订单</button>
           </block>
         </view>
       </view>
     </block>
     <view wx:else class="empty-wrap">
-      <text class="empty-icon">🛒</text>
-      <text class="empty-text">暂无订单</text>
+      <text class="empty-icon">{{orderType === 'service' ? '🔧' : '🛒'}}</text>
+      <text class="empty-text">暂无{{orderType === 'service' ? '服务' : '购物'}}订单</text>
     </view>
   </view>
 </view>

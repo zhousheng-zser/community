@@ -1,7 +1,7 @@
 <view class="portal-page edit-page">
   <view class="portal-top merchant-gradient" style="padding-bottom: 24rpx;">
-    <text class="portal-title">编辑商品资料</text>
-    <text class="portal-sub">主图、售价、库存与文字说明；保存后用户在店铺中可见</text>
+    <text class="portal-title">{{isCreate ? '新增商品并上架' : '编辑商品资料'}}</text>
+    <text class="portal-sub">{{isCreate ? '填写商品信息后创建并立即上架' : '主图、售价、库存与文字说明；保存后用户在店铺中可见'}}</text>
   </view>
 
   <block wx:if="{{loading}}">
@@ -22,7 +22,7 @@
       </view>
 
       <view class="field">
-        <text class="field-label">主图</text>
+        <text class="field-label">商品图片（最多 6 张）</text>
         <view class="img-row">
           <image
             class="goods-cover"
@@ -31,13 +31,19 @@
             bindtap="previewCover"
           ></image>
           <view class="img-actions">
-            <button class="sheet-btn ghost mini-pad" size="mini" bindtap="chooseCover">上传图片</button>
+            <button class="sheet-btn ghost mini-pad" size="mini" bindtap="chooseCover">上传/追加图片</button>
             <button
               class="sheet-btn ghost mini-pad danger-text"
               size="mini"
               wx:if="{{mainImagePath}}"
               bindtap="clearCover"
             >移除</button>
+          </view>
+        </view>
+        <view class="multi-img-wrap" wx:if="{{imageList.length}}">
+          <view class="multi-img-item" wx:for="{{imageList}}" wx:key="index">
+            <image class="multi-img" src="{{item}}" mode="aspectFill" bindtap="previewImageAt" data-idx="{{index}}"></image>
+            <view class="multi-img-del" bindtap="removeImage" data-idx="{{index}}">×</view>
           </view>
         </view>
         <text class="field-hint">支持相册或拍照，将上传至服务器</text>
@@ -97,7 +103,7 @@
         loading="{{saving}}"
         disabled="{{saving}}"
         bindtap="save"
-      >保存</button>
+      >{{isCreate ? '创建并上架' : '保存'}}</button>
     </view>
   </block>
 </view>

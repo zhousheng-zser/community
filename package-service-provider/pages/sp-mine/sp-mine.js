@@ -36,7 +36,7 @@ Page({
   },
 
   goHome() { wx.redirectTo({ url: '/package-service-provider/pages/sp-home/sp-home' }); },
-  goOrders() { wx.redirectTo({ url: '/package-service-provider/pages/sp-orders/sp-orders' }); },
+  goOrders() { wx.navigateTo({ url: '/package-merchant/pages/merchant-orders/merchant-orders?scene=direct_service' }); },
   goDispatch() { wx.navigateTo({ url: '/package-service-provider/pages/sp-dispatch/sp-dispatch' }); },
   goServices() { wx.navigateTo({ url: '/package-service-provider/pages/sp-services/sp-services' }); },
   backUser() { rp.backToUserTab(); }

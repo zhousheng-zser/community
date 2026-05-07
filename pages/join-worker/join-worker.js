@@ -33,27 +33,32 @@ Page({
   },
 
   fetchCommunities() {
-    util.get('core/communities')
+    const applyNames = (res) => {
+      const list = (res && res.list) || (res && res.data && res.data.list) || (Array.isArray(res && res.data) ? res.data : []) || [];
+      const names = list.map((c) => c.name || c.community_name || c.title).filter(Boolean);
+      if (names.length > 0) {
+        this.setData({ communityList: names });
+        return true;
+      }
+      return false;
+    };
+    util.get('geo/communities')
       .then((res) => {
-        const list = (res && res.list) || (res && res.data && res.data.list) || [];
-        const names = list.map(c => c.name).filter(Boolean);
-        if (names.length > 0) {
-          this.setData({ communityList: names });
-        } else {
-          this.setData({ communityList: ['其他'] });
-        }
+        if (!applyNames(res)) this.setData({ communityList: ['其他'] });
       })
       .catch(() => {
-        this.setData({ communityList: ['其他'] });
+        util.get('core/communities')
+          .then((res2) => {
+            if (!applyNames(res2)) this.setData({ communityList: ['其他'] });
+          })
+          .catch(() => {
+            this.setData({ communityList: ['其他'] });
+          });
       });
   },
 
   onShow() {
-    const user = app.globalData.user || {};
-    const rp = require('../../utils/rolePortals.js');
-    if (rp.canUseWorkerPortal(user)) {
-      wx.redirectTo({ url: '/package-worker/pages/worker-home/worker-home' });
-    }
+    // 去掉自动跳转，允许未入驻用户查看入驻页面
   },
 
   onInput(e) {

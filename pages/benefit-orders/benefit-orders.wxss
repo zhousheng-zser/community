@@ -4,4 +4,5 @@
 .bo-title { display: block; font-size: 28rpx; font-weight: 600; }
 .bo-sub { font-size: 24rpx; color: #888; margin-top: 8rpx; }
 .bo-empty { text-align: center; padding: 80rpx 32rpx; color: #666; font-size: 26rpx; }
-.bo-btn { margin-top: 32rpx; background: #ff7a00; color: #fff; border-radius: 999rpx; }
+.bo-btn { margin-top: 32rpx; background: #000000; color: #fff; border-radius: 999rpx; }
+

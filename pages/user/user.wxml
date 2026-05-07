@@ -114,7 +114,7 @@
   <view class="card">
     <view class="card-head">
       <text class="card-title">我的订单</text>
-      <navigator class="card-more" url="../service-orders-my/service-orders-my">全部订单 ›</navigator>
+      <navigator class="card-more" url="../market-order-list/market-order-list?type=service">全部订单 ›</navigator>
     </view>
     <view class="menu-grid">
       <block wx:for="{{orderMenus}}" wx:key="name">

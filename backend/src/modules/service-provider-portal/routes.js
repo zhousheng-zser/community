@@ -18,11 +18,15 @@ router.get('/services', ctrl.getServices);
 router.post('/services', ctrl.createService);
 router.get('/services/:id', ctrl.getServiceDetail);
 router.patch('/services/:id', ctrl.updateService);
+router.post('/services/:id/shelf', ctrl.shelfService);
 
 // 8.4 订单管理
 router.get('/orders', ctrl.getOrders);
 router.get('/orders/:id', ctrl.getOrderDetail);
+router.post('/orders/:id/action', ctrl.orderAction);
 router.post('/orders/:id/accept', ctrl.acceptOrder);
+router.post('/orders/:id/dispatch', ctrl.dispatchOrder);
+router.post('/orders/:id/reject', ctrl.rejectOrder);
 router.post('/orders/:id/check-in', ctrl.checkIn);
 router.post('/orders/:id/evidence', ctrl.uploadEvidence);
 router.post('/orders/:id/complete', ctrl.completeOrder);
