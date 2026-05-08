@@ -35,6 +35,8 @@ Page({
       { text: "本地集市" }
     ],
     categoryList: [],
+    /** 轮播：须在 data 中有初值，避免 wx:for 在 undefined 上行为异常或旧基础库问题 */
+    banner: [],
     quickActions: [],
     knowledgeList: [],
     hotList: [],
@@ -164,8 +166,12 @@ Page({
     }
     const that = this;
     // 先做一次本地初始化，避免回调异常时首页模块为空
-    that.init();
-    app.save(parentOpId, that.init.bind(that));
+    const runInit = () =>
+      that.init().catch((err) => {
+        console.error('[index] init 失败', err);
+      });
+    runInit();
+    app.save(parentOpId, runInit);
   },
   onShow: function () {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
@@ -229,8 +235,8 @@ Page({
     return app.onShare(openid, res);
   },
   onPullDownRefresh() {
-    this.init()
-    wx.stopPullDownRefresh()
+    this.init().catch((err) => console.error('[index] 下拉刷新 init 失败', err));
+    wx.stopPullDownRefresh();
   },
   switchTopTab(e) {
     const tab = e.currentTarget.dataset.tab;
@@ -549,21 +555,6 @@ Page({
       { id: 'local1', imageUrl: images.bannerHome, linkType: 'none', linkValue: '' },
       { id: 'local2', imageUrl: images.bannerSale, linkType: 'none', linkValue: '' }
     ];
-    try {
-      const bRes = await util.get('core/banners', { scene: 'home' });
-      const rows = unwrapList(bRes);
-      if (rows.length > 0) {
-        const mapped = rows.map((b, idx) => ({
-          id: b.id != null ? b.id : `b${idx}`,
-          imageUrl: imgUrl(b.image_url || b.imageUrl || ''),
-          linkType: (b.link_type || b.linkType || 'none').toLowerCase(),
-          linkValue: b.link_value || b.linkValue || ''
-        })).filter((x) => !!x.imageUrl);
-        if (mapped.length > 0) banner = mapped;
-      }
-    } catch (e) {
-      console.log('core/banners 不可用，使用本地轮播', e);
-    }
 
     const mapHomeIcon = (rows) => rows.map((r) => ({ ...r, icon: imgUrl(r.icon) }));
     // 与「直约服务商」卡片一致的暖灰底 + 橙色系点缀（无图标时 emoji 兜底仍保持同色系）
@@ -594,22 +585,6 @@ Page({
       { name: "宠物喂养", icon: "/img/home_icons2/pet_feed.png", emoji: "🐾", bgColor: "#fff5e0", url: "../order-publish/order-publish?tab=邻里帮帮&category=宠物喂养" }
     ]);
 
-    // 加载第三方小程序配置
-    let thirdPartyMiniPrograms = this.data.thirdPartyMiniPrograms;
-    try {
-      const res = await api.miniProgram.getMiniPrograms();
-      const programs = res.list || (res.data && res.data.list) || [];
-      if (programs.length > 0) {
-        thirdPartyMiniPrograms = programs.map(p => ({
-          name: p.name,
-          icon: p.icon || '/img/index/menuicon1.png',
-          appId: p.appId,
-          path: p.path
-        }));
-      }
-    } catch (e) {
-      console.log('加载第三方小程序配置失败，使用默认配置', e);
-    }
     // ===== 小区热卖榜：优先 core/community/hot，回退 core/services/hot =====
     const hotRankFallback = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', '上新'];
     const serviceImageFallbackPool = [
@@ -654,6 +629,70 @@ Page({
       { id: 3, remarkC: images.svcWasher, goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
       { id: 4, remarkC: images.svcHood, goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
+
+    const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
+    const mapMerchantList = () => goods.map((item, i) => ({
+      id: item.id,
+      name: item.goodsTitle,
+      sub: '服务' + item.id + '单',
+      // 测试期固定给可展示图片，避免后端返回坏链/空链导致卡片无图
+      image: imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean),
+      url: '../service/service?id=' + item.id
+    }));
+    let merchantList = mapMerchantList();
+    let workerList = [];
+    let marketList = [
+      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
+      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
+      { id: 2003, name: "当地特产一键速达", price: "99", image: images.goodsLocal }
+    ];
+
+    let thirdPartyMiniPrograms = this.data.thirdPartyMiniPrograms;
+    // 打包/弱网/未配置 request 合法域名时，上面多个 await 会长时间卡住；先同步铺底再拉接口
+    this.setData({
+      banner,
+      categoryList,
+      quickActions,
+      knowledgeList,
+      hotList,
+      hotFilters,
+      merchantList,
+      workerList,
+      marketList,
+      thirdPartyMiniPrograms
+    });
+
+    try {
+      const bRes = await util.get('core/banners', { scene: 'home' });
+      const rows = unwrapList(bRes);
+      if (rows.length > 0) {
+        const mapped = rows.map((b, idx) => ({
+          id: b.id != null ? b.id : `b${idx}`,
+          imageUrl: imgUrl(b.image_url || b.imageUrl || ''),
+          linkType: (b.link_type || b.linkType || 'none').toLowerCase(),
+          linkValue: b.link_value || b.linkValue || ''
+        })).filter((x) => !!x.imageUrl);
+        if (mapped.length > 0) banner = mapped;
+      }
+    } catch (e) {
+      console.log('core/banners 不可用，使用本地轮播', e);
+    }
+
+    try {
+      const res = await api.miniProgram.getMiniPrograms();
+      const programs = res.list || (res.data && res.data.list) || [];
+      if (programs.length > 0) {
+        thirdPartyMiniPrograms = programs.map(p => ({
+          name: p.name,
+          icon: p.icon || '/img/index/menuicon1.png',
+          appId: p.appId,
+          path: p.path
+        }));
+      }
+    } catch (e) {
+      console.log('加载第三方小程序配置失败，使用默认配置', e);
+    }
+
     if (!config.useCuratedHomeHotList) {
       let mappedHot = null;
       try {
@@ -688,34 +727,10 @@ Page({
       if (mappedHot) hotList = mappedHot;
     }
 
-    const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
-    const mapMerchantList = () => goods.map((item, i) => ({
-      id: item.id,
-      name: item.goodsTitle,
-      sub: '服务' + item.id + '单',
-      // 测试期固定给可展示图片，避免后端返回坏链/空链导致卡片无图
-      image: imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean),
-      url: '../service/service?id=' + item.id
-    }));
-    let merchantList = mapMerchantList();
-    let workerList = [];
-    let marketList = [
-      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
-      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
-      { id: 2003, name: "当地特产一键速达", price: "99", image: images.goodsLocal }
-    ];
-    // 首屏先渲染「首页」tab：避免 init 末尾才 setData 时，长时间无任何图片与列表（后续接口在后台继续跑）
     this.setData({
       banner,
-      categoryList,
-      quickActions,
-      knowledgeList,
-      hotList,
-      hotFilters,
-      merchantList,
-      workerList,
-      marketList,
-      thirdPartyMiniPrograms
+      thirdPartyMiniPrograms,
+      hotList
     });
 
     // ===== 从数据库获取服务商品（直约服务商）=====
@@ -1126,7 +1141,9 @@ Page({
     let assistMarqueeList = [];
     try {
       const feedRes = await util.get('neighbor-assist/orders/my', { role: 'publisher', page: 1, limit: 10 });
-      const list = Array.isArray(feedRes) ? feedRes : (feedRes.list || feedRes.data?.list || []);
+      const list = Array.isArray(feedRes)
+        ? feedRes
+        : (feedRes.list || (feedRes.data && feedRes.data.list) || []);
       assistMarqueeList = list.slice(0, 10).map((x, i) => {
         const fullText = String(x.content || x.title || x.remark || x.assist_type_label || '').slice(0, 40);
         return {
