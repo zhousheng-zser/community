@@ -1,2 +1,20 @@
-<!--package-rider/pages/rider-home/rider-home.wxml-->
-<text>package-rider/pages/rider-home/rider-home.wxml</text>
+<view class="rider-home-page">
+  <view class="rider-home-header">
+    <text class="rider-home-title">骑手工作台</text>
+    <text class="rider-home-sub">查看并处理配送任务</text>
+  </view>
+  <view class="rider-home-card" bindtap="goTasks">
+    <view class="rider-home-card-main">
+      <text class="rider-home-card-title">配送任务</text>
+      <text class="rider-home-card-desc">待取货、配送中、已送达</text>
+    </view>
+    <text class="rider-home-card-arrow">›</text>
+  </view>
+  <view class="rider-home-card" bindtap="goMine">
+    <view class="rider-home-card-main">
+      <text class="rider-home-card-title">我的</text>
+      <text class="rider-home-card-desc">账号与设置</text>
+    </view>
+    <text class="rider-home-card-arrow">›</text>
+  </view>
+</view>

@@ -1,6 +1,6 @@
 const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
-const mshop = require('../../../utils/merchantShopContext.js');
+const mshop = require('../../utils/merchantShopContext.js');
 
 const FALLBACK_IMG = '/img/placeholders/home_cleaning.png';
 

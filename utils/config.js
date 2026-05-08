@@ -2,11 +2,11 @@
  * 小程序全局配置文件
  */
 const config = {
-    // 当前使用的 API 基础地址
-    baseUrl: 'https://8.136.29.208:3001/api/v1',
+    // 当前使用的 API 基础地址（走网关 443，不再直连 :3001）
+    baseUrl: 'https://jshsp1.eds-tech.cn/api/v1',
 
-    // 静态资源（图片）基础地址，上传到服务器的图片均通过此前缀访问
-    imageBaseUrl: 'https://8.136.29.208:3001',
+    // 静态资源（图片）基础地址
+    imageBaseUrl: 'https://jshsp1.eds-tech.cn',
 
     /**
      * [开发阶段] 已迁入后端 data/uploads/images 的一级目录；/img/<目录>/... 在 imgUrl 中转为 imageBaseUrl + /uploads/...（每段 encodeURIComponent）

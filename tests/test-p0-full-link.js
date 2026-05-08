@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const http = require('http');
-const BASE_URL = 'http://8.136.29.208:3001';
+const BASE_URL = 'http://jshsp1.eds-tech.cn:3001';
 const RESULTS = { pass: 0, fail: 0, warn: 0, skip: 0, errors: [] };
 
 // 手动 Token 配置（用于绕过微信 code 验证）

@@ -2,9 +2,9 @@ const app = getApp();
 const util = require('../../../utils/util.js');
 const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
-const merchantOrderUi = require('../../../utils/merchantOrderUi.js');
-const merchantOrderMock = require('../../../utils/merchantOrderMock.js');
-const workerOrderUi = require('../../../utils/workerOrderUi.js');
+const merchantOrderUi = require('../../utils/merchantOrderUi.js');
+const merchantOrderMock = require('../../utils/merchantOrderMock.js');
+const workerOrderUi = require('../../utils/workerOrderUi.js');
 const api = require('../../../api/index.js');
 
 function getCurrentLocation() {

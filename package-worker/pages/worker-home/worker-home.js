@@ -2,7 +2,7 @@ const app = getApp();
 const util = require('../../../utils/util.js');
 const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
-const workerOrderUi = require('../../../utils/workerOrderUi.js');
+const workerOrderUi = require('../../utils/workerOrderUi.js');
 const api = require('../../../api/index.js');
 const balance = require('../../../utils/balance.js');
 

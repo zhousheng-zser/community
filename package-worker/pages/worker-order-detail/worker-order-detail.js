@@ -1,6 +1,6 @@
 const util = require('../../../utils/util.js');
-const workerOrderUi = require('../../../utils/workerOrderUi.js');
-const workerOrderMock = require('../../../utils/workerOrderMock.js');
+const workerOrderUi = require('../../utils/workerOrderUi.js');
+const workerOrderMock = require('../../utils/workerOrderMock.js');
 
 function maskPhone(p) {
   if (!p || String(p).length < 11) return p || '';

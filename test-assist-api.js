@@ -1,6 +1,6 @@
 const http = require('http');
 
-const BASE = 'http://8.136.29.208:3001';
+const BASE = 'http://jshsp1.eds-tech.cn:3001';
 const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwib3BlbmlkIjoicGhvbmVfMTM4MDAxMzgwMDAiLCJ0b2tlbl92ZXJzaW9uIjowLCJpYXQiOjE3NzcwMjMzNjUsImV4cCI6MTc3NzYyODE2NX0.xvts6m1DQnCC8qEWNniaFGGGFEYW_2Lz7xiXNJuOMPw';
 
 function req(method, path, body) {

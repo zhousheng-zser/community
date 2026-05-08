@@ -84,6 +84,14 @@
       },
       {
         "type": "folder",
+        "value": "errorpic"
+      },
+      {
+        "type": "folder",
+        "value": "question"
+      },
+      {
+        "type": "folder",
         "value": ".claude"
       },
       {
@@ -141,6 +149,114 @@
       {
         "type": "file",
         "value": "fuka.jpg"
+      },
+      {
+        "type": "folder",
+        "value": "scripts"
+      },
+      {
+        "type": "folder",
+        "value": "tests"
+      },
+      {
+        "type": "folder",
+        "value": "docs"
+      },
+      {
+        "type": "folder",
+        "value": ".git"
+      },
+      {
+        "type": "folder",
+        "value": "api"
+      },
+      {
+        "type": "folder",
+        "value": "前端对接文档包"
+      },
+      {
+        "type": "folder",
+        "value": "流量联盟"
+      },
+      {
+        "type": "file",
+        "value": "cleanup_img.js"
+      },
+      {
+        "type": "file",
+        "value": "compare-frontend-api-doc.js"
+      },
+      {
+        "type": "file",
+        "value": "create-test-accounts-server.js"
+      },
+      {
+        "type": "file",
+        "value": "create-test-data-sql.js"
+      },
+      {
+        "type": "file",
+        "value": "create-test-data.js"
+      },
+      {
+        "type": "file",
+        "value": "create-worker-account.js"
+      },
+      {
+        "type": "file",
+        "value": "deploy_img.js"
+      },
+      {
+        "type": "file",
+        "value": "fix-model.js"
+      },
+      {
+        "type": "file",
+        "value": "fix-neighbor-model.js"
+      },
+      {
+        "type": "file",
+        "value": "fix_missing_images.js"
+      },
+      {
+        "type": "file",
+        "value": "generate-api-list.js"
+      },
+      {
+        "type": "file",
+        "value": "replace_urls.js"
+      },
+      {
+        "type": "file",
+        "value": "seed-all-test-data.js"
+      },
+      {
+        "type": "file",
+        "value": "seed-test-accounts.js"
+      },
+      {
+        "type": "file",
+        "value": "seed-test-data.js"
+      },
+      {
+        "type": "file",
+        "value": "test-all-chains.js"
+      },
+      {
+        "type": "file",
+        "value": "test-api-doc-endpoints.js"
+      },
+      {
+        "type": "file",
+        "value": "test-assist-api.js"
+      },
+      {
+        "type": "file",
+        "value": "content.md"
+      },
+      {
+        "type": "file",
+        "value": "功能对比分析报告.md"
       }
     ],
     "include": []

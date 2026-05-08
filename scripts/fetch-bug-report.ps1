@@ -1,5 +1,5 @@
 # 通过 SSH 访问服务器上的文件
-$sshCmd = "ssh -o StrictHostKeyChecking=no cw@8.136.29.208"
+$sshCmd = "ssh -o StrictHostKeyChecking=no cw@jshsp1.eds-tech.cn"
 
 # 进入目录并查看文件
 $safePath = "/home/cw/a/community-backend/问题统计测试准备"

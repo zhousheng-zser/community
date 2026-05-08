@@ -65,7 +65,7 @@ function getApiBaseUrl() {
     case ENV.TESTING:
       return 'https://test-api.yourdomain.com';
     default:
-      return 'https://8.136.29.208:3001';
+      return 'https://jshsp1.eds-tech.cn';
   }
 }
 

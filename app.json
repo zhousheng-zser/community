@@ -11,7 +11,6 @@
     "pages/gorder-list/gorder-list",
     "pages/gorder-detail/gorder-detail",
     "pages/cash/cash",
-    "pages/coupons-all/coupons-all",
     "pages/book/book",
     "pages/audit/audit",
     "pages/dispatch/dispatch",
@@ -31,11 +30,9 @@
     "pages/account/account",
     "pages/order/order",
     "pages/recomm/recomm",
-    "pages/activity/activity",
     "pages/goods-classify/goods-classify",
     "pages/tidy-service/tidy-service",
     "pages/goods-detail/goods-detail",
-    "pages/coupons-my/coupons-my",
     "pages/activity-list/activity-list",
     "pages/user-code/user-code",
     "pages/book-my/book-my",
@@ -75,21 +72,42 @@
     "pages/appeal-list/appeal-list",
     "pages/activity-manage/activity-manage",
     "pages/community-steward/community-steward",
-    "pages/platform-kefu/platform-kefu",
-    "pages/wallet-transactions/wallet-transactions",
     "pages/shopping-search/shopping-search",
     "pages/consumer-rights/consumer-rights",
     "pages/after-sale-apply/after-sale-apply",
     "pages/login/login",
     "pages/register/register",
     "pages/forget-password/forget-password",
-    "pages/env-switcher/env-switcher",
-    "pages/notification-center/notification-center",
-    "pages/commission-overview/commission-overview",
-    "pages/commission-records/commission-records",
-    "pages/partner-manage/partner-manage"
+    "pages/env-switcher/env-switcher"
   ],
   "subPackages": [
+    {
+      "root": "package-account",
+      "name": "account",
+      "pages": [
+        "pages/wallet-transactions/wallet-transactions",
+        "pages/platform-kefu/platform-kefu",
+        "pages/notification-center/notification-center"
+      ]
+    },
+    {
+      "root": "package-commission",
+      "name": "commission",
+      "pages": [
+        "pages/commission-overview/commission-overview",
+        "pages/commission-records/commission-records",
+        "pages/partner-manage/partner-manage"
+      ]
+    },
+    {
+      "root": "package-customer",
+      "name": "customer",
+      "pages": [
+        "pages/coupons-all/coupons-all",
+        "pages/coupons-my/coupons-my",
+        "pages/activity/activity"
+      ]
+    },
     {
       "root": "package-worker",
       "name": "worker",
@@ -156,6 +174,7 @@
     "navigationBarTitleText": "社区服务",
     "navigationBarTextStyle": "white"
   },
+  "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "custom": true,
     "color": "#8d8d8d",

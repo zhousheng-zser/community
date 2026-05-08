@@ -5,7 +5,7 @@
 
 const http = require('http');
 
-const BASE = 'http://8.136.29.208:3001';
+const BASE = 'http://jshsp1.eds-tech.cn:3001';
 const API = '/api/v1';
 
 function api(method, path, body = null) {

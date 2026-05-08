@@ -22,7 +22,7 @@ Page({
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
       { name: "惠民卡订单", icon: "benefit_card_order", url: "../benefit-orders/benefit-orders" },
       { name: "推客订单", icon: "promoter_order", url: "../promoter-orders/promoter-orders" },
-      { name: "合伙人中心", icon: "promoter_order", url: "../commission-overview/commission-overview" },
+      { name: "合伙人中心", icon: "promoter_order", url: "/package-commission/pages/commission-overview/commission-overview" },
       { name: "组合套餐", icon: "combo_package", url: "../combo-orders/combo-orders" }
     ],
     communityMenus: [
@@ -44,7 +44,7 @@ Page({
       { name: "小区管家", icon: "community_manager", url: "../community-steward/community-steward" },
       { name: "关于我们", icon: "about_us", url: "../about/about" },
       { name: "地址管理", icon: "address_management", url: "../address/address" },
-      { name: "平台客服", icon: "platform_service", url: "../platform-kefu/platform-kefu" },
+      { name: "平台客服", icon: "platform_service", url: "/package-account/pages/platform-kefu/platform-kefu" },
       { name: "设置", icon: "settings", url: "../settings/settings" }
     ]
   },

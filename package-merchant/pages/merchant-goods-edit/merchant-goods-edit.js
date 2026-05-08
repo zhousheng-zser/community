@@ -1,5 +1,5 @@
 const util = require('../../../utils/util.js');
-const mshop = require('../../../utils/merchantShopContext.js');
+const mshop = require('../../utils/merchantShopContext.js');
 const api = require('../../../api/index.js');
 const config = require('../../../utils/config.js');
 

@@ -62,5 +62,17 @@ Page({
    */
   onShareAppMessage() {
 
+  },
+
+  goTasks() {
+    wx.navigateTo({
+      url: '/package-rider/pages/rider-tasks/rider-tasks'
+    })
+  },
+
+  goMine() {
+    wx.navigateTo({
+      url: '/package-rider/pages/rider-mine/rider-mine'
+    })
   }
 })

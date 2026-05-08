@@ -96,14 +96,14 @@ Page({
   },
 
   goRecords() {
-    wx.navigateTo({ url: '/pages/wallet-transactions/wallet-transactions' });
+    wx.navigateTo({ url: '/package-account/pages/wallet-transactions/wallet-transactions' });
   },
 
   goCommission() {
-    wx.navigateTo({ url: '/pages/commission-overview/commission-overview' });
+    wx.navigateTo({ url: '/package-commission/pages/commission-overview/commission-overview' });
   },
 
   goCommissionRecords() {
-    wx.navigateTo({ url: '/pages/commission-records/commission-records' });
+    wx.navigateTo({ url: '/package-commission/pages/commission-records/commission-records' });
   }
 })

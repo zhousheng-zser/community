@@ -1,7 +1,7 @@
 const app = getApp();
 const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
-const spCtx = require('../../../utils/spContext.js');
+const spCtx = require('../../utils/spContext.js');
 
 Page({
   data: {

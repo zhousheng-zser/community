@@ -1,5 +1,5 @@
 const api = require('../../../api/index.js');
-const spCtx = require('../../../utils/spContext.js');
+const spCtx = require('../../utils/spContext.js');
 
 Page({
   data: {

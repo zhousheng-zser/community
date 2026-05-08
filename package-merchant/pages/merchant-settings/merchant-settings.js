@@ -1,5 +1,5 @@
 const api = require('../../../api/index.js');
-const mshop = require('../../../utils/merchantShopContext.js');
+const mshop = require('../../utils/merchantShopContext.js');
 
 function firstNonEmpty() {
   for (let i = 0; i < arguments.length; i += 1) {

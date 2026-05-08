@@ -35,8 +35,8 @@ async function createTestData() {
       VALUES ('TEST001', '测试店铺', '食品生鲜', 1, 1, NOW(), NOW())
       ON DUPLICATE KEY UPDATE name='测试店铺', updated_at=NOW()
     `, { type: Q.INSERT });
-    const shops = await sequelize.query('SELECT id FROM market_shops WHERE shop_no = "TEST001" LIMIT 1', { type: Q.SELECT });
-    const shop = shops[0];
+    const shopRows = await sequelize.query('SELECT id FROM market_shops WHERE shop_no = "TEST001" LIMIT 1', { type: Q.SELECT });
+    const shop = shopRows[0];
     console.log('✓ 店铺创建成功 (id=' + shop.id + ')\n');
 
     // 3. 创建商家账号
@@ -60,8 +60,8 @@ async function createTestData() {
 
     // 6. 创建收货地址
     console.log('[6] 创建收货地址...');
-    const users = await sequelize.query('SELECT id FROM Users WHERE phone = "13800138000" LIMIT 1', { type: Q.SELECT });
-    const user = users[0];
+    const userRows = await sequelize.query('SELECT id FROM Users WHERE phone = "13800138000" LIMIT 1', { type: Q.SELECT });
+    const user = userRows[0];
     await sequelize.query(`
       INSERT INTO user_addresses (user_id, name, phone, address, is_default, created_at, updated_at)
       VALUES (${user.id}, '测试用户', '13800138000', '北京市朝阳区测试路123号', 1, NOW(), NOW())
@@ -71,14 +71,14 @@ async function createTestData() {
 
     // 7. 验证
     console.log('[7] 验证数据...');
-    const users = await sequelize.query('SELECT * FROM Users WHERE phone = "13800138000"', { type: Q.SELECT });
-    console.log('✓ 用户:', users[0]?.nickname);
+    const verifyUsers = await sequelize.query('SELECT * FROM Users WHERE phone = "13800138000"', { type: Q.SELECT });
+    console.log('✓ 用户:', verifyUsers[0]?.nickname);
 
     const merchants = await sequelize.query('SELECT * FROM merchant_accounts WHERE username = "merchant_test"', { type: Q.SELECT });
     console.log('✓ 商家:', merchants[0]?.username);
 
-    const shops = await sequelize.query('SELECT * FROM market_shops WHERE shop_no = "TEST001"', { type: Q.SELECT });
-    console.log('✓ 店铺:', shops[0]?.name);
+    const verifyShops = await sequelize.query('SELECT * FROM market_shops WHERE shop_no = "TEST001"', { type: Q.SELECT });
+    console.log('✓ 店铺:', verifyShops[0]?.name);
 
     const goods = await sequelize.query('SELECT * FROM market_goods WHERE goods_no = "GOODS001"', { type: Q.SELECT });
     console.log('✓ 商品:', goods[0]?.name, `¥${goods[0]?.price}`);

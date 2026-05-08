@@ -1,6 +1,13 @@
 {
   "permissions": {
     "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Agent(*)",
       "Bash(mysql --version 2>/dev/null || echo \"MySQL client not found\")",
       "Bash(sshpass -V 2>/dev/null || echo \"sshpass not available\")",
       "Bash(python3 -c \"import paramiko; print\\('paramiko ok'\\)\" 2>/dev/null || python -c \"import paramiko; print\\('paramiko ok'\\)\" 2>/dev/null || echo \"paramiko not available\")",
@@ -41,9 +48,9 @@
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\\\\CODE\\\\project\\\\community\\\\check_miniprogram.ps1\")",
       "Bash(Get-ChildItem -Path \"D:\\\\CODE\\\\project\\\\community\\\\pages\" -Filter \"neighbor*\" -Recurse)",
       "Bash(Select-Object FullName)",
-      "Bash(curl -s -X GET \"https://8.136.29.208:3001/api/v1/neighbor-assist/orders/feed?limit=5\" -H \"Authorization: Bearer test\")",
-      "Bash(curl -s -m 5 https://8.136.29.208:3001/api/v1/neighbor-assist/orders/feed?limit=5 -w \"\\\\nHTTP_CODE:%{http_code}\")",
-      "Bash(curl -s -m 10 \"https://8.136.29.208:3001/api/v1/neighbor-assist/orders/pool?limit=3\")"
+      "Bash(curl -s -X GET \"https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/feed?limit=5\" -H \"Authorization: Bearer test\")",
+      "Bash(curl -s -m 5 https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/feed?limit=5 -w \"\\\\nHTTP_CODE:%{http_code}\")",
+      "Bash(curl -s -m 10 \"https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/pool?limit=3\")"
     ]
   }
 }

@@ -1563,7 +1563,7 @@ Page({
   goActivity(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: '../activity/activity?id=' + id,
+      url: '/package-customer/pages/activity/activity?id=' + id,
     })
   },
 

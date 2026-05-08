@@ -1,2 +1,12 @@
-<!--package-rider/pages/rider-mine/rider-mine.wxml-->
-<text>package-rider/pages/rider-mine/rider-mine.wxml</text>
+<view class="rider-mine-page">
+  <view class="rider-mine-header">
+    <text class="rider-mine-name">骑手</text>
+    <text class="rider-mine-tip">更多能力开发中</text>
+  </view>
+  <view class="rider-mine-section">
+    <view class="rider-mine-cell" bindtap="goTasks">
+      <text class="rider-mine-cell-label">配送任务</text>
+      <text class="rider-mine-cell-arrow">›</text>
+    </view>
+  </view>
+</view>

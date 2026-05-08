@@ -2,7 +2,7 @@ const app = getApp();
 const util = require('../../../utils/util.js');
 const rp = require('../../../utils/rolePortals.js');
 const api = require('../../../api/index.js');
-const spCtx = require('../../../utils/spContext.js');
+const spCtx = require('../../utils/spContext.js');
 const balance = require('../../../utils/balance.js');
 
 const DEF_AVATAR =

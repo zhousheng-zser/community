@@ -36,7 +36,7 @@
         <text class="hstat-label">积分</text>
       </view>
       <view class="hstat-divider"></view>
-      <navigator class="hstat" url="../coupons-my/coupons-my">
+      <navigator class="hstat" url="/package-customer/pages/coupons-my/coupons-my">
         <view class="hstat-icon-wrap">
           <image class="hstat-icon-img" src="/img/home_icons2/coupon.png" mode="aspectFit"></image>
         </view>
