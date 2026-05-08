@@ -1,7 +1,7 @@
 /**app.wxss**/
 page{
   font-size: 28rpx;
-  background-color: #000000;
+  background-color: #ffffff;
 }
 .text-ellipsis{
   text-overflow:ellipsis;
