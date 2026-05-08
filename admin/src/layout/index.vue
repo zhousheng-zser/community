@@ -46,6 +46,10 @@
           <el-icon><Shop /></el-icon>
           <span>直约服务商管理</span>
         </el-menu-item>
+        <el-menu-item index="/service-dispatch">
+          <el-icon><Operation /></el-icon>
+          <span>到家服务派单台</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -80,7 +84,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop } from '@element-plus/icons-vue'
+import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop, Operation } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()

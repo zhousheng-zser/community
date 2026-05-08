@@ -1,0 +1,5 @@
+<view class="am-page">
+  <text class="am-tip">您可在此快捷进入已发布活动的管理与「我参与的活动」列表；完整审核与后台配置请使用运营端。</text>
+  <button class="am-btn" bindtap="goPublish">发布动态/活动</button>
+  <button class="am-btn ghost" bindtap="goMine">我参与的活动</button>
+</view>

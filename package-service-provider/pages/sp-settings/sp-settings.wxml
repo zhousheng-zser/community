@@ -1,0 +1,26 @@
+<view class="settings-page">
+  <view wx:if="{{loading}}" class="loading-tip">加载中…</view>
+
+  <block wx:else>
+    <view class="section">
+      <view class="section-label required">门店名称</view>
+      <input class="field-input" placeholder="请输入门店名称" value="{{shopName}}" bindinput="onShopNameInput" maxlength="50" />
+    </view>
+
+    <view class="section">
+      <view class="section-label required">联系人</view>
+      <input class="field-input" placeholder="请输入联系人姓名" value="{{contactName}}" bindinput="onContactInput" maxlength="20" />
+    </view>
+
+    <view class="section">
+      <view class="section-label required">联系电话</view>
+      <input class="field-input" placeholder="请输入手机号" value="{{contactPhone}}" bindinput="onPhoneInput" type="number" maxlength="11" />
+    </view>
+
+    <view class="bottom-bar">
+      <button class="save-btn" bindtap="save" disabled="{{saving}}">
+        {{saving ? '保存中…' : '保存修改'}}
+      </button>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,209 @@
+.academy-page {
+  background-color: #f4f5f7;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 顶部导航栏 */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  z-index: 100;
+}
+
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 44px;
+  padding: 0 20rpx;
+}
+
+.back-btn {
+  font-size: 32rpx;
+  color: #333;
+  padding: 10rpx 20rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+}
+
+/* 主滚动区域 */
+.main-scroll {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 顶部横幅 */
+.hero-wrap {
+  width: 100%;
+  height: 320rpx;
+  background: #fff;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 5大分类球区 */
+.quick-navs {
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  padding: 30rpx 20rpx;
+  border-radius: 0 0 24rpx 24rpx;
+}
+
+.q-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.q-icon-wrap {
+  width: 90rpx;
+  height: 90rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+}
+
+/* 用 nth-child 区分五种底色替代真实图标 */
+.q-item:nth-child(1) .q-icon-wrap { background: #fff1e3; }
+.q-item:nth-child(2) .q-icon-wrap { background: #ffe4e5; }
+.q-item:nth-child(3) .q-icon-wrap { background: #e0f4ff; }
+.q-item:nth-child(4) .q-icon-wrap { background: #ffe5f1; }
+.q-item:nth-child(5) .q-icon-wrap { background: #e6f9ed; }
+
+.q-icon-ph {
+  width: 44rpx;
+  height: 44rpx;
+  background: rgba(0,0,0,0.1); /* 假装这里有个彩色图标 */
+  mask-size: contain;
+}
+
+.q-text {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 通用区块容器 */
+.section-wrap {
+  background: #fff;
+  border-radius: 20rpx;
+  margin: 24rpx 20rpx;
+  padding: 30rpx 20rpx;
+}
+
+.sec-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.sec-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.sec-more {
+  font-size: 26rpx;
+  color: #5c84d6; /* 浅蓝色链接 */
+}
+
+/* 两列卡片网格 */
+.sec-grid {
+  display: flex;
+  justify-content: space-between;
+}
+
+.video-card {
+  width: 48%;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.06);
+}
+
+.card-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  background: #eee;
+}
+
+.card-cover {
+  width: 100%;
+  height: 100%;
+}
+
+.card-tag {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  background: rgba(220,150,50,0.9);
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+/* 卡片播放遮罩（模拟原生按键） */
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-circle {
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 6rpx;
+  box-sizing: border-box;
+}
+
+.play-triangle {
+  width: 0;
+  height: 0;
+  border-top: 10rpx solid transparent;
+  border-left: 14rpx solid #fff;
+  border-bottom: 10rpx solid transparent;
+}
+
+.card-bottom {
+  background: #2a2a2a;
+  padding: 16rpx;
+  height: 70rpx; 
+  display: flex;
+  align-items: center;
+}
+
+.card-title {
+  color: #ccc;
+  font-size: 24rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}

@@ -40,14 +40,25 @@ function parseDetail(raw, myUserId) {
   const lat = parseFloat(String(r.lat != null ? r.lat : r.latitude || ''), 10);
   const lng = parseFloat(String(r.lng != null ? r.lng : r.longitude || ''), 10);
   const pub = r.publisher || r.publisher_user || {};
-  const hel = r.helper || r.assignee || r.worker || {};
-  let myRole =
-    r.my_role ||
-    (r.publisher_id != null && uid && Number(r.publisher_id) === uid
-      ? 'publisher'
-      : r.helper_id != null && uid && Number(r.helper_id) === uid
-        ? 'helper'
-        : '');
+  const hel = r.helper || r.assignee || r.worker || r.assigned_worker || {};
+  const publisherUid =
+    r.user_id != null ? Number(r.user_id) : pub && pub.id != null ? Number(pub.id) : null;
+  let helperUid =
+    r.assigned_worker_id != null
+      ? Number(r.assigned_worker_id)
+      : hel && hel.id != null
+        ? Number(hel.id)
+        : null;
+
+  let myRole = r.my_role || '';
+  if (!myRole && uid) {
+    if (publisherUid != null && uid === publisherUid) myRole = 'publisher';
+    else if (helperUid != null && uid === helperUid) myRole = 'helper';
+  }
+
+  let peerUserId = null;
+  if (myRole === 'publisher' && helperUid != null && helperUid > 0) peerUserId = helperUid;
+  else if (myRole === 'helper' && publisherUid != null && publisherUid > 0) peerUserId = publisherUid;
   let peerPhoneRaw = '';
   let peerName = '';
   if (myRole === 'publisher') {
@@ -82,6 +93,9 @@ function parseDetail(raw, myUserId) {
     contactPhone,
     contactPhoneDisplay: maskPhone(contactPhone),
     conversationId: r.conversation_id || r.conversationId || null,
+    publisherUserId: publisherUid,
+    helperUserId: helperUid,
+    peerUserId,
     check_in_at: r.check_in_at || r.check_in_time,
     payStatus: r.pay_status || r.payStatus || 'unpaid',
     reviewed: !!(r.reviewed || r.has_review)
@@ -281,22 +295,21 @@ Page({
   },
 
   async sendCheckInMessageToChat() {
+    const app = getApp();
+    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
     const { order, id } = this.data;
-    let cid = order.conversationId;
-    if (!cid) {
-      try {
-        const res = await util.post('neighbor-assist/conversations/ensure', { order_id: id });
-        cid = res && (res.conversation_id || res.id || res.conversationId);
-      } catch (e) {
-        cid = `order_${id}`;
-      }
-    }
-    if (!cid) return;
+    const peerUid = order.peerUserId != null ? Number(order.peerUserId) : 0;
+    if (!me || !peerUid) return;
     try {
+      await util.post('messages/order-conversation/ensure', {
+        channel: 'neighbor_assist',
+        order_id: Number(id),
+        order_no: String(order.orderNo || id)
+      });
       const now = new Date();
       const timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       await util.post('messages/send', {
-        conversationId: cid,
+        peerId: peerUid,
         content: `【系统消息】接单邻居已于 ${timeStr} 到场打卡，开始为您提供服务。`,
         msgType: 'text'
       });
@@ -457,30 +470,44 @@ Page({
   noop() {},
 
   async openChat() {
+    const app = getApp();
+    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
     const { order, id, isMock } = this.data;
-    let cid = order.conversationId;
     if (isMock) {
-      wx.showToast({ title: '演示：无会话 ID', icon: 'none' });
+      wx.showToast({ title: '演示：无会话', icon: 'none' });
       return;
     }
-    if (!cid) {
-      try {
-        const res = await util.post('neighbor-assist/conversations/ensure', { order_id: id });
-        cid = res && (res.conversation_id || res.id || res.conversationId);
-      } catch (e) {
-        // 后端若未实现 conversations/ensure，使用订单 ID 作为会话标识兜底
-        console.log('创建会话失败，使用订单ID作为会话ID', e);
-        cid = `order_${id}`;
+    const peerUid = order.peerUserId != null ? Number(order.peerUserId) : 0;
+    if (!peerUid) {
+      wx.showToast({ title: '接单后才可与对方沟通', icon: 'none' });
+      return;
+    }
+    if (!me) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    wx.showLoading({ title: '打开会话', mask: true });
+    try {
+      const res = await util.post('messages/order-conversation/ensure', {
+        channel: 'neighbor_assist',
+        order_id: Number(id),
+        order_no: String(order.orderNo || id)
+      });
+      wx.hideLoading();
+      const data = res && res.data !== undefined ? res.data : res;
+      const cid = data && (data.conversation_id || data.conversationId);
+      if (!cid) {
+        wx.showToast({ title: '无法建立会话', icon: 'none' });
+        return;
       }
+      const name = encodeURIComponent(order.peerName || '帮帮聊天');
+      const orderNo = encodeURIComponent(order.orderNo || '');
+      wx.navigateTo({
+        url: `/pages/chat/chat?conversationId=${cid}&peerId=${peerUid}&name=${name}&orderNo=${orderNo}&orderScene=neighbor_assist&orderId=${id}`
+      });
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: (e && e.errmsg) || (e && e.message) || '消息服务暂不可用', icon: 'none' });
     }
-    if (!cid) {
-      wx.showToast({ title: '未返回会话 ID', icon: 'none' });
-      return;
-    }
-    const name = encodeURIComponent(order.peerName || '帮帮聊天');
-    const orderNo = encodeURIComponent(order.orderNo || '');
-    wx.navigateTo({
-      url: `/pages/chat/chat?conversationId=${cid}&name=${name}&orderNo=${orderNo}&orderScene=neighbor_assist&orderId=${id}`
-    });
   }
 });

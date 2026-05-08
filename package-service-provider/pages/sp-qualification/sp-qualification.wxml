@@ -1,0 +1,74 @@
+<view class="qual-page">
+  <view wx:if="{{loading}}" class="loading-tip">加载中…</view>
+
+  <block wx:else>
+    <!-- 基本信息 -->
+    <view class="card">
+      <view class="card-title">基本信息</view>
+      <view class="info-row">
+        <text class="info-label">门店名称</text>
+        <text class="info-value">{{shopName || '—'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">联系人</text>
+        <text class="info-value">{{contactName || '—'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">联系电话</text>
+        <text class="info-value">{{phone || '—'}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">入驻状态</text>
+        <text class="info-value status {{status}}">{{statusText}}</text>
+      </view>
+      <view class="info-row" wx:if="{{communityName}}">
+        <text class="info-label">所在小区</text>
+        <text class="info-value">{{communityName}}</text>
+      </view>
+      <button class="edit-btn" bindtap="goSettings">修改信息</button>
+    </view>
+
+    <!-- 证件资料 -->
+    <view class="card">
+      <view class="card-title">证件资料</view>
+
+      <view class="cert-row" wx:if="{{licenseUrl}}">
+        <text class="cert-label">营业执照</text>
+        <image class="cert-img" src="{{licenseUrl}}" mode="aspectFill" bindtap="previewImg" data-src="{{licenseUrl}}"></image>
+      </view>
+
+      <view class="cert-row" wx:if="{{idCardUrl}}">
+        <text class="cert-label">身份证</text>
+        <image class="cert-img" src="{{idCardUrl}}" mode="aspectFill" bindtap="previewImg" data-src="{{idCardUrl}}"></image>
+      </view>
+
+      <view class="cert-row" wx:if="{{shopFrontUrl}}">
+        <text class="cert-label">门头照</text>
+        <image class="cert-img" src="{{shopFrontUrl}}" mode="aspectFill" bindtap="previewImg" data-src="{{shopFrontUrl}}"></image>
+      </view>
+
+      <view class="cert-row" wx:if="{{environmentUrls.length}}">
+        <text class="cert-label">环境照</text>
+        <view class="img-row">
+          <image class="thumb" wx:for="{{environmentUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImgList" data-list="{{environmentUrls}}" data-idx="{{index}}"></image>
+        </view>
+      </view>
+
+      <view class="cert-row" wx:if="{{certificateUrls.length}}">
+        <text class="cert-label">专业证书</text>
+        <view class="img-row">
+          <image class="thumb" wx:for="{{certificateUrls}}" wx:key="*this" src="{{item}}" mode="aspectFill" bindtap="previewImgList" data-list="{{certificateUrls}}" data-idx="{{index}}"></image>
+        </view>
+      </view>
+
+      <view class="no-cert" wx:if="{{!licenseUrl && !idCardUrl && !shopFrontUrl && !environmentUrls.length && !certificateUrls.length}}">
+        <text>暂无证件信息，请联系客服补充</text>
+      </view>
+    </view>
+
+    <!-- 重新入驻入口 -->
+    <view class="card" wx:if="{{status === 'rejected' || status === 'inactive'}}">
+      <button class="rejoin-btn" bindtap="goJoin">重新申请入驻</button>
+    </view>
+  </block>
+</view>

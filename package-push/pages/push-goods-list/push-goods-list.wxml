@@ -1,0 +1,152 @@
+<view class="push-list-page">
+  <!-- 头部大横幅区 -->
+  <view class="hero-banner">
+    <!-- 背景图 (占位) -->
+    <image class="hero-bg" src="https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=800&q=80" mode="aspectFill"></image>
+    
+    <!-- 悬浮的透明顶导 -->
+    <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+      <text bindtap="goBack" class="back-btn">〈</text>
+      <!-- 标题在横幅中展示较居中，顶导可以不显示居中文字，或只保留功能 -->
+      <text class="title"></text>
+      <text style="width: 40rpx"></text> 
+    </view>
+
+    <!-- 横幅文字内容 -->
+    <view class="hero-content" style="margin-top: {{navTopPadding + 10}}px;">
+      <block wx:if="{{isSidebarLayout}}">
+        <text class="hero-title" style="font-size: 60rpx; letter-spacing: 2rpx; text-shadow: none; padding-bottom: 10rpx">家庭必备 特惠囤货</text>
+        <text class="hero-sub font-bold" style="background: transparent; border: none; padding: 0; font-size: 34rpx; font-weight: bold; margin-bottom: 20rpx; box-shadow: none;">衣食住行 啥都有</text>
+        <view class="hero-sub-wrap">
+          <text class="hero-sub" style="background: rgba(255,100,100,0.5)">品质保障 · 省心省力</text>
+        </view>
+      </block>
+      <block wx:elif="{{isHighCommLayout}}">
+        <text class="hero-title" style="font-size: 68rpx; letter-spacing: 4rpx; font-weight: 900; -webkit-text-stroke: 1rpx #fff; text-shadow: 0 4rpx 10rpx rgba(0,0,0,0.2);">{{pageTitle}}</text>
+        <view class="hero-sub-wrap" style="margin-top: 20rpx;">
+          <text class="hero-sub" style="background: linear-gradient(90deg, #ff4c2d, #ff8c42); font-weight: bold; border: none; padding: 6rpx 20rpx; border-radius: 0 20rpx 20rpx 20rpx; box-shadow: 0 4rpx 10rpx rgba(255,100,100,0.4)">💰 500万助力补贴</text>
+        </view>
+      </block>
+      <block wx:else>
+        <text class="hero-title">{{pageTitle}}</text>
+        <view class="hero-sub-wrap">
+          <text class="hero-sub">精打细算也要品质生活！</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 主体内容区 -->
+  <view class="main-content">
+    
+    <block wx:if="{{isSidebarLayout}}">
+      <!-- 本地商城甄选专区：左右分栏结构 -->
+      <view class="sidebar-layout">
+        <!-- 左侧一级导航 -->
+        <scroll-view class="sidebar-left" scroll-y="true">
+          <view wx:for="{{sidebarCategories}}" wx:key="*this"
+                class="sidebar-item {{item === activeSidebarCategory ? 'active' : ''}}"
+                bindtap="handleSidebarClick" data-name="{{item}}">
+            {{item}}
+          </view>
+        </scroll-view>
+        
+        <!-- 右侧商品列表 -->
+        <scroll-view class="sidebar-right" scroll-y="true">
+          <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
+            <view class="list-info">
+              <text class="list-name">{{item.name}}</text>
+              <view class="list-tags">
+                <text class="t-red">验货实测</text>
+                <text class="t-red">资质齐全</text>
+                <text class="t-red">源产地</text>
+              </view>
+              <view class="list-bottom">
+                <view class="list-price"><text class="yen">￥</text>{{item.price}}</view>
+                <view class="action-row" style="margin-top: 0">
+                  <text class="list-comm" style="background: transparent; color: #cc8f66; font-size: 20rpx; border: 2rpx solid #e1c0b1; font-weight: bold">定向高佣 ￥{{item.comm}}</text>
+                  <text class="buy-btn" style="background: #ff594d">去购买</text>
+                </view>
+              </view>
+            </view>
+          </navigator>
+        </scroll-view>
+      </view>
+    </block>
+
+    <block wx:elif="{{isHighCommLayout}}">
+      <!-- 高佣专区：全宽单栏商品列表 + 顶部橙色提示条，无搜索框 -->
+      <view class="high-comm-notice">下单后，可在我的订单查看“返佣金额”</view>
+      
+      <view class="high-comm-layout">
+        <navigator class="list-item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="list-cover"></image>
+          <view class="list-info">
+            <text class="list-name">{{item.name}}</text>
+            <view class="list-tags">
+              <text class="t-red">验货实测</text>
+              <text class="t-red">资质齐全</text>
+              <text class="t-red">源产地</text>
+            </view>
+            <view class="list-bottom">
+              <view class="list-price"><text class="yen">￥</text>{{item.price}}</view>
+              <view class="action-row" style="margin-top: 0">
+                <text class="list-comm" style="background: transparent; color: #cc8f66; font-size: 20rpx; border: 2rpx solid #e1c0b1; padding: 2rpx 8rpx; font-weight: bold;">定向高佣 ￥{{item.comm}}</text>
+                <text class="buy-btn" style="background: #ff594d">去购买</text>
+              </view>
+            </view>
+          </view>
+        </navigator>
+      </view>
+    </block>
+
+    <block wx:else>
+      <!-- 默认布局 (爆款/礼物/高佣): 搜索框 + 瀑布流网格 -->
+      
+      <!-- 礼物专区专属：横向滑动的子分类头像 -->
+      <scroll-view wx:if="{{isGiftZone && subCategories.length}}" class="gift-sub-scroll" scroll-x="true" scroll-with-animation="true">
+        <view class="gift-sub-row">
+          <view
+            class="gift-sub-item {{giftSubActive === item.name ? 'active' : ''}}"
+            wx:for="{{subCategories}}"
+            wx:key="name"
+            data-name="{{item.name}}"
+            bindtap="handleGiftSubTap"
+          >
+            <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill"></image>
+            <text>{{item.name}}</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 搜索框 -->
+      <view class="search-box">
+        <view class="search-input-wrap">
+          <icon type="search" size="14" color="#999"/>
+          <input class="search-input" placeholder="请输入关键词" placeholder-style="color:#999;"/>
+        </view>
+        <view class="search-btn">搜索</view>
+      </view>
+
+      <!-- 瀑布流网格 -->
+      <view class="grid">
+        <navigator class="item" wx:for="{{goods}}" wx:key="id" url="{{item.detailUrl}}">
+          <image wx:if="{{item.image}}" src="{{item.image}}" mode="aspectFill" class="cover-img"></image>
+          <view class="info-wrap">
+            <text class="name">{{item.name}}</text>
+            <view class="price-row">
+              <text class="yen">￥</text>{{item.price}}
+              <text wx:if="{{item.tag}}" class="tag">{{item.tag}}</text>
+            </view>
+            <view class="action-row">
+              <text class="rebate">分享赚 ￥{{item.comm}}</text>
+              <text class="buy-btn">去购买</text>
+            </view>
+          </view>
+        </navigator>
+      </view>
+    </block>
+
+  </view>
+</view>

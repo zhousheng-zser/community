@@ -1,0 +1,6 @@
+<scroll-view class="cr-page" scroll-y>
+  <text class="cr-p">1. 平台将依法保障消费者知情权与公平交易权，商品与服务信息以商家展示及订单约定为准。</text>
+  <text class="cr-p">2. 发生争议时，用户可通过「意见反馈」「平台客服」提交材料，平台将协调处理。</text>
+  <text class="cr-p">3. 涉及退款、售后、服务质量等问题，请保留订单、聊天记录与现场凭证，便于核实。</text>
+  <text class="cr-p">4. 本说明为摘要展示，具体以您与平台签署的用户协议及适用法律为准。</text>
+</scroll-view>

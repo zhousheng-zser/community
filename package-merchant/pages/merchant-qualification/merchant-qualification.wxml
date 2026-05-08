@@ -1,0 +1,69 @@
+<view class="portal-page qua-page">
+  <view class="portal-top merchant-gradient" style="padding-bottom: 24rpx;">
+    <text class="portal-title">店铺入驻与资质</text>
+    <text class="portal-sub">展示当前商家入驻资料，仅查看；修改请走店铺设置</text>
+  </view>
+
+  <view class="loading-box" wx:if="{{loading}}">加载中...</view>
+
+  <block wx:elif="{{loadFailed}}">
+    <view class="portal-card section">
+      <view class="kv-row">
+        <text class="kv-key">提示</text>
+        <text class="kv-val">{{failHint || '暂未获取到入驻资料，请稍后重试'}}</text>
+      </view>
+      <button class="sheet-btn ghost" bindtap="reload">重新加载</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="portal-card section">
+      <view class="section-title">基础资料</view>
+      <view class="kv-row"><text class="kv-key">店铺名</text><text class="kv-val">{{detail.shopName || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">类目</text><text class="kv-val">{{detail.category || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">联系人</text><text class="kv-val">{{detail.contactName || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">联系电话</text><text class="kv-val">{{detail.phone || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">主体名称</text><text class="kv-val">{{detail.entityName || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">法人/经营者</text><text class="kv-val">{{detail.legalPerson || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">统一社会信用码</text><text class="kv-val">{{detail.creditCode || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">推广员姓名</text><text class="kv-val">{{detail.promoterName || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">申请时间</text><text class="kv-val">{{detail.applyTime || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">详细地址</text><text class="kv-val">{{detail.address || '-'}}</text></view>
+      <view class="kv-row multiline"><text class="kv-key">商家简介</text><text class="kv-val">{{detail.description || '-'}}</text></view>
+      <view class="kv-row"><text class="kv-key">小区ID</text><text class="kv-val">{{detail.communityId || '-'}}</text></view>
+    </view>
+
+    <view class="portal-card section">
+      <view class="section-title">固定业务图</view>
+      <view class="img-grid fixed-grid">
+        <view class="img-item" bindtap="previewOne" data-url="{{detail.logoUrl}}">
+          <image class="img" src="{{detail.logoUrl || fallbackImg}}" mode="aspectFill"></image>
+          <text class="img-label">Logo</text>
+        </view>
+        <view class="img-item" bindtap="previewOne" data-url="{{detail.backgroundUrl}}">
+          <image class="img" src="{{detail.backgroundUrl || fallbackImg}}" mode="aspectFill"></image>
+          <text class="img-label">背景图</text>
+        </view>
+        <view class="img-item" bindtap="previewOne" data-url="{{detail.licenseUrl}}">
+          <image class="img" src="{{detail.licenseUrl || fallbackImg}}" mode="aspectFill"></image>
+          <text class="img-label">执照图</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="portal-card section">
+      <view class="section-title">入驻实地照（{{detail.placePhotos.length}}张）</view>
+      <view class="img-grid">
+        <view class="img-item" wx:for="{{detail.placePhotos}}" wx:key="*this" bindtap="previewOne" data-url="{{item}}">
+          <image class="img" src="{{item}}" mode="aspectFill"></image>
+        </view>
+      </view>
+      <view class="field-hint" wx:if="{{!detail.placePhotos.length}}">暂无实地照</view>
+    </view>
+
+    <view class="portal-card section actions">
+      <button class="sheet-btn primary" bindtap="goSettings">去店铺设置编辑</button>
+      <button class="sheet-btn ghost" bindtap="reload">刷新资料</button>
+    </view>
+  </block>
+</view>

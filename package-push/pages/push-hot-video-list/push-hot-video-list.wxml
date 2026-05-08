@@ -1,0 +1,83 @@
+<view class="hot-video-page">
+  <!-- 头部区域，包含圆润粉色渐变背景和操作说明 -->
+  <view class="hero-header" style="padding-top: {{navTopPadding}}px;">
+    <!-- 导航栏 -->
+    <view class="nav-bar">
+      <view class="back-btn" bindtap="goBack">
+        <text class="arrow">〈</text>
+      </view>
+      <view class="right-icon">•••</view>
+    </view>
+    
+    <!-- 标题文字区 -->
+    <view class="hero-content">
+      <view class="hero-title">热门带货视频</view>
+      
+      <view class="steps-column">
+        <view class="step">
+          <text class="s-num">01</text>
+          <text class="s-text">点击带货视频</text>
+        </view>
+        <view class="s-line"></view>
+        <view class="step">
+          <text class="s-num">02</text>
+          <text class="s-text">转发分享带货视频</text>
+        </view>
+        <view class="s-line"></view>
+        <view class="step">
+          <text class="s-num">03</text>
+          <text class="s-text">好友进入视频购买商品后，您可获得收益</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 右侧场记板装饰插画 -->
+    <image class="hero-dec" src="/img/index/menuicon4.png" mode="aspectFit"></image>
+  </view>
+
+  <!-- 内容主体面板 -->
+  <view class="main-panel">
+    <!-- 悬浮搜索条 -->
+    <view class="search-bar">
+      <view class="input-box">
+        <icon type="search" size="14" color="#ff7e70"/>
+        <input placeholder="请输入关键词" placeholder-class="ph-cls" />
+      </view>
+      <view class="search-btn">搜索</view>
+    </view>
+
+    <!-- 瀑布流/两列网格布局视频列表 -->
+    <view class="video-grid">
+      <view class="v-item" wx:for="{{hotVideos}}" wx:key="id" bindtap="openFakeVideoChannel">
+        
+        <!-- 大图封面与点缀 -->
+        <view class="cover-box">
+          <image class="cover-img" src="{{item.image}}" mode="aspectFill"></image>
+          <!-- 中央播放环 -->
+          <view class="play-ring">
+            <view class="play-arrow"></view>
+          </view>
+          
+          <!-- 底部作者栏 -->
+          <view class="author-bar">
+            <!-- 前面的logo位 -->
+            <view class="a-logo">∽</view>
+            <text class="a-name">{{item.author}}</text>
+            <view class="a-likes">♥ {{item.likes}}</view>
+          </view>
+        </view>
+
+        <!-- 文字信息区 -->
+        <view class="v-info">
+          <view class="v-title">{{item.title}}</view>
+          <view class="v-price">￥{{item.price}}</view>
+          <view class="v-comm">
+            <text class="c-label">分享每单赚</text> 
+            <text class="c-val">￥{{item.comm}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</view>

@@ -1,5 +1,5 @@
 const db = require('../../../models');
-const { Conversation, UserConversation, Message, MarketOrder, sequelize } = db;
+const { Conversation, UserConversation, Message, MarketOrder, NeighborAssistOrder, sequelize } = db;
 
 const ok = (res, data) => res.json({ errcode: 0, code: 0, msg: 'ok', data });
 const fail = (res, msg, status = 400, code = 1) => res.status(status).json({ errcode: code, code, msg, errmsg: msg });
@@ -190,6 +190,32 @@ exports.ensureOrderConversation = async (req, res) => {
       peer = Number(body.customer_user_id || body.buyer_user_id || 0);
     } else if (channel === 'worker_customer') {
       peer = Number(body.customer_user_id || body.buyer_user_id || 0);
+    } else if (channel === 'neighbor_assist') {
+      if (!NeighborAssistOrder) {
+        await t.rollback();
+        return fail(res, '邻里帮模块未加载', 503, 503);
+      }
+      const orderIdNum = Number(body.order_id || 0);
+      if (!orderIdNum) {
+        await t.rollback();
+        return fail(res, '缺少 order_id');
+      }
+      const ordRow = await NeighborAssistOrder.findByPk(orderIdNum, { transaction: t });
+      if (!ordRow) {
+        await t.rollback();
+        return fail(res, '订单不存在', 404, 404);
+      }
+      const publisherId = Number(ordRow.user_id);
+      const helperIdRaw = ordRow.assigned_worker_id != null ? Number(ordRow.assigned_worker_id) : 0;
+      if (!helperIdRaw) {
+        await t.rollback();
+        return fail(res, '订单尚未指派邻居，暂时无法会话', 400, 400);
+      }
+      if (me !== publisherId && me !== helperIdRaw) {
+        await t.rollback();
+        return fail(res, '无权参与该会话', 403, 403);
+      }
+      peer = me === publisherId ? helperIdRaw : publisherId;
     }
     if (!peer) {
       await t.rollback();

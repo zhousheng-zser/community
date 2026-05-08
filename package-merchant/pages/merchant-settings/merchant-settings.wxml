@@ -1,0 +1,68 @@
+<view class="portal-page settings-page">
+  <view class="portal-top merchant-gradient" style="padding-bottom: 24rpx;">
+    <text class="portal-title">店铺设置</text>
+    <text class="portal-sub">维护联系人、联系电话、商家简介、小区ID</text>
+  </view>
+
+  <block wx:if="{{loading}}">
+    <view class="loading-box">加载中...</view>
+  </block>
+
+  <block wx:else>
+    <view class="portal-card settings-card">
+      <view class="field">
+        <text class="field-label">联系人</text>
+        <input
+          class="field-input"
+          placeholder="请输入联系人姓名"
+          maxlength="30"
+          value="{{contactName}}"
+          bindinput="onContactInput"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">联系电话</text>
+        <input
+          class="field-input"
+          type="number"
+          placeholder="请输入联系电话"
+          maxlength="11"
+          value="{{contactPhone}}"
+          bindinput="onPhoneInput"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">商家简介</text>
+        <textarea
+          class="field-textarea"
+          placeholder="请输入店铺简介"
+          maxlength="300"
+          auto-height
+          value="{{description}}"
+          bindinput="onDescInput"
+        ></textarea>
+        <text class="field-hint">{{descLen}}/300</text>
+      </view>
+
+      <view class="field">
+        <text class="field-label">小区ID</text>
+        <input
+          class="field-input"
+          type="number"
+          placeholder="请输入小区ID（数字）"
+          value="{{communityId}}"
+          bindinput="onCommunityInput"
+        />
+      </view>
+
+      <button
+        class="sheet-btn block primary save-btn"
+        loading="{{saving}}"
+        disabled="{{saving}}"
+        bindtap="save"
+      >保存设置</button>
+    </view>
+  </block>
+</view>

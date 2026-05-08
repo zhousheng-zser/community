@@ -1,0 +1,8 @@
+<view class="pk-page">
+  <text class="pk-tip">订单与账号问题请优先在「消息」联系商家/客服会话；此处为平台兜底联系方式。</text>
+  <view class="pk-row">
+    <text>客服热线</text>
+    <text class="pk-phone" bindtap="copyPhone">{{phone}}</text>
+  </view>
+  <button class="pk-btn" open-type="contact">发起在线客服会话</button>
+</view>

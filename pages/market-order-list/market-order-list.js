@@ -15,6 +15,7 @@ const MARKET_STATUS_MAP = {
 
 const SERVICE_STATUS_MAP = {
   pending_pay: { text: '待付款', class: 'primary' },
+  paid_pending_dispatch: { text: '待平台派单', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
   dispatched: { text: '已派单', class: 'primary' },
   in_service: { text: '服务中', class: 'primary' },
@@ -38,6 +39,7 @@ const MARKET_TABS = [
 const SERVICE_TABS = [
   { key: 'all', label: '全部' },
   { key: 'pending_pay', label: '待付款' },
+  { key: 'paid_pending_dispatch', label: '待派单' },
   { key: 'pending_accept', label: '待接单' },
   { key: 'dispatched', label: '已派单' },
   { key: 'in_service', label: '服务中' },

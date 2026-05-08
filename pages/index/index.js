@@ -10,7 +10,6 @@ const images = require('../../utils/images.js');
 const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
-const { applyHomeCategoryAvailability } = require('../../utils/homeCategoryAvailability.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 
 // 首页「直约技工」本地兜底数据（后端 core/workers 不可用时的展示）
@@ -538,11 +537,6 @@ Page({
 
   onTapHomeCategory(e) {
     const ds = e.currentTarget.dataset || {};
-    const unsupported = ds.unsupported === true || ds.unsupported === 'true';
-    if (unsupported) {
-      wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
-      return;
-    }
     const url = ds.url;
     if (!url) return;
     wx.navigateTo({ url });
@@ -660,11 +654,6 @@ Page({
       { id: 3, remarkC: images.svcWasher, goodsTitle: '洗衣机深度清洗', goodsSub: '专业拆洗内桶，高温消毒除霉，恢复洁净如新', price: '128.00' },
       { id: 4, remarkC: images.svcHood, goodsTitle: '油烟机深度清洗', goodsSub: '专业拆洗油网、风轮，高温溶油去污', price: '158.00' }
     ];
-    const filterHotRowsForCategory = (rows) => {
-      if (!Array.isArray(rows)) return [];
-      return rows.filter((r) => r && typeof r === 'object' && String(r.item_type || r.itemType || 'service').toLowerCase() !== 'shop');
-    };
-    let rawHotForCategory = [];
     if (!config.useCuratedHomeHotList) {
       let mappedHot = null;
       try {
@@ -673,12 +662,10 @@ Page({
         const commRes = await util.get('core/community/hot', q);
         const services = commRes && (commRes.services || commRes.service_list);
         if (Array.isArray(services) && services.length > 0) {
-          rawHotForCategory = filterHotRowsForCategory(services);
           mappedHot = mapHotRows(services);
         } else {
           const flat = unwrapList(commRes);
           if (flat.length > 0) {
-            rawHotForCategory = filterHotRowsForCategory(flat);
             mappedHot = mapHotRows(flat);
           }
         }
@@ -692,7 +679,6 @@ Page({
           const hotRes = await util.get('core/services/hot', hotQ);
           const hotData = unwrapList(hotRes);
           if (hotData.length > 0) {
-            rawHotForCategory = filterHotRowsForCategory(hotData);
             mappedHot = mapHotRows(hotData);
           }
         } catch (e2) {
@@ -701,7 +687,6 @@ Page({
       }
       if (mappedHot) hotList = mappedHot;
     }
-    categoryList = applyHomeCategoryAvailability(categoryList, rawHotForCategory);
 
     const hotFilters = ["保洁", "家电清洗", "安装维修", "搬家拉货"];
     const mapMerchantList = () => goods.map((item, i) => ({

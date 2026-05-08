@@ -1,0 +1,32 @@
+.sp-orders-page { background: #f5f5f5; min-height: 100vh; padding-bottom: 120rpx; }
+.sp-tabs { display: flex; background: #fff; overflow-x: auto; white-space: nowrap; padding: 0 8rpx; }
+.sp-tab-item { display: inline-block; padding: 20rpx 24rpx; font-size: 26rpx; color: #666; flex-shrink: 0; }
+.sp-tab-item.active { color: #07c160; border-bottom: 4rpx solid #07c160; font-weight: 600; }
+.sp-order-list { padding: 16rpx; }
+.sp-order-card { background: #fff; border-radius: 16rpx; margin-bottom: 20rpx; overflow: hidden; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); }
+.sp-order-header { display: flex; justify-content: space-between; align-items: center; padding: 20rpx 24rpx; border-bottom: 1rpx solid #f5f5f5; }
+.sp-order-no { font-size: 24rpx; color: #999; }
+.sp-order-status { font-size: 26rpx; font-weight: 600; }
+.status-pending_accept { color: #e74c3c; }
+.status-paid_pending_dispatch, .status-dispatched { color: #f39c12; }
+.status-in_service { color: #3498db; }
+.status-pending_user_confirm { color: #9b59b6; }
+.status-completed { color: #07c160; }
+.status-cancelled, .status-closed { color: #bbb; }
+.sp-order-body { padding: 20rpx 24rpx; }
+.sp-order-title { font-size: 30rpx; font-weight: 600; color: #333; display: block; margin-bottom: 16rpx; }
+.sp-order-row { display: flex; justify-content: space-between; padding: 8rpx 0; }
+.sp-order-label { font-size: 26rpx; color: #999; }
+.sp-order-value { font-size: 26rpx; color: #333; }
+.sp-order-amount { font-weight: 600; color: #e74c3c; }
+.sp-order-actions { display: flex; flex-direction: row; justify-content: flex-end; padding: 16rpx 24rpx; gap: 16rpx; background: #fafafa; border-top: 1rpx solid #f0f0f0; }
+.sp-act { padding: 12rpx 28rpx; border-radius: 8rpx; font-size: 26rpx; font-weight: 500; }
+.sp-act--primary { background: #07c160; color: #fff; }
+.sp-act--danger { background: #fff; color: #e74c3c; border: 1rpx solid #e74c3c; }
+.sp-act-hint { font-size: 24rpx; color: #999; line-height: 56rpx; }
+.sp-empty { text-align: center; padding: 80rpx 0; color: #bbb; font-size: 28rpx; }
+.sp-loading { text-align: center; padding: 40rpx 0; color: #bbb; font-size: 26rpx; }
+.sp-tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; border-top: 1rpx solid #eee; padding-bottom: env(safe-area-inset-bottom); }
+.sp-tabbar-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 12rpx 0; font-size: 22rpx; color: #666; }
+.sp-tabbar-on { color: #07c160; }
+.sp-tabbar-icon { width: 48rpx; height: 48rpx; margin-bottom: 4rpx; }

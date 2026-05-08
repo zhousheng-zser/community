@@ -1,0 +1,80 @@
+<view class="edit-page">
+  <view wx:if="{{loading}}" class="loading-tip">加载中…</view>
+
+  <block wx:else>
+    <!-- 封面图 -->
+    <view class="section">
+      <view class="section-label">服务封面图</view>
+      <view class="cover-box" bindtap="chooseCover">
+        <image class="cover-img" src="{{coverDisplay}}" mode="aspectFill"></image>
+        <view class="cover-mask" wx:if="{{!coverPath}}">
+          <text class="cover-tip">点击上传封面</text>
+        </view>
+        <text class="cover-clear" bindtap="clearCover" catchtap="clearCover" wx:if="{{coverPath}}">×</text>
+      </view>
+    </view>
+
+    <!-- 服务名称 -->
+    <view class="section">
+      <view class="section-label required">服务名称</view>
+      <input class="field-input" placeholder="请输入服务名称（必填）" value="{{title}}" bindinput="onTitleInput" maxlength="60" />
+    </view>
+
+    <!-- 服务副标题 -->
+    <view class="section">
+      <view class="section-label">副标题 / 简介</view>
+      <input class="field-input" placeholder="一句话描述服务（选填）" value="{{subTitle}}" bindinput="onSubTitleInput" maxlength="100" />
+    </view>
+
+    <!-- 价格 -->
+    <view class="section">
+      <view class="section-label required">服务价格（元）</view>
+      <input class="field-input price-input" placeholder="请输入价格" value="{{priceInput}}" bindinput="onPriceInput" type="digit" />
+    </view>
+
+    <!-- 服务分类 -->
+    <view class="section" wx:if="{{categories.length}}">
+      <view class="section-label">服务分类</view>
+      <picker mode="selector" range="{{categories}}" range-key="name" bindchange="pickCategory">
+        <view class="picker-row">
+          <text class="picker-text {{categoryName ? '' : 'placeholder'}}">{{categoryName || '请选择分类（选填）'}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 详细描述 -->
+    <view class="section">
+      <view class="section-label">服务详情</view>
+      <textarea class="desc-area" placeholder="详细描述服务内容（选填）" value="{{description}}" bindinput="onDescInput" maxlength="500" auto-height />
+      <text class="desc-count">{{descLen}}/500</text>
+    </view>
+
+    <!-- 详图 -->
+    <view class="section">
+      <view class="section-label">详情图片（最多6张）</view>
+      <view class="img-list">
+        <view class="img-item add-btn" bindtap="chooseDetailImages" wx:if="{{detailImages.length < 6}}">
+          <text class="add-icon">＋</text>
+        </view>
+        <view class="img-item" wx:for="{{detailImages}}" wx:key="*this">
+          <image class="thumb" src="{{util.imgUrl ? util.imgUrl(item, item) : item}}" mode="aspectFill" bindtap="previewDetailImage" data-idx="{{index}}"></image>
+          <text class="img-del" catchtap="removeDetailImage" data-idx="{{index}}">×</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 上架状态 -->
+    <view class="section section-row">
+      <text class="section-label">立即上架</text>
+      <switch checked="{{isPublished}}" bindchange="onPublishedChange" color="#07c160" />
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="bottom-bar">
+      <button class="save-btn" bindtap="save" disabled="{{saving}}">
+        {{saving ? '保存中…' : (isCreate ? '创建并上架' : '保存修改')}}
+      </button>
+    </view>
+  </block>
+</view>

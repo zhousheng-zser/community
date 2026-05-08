@@ -78,6 +78,8 @@ router.use('/market', marketRoutes);
 router.use('/benefit-coin', benefitCardRoutes);
 router.use('/benefit-alliance', benefitAllianceRoutes);
 router.use('/admin', benefitAllianceAdminRoutes);
+const adminDispatchRoutes = require('../modules/service-order/adminDispatch.routes');
+router.use('/admin', adminDispatchRoutes);
 router.use('/coupons', couponRoutes);
 router.use('/chat', chatRoutes);
 router.use('/commission', commissionRoutes);

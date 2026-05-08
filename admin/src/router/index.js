@@ -54,6 +54,12 @@ const routes = [
                 name: 'ServiceProviders',
                 component: () => import('../views/ServiceProviders.vue'),
                 meta: { title: '直约服务商管理', icon: 'Shop' }
+            },
+            {
+                path: 'service-dispatch',
+                name: 'ServiceDispatch',
+                component: () => import('../views/ServiceDispatch.vue'),
+                meta: { title: '到家服务派单台', icon: 'Operation' }
             }
         ]
     }

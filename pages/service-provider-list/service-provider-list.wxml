@@ -1,0 +1,31 @@
+<view class="spl-page">
+  <view class="spl-header">
+    <text class="spl-title">直约服务商</text>
+    <text class="spl-sub">选择服务商，查看服务项目打包下单</text>
+  </view>
+
+  <view class="spl-loading" wx:if="{{loading}}">加载中…</view>
+
+  <view class="spl-list" wx:elif="{{list.length}}">
+    <view
+      class="spl-card"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="goShop"
+      data-url="{{item.url}}"
+    >
+      <image class="spl-cover" src="{{item.image}}" mode="aspectFill" lazy-load></image>
+      <view class="spl-info">
+        <text class="spl-name">{{item.name}}</text>
+        <text class="spl-desc">{{item.desc}}</text>
+        <view class="spl-action">
+          <text class="spl-btn">查看服务 ›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="spl-empty" wx:else>
+    <text>暂无服务商数据</text>
+  </view>
+</view>

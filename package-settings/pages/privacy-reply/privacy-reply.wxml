@@ -1,0 +1,15 @@
+<view class="pp-page">
+  <text class="pp-tip">以下设置保存在本机，与社区评论接口联调后应由服务端同步。</text>
+  <view class="pp-list">
+    <view
+      class="pp-item {{current === item.id ? 'on' : ''}}"
+      wx:for="{{options}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="select"
+    >
+      <text>{{item.label}}</text>
+      <text class="pp-check" wx:if="{{current === item.id}}">✓</text>
+    </view>
+  </view>
+</view>

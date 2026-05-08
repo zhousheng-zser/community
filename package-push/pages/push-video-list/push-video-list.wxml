@@ -1,0 +1,60 @@
+<view class="academy-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <view class="nav-content">
+      <view bindtap="goBack" class="back-btn">〈</view>
+      <text class="title">本地商城课堂 - 专业课程学...</text>
+      <view class="back-btn" style="visibility: hidden">〈</view>
+    </view>
+  </view>
+
+  <scroll-view class="main-scroll" scroll-y="true" style="height: calc(100vh - {{navTopPadding + 44}}px); margin-top: {{navTopPadding + 44}}px;">
+    
+    <!-- 顶部横幅 -->
+    <view class="hero-wrap">
+      <image src="{{banner}}" mode="aspectFill" class="hero-img"></image>
+    </view>
+
+    <!-- 5大分类球 -->
+    <view class="quick-navs">
+      <view class="q-item" wx:for="{{quickNavs}}" wx:key="name" bindtap="goCategory" data-name="{{item.name}}">
+        <view class="q-icon-wrap">
+          <!-- 这里应该放图纸里的专属彩色图标，暂时用颜色替代 -->
+          <view class="q-icon-ph"></view>
+        </view>
+        <text class="q-text">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 动态分类区块渲染 -->
+    <view class="section-wrap" wx:for="{{videoSections}}" wx:key="title" wx:for-item="section">
+      <!-- 区块头部 -->
+      <view class="sec-header">
+        <text class="sec-title">{{section.title}}</text>
+        <text class="sec-more" bindtap="goCategory" data-name="{{section.title}}">查看全部</text>
+      </view>
+      
+      <!-- 区块两列卡片 -->
+      <view class="sec-grid">
+        <view class="video-card" wx:for="{{section.items}}" wx:key="id" wx:for-item="vid" bindtap="goCategory" data-name="{{section.title}}">
+          <!-- 上方封面与播放按钮 -->
+          <view class="card-cover-wrap">
+            <image src="{{vid.image}}" mode="aspectFill" class="card-cover"></image>
+            <!-- 播放按钮遮罩 -->
+            <view class="play-overlay">
+              <view class="play-circle"><view class="play-triangle"></view></view>
+            </view>
+            <!-- 右上角角标 -->
+            <view class="card-tag">{{vid.tag}}</view>
+          </view>
+          <!-- 下方黑色标题带 -->
+          <view class="card-bottom">
+            <text class="card-title">{{vid.title}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部占位 -->
+    <view style="height: 60rpx;"></view>
+  </scroll-view>
+</view>

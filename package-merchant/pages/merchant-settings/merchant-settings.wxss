@@ -1,0 +1,83 @@
+@import "../../styles/portal.wxss";
+
+page {
+  background: #f5f0e8;
+}
+
+.settings-page {
+  min-height: 100vh;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+
+.loading-box {
+  padding: 120rpx 0;
+  text-align: center;
+  color: #78716c;
+  font-size: 28rpx;
+}
+
+.settings-card {
+  margin: 0 24rpx 32rpx;
+}
+
+.field {
+  margin-bottom: 32rpx;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #57534e;
+  font-weight: 600;
+}
+
+.field-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  background: #faf8f4;
+  border-radius: 16rpx;
+  border: 1rpx solid #e7dfd0;
+}
+
+.field-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 180rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  background: #faf8f4;
+  border-radius: 16rpx;
+  border: 1rpx solid #e7dfd0;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #a8a29e;
+}
+
+.sheet-btn {
+  margin: 0;
+  font-size: 28rpx;
+  border-radius: 16rpx;
+  line-height: 72rpx;
+  padding: 0 24rpx;
+}
+
+.sheet-btn.block {
+  width: 100%;
+  line-height: 88rpx;
+}
+
+.sheet-btn.primary {
+  background: linear-gradient(135deg, #6b4f2a 0%, #9a7340 100%);
+  color: #fff;
+}
+
+.save-btn {
+  margin-top: 8rpx;
+}

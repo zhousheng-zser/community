@@ -1,0 +1,63 @@
+<view class="periodic-page {{themeClass}}">
+  <!-- 头部渐变与装饰部分 -->
+  <view class="hero-header" style="padding-top: {{navTopPadding}}px;">
+    <!-- 透明导航支持 -->
+    <view class="nav-bar">
+      <view class="back-btn" bindtap="goBack">
+        <text class="arrow">〈</text>
+      </view>
+
+    </view>
+    
+    <!-- 背部巨大字号或图形修饰物 -->
+    <view class="bg-deco-text">{{bgText}}</view>
+
+    <!-- 主标题区 (居中) -->
+    <view class="title-zone">
+      <view class="main-title">{{listType}}</view>
+      
+      <!-- 如果有子标题装饰条 -->
+      <view class="sub-title-bar" wx:if="{{subText}}">
+        <view class="sub-corner left"></view>
+        <text class="sub-text">{{subText}}</text>
+        <view class="sub-corner right"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 往下延伸的商品列表容器 -->
+  <view class="list-container">
+    <view wx:if="{{loading}}" class="empty-tip">加载中…</view>
+    <view wx:elif="{{goodsList.length === 0}}" class="empty-tip">暂无商品数据</view>
+    <block wx:else>
+      <navigator url="{{item.detailUrl}}" class="card-item" wx:for="{{goodsList}}" wx:key="id">
+        <!-- 左上角的榜单标识小红签 -->
+        <view class="badge">{{listType}}</view>
+        <view class="main-info">
+          <!-- 左侧封面照 -->
+          <image wx:if="{{item.image}}" class="cover" src="{{item.image}}" mode="aspectFill"></image>
+          <!-- 右侧商品名及操作 -->
+          <view class="details">
+            <view class="g-title">{{item.title}}</view>
+            <view class="g-bottom">
+              <view class="price-wrap">
+                <text class="p-sign">￥</text>
+                <text class="p-val">{{item.price}}</text>
+              </view>
+              <view class="action-row">
+                <view class="comm-box">分享赚/购买返￥{{item.comm}}</view>
+                <view class="buy-btn">去购买</view>
+              </view>
+            </view>
+          </view>
+        </view>
+        <!-- 推荐理由（若有） -->
+        <view class="reason-row" wx:if="{{item.reason}}">
+          <text class="thumb">👍</text>
+          <text class="r-label">推荐理由：</text>
+          <text class="r-cont">{{item.reason}}</text>
+        </view>
+      </navigator>
+    </block>
+  </view>
+</view>

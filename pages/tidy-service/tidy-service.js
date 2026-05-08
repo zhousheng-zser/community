@@ -1,12 +1,6 @@
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 
-function toNumberOrNull(v) {
-  if (v == null || v === '') return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
 Page({
   data: {
     navTopPadding: 20,
@@ -179,39 +173,13 @@ Page({
   },
 
   decorateService(item) {
-    const unsupported = this.isServiceUnsupported(item);
     return {
       ...item,
       sold: item.sold || "已售0 好评率100%",
       image: item.image || images.homeCleaning,
-      unsupported,
-      saleStatusText: unsupported ? '不可提供' : ''
+      unsupported: false,
+      saleStatusText: ''
     };
-  },
-
-  getCurrentCommunityId() {
-    const gd = getApp().globalData || {};
-    return toNumberOrNull(
-      gd.communityId || gd.community_id || wx.getStorageSync('community_id') || wx.getStorageSync('communityId')
-    );
-  },
-
-  isServiceUnsupported(item) {
-    if (!item || typeof item !== 'object') return false;
-    if (item.community_supported === false) return true;
-    if (item.supported === false || item.is_available === false) return true;
-    const communityId = this.getCurrentCommunityId();
-    const allow = Array.isArray(item.supported_community_ids) ? item.supported_community_ids : item.supportedCommunityIds;
-    if (Array.isArray(allow) && allow.length > 0 && communityId != null) {
-      const allowSet = allow.map((x) => Number(x)).filter((x) => Number.isFinite(x));
-      if (allowSet.length > 0 && !allowSet.includes(communityId)) return true;
-    }
-    const deny = Array.isArray(item.blocked_community_ids) ? item.blocked_community_ids : item.blockedCommunityIds;
-    if (Array.isArray(deny) && deny.length > 0 && communityId != null) {
-      const denySet = deny.map((x) => Number(x)).filter((x) => Number.isFinite(x));
-      if (denySet.includes(communityId)) return true;
-    }
-    return false;
   },
 
   goBack() {
@@ -239,10 +207,6 @@ Page({
   },
 
   goServiceDetail(e) {
-    if (e.currentTarget.dataset.unsupported) {
-      wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
-      return;
-    }
     const key = this._groupKey || 'tidy';
     const sid = e.currentTarget.dataset.id;
     wx.navigateTo({

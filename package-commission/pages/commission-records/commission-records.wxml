@@ -1,0 +1,46 @@
+<view class="container">
+  <!-- Tab 切换 -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{activeTab === item.key ? 'active' : ''}}"
+      wx:for="{{tabs}}"
+      wx:key="key"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >
+      {{item.label}}
+    </view>
+  </view>
+
+  <!-- 佣金记录列表 -->
+  <view class="record-list" wx:if="{{list.length > 0}}">
+    <view class="record-item" wx:for="{{list}}" wx:key="id">
+      <view class="record-header">
+        <view class="record-order">
+          <text class="order-id">{{item.order_id}}</text>
+          <text class="order-type">{{item.order_type}}</text>
+        </view>
+        <view class="record-amount {{item.status}}">
+          <text class="amount">¥{{item.commission_amount}}</text>
+        </view>
+      </view>
+      <view class="record-footer">
+        <view class="record-meta">
+          <text class="role-tag" style="color: {{item.status_color}}">{{item.role_label}}</text>
+          <text class="status-tag" style="color: {{item.status_color}}">{{item.status_label}}</text>
+        </view>
+        <text class="record-time">{{item.distributed_at}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{list.length === 0 && !loading}}">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">暂无佣金记录</view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{loading}}">加载中...</view>
+  <view class="load-more" wx:if="{{!hasMore && list.length > 0}}">没有更多了</view>
+</view>

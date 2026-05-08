@@ -1,0 +1,58 @@
+<view class="pp-page">
+  <view class="top-nav" style="padding-top: {{navTopPadding}}px;">
+    <view class="back-icon" bindtap="goBack"></view>
+    <text class="nav-title">商品详情</text>
+  </view>
+
+  <image wx:if="{{product.image}}" class="cover" src="{{product.image}}" mode="aspectFill"></image>
+
+  <view class="info-card">
+    <view class="price-row">
+      <text class="price-symbol">￥</text>
+      <text class="price-num">{{product.price || product.pay || '0'}}</text>
+    </view>
+    <view class="calc">
+      <text>到手价 ￥{{product.price || product.pay || '0'}}</text>
+      <text>支付价 ￥{{product.pay || product.price || '0'}}</text>
+      <text>预计每单返 ￥{{product.rebate || '0'}}</text>
+    </view>
+    <text class="name">{{product.name}}</text>
+    <view class="shop-row">
+      <text>{{product.shop}}</text>
+      <text class="btn" bindtap="goShopAll">店铺全部商品</text>
+    </view>
+  </view>
+
+  <view class="section-title">商品详情</view>
+
+  <view class="recommend-section" wx:if="{{recommendedGoods.length}}">
+    <view class="recommend-head">
+      <text>{{recommendTitle}}</text>
+      <text class="more" bindtap="goShopAll">更多</text>
+    </view>
+    <view class="recommend-grid">
+      <view class="recommend-card" wx:for="{{recommendedGoods}}" wx:key="id" data-url="{{item.detailUrl}}" bindtap="goRecommendGoods">
+        <image wx:if="{{item.image}}" class="recommend-img" src="{{item.image}}" mode="aspectFill"></image>
+        <text class="recommend-name">{{item.name}}</text>
+        <text class="recommend-price">￥{{item.price || '0'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-bar">
+    <text class="home" bindtap="goHome">首页</text>
+    <text class="share">￥{{product.rebate || '0'}} 分享每单赚</text>
+    <text class="buy" bindtap="handleBuyClick">购买每单返</text>
+  </view>
+</view>
+
+<view class="overlay" wx:if="{{showStoreProduct}}"></view>
+<view class="store-product-wrapper" wx:if="{{showStoreProduct}}">
+  <store-product
+    appid="{{shopAppId}}"
+    product-id="{{productId}}"
+    custom-style="{{customStyle}}"
+    bind:success="onStoreProductSuccess"
+    bind:fail="onStoreProductFail"
+  />
+</view>

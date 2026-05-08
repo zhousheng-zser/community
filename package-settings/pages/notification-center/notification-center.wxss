@@ -1,0 +1,20 @@
+page { background: #f5f5f5; min-height: 100vh; }
+.nc-page { padding-bottom: 40rpx; }
+.nc-header { background: #fff; padding: 0 24rpx; display: flex; justify-content: space-between; align-items: center; border-bottom: 1rpx solid #f0f0f0; }
+.nc-tabs { display: flex; }
+.nc-tab { padding: 24rpx 32rpx; font-size: 28rpx; color: #666; position: relative; }
+.nc-tab.active { color: #1890ff; font-weight: 600; }
+.nc-tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 40rpx; height: 4rpx; background: #1890ff; border-radius: 2rpx; }
+.nc-actions { display: flex; gap: 24rpx; }
+.nc-action { font-size: 26rpx; color: #1890ff; padding: 24rpx 0; }
+.nc-list { padding: 24rpx; }
+.nc-item { display: flex; align-items: center; padding: 24rpx; background: #fff; border-radius: 16rpx; margin-bottom: 16rpx; }
+.nc-item.unread { background: #f0f9ff; }
+.nc-dot { width: 16rpx; height: 16rpx; background: #1890ff; border-radius: 50%; margin-right: 16rpx; flex-shrink: 0; }
+.nc-content { flex: 1; }
+.nc-title { font-size: 28rpx; color: #333; line-height: 1.4; margin-bottom: 8rpx; }
+.nc-time { font-size: 24rpx; color: #999; }
+.nc-arrow { font-size: 32rpx; color: #ccc; margin-left: 16rpx; }
+.nc-empty, .nc-loading { text-align: center; padding: 120rpx 0; color: #999; }
+.nc-empty-icon { font-size: 80rpx; display: block; margin-bottom: 20rpx; }
+.nc-empty-text { font-size: 28rpx; }
