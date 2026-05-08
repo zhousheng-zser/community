@@ -174,7 +174,6 @@
     "navigationBarTitleText": "社区服务",
     "navigationBarTextStyle": "white"
   },
-  "lazyCodeLoading": "requiredComponents",
   "tabBar": {
     "custom": true,
     "color": "#8d8d8d",

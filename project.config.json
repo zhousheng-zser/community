@@ -168,10 +168,6 @@
       },
       {
         "type": "folder",
-        "value": "api"
-      },
-      {
-        "type": "folder",
         "value": "前端对接文档包"
       },
       {
