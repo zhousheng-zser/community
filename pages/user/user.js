@@ -5,6 +5,8 @@ const rolePortals = require('../../utils/rolePortals.js');
 const api = require('../../api/index.js');
 const balance = require('../../utils/balance.js');
 const localPrefs = require('../../utils/localPrefs.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
+const favoritesStore = require('../../utils/favoritesStore.js');
 
 Page({
   data: {
@@ -14,6 +16,8 @@ Page({
     roleLabel: '普通用户',
     points: 0,
     couponCount: 0,
+    footprintCount: 0,
+    favoriteCount: 0,
     workbenchCollapsed: true,
     orderMenus: [
       { name: "服务订单", icon: "service_order", url: "../market-order-list/market-order-list?type=service" },
@@ -160,7 +164,9 @@ Page({
       user,
       roleLabel,
       loggedIn,
-      points: user.points || 0
+      points: user.points || 0,
+      footprintCount: browseFootprint.count(),
+      favoriteCount: favoritesStore.count()
     });
 
     this.getProfile();

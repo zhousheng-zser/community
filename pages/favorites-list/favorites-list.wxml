@@ -1,0 +1,26 @@
+<view class="fp-page">
+  <view class="fp-toolbar" wx:if="{{list.length > 0}}">
+    <text class="fp-hint">共收藏 {{list.length}} 件</text>
+    <text class="fp-clear" bindtap="onClear">清空</text>
+  </view>
+
+  <view class="fp-list" wx:if="{{list.length > 0}}">
+    <view class="fp-item" wx:for="{{list}}" wx:key="dedupeKey">
+      <view class="fp-main" bindtap="onOpen" data-idx="{{index}}">
+        <image class="fp-cover" src="{{item.cover || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill"></image>
+        <view class="fp-body">
+          <text class="fp-title">{{item.title}}</text>
+          <text class="fp-kind">{{kindLabels[item.kind] || '收藏'}}</text>
+        </view>
+        <text class="fp-arrow">›</text>
+      </view>
+      <view class="fp-unfav" catchtap="onRemove" data-key="{{item.dedupeKey}}">取消</view>
+    </view>
+  </view>
+
+  <view wx:else class="fp-empty">
+    <text class="fp-empty-icon">⭐</text>
+    <text class="fp-empty-text">暂无收藏</text>
+    <text class="fp-empty-sub">在商品详情页点击「收藏」可将商品加入列表</text>
+  </view>
+</view>

@@ -1,5 +1,7 @@
 const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
+const favoritesStore = require('../../utils/favoritesStore.js');
 
 const MARKET_PRODUCT_MAP = {
   101: { name: 'market product', price: '1.68', pay: '1.68', rebate: '0.10', image: '', shop: '' },
@@ -40,6 +42,8 @@ Page({
     recommendTitle: '本店推荐',
     shopAppId: 'wx0000000000000000',
     productId: 'PRODUCT_123456789',
+    navGoodsId: 0,
+    favorited: false,
     showStoreProduct: false,
     customStyle: {
       card: { 'background-color': '#ffffff', 'border-radius': '12px' },
@@ -126,6 +130,61 @@ Page({
       detailUrl: `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(id))}&shopId=${encodeURIComponent(String(this.data.shopId || ''))}&image=${encodeURIComponent(image)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(price)}`
     };
   },
+  buildPushGoodsRow(goodsId, shopId, name, image, price) {
+    const gid = Number(goodsId || 0);
+    if (!gid) return null;
+    const sid = Number(shopId || 0);
+    const title = String(name || '').trim() || '商品';
+    const cover = image != null ? String(image) : '';
+    const p = this.normalizeMoney(price);
+    const url =
+      `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(gid))}` +
+      `&shopId=${encodeURIComponent(String(sid))}` +
+      `&image=${encodeURIComponent(cover)}` +
+      `&name=${encodeURIComponent(title)}` +
+      `&price=${encodeURIComponent(p)}`;
+    return {
+      kind: 'push_goods',
+      dedupeKey: `push_goods:${gid}`,
+      title,
+      cover,
+      url
+    };
+  },
+  recordPushGoodsFootprint(goodsId, shopId, name, image, price) {
+    const row = this.buildPushGoodsRow(goodsId, shopId, name, image, price);
+    if (row) browseFootprint.record(row);
+  },
+  syncPushFavorited() {
+    let gid = Number(this.data.navGoodsId || 0);
+    if (!gid) {
+      const n = Number(this.data.productId);
+      if (Number.isFinite(n) && n > 0) gid = n;
+    }
+    if (!gid) {
+      this.setData({ favorited: false });
+      return;
+    }
+    this.setData({ favorited: favoritesStore.has(`push_goods:${gid}`) });
+  },
+  togglePushFavorite() {
+    const p = this.data.product || {};
+    let gid = Number(this.data.navGoodsId || 0);
+    if (!gid) {
+      const n = Number(this.data.productId);
+      if (Number.isFinite(n) && n > 0) gid = n;
+    }
+    if (!gid) {
+      wx.showToast({ title: '暂无法收藏', icon: 'none' });
+      return;
+    }
+    const shopId = Number(this.data.shopId || 0);
+    const row = this.buildPushGoodsRow(gid, shopId, p.name, p.image, p.price || p.pay);
+    if (!row) return;
+    const favorited = favoritesStore.toggle(row);
+    this.setData({ favorited });
+    wx.showToast({ title: favorited ? '已加入收藏' : '已取消收藏', icon: 'none' });
+  },
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
     const id = Number(options.id || 0);
@@ -146,6 +205,7 @@ Page({
 
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
+      navGoodsId: id,
       product: mockProduct ? {
         ...mockProduct,
         image: navImage || mockProduct.image,
@@ -154,6 +214,12 @@ Page({
         pay: navPrice ? this.normalizeMoney(navPrice) : mockProduct.pay
       } : emptyProduct,
       shopId: optionShopId
+    }, () => {
+      if (id) {
+        const p = this.data.product || {};
+        this.recordPushGoodsFootprint(id, optionShopId, p.name, p.image, p.price || p.pay);
+      }
+      this.syncPushFavorited();
     });
 
     if (optionShopId) {
@@ -166,7 +232,12 @@ Page({
     try {
       const res = await util.get(`market/goods/${id}`);
       const g = res && typeof res === 'object' ? (res.data != null ? res.data : res) : null;
-      if (!g || (g.id == null && g.goods_id == null)) return;
+      if (!g || (g.id == null && g.goods_id == null)) {
+        const p = this.data.product || {};
+        this.recordPushGoodsFootprint(id, this.data.shopId, p.name, p.image, p.price || p.pay);
+        this.syncPushFavorited();
+        return;
+      }
 
       const shop = g.shop && typeof g.shop === 'object' ? g.shop : {};
       const store = g.store && typeof g.store === 'object' ? g.store : {};
@@ -245,8 +316,15 @@ Page({
         'product.shop': shop.name || shop.shop_name || store.name || store.shop_name || merchant.name || merchant.shop_name || g.shop_name || this.data.product.shop || '',
         shopId,
         shopAppId: g.shop_appid || g.shopAppId || this.data.shopAppId,
-        productId: g.product_id || g.productId || String(g.id || g.goods_id)
+        productId: g.product_id || g.productId || String(g.id || g.goods_id),
+        navGoodsId: Number(g.id || g.goods_id || id) || this.data.navGoodsId
       }, () => {
+        const gid = Number(g.id || g.goods_id || id);
+        const pnm =
+          g.name || g.title || g.goods_name || (this.data.product && this.data.product.name) || '';
+        const ppr = this.normalizeMoney(payRaw || priceRaw);
+        this.recordPushGoodsFootprint(gid, shopId, pnm, finalImage, ppr);
+        this.syncPushFavorited();
         if (shopId) {
           this.loadRecommendedGoods(shopId, Number(g.id || g.goods_id || id));
         } else {
@@ -256,6 +334,9 @@ Page({
     } catch (e) {
       console.log('load product detail failed', e);
       wx.showToast({ title: '商品信息加载失败', icon: 'none' });
+      const p = this.data.product || {};
+      this.recordPushGoodsFootprint(id, this.data.shopId, p.name, p.image, p.price || p.pay);
+      this.syncPushFavorited();
     }
   },
   async loadRecommendedGoods(shopId, currentId) {
@@ -304,6 +385,10 @@ Page({
       console.log('load fallback recommended goods failed', e);
     }
   },
+  onShow() {
+    this.syncPushFavorited();
+  },
+
   goBack() {
     const pages = getCurrentPages();
     if (pages.length > 1) {

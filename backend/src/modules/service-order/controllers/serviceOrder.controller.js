@@ -1,5 +1,6 @@
 const db = require('../../../models');
 const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication } = db;
+const orderPoints = require('../../../services/orderPoints.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -258,6 +259,8 @@ exports.mockPay = async (req, res) => {
       pay_status: 'paid',
       paid_at: new Date()
     });
+    await row.reload();
+    await orderPoints.grantPointsOnOrderPaid(ServiceOrder, row, null);
     ok(res, { id: row.id, status: row.status, pay_status: row.pay_status }, '支付成功');
   } catch (err) {
     console.error('[service-order/mock-pay]', err);

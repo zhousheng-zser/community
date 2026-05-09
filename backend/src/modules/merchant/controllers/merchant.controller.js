@@ -1,5 +1,6 @@
 const db = require('../../../models');
 const { MerchantShop, MerchantGoods, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
+const orderPoints = require('../../../services/orderPoints.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -519,6 +520,9 @@ exports.orderAction = async (req, res) => {
       for (const it of items) {
         await MerchantGoods.increment('stock', { by: Number(it.quantity), where: { id: it.goods_id } });
         await MerchantGoods.increment('sales_count', { by: -Number(it.quantity), where: { id: it.goods_id } });
+      }
+      if (row.pay_status === 'paid') {
+        await orderPoints.revokePointsOnOrderRefund(MarketOrder, row, null);
       }
       await row.update({ order_status: 'cancelled', pay_status: row.pay_status === 'paid' ? 'refunded' : row.pay_status, cancel_reason: note || '商家拒单', cancelled_at: new Date() });
       await MarketRefundOrder.create({
@@ -1044,6 +1048,9 @@ exports.approveRefund = async (req, res) => {
       decided_at: new Date(),
       decided_by: `merchant:${userId}`
     });
+
+    const mo = await MarketOrder.findOne({ where: { order_no: row.order_no, shop_id: shop.id } });
+    if (mo) await orderPoints.revokePointsOnOrderRefund(MarketOrder, mo, null);
 
     // 同步更新关联订单的退款状态
     await MarketOrder.update(

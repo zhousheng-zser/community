@@ -146,6 +146,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
       comment: '取消时间'
+    },
+    points_earned: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0,
+      comment: '本单已发放积分，退款时扣回'
     }
   }, {
     tableName: 'service_orders',

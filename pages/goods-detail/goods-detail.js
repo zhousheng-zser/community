@@ -1,4 +1,6 @@
 const util = require('../../utils/util.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
+const favoritesStore = require('../../utils/favoritesStore.js');
 
 Page({
   data: {
@@ -20,7 +22,8 @@ Page({
     },
     cartItems: [],
     cartTotalNum: 0,
-    cartTotalPrice: '0.00'
+    cartTotalPrice: '0.00',
+    favorited: false
   },
 
   onLoad(options) {
@@ -35,9 +38,13 @@ Page({
   },
 
   onShow() {
-    // 每次显示时重新计算该店购物车
     if (this.data.goods) {
       this.syncCartFromStorage();
+      const g = this.data.goods;
+      const gid = g && (g.id != null ? g.id : this.data.goodsId);
+      if (gid != null && gid !== '') {
+        this.setData({ favorited: favoritesStore.has(`market_goods:${gid}`) });
+      }
     }
   },
 
@@ -61,6 +68,24 @@ Page({
     }
     this.setData({ goods: data });
 
+    try {
+      const gid = data.id != null ? data.id : this.data.goodsId;
+      if (gid != null && gid !== '') {
+        const imgs = data.main_images || data.images || [];
+        const raw = Array.isArray(imgs) && imgs[0] ? imgs[0] : '';
+        const cover = raw ? util.imgUrl(raw) : '';
+        const name = data.name || data.title || data.goods_name || '商品';
+        browseFootprint.record({
+          kind: 'market_goods',
+          dedupeKey: `market_goods:${gid}`,
+          title: name,
+          cover,
+          url: `/pages/goods-detail/goods-detail?id=${encodeURIComponent(String(gid))}`
+        });
+        this.setData({ favorited: favoritesStore.has(`market_goods:${gid}`) });
+      }
+    } catch (e) {}
+
     // 初始化默认全选首个规格
     if (data.sku_tree && data.sku_tree.length > 0) {
       let initialSpecs = data.sku_tree.map(g => g.items[0]);
@@ -72,27 +97,25 @@ Page({
     this.syncCartFromStorage();
   },
 
-  mockDetail() {
-    this.processGoodsData({
-      id: 1001,
-      shopId: 88,
-      shopName: "多宝严选超市 (高新店)",
-      name: "[演示商品] 进口巨无霸多规格生鲜大礼包",
-      main_images: ["/img/placeholders/home_cleaning.png", "/img/placeholders/home_cleaning.png"],
-      price_range: "20.00 - 45.00",
-      sales: 1205,
-      desc_html: "<p>这里是从服务端下发的超长<strong>富文本介绍</strong>。</p><p>支持显示非常复杂的商品视频和排版结构。</p>",
-      sku_tree: [ 
-        { group: "规格大小", items: ["大份装", "迷你装"] },
-        { group: "新鲜度档位", items: ["即食", "绿果需催熟"] }
-      ],
-      sku_list: [
-        { id: "sku_1", specs: ["大份装", "即食"], price: "45.00", stock: 100, image: "/img/placeholders/home_cleaning.png" },
-        { id: "sku_2", specs: ["大份装", "绿果需催熟"], price: "42.00", stock: 50, image: "/img/placeholders/home_cleaning.png" },
-        { id: "sku_3", specs: ["迷你装", "即食"], price: "22.00", stock: 80, image: "/img/placeholders/home_cleaning.png" },
-        { id: "sku_4", specs: ["迷你装", "绿果需催熟"], price: "20.00", stock: 10, image: "/img/placeholders/home_cleaning.png" }
-      ]
+  toggleFavorite() {
+    const g = this.data.goods;
+    if (!g) return;
+    const gid = g.id != null ? g.id : this.data.goodsId;
+    if (gid == null || gid === '') return;
+    const imgs = g.main_images || g.images || [];
+    const raw = Array.isArray(imgs) && imgs[0] ? imgs[0] : '';
+    const cover = raw ? util.imgUrl(raw) : '';
+    const name = g.name || g.title || g.goods_name || '商品';
+    const key = `market_goods:${gid}`;
+    const favorited = favoritesStore.toggle({
+      kind: 'market_goods',
+      dedupeKey: key,
+      title: name,
+      cover,
+      url: `/pages/goods-detail/goods-detail?id=${encodeURIComponent(String(gid))}`
     });
+    this.setData({ favorited });
+    wx.showToast({ title: favorited ? '已加入收藏' : '已取消收藏', icon: 'none' });
   },
 
   // ==================== SKU 模块逻辑 ====================

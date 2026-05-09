@@ -1,6 +1,7 @@
 const util = require('../../utils/util.js');
 const { unwrapList } = util;
 const app = getApp();
+const browseFootprint = require('../../utils/browseFootprint.js');
 
 function moneyText(v) {
   if (v == null || v === '') return '0';
@@ -170,6 +171,15 @@ Page({
         groups = await this._fallbackCatalog(imgUrl);
       }
       this.setData({ providerName: name, providerCover: cover, providerDesc: desc, providerPhone: phone, groups, loading: false });
+      try {
+        browseFootprint.record({
+          kind: 'service_provider',
+          dedupeKey: `service_provider:${this.data.providerId}`,
+          title: name || '服务商',
+          cover: cover || '',
+          url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(this.data.providerId))}`
+        });
+      } catch (e) {}
       this._recalcTotal();
     } catch (e) {
       this.setData({ loading: false });

@@ -8,6 +8,8 @@
     "pages/classify/classify",
     "pages/goods-cart/goods-cart",
     "pages/user/user",
+    "pages/browse-footprint/browse-footprint",
+    "pages/favorites-list/favorites-list",
     "pages/gorder-list/gorder-list",
     "pages/gorder-detail/gorder-detail",
     "pages/cash/cash",

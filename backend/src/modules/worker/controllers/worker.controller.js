@@ -1,5 +1,6 @@
 const db = require('../../../models');
 const { WorkerApplication, ServiceOrder } = db;
+const orderPoints = require('../../../services/orderPoints.service');
 
 // POST /worker/apply
 exports.apply = async (req, res) => {
@@ -219,6 +220,9 @@ exports.rejectOrder = async (req, res) => {
     if (!row) return res.status(404).json({ code: 1, msg: '订单不存在' });
     if (row.status !== 'dispatched') return res.status(400).json({ code: 1, msg: '当前状态不可拒单' });
     const note = String((req.body || {}).reason || '技工拒单').trim();
+    if (row.pay_status === 'paid') {
+      await orderPoints.revokePointsOnOrderRefund(ServiceOrder, row, null);
+    }
     await row.update({
       status: 'cancelled',
       pay_status: row.pay_status === 'paid' ? 'refunded' : row.pay_status,

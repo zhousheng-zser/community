@@ -41,6 +41,10 @@
 
   <view class="bottom-bar">
     <text class="home" bindtap="goHome">首页</text>
+    <view class="bottom-favor" bindtap="togglePushFavorite">
+      <text class="bf-icon {{favorited ? 'on' : ''}}">{{favorited ? '★' : '☆'}}</text>
+      <text class="bf-t {{favorited ? 'on' : ''}}">收藏</text>
+    </view>
     <text class="share">￥{{product.rebate || '0'}} 分享每单赚</text>
     <text class="buy" bindtap="handleBuyClick">购买每单返</text>
   </view>

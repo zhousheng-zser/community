@@ -2,6 +2,7 @@ const util = require('../../utils/util.js');
 const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
 const { pickWorkerAvatar, genderToLabel, FALLBACK_WORKER_ROWS, FALLBACK_WORKER_GOODS } = require('../../utils/workerApiMap.js');
 
@@ -113,6 +114,17 @@ Page({
       reviews,
       reviewCount: reviews.length
     });
+    try {
+      if (worker && worker.id != null) {
+        browseFootprint.record({
+          kind: 'worker',
+          dedupeKey: `worker:${worker.id}`,
+          title: worker.name || '技工',
+          cover: worker.avatar || '',
+          url: `/pages/worker-detail/worker-detail?id=${encodeURIComponent(String(worker.id))}`
+        });
+      }
+    } catch (e) {}
   },
   async loadWorker(id) {
     try {

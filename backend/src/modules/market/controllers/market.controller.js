@@ -1,5 +1,6 @@
 const db = require('../../../models');
 const { MerchantShop, MerchantGoods, MarketCartItem, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
+const orderPoints = require('../../../services/orderPoints.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -783,6 +784,9 @@ exports.cancelOrder = async (req, res) => {
       await MerchantGoods.increment('sales_count', { by: -Number(it.quantity), where: { id: it.goods_id }, transaction: t });
     }
     const nextPayStatus = row.pay_status === 'paid' ? 'refunded' : row.pay_status;
+    if (row.pay_status === 'paid') {
+      await orderPoints.revokePointsOnOrderRefund(MarketOrder, row, t);
+    }
     await row.update({
       order_status: row.pay_status === 'paid' ? 'refunded' : 'cancelled',
       pay_status: nextPayStatus,
@@ -917,6 +921,8 @@ exports.mockPaymentSuccess = async (req, res) => {
     if (!row) return fail(res, '订单不存在', 404);
     if (row.order_status !== 'pending_payment') return fail(res, '当前订单不可模拟支付');
     await row.update({ pay_status: 'paid', order_status: 'pending_accept', paid_at: new Date() });
+    await row.reload();
+    await orderPoints.grantPointsOnOrderPaid(MarketOrder, row, null);
     ok(res, { order_no: row.order_no, pay_status: row.pay_status, order_status: row.order_status }, '支付成功');
   } catch (err) {
     console.error('[market/payments/mock-success]', err);

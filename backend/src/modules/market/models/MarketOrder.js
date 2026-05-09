@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
     cancelled_at: { type: DataTypes.DATE, allowNull: true },
     delivered_at: { type: DataTypes.DATE, allowNull: true },
     completed_at: { type: DataTypes.DATE, allowNull: true },
-    expired_at: { type: DataTypes.DATE, allowNull: true }
+    expired_at: { type: DataTypes.DATE, allowNull: true },
+    points_earned: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0, comment: '本单已发放积分(支付成功)，退款时扣回' }
   }, {
     tableName: 'market_orders',
     timestamps: true,

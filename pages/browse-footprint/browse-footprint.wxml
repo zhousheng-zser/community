@@ -1,0 +1,23 @@
+<view class="fp-page">
+  <view class="fp-toolbar" wx:if="{{list.length > 0}}">
+    <text class="fp-hint">最近浏览 {{list.length}} 条</text>
+    <text class="fp-clear" bindtap="onClear">清空</text>
+  </view>
+
+  <view class="fp-list" wx:if="{{list.length > 0}}">
+    <view class="fp-item" wx:for="{{list}}" wx:key="dedupeKey" bindtap="onOpen" data-idx="{{index}}">
+      <image class="fp-cover" src="{{item.cover || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill"></image>
+      <view class="fp-body">
+        <text class="fp-title">{{item.title}}</text>
+        <text class="fp-kind">{{kindLabels[item.kind] || '浏览'}}</text>
+      </view>
+      <text class="fp-arrow">›</text>
+    </view>
+  </view>
+
+  <view wx:else class="fp-empty">
+    <text class="fp-empty-icon">👣</text>
+    <text class="fp-empty-text">暂无浏览记录</text>
+    <text class="fp-empty-sub">浏览商品、服务或技工主页后会出现在这里</text>
+  </view>
+</view>

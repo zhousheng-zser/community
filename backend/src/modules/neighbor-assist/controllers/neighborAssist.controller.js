@@ -8,6 +8,7 @@ const db = require('../../../models');
 const NeighborAssistOrder = db.NeighborAssistOrder;
 const User = db.User;
 const WorkerApplication = db.WorkerApplication;
+const orderPoints = require('../../../services/orderPoints.service');
 // WorkerProfile 可能由主后端提供，当前环境缺失时降级处理
 const WorkerProfile = db.WorkerProfile || null;
 
@@ -204,6 +205,8 @@ exports.mockPay = async (req, res) => {
     order.pay_status = 'paid';
     order.status = 'paid_pending_dispatch';
     await order.save();
+    await order.reload();
+    await orderPoints.grantPointsOnOrderPaid(NeighborAssistOrder, order, null);
     return ok(res, order.get({ plain: true }));
   } catch (e) {
     console.error('neighborAssist mockPay', e);

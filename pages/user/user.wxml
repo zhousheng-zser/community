@@ -44,21 +44,21 @@
         <text class="hstat-label">优惠券</text>
       </navigator>
       <view class="hstat-divider"></view>
-      <view class="hstat">
+      <navigator class="hstat" url="../favorites-list/favorites-list">
         <view class="hstat-icon-wrap">
           <image class="hstat-icon-img" src="/img/market_icons/star.png" mode="aspectFit"></image>
         </view>
-        <text class="hstat-num">0</text>
+        <text class="hstat-num">{{favoriteCount}}</text>
         <text class="hstat-label">收藏</text>
-      </view>
+      </navigator>
       <view class="hstat-divider"></view>
-      <view class="hstat">
+      <navigator class="hstat" url="../browse-footprint/browse-footprint">
         <view class="hstat-icon-wrap">
           <image class="hstat-icon-img" src="/img/home_icons2/pickup.png" mode="aspectFit"></image>
         </view>
-        <text class="hstat-num">0</text>
+        <text class="hstat-num">{{footprintCount}}</text>
         <text class="hstat-label">足迹</text>
-      </view>
+      </navigator>
     </view>
   </view>
 

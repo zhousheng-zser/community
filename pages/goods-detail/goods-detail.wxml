@@ -47,6 +47,10 @@
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
     <view class="bar-left">
+      <view class="favor-btn {{favorited ? 'on' : ''}}" bindtap="toggleFavorite">
+        <text class="icon">{{favorited ? '★' : '☆'}}</text>
+        <text class="text">收藏</text>
+      </view>
       <view class="kefu-btn" bindtap="callMerchant">
         <text class="icon">📞</text>
         <text class="text">客服</text>

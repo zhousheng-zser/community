@@ -59,6 +59,11 @@ module.exports = (sequelize, DataTypes) => {
     completed_at: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    points_earned: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 0
     }
   }, {
     tableName: 'neighbor_assist_orders',

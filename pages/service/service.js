@@ -3,6 +3,7 @@ const { imgUrl } = util;
 const images = require('../../utils/images.js');
 const { buildServiceMockMap } = require('../../utils/serviceMockData.js');
 const { listImageFromHome3, home3PathForTitle } = require('../../utils/serviceHome3.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
 
 Page({
   data: {
@@ -84,6 +85,22 @@ Page({
       detailImages: service.detailImages,
       descText: service.desc
     });
+    try {
+      const sid = Number.isFinite(resolvedServiceId) ? resolvedServiceId : Number(this.data.serviceId);
+      if (!sid) return;
+      let url = `/pages/service/service?id=${encodeURIComponent(String(sid))}`;
+      if (this.data.workerId != null) url += `&worker_id=${encodeURIComponent(String(this.data.workerId))}`;
+      if (this.data.groupKey) url += `&group_key=${encodeURIComponent(this.data.groupKey)}`;
+      const wPart = this.data.workerId != null ? `_${this.data.workerId}` : '';
+      const gPart = this.data.groupKey ? `_${this.data.groupKey}` : '';
+      browseFootprint.record({
+        kind: 'service',
+        dedupeKey: `service:${sid}${wPart}${gPart}`,
+        title: (service && service.title) || '服务',
+        cover: (service && service.banner) || '',
+        url
+      });
+    } catch (e) {}
   },
   orderConfrim() {
     const svc = this.data.service || {};

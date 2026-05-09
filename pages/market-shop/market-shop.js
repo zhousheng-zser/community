@@ -1,5 +1,6 @@
 const util = require('../../utils/util.js');
 const { imgUrl, pickMarketShopAvatarPath, flattenMarketShopPayload } = util;
+const browseFootprint = require('../../utils/browseFootprint.js');
 
 Page({
   data: {
@@ -209,6 +210,15 @@ Page({
         currentShopId: shop.id,
         shopLoadError: false
       }, () => {
+        try {
+          browseFootprint.record({
+            kind: 'market_shop',
+            dedupeKey: `market_shop:${shop.id}`,
+            title: shop.name || '店铺',
+            cover: shop.logo || shop.cover || '',
+            url: `/pages/market-shop/market-shop?id=${encodeURIComponent(String(shop.id))}`
+          });
+        } catch (e) {}
         this.syncCartFromApi(shop.id);
       });
 
