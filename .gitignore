@@ -4,6 +4,11 @@ project.config.json
 backend/.env
 .env.deploy
 
+# 邮件配置（包含敏感信息）
+scripts/email-config.js
+
+# 微信开发者工具 CLI 预览产物（二维码 PNG、preview-info JSON 等）
+preview-output/
 
 # 系统文件
 .DS_Store

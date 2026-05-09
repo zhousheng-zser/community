@@ -10,9 +10,17 @@
     "compress:homepage-material": "node scripts/compress-home-service-images.js --only=material --max=480",
     "optimize:home-categories": "node scripts/optimize-home-categories-images.js",
     "resize:home-icons2": "node scripts/resize-home-icons2-images.js",
-    "resize:market-icons": "node scripts/resize-market-icons-images.js"
+    "resize:market-icons": "node scripts/resize-market-icons-images.js",
+    "preview": "node scripts/wechat-preview.js",
+    "preview:terminal": "node scripts/wechat-preview.js --format terminal",
+    "preview:base64": "node scripts/wechat-preview.js --format base64",
+    "preview:auto": "node scripts/wechat-preview.js --auto-preview",
+    "preview:email": "node scripts/wechat-preview.js --email",
+    "upload": "node scripts/wechat-preview.js --upload",
+    "release:preview-email": "node scripts/upload-preview-email.js"
   },
   "devDependencies": {
+    "nodemailer": "^8.0.7",
     "ssh2": "^1.17.0",
     "ssh2-sftp-client": "^11.0.0"
   },
