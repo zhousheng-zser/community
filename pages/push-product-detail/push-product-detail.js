@@ -155,7 +155,7 @@ Page({
     const row = this.buildPushGoodsRow(goodsId, shopId, name, image, price);
     if (row) browseFootprint.record(row);
   },
-  syncPushFavorited() {
+  async syncPushFavorited() {
     let gid = Number(this.data.navGoodsId || 0);
     if (!gid) {
       const n = Number(this.data.productId);
@@ -165,9 +165,10 @@ Page({
       this.setData({ favorited: false });
       return;
     }
-    this.setData({ favorited: favoritesStore.has(`push_goods:${gid}`) });
+    const favorited = await favoritesStore.has(gid);
+    this.setData({ favorited });
   },
-  togglePushFavorite() {
+  async togglePushFavorite() {
     const p = this.data.product || {};
     let gid = Number(this.data.navGoodsId || 0);
     if (!gid) {
@@ -179,9 +180,7 @@ Page({
       return;
     }
     const shopId = Number(this.data.shopId || 0);
-    const row = this.buildPushGoodsRow(gid, shopId, p.name, p.image, p.price || p.pay);
-    if (!row) return;
-    const favorited = favoritesStore.toggle(row);
+    const favorited = await favoritesStore.toggle(gid, shopId || undefined);
     this.setData({ favorited });
     wx.showToast({ title: favorited ? '已加入收藏' : '已取消收藏', icon: 'none' });
   },

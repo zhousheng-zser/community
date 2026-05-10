@@ -166,11 +166,21 @@ Page({
       loggedIn,
       points: user.points || 0,
       footprintCount: browseFootprint.count(),
-      favoriteCount: favoritesStore.count()
+      favoriteCount: 0  // 先置 0，异步更新
     });
 
     this.getProfile();
     this.getMyCoupon();
+    this.loadFavoriteCount();
+  },
+
+  async loadFavoriteCount() {
+    try {
+      const { total } = await favoritesStore.fetchList({ page: 1, page_size: 1 });
+      this.setData({ favoriteCount: total || 0 });
+    } catch (e) {
+      this.setData({ favoriteCount: 0 });
+    }
   },
 
   // 从服务端拉取用户完整资料（含余额）

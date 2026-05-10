@@ -25,6 +25,10 @@ Page({
     }
   },
   goBenefit() {
-    wx.navigateTo({ url: '/pages/push-channel/push-channel' });
+    const app = getApp();
+    if (app.globalData) {
+      app.globalData.targetIndexTab = '惠民卡';
+    }
+    wx.switchTab({ url: '/pages/index/index' });
   }
 });

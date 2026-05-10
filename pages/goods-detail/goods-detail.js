@@ -44,7 +44,9 @@ Page({
       const g = this.data.goods;
       const gid = g && (g.id != null ? g.id : this.data.goodsId);
       if (gid != null && gid !== '') {
-        this.setData({ favorited: favoritesStore.has(`market_goods:${gid}`) });
+        favoritesStore.has(Number(gid)).then(favorited => {
+          this.setData({ favorited });
+        });
       }
     }
   },
@@ -100,7 +102,10 @@ Page({
           cover,
           url: `/pages/goods-detail/goods-detail?id=${encodeURIComponent(String(gid))}`
         });
-        this.setData({ favorited: favoritesStore.has(`market_goods:${gid}`) });
+        // 异步查询服务端收藏状态
+        favoritesStore.has(Number(gid)).then(favorited => {
+          this.setData({ favorited });
+        });
       }
     } catch (e) {}
 
@@ -115,23 +120,13 @@ Page({
     this.syncCartFromStorage();
   },
 
-  toggleFavorite() {
+  async toggleFavorite() {
     const g = this.data.goods;
     if (!g) return;
     const gid = g.id != null ? g.id : this.data.goodsId;
     if (gid == null || gid === '') return;
-    const imgs = g.main_images || g.images || [];
-    const raw = Array.isArray(imgs) && imgs[0] ? imgs[0] : '';
-    const cover = raw ? util.imgUrl(raw) : '';
-    const name = g.name || g.title || g.goods_name || '商品';
-    const key = `market_goods:${gid}`;
-    const favorited = favoritesStore.toggle({
-      kind: 'market_goods',
-      dedupeKey: key,
-      title: name,
-      cover,
-      url: `/pages/goods-detail/goods-detail?id=${encodeURIComponent(String(gid))}`
-    });
+    const shopId = g.shopId || g.shop_id;
+    const favorited = await favoritesStore.toggle(Number(gid), shopId ? Number(shopId) : undefined);
     this.setData({ favorited });
     wx.showToast({ title: favorited ? '已加入收藏' : '已取消收藏', icon: 'none' });
   },
