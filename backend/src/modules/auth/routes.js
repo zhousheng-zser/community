@@ -9,3 +9,5 @@ router.post('/sms-code', ctrl.sendSmsCode);
 router.post('/admin/login', ctrl.adminLogin);
 
 module.exports = router;
+router.post('/merchant-portal/login', ctrl.merchantPortalLogin);
+router.post('/service-portal/login', ctrl.servicePortalLogin);

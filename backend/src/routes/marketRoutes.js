@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const marketShopController = require('../controllers/marketShopController');
 const marketSearchController = require('../controllers/marketSearchController');
 const marketCartController = require('../controllers/marketCartController');
+const marketFavoriteController = require('../controllers/marketFavoriteController');
 const marketOrderController = require('../controllers/marketOrderController');
 const marketPaymentController = require('../controllers/marketPaymentController');
 const genRefundNo = () => `MR${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`;
@@ -30,6 +31,12 @@ router.post('/cart/items', authMiddleware, marketCartController.addItem);
 router.put('/cart/items/:itemId', authMiddleware, marketCartController.updateItem);
 router.delete('/cart/items/:itemId', authMiddleware, marketCartController.deleteItem);
 router.delete('/cart', authMiddleware, marketCartController.clearCart);
+
+// 商品收藏（登录态）：每用户一个逻辑收藏夹，以 goods_id（market_goods.id）为唯一键
+router.get('/favorites/status', authMiddleware, marketFavoriteController.status);
+router.get('/favorites', authMiddleware, marketFavoriteController.listFavorites);
+router.post('/favorites', authMiddleware, marketFavoriteController.addFavorite);
+router.delete('/favorites/:goodsId', authMiddleware, marketFavoriteController.removeFavorite);
 
 // 订单接口（登录态）；注意 /orders/my 须在 /orders/:orderNo 之前注册
 router.post('/orders/preview', authMiddleware, marketOrderController.preview);
