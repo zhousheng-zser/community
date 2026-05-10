@@ -740,11 +740,7 @@
   justify-content: center;
 }
 
-.jt-hero-icon {
-  width: 80rpx;
-  height: 80rpx;
-  margin-bottom: 10rpx;
-}
+
 
 .jt-hero-title {
   font-size: 46rpx;

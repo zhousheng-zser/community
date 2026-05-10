@@ -29,14 +29,13 @@
     <view class="jt-hero">
       <swiper class="jt-hero-swiper" autoplay="true" indicator-dots="true" indicator-active-color="#fff" circular="true">
         <swiper-item wx:for="{{pushHeroBanners}}" wx:key="id">
-          <view class="slide-wrap">
+          <navigator url="{{item.url}}" class="slide-wrap" hover-class="none">
             <image src="{{item.image}}" mode="aspectFill" class="fs-hero-img"></image>
             <view class="slide-content">
-              <image class="jt-hero-icon" src="/img/index/menuicon1.png" mode="aspectFit"></image>
-              <text class="jt-hero-title">品牌好物</text>
-              <text class="jt-hero-sub">严选之品，生活之味</text>
+              <text class="jt-hero-title">{{item.title}}</text>
+              <text class="jt-hero-sub">{{item.sub}}</text>
             </view>
-          </view>
+          </navigator>
         </swiper-item>
       </swiper>
     </view>

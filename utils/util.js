@@ -31,7 +31,7 @@ const imgUrl = (path, fallback) => {
   if (path == null || path === '') return fallback != null ? imgUrl(fallback) : '';
   const raw = String(path).trim();
   if (/^https?:\/\//i.test(raw)) {
-    if (raw.includes('example.com')) return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // 透明像素点
+    if (raw.includes('example.com') || (raw.includes('127.0.0.1') && raw.includes('/uploads/'))) return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // 透明像素点
     return raw;
   }
   let normalized = normalizeServerImagePath(raw);

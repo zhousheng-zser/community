@@ -1,4 +1,5 @@
 const util = require('../../utils/util.js');
+const config = require('../../utils/config.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
 
@@ -63,9 +64,26 @@ Page({
 
   // 处理富文本与规格初始化
   processGoodsData(data) {
-    if (data.desc_html) {
-      data.desc_html = data.desc_html.replace(/\<img/gi, '<img style="max-width:100%;height:auto;display:block;"');
+    // 1. 处理主图列表
+    const rawImages = data.main_images || data.images || [];
+    data.main_images = rawImages.map(url => util.imgUrl(url));
+
+    // 2. 处理 SKU 列表中的图片
+    if (data.sku_list && Array.isArray(data.sku_list)) {
+      data.sku_list.forEach(sku => {
+        if (sku.image) sku.image = util.imgUrl(sku.image);
+      });
     }
+
+    // 3. 处理详情富文本中的图片路径
+    if (data.desc_html) {
+      // 替换样式
+      data.desc_html = data.desc_html.replace(/\<img/gi, '<img style="max-width:100%;height:auto;display:block;"');
+      // 修复相对路径 /uploads/ -> https://.../uploads/
+      const baseUrl = config.imageBaseUrl.replace(/\/$/, '');
+      data.desc_html = data.desc_html.replace(/src=["']\/uploads\//gi, `src="${baseUrl}/uploads/`);
+    }
+
     this.setData({ goods: data });
 
     try {

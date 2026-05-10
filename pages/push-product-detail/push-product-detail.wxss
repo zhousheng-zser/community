@@ -4,7 +4,7 @@ page {
 
 .pp-page {
   min-height: 100vh;
-  padding-bottom: 140rpx;
+  padding-bottom: 100rpx;
 }
 
 .top-nav {
@@ -184,55 +184,57 @@ page {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 12rpx;
+  padding: 10rpx 16rpx 10rpx;
   background: #fff;
   display: flex;
-  gap: 10rpx;
+  align-items: center;
+  gap: 12rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
 }
 
 .bottom-bar text {
-  border-radius: 36rpx;
   text-align: center;
-  line-height: 76rpx;
+  line-height: 60rpx;
   font-size: 24rpx;
 }
 
+.home-btn,
 .bottom-favor {
-  width: 100rpx;
   flex-shrink: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  border-radius: 36rpx;
-  line-height: normal;
-  padding: 6rpx 0;
+  background: #f8f8f8;
+  border-radius: 30rpx;
+  padding: 0 16rpx;
+  height: 60rpx;
+  gap: 6rpx;
 }
 
+.hb-icon,
 .bf-icon {
-  font-size: 34rpx;
+  font-size: 30rpx;
   color: #555;
-  line-height: 1.1;
 }
 
-.bf-icon.on {
-  color: #ffb400;
-}
-
+.hb-t,
 .bf-t {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #666;
-  margin-top: 4rpx;
 }
 
+.bf-icon.on,
 .bf-t.on {
   color: #ffb400;
 }
 
-.home {
-  width: 110rpx;
-  background: #fff;
+.share,
+.buy {
+  flex: 1;
+  border-radius: 30rpx;
+  height: 60rpx;
+  line-height: 60rpx;
 }
 
 .share {

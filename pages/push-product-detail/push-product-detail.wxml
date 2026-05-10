@@ -40,7 +40,10 @@
   </view>
 
   <view class="bottom-bar">
-    <text class="home" bindtap="goHome">首页</text>
+    <view class="home-btn" bindtap="goHome">
+      <text class="hb-icon">🏠</text>
+      <text class="hb-t">首页</text>
+    </view>
     <view class="bottom-favor" bindtap="togglePushFavorite">
       <text class="bf-icon {{favorited ? 'on' : ''}}">{{favorited ? '★' : '☆'}}</text>
       <text class="bf-t {{favorited ? 'on' : ''}}">收藏</text>

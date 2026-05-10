@@ -795,8 +795,20 @@ Page({
 
     // 模块一：顶级海报轮播图
     const pushHeroBanners = [
-      { id: 1, image: images.bannerHome },
-      { id: 2, image: images.bannerSale }
+      { 
+        id: 1, 
+        image: images.bannerHome, 
+        title: '品牌好物', 
+        sub: '严选之品，生活之味',
+        url: '/pages/push-channel/push-channel?title=品牌好物' 
+      },
+      { 
+        id: 2, 
+        image: images.bannerSale, 
+        title: '秋冬好物', 
+        sub: '温暖一冬，质感生活',
+        url: '/pages/push-channel/push-channel?title=秋冬好物' 
+      }
     ];
 
     // 模块二：分类金刚
