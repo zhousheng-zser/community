@@ -9,7 +9,7 @@ const SLOT_COUNT = 6;
 function workerAvatarUrl(workerId) {
   const id = Number(workerId);
   if (!Number.isFinite(id) || id < 1) {
-    return imgUrl('/img/placeholders/home_cleaning.png');
+    return imgUrl('https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png');
   }
   const slot = ((id - 1) % SLOT_COUNT) + 1;
   return imgUrl(`/img/worker_avatars/${slot}.png`);

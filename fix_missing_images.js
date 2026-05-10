@@ -2,21 +2,26 @@ const fs = require('fs');
 const path = require('path');
 
 const replacements = {
-  '/img/placeholders/home_cleaning.png': 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80',
-  '/img/placeholders/sale_banner.png': 'https://images.unsplash.com/photo-1607083206869-4c76720db39f?auto=format&fit=crop&w=600&q=80',
-  '/img/placeholders/avatar_worker.png': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-  '/img/placeholders/avatar_worker_1772546547875.png': 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-  '/img/head.jpg': 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+  '/img/placeholders/home_cleaning.png': 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png',
+  '/img/placeholders/sale_banner.png': 'https://jshsp1.eds-tech.cn/uploads/file-1773395942500-585304598.png',
+  '/img/placeholders/avatar_worker.png': 'https://jshsp1.eds-tech.cn/uploads/file-1773395942842-959042242.png',
+  '/img/placeholders/avatar_worker_1772546547875.png': 'https://jshsp1.eds-tech.cn/uploads/file-1773395942842-959042242.png',
+  '/img/head.jpg': 'https://jshsp1.eds-tech.cn/uploads/file-1773395943186-905167166.jpg'
 };
 
 function walk(dir) {
-  fs.readdirSync(dir).forEach(file => {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
     const fullPath = path.join(dir, file);
-    if (fullPath.includes('node_modules') || fullPath.includes('.git')) return;
-    
-    if (fs.statSync(fullPath).isDirectory()) {
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      if (['node_modules', '.git', 'dist', 'miniprogram_npm'].includes(file)) continue;
       walk(fullPath);
-    } else if (fullPath.endsWith('.wxml')) {
+    } else if (fullPath.endsWith('.wxml') || fullPath.endsWith('.js') || fullPath.endsWith('.wxss')) {
+      // Skip the script itself and images.js to avoid circular replacement or breaking logic
+      if (fullPath.includes('fix_missing_images.js') || fullPath.includes('utils' + path.sep + 'images.js')) continue;
+
       let content = fs.readFileSync(fullPath, 'utf8');
       let changed = false;
       for (const [key, value] of Object.entries(replacements)) {
@@ -30,7 +35,10 @@ function walk(dir) {
         console.log('Fixed:', fullPath);
       }
     }
-  });
+  }
 }
 
+console.log('Starting global placeholder replacement...');
 walk(__dirname);
+console.log('Done.');
+

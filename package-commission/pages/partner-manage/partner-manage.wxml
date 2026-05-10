@@ -26,7 +26,7 @@
     <view class="chain-card" wx:if="{{chain}}">
       <view class="chain-item" wx:if="{{chain.district_partner}}">
         <view class="chain-avatar">
-          <image src="{{chain.district_partner.avatar_url || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill" />
+          <image src="{{chain.district_partner.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
         </view>
         <view class="chain-info">
           <text class="chain-name">{{chain.district_partner.nickname || '区县合伙人'}}</text>
@@ -35,7 +35,7 @@
       </view>
       <view class="chain-item" wx:if="{{chain.market_partner}}">
         <view class="chain-avatar">
-          <image src="{{chain.market_partner.avatar_url || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill" />
+          <image src="{{chain.market_partner.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
         </view>
         <view class="chain-info">
           <text class="chain-name">{{chain.market_partner.nickname || '市场合伙人'}}</text>
@@ -55,7 +55,7 @@
     </view>
     <view class="downline-card" wx:if="{{downlineCount > 0}}">
       <view class="downline-item" wx:for="{{downlines}}" wx:key="id">
-        <image class="downline-avatar" src="{{item.avatar_url || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill" />
+        <image class="downline-avatar" src="{{item.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
         <view class="downline-info">
           <text class="downline-name">{{item.nickname || '微信用户'}}</text>
           <text class="downline-time">{{item.created_at}}</text>

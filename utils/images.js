@@ -16,10 +16,10 @@ const usp = (id, w = 600) =>
 
 const images = {
   // ── 后端已上传文件（服务器原路径）──────────────────────────────────────────
-  homeCleaning: base + '/uploads/file-1773395942165-45947155.png',
-  saleBanner: base + '/uploads/file-1773395942500-585304598.png',
-  avatarWorker: base + '/uploads/file-1773395942842-959042242.png',
-  defaultHead: base + '/uploads/file-1773395943186-905167166.jpg',
+  homeCleaning: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  saleBanner: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  avatarWorker: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+  defaultHead: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
 
   // ── 首页 Banner ────────────────────────────────────────────────────────────
   bannerHome: base + '/uploads/file-1773395942165-45947155.png',
@@ -89,7 +89,7 @@ const images = {
   // ── 管家精选商品 ────────────────────────────────────────────────────────────
   goodsSkincare1: usp('1522335789203-aabd1fc54bc9', 500),
   goodsSkincare2: usp('1604654894610-df63bc536371', 500),
-  goodsLocal: '/img/placeholders/home_cleaning.png',
+  goodsLocal: base + '/uploads/file-1773395942165-45947155.png',
 
   // ── 本地商城 / 带货商品 ────────────────────────────────────────────────────────
   pushFood1: usp('1504674900247-0877df9cc836', 400),
@@ -106,14 +106,15 @@ const images = {
   // ── 直播封面 ────────────────────────────────────────────────────────────────
   // ── 便捷方法：根据原始本地路径返回服务器/CDN 地址 ──────────────────────────
   resolve(localPath) {
-    const map = {
-      '/img/placeholders/home_cleaning.png': images.homeCleaning,
-      '/img/placeholders/sale_banner.png': images.saleBanner,
-      '/img/placeholders/avatar_worker.png': images.avatarWorker,
-      '/img/placeholders/avatar_worker_1772546547875.png': images.avatarWorker,
-      '/img/head.jpg': images.defaultHead,
-    };
-    return map[localPath] || localPath;
+    const placeholders = [
+      '/img/placeholders/home_cleaning.png',
+      '/img/placeholders/sale_banner.png',
+      '/img/placeholders/avatar_worker.png',
+      '/img/placeholders/avatar_worker_1772546547875.png',
+      '/img/head.jpg'
+    ];
+    if (placeholders.includes(localPath)) return '';
+    return localPath;
   }
 };
 

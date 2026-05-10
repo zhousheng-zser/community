@@ -28,9 +28,12 @@ const normalizeServerImagePath = (path) => {
  * - 其他以 / 开头的路径 → 拼接 imageBaseUrl（如接口返回 /uploads/...）
  */
 const imgUrl = (path, fallback) => {
-  if (path == null || path === '') return fallback != null ? imgUrl(fallback) : images.homeCleaning;
+  if (path == null || path === '') return fallback != null ? imgUrl(fallback) : '';
   const raw = String(path).trim();
-  if (/^https?:\/\//i.test(raw)) return raw;
+  if (/^https?:\/\//i.test(raw)) {
+    if (raw.includes('example.com')) return 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // 透明像素点
+    return raw;
+  }
   let normalized = normalizeServerImagePath(raw);
   const resolved = images.resolve(normalized);
   if (resolved !== normalized) return resolved;

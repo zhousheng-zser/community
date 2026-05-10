@@ -192,7 +192,7 @@ Page({
         name: g.name || g.goods_name || g.goods_name_snapshot,
         price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
         quantity: g.quantity || 1,
-        image: rawImage ? util.imgUrl(rawImage) : '/img/placeholders/home_cleaning.png'
+        image: rawImage ? util.imgUrl(rawImage) : 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'
       };
     });
     return {
@@ -225,7 +225,7 @@ Page({
     const merchantUserId = order.merchant_user_id || detail.merchant_user_id || order.provider_user_id || detail.provider_user_id || provider.id || merchant.id || null;
 
     const rawImage = service.image || service.main_image || service.cover_image || service.cover || '';
-    const image = rawImage ? util.imgUrl(rawImage) : '/img/placeholders/home_cleaning.png';
+    const image = rawImage ? util.imgUrl(rawImage) : 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png';
 
     const title = order.service_title || order.title || service.title || '到家服务';
     const amount = order.amount || order.pay_amount || detail.amount || detail.pay_amount || '0.00';

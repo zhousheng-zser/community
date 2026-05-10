@@ -6,7 +6,7 @@
 
   <view class="fp-list" wx:if="{{list.length > 0}}">
     <view class="fp-item" wx:for="{{list}}" wx:key="dedupeKey" bindtap="onOpen" data-idx="{{index}}">
-      <image class="fp-cover" src="{{item.cover || '/img/placeholders/home_cleaning.png'}}" mode="aspectFill"></image>
+      <image class="fp-cover" src="{{item.cover || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill"></image>
       <view class="fp-body">
         <text class="fp-title">{{item.title}}</text>
         <text class="fp-kind">{{kindLabels[item.kind] || '浏览'}}</text>

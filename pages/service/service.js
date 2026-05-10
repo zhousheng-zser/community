@@ -53,7 +53,7 @@ Page({
           ? res.detail_images
           : (typeof res.detail_images === 'string' ? JSON.parse(res.detail_images || '[]') : []);
         const title = res.title || res.name || '';
-        const apiBanner = imgUrl(res.cover_image || res.banner || '/img/placeholders/home_cleaning.png');
+        const apiBanner = imgUrl(res.cover_image || res.banner || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png');
         let imgs = (Array.isArray(detailImages) ? detailImages : []).map((p) => imgUrl(p));
         const home3 = home3PathForTitle(title);
         if (home3) {
