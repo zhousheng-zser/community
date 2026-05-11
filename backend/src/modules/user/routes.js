@@ -14,5 +14,9 @@ router.delete('/addresses/:id', ctrl.deleteAddress);
 router.get('/invite-code', ctrl.getInviteCode);
 router.post('/bind-inviter', ctrl.bindInviter);
 router.get('/invitees', ctrl.getInvitees);
+router.post('/footprints', ctrl.recordFootprint);
+router.post('/footprints/batch', ctrl.batchFootprints);
+router.get('/footprints', ctrl.getFootprints);
+router.delete('/footprints', ctrl.clearFootprints);
 
 module.exports = router;

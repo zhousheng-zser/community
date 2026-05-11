@@ -210,3 +210,108 @@ exports.getInvitees = async (req, res) => {
     fail(res, '获取邀请列表失败', 500);
   }
 };
+
+// ─── 浏览足迹 ────────────────────────────────────────────────────────────────
+
+const { BrowseFootprint } = require('../../../models');
+
+// POST /user/footprints - 记录一条足迹
+exports.recordFootprint = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { kind, dedupe_key, title, cover, url } = req.body || {};
+    if (!kind || !dedupe_key || !url) return fail(res, '参数不完整');
+
+    const [row] = await BrowseFootprint.upsert({
+      user_id: userId,
+      kind,
+      dedupe_key: String(dedupe_key).slice(0, 128),
+      title: String(title || '').slice(0, 200),
+      cover: String(cover || '').slice(0, 500),
+      url: String(url).slice(0, 500)
+    });
+
+    ok(res, { id: row.id });
+  } catch (err) {
+    console.error('[user/footprints] record', err);
+    fail(res, '记录足迹失败', 500);
+  }
+};
+
+// POST /user/footprints/batch - 批量上传足迹（本地→后端同步）
+exports.batchFootprints = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { list } = req.body || {};
+    if (!Array.isArray(list) || !list.length) return fail(res, '空列表');
+
+    const rows = list.slice(0, 50).map(item => ({
+      user_id: userId,
+      kind: String(item.kind || '').slice(0, 32),
+      dedupe_key: String(item.dedupe_key || item.dedupeKey || '').slice(0, 128),
+      title: String(item.title || '').slice(0, 200),
+      cover: String(item.cover || '').slice(0, 500),
+      url: String(item.url || '').slice(0, 500)
+    })).filter(r => r.kind && r.dedupe_key && r.url);
+
+    if (rows.length) {
+      await BrowseFootprint.bulkCreate(rows, {
+        updateOnDuplicate: ['title', 'cover', 'url', 'updated_at']
+      });
+    }
+
+    ok(res, { synced: rows.length });
+  } catch (err) {
+    console.error('[user/footprints] batch', err);
+    fail(res, '同步足迹失败', 500);
+  }
+};
+
+// GET /user/footprints - 获取足迹列表
+exports.getFootprints = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const offset = (page - 1) * limit;
+
+    const result = await BrowseFootprint.findAndCountAll({
+      where: { user_id: userId },
+      order: [['updated_at', 'DESC']],
+      limit,
+      offset,
+      attributes: ['id', 'kind', 'dedupe_key', 'title', 'cover', 'url', 'updated_at']
+    });
+
+    const list = result.rows.map(r => ({
+      kind: r.kind,
+      dedupeKey: r.dedupe_key,
+      title: r.title,
+      cover: r.cover,
+      url: r.url,
+      t: new Date(r.updated_at).getTime()
+    }));
+
+    ok(res, { list, total: result.count, page });
+  } catch (err) {
+    console.error('[user/footprints] get', err);
+    fail(res, '获取足迹失败', 500);
+  }
+};
+
+// DELETE /user/footprints - 清空足迹
+exports.clearFootprints = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    await BrowseFootprint.destroy({ where: { user_id: userId } });
+    ok(res, null, '已清空');
+  } catch (err) {
+    console.error('[user/footprints] clear', err);
+    fail(res, '清空足迹失败', 500);
+  }
+};

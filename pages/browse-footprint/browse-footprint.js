@@ -10,8 +10,9 @@ Page({
     this.refresh();
   },
 
-  refresh() {
-    this.setData({ list: browseFootprint.getList() });
+  async refresh() {
+    const list = await browseFootprint.getList();
+    this.setData({ list });
   },
 
   onOpen(e) {
@@ -27,7 +28,7 @@ Page({
       success: (res) => {
         if (res.confirm) {
           browseFootprint.clear();
-          this.refresh();
+          this.setData({ list: [] });
         }
       }
     });

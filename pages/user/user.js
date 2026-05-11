@@ -243,6 +243,7 @@ Page({
         points: data.points != null ? Number(data.points) : (user.points || this.data.points || 0)
       });
       this.loadCommissionBalance();
+      browseFootprint.syncLocalToServer();
     }).catch(() => {
       this.setData({ balance: '0.00' });
     });
