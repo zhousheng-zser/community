@@ -22,9 +22,6 @@
     "pages/service-provider-shop/service-provider-shop",
     "pages/service-provider-list/service-provider-list",
     "pages/service/service",
-    "pages/push-channel/push-channel",
-    "pages/push-goods-list/push-goods-list",
-    "pages/push-product-detail/push-product-detail",
     "pages/market-shop/market-shop",
     "pages/market-banner/market-banner",
     "pages/worker-detail/worker-detail",
@@ -45,12 +42,6 @@
     "pages/goods-confrim/goods-confrim",
     "pages/book-detail/book-detail",
     "pages/my-posts/my-posts",
-    "pages/push-video-list/push-video-list",
-    "pages/push-video-category/push-video-category",
-    "pages/push-daily-news/push-daily-news",
-    "pages/push-top-sales/push-top-sales",
-    "pages/push-hot-video-list/push-hot-video-list",
-    "pages/push-periodic-list/push-periodic-list",
     "pages/settings/settings",
     "pages/feedback/feedback",
     "pages/my-follows/my-follows",
@@ -82,6 +73,21 @@
     "pages/forget-password/forget-password"
   ],
   "subPackages": [
+    {
+      "root": "package-push",
+      "name": "push",
+      "pages": [
+        "pages/push-channel/push-channel",
+        "pages/push-goods-list/push-goods-list",
+        "pages/push-product-detail/push-product-detail",
+        "pages/push-video-list/push-video-list",
+        "pages/push-video-category/push-video-category",
+        "pages/push-daily-news/push-daily-news",
+        "pages/push-top-sales/push-top-sales",
+        "pages/push-hot-video-list/push-hot-video-list",
+        "pages/push-periodic-list/push-periodic-list"
+      ]
+    },
     {
       "root": "package-account",
       "name": "account",
@@ -219,5 +225,6 @@
     "getLocation",
     "chooseLocation",
     "chooseAddress"
-  ]
+  ],
+  "lazyCodeLoading": "requiredComponents"
 }

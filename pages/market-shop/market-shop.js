@@ -137,7 +137,7 @@ Page({
         price: String(priceRaw),
         oldPrice: String(oldPriceRaw),
         image: g.main_image || g.image ? imgUrl(g.main_image || g.image) : '',
-        detailUrl: `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(g.id || g.goods_id))}&shopId=${encodeURIComponent(String(this.data.currentShopId || ''))}&image=${encodeURIComponent(g.main_image || g.image ? imgUrl(g.main_image || g.image) : '')}&name=${encodeURIComponent(g.name || g.goods_name || '')}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`
+        detailUrl: `/package-push/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(g.id || g.goods_id))}&shopId=${encodeURIComponent(String(this.data.currentShopId || ''))}&image=${encodeURIComponent(g.main_image || g.image ? imgUrl(g.main_image || g.image) : '')}&name=${encodeURIComponent(g.name || g.goods_name || '')}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`
       });
     });
 

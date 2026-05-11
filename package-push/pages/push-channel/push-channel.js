@@ -1,4 +1,4 @@
-const util = require('../../utils/util.js');
+const util = require('../../../utils/util.js');
 
 const TITLE_TO_CHANNEL = {
   品牌好货: "brand_goods",

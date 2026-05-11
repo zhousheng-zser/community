@@ -1,5 +1,5 @@
-const util = require('../../utils/util.js');
-const config = require('../../utils/config.js');
+const util = require('../../../utils/util.js');
+const config = require('../../../utils/config.js');
 
 const MARKET_PRODUCT_MAP = {
   101: { name: 'market product', price: '1.68', pay: '1.68', rebate: '0.10', image: '', shop: '' },

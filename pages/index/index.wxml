@@ -70,7 +70,7 @@
     <view class="jt-sales-row">
       <!-- 每日上新 -->
       <view class="jt-daily-news">
-        <navigator class="head" url="/pages/push-daily-news/push-daily-news">
+        <navigator class="head" url="/package-push/pages/push-daily-news/push-daily-news">
           <text class="title">每日上新</text>
           <image class="head-icon" src="/img/index/ticon1.png"></image>
         </navigator>
@@ -88,7 +88,7 @@
 
       <!-- 热卖TOP榜 -->
       <view class="jt-top-sales">
-        <navigator class="head" url="/pages/push-top-sales/push-top-sales">
+        <navigator class="head" url="/package-push/pages/push-top-sales/push-top-sales">
           <text class="title">热卖TOP榜</text>
           <image class="head-icon" src="/img/index/ticon2.png"></image>
         </navigator>
@@ -137,7 +137,7 @@
         </view>
         
         <!-- 模块八：查看更多按钮 -->
-        <navigator url="/pages/push-periodic-list/push-periodic-list?type={{pushPeriodicTabs[activePeriodicTabIndex]}}" class="view-more-line">
+        <navigator url="/package-push/pages/push-periodic-list/push-periodic-list?type={{pushPeriodicTabs[activePeriodicTabIndex]}}" class="view-more-line">
           查看更多 >
         </navigator>
       </view>

@@ -605,7 +605,7 @@ const normalizeShopProductRow = (item, idx = 0) => {
     store.id || store.shop_id || store.shopId ||
     merchant.id || merchant.shop_id || merchant.shopId ||
     '';
-  const detailUrl = `/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(id))}&shopId=${encodeURIComponent(String(shopId))}&image=${encodeURIComponent(image)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`;
+  const detailUrl = `/package-push/pages/push-product-detail/push-product-detail?id=${encodeURIComponent(String(id))}&shopId=${encodeURIComponent(String(shopId))}&image=${encodeURIComponent(image)}&name=${encodeURIComponent(name)}&price=${encodeURIComponent(String(priceRaw != null ? priceRaw : ''))}`;
   const commRaw = item.rebate_amount != null ? item.rebate_amount : (item.comm != null ? item.comm : 0);
   const commStr = String(commRaw != null ? commRaw : 0);
   const shareFromApi = item.share_tag || item.shareTag;

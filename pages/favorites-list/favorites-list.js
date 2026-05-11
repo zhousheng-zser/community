@@ -101,7 +101,7 @@ Page({
     const { goodsId, shopId, cover, goodsName, price } = e.currentTarget.dataset;
     if (!goodsId) return;
     wx.navigateTo({
-      url: `/pages/push-product-detail/push-product-detail` +
+      url: `/package-push/pages/push-product-detail/push-product-detail` +
         `?id=${goodsId}` +
         `&shopId=${shopId || ''}` +
         `&image=${encodeURIComponent(cover || '')}` +

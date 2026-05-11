@@ -253,6 +253,114 @@
       {
         "type": "file",
         "value": "功能对比分析报告.md"
+      },
+      {
+        "type": "file",
+        "value": "features.json"
+      },
+      {
+        "type": "file",
+        "value": "feature_comparison_report.json"
+      },
+      {
+        "type": "file",
+        "value": "惠民社区功能清单.xlsx"
+      },
+      {
+        "type": "file",
+        "value": "check_features.py"
+      },
+      {
+        "type": "file",
+        "value": "compare_features.py"
+      },
+      {
+        "type": "file",
+        "value": "analyze_features.py"
+      },
+      {
+        "type": "file",
+        "value": "compress_images.py"
+      },
+      {
+        "type": "file",
+        "value": "generate_icons_server.py"
+      },
+      {
+        "type": "file",
+        "value": "test-business-flow.ps1"
+      },
+      {
+        "type": "file",
+        "value": "test-neighbor-full-suite.sh"
+      },
+      {
+        "type": "file",
+        "value": "test-neighbor-full.sh"
+      },
+      {
+        "type": "file",
+        "value": "test-neighbor-smoke.sh"
+      },
+      {
+        "type": "file",
+        "value": "generator.html"
+      },
+      {
+        "type": "file",
+        "value": "test.html"
+      },
+      {
+        "type": "file",
+        "value": "package-lock.json"
+      },
+      {
+        "type": "folder",
+        "value": "preview-output"
+      },
+      {
+        "type": "folder",
+        "value": "market-portal"
+      },
+      {
+        "type": "folder",
+        "value": "service-portal"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-channel"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-goods-list"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-product-detail"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-video-list"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-video-category"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-daily-news"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-top-sales"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-hot-video-list"
+      },
+      {
+        "type": "folder",
+        "value": "pages/push-periodic-list"
       }
     ],
     "include": []

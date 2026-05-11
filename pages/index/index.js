@@ -800,23 +800,23 @@ Page({
         image: images.bannerHome, 
         title: '品牌好物', 
         sub: '严选之品，生活之味',
-        url: '/pages/push-channel/push-channel?title=品牌好物' 
+        url: '/package-push/pages/push-channel/push-channel?title=品牌好物' 
       },
       { 
         id: 2, 
         image: images.bannerSale, 
         title: '秋冬好物', 
         sub: '温暖一冬，质感生活',
-        url: '/pages/push-channel/push-channel?title=秋冬好物' 
+        url: '/package-push/pages/push-channel/push-channel?title=秋冬好物' 
       }
     ];
 
     // 模块二：分类金刚
     const pushCategories = mapHomeIcon([
-      { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/pages/push-goods-list/push-goods-list?id=1" },
-      { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/pages/push-goods-list/push-goods-list?id=2" },
-      { name: "本地商城甄选", icon: "/img/local_goods_icons/star.png", url: "/pages/push-goods-list/push-goods-list?id=3" },
-      { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/pages/push-goods-list/push-goods-list?id=4" }
+      { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=1" },
+      { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=2" },
+      { name: "本地商城甄选", icon: "/img/local_goods_icons/star.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=4" }
     ]);
 
     // 模块三：导购窗
