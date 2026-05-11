@@ -60,6 +60,12 @@ const routes = [
                 name: 'ServiceDispatch',
                 component: () => import('../views/ServiceDispatch.vue'),
                 meta: { title: '到家服务派单台', icon: 'Operation' }
+            },
+            {
+                path: 'home-display-config',
+                name: 'HomeDisplayConfig',
+                component: () => import('../views/HomeDisplayConfig.vue'),
+                meta: { title: '首页管理', icon: 'HomeFilled' }
             }
         ]
     }
