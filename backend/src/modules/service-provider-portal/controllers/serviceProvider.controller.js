@@ -251,15 +251,36 @@ exports.getServices = async (req, res) => {
     const limit = Math.min(Math.max(parseInt(query.limit, 10) || 20, 1), 200);
     const offset = (page - 1) * limit;
 
-    const where = { provider_id: profile.id };
-    if (query.status) where.status = String(query.status);
-    if (query.category_key) where.category_key = String(query.category_key);
-    if (query.keyword) {
-      where[db.Sequelize.Op.or] = [
-        { title: { [db.Sequelize.Op.like]: `%${String(query.keyword).trim()}%` } },
-        { name: { [db.Sequelize.Op.like]: `%${String(query.keyword).trim()}%` } }
-      ];
+    const Op = db.Sequelize.Op;
+    const and = [{ provider_id: profile.id }];
+
+    const shelf = query.shelf || query.on_shelf;
+    if (shelf === 'on' || shelf === '1' || shelf === 'published') {
+      and.push({ status: 'on_sale', is_published: 1 });
+    } else if (shelf === 'off' || shelf === '0' || shelf === 'unpublished') {
+      and.push({
+        [Op.or]: [
+          { status: { [Op.ne]: 'on_sale' } },
+          { is_published: { [Op.ne]: 1 } }
+        ]
+      });
+    } else if (query.status) {
+      and.push({ status: String(query.status) });
     }
+
+    if (query.category_key) and.push({ category_key: String(query.category_key) });
+
+    if (query.keyword) {
+      const kw = `%${String(query.keyword).trim()}%`;
+      and.push({
+        [Op.or]: [
+          { title: { [Op.like]: kw } },
+          { name: { [Op.like]: kw } }
+        ]
+      });
+    }
+
+    const where = and.length === 1 ? and[0] : { [Op.and]: and };
 
     const { count, rows } = await ServiceItem.findAndCountAll({
       where,

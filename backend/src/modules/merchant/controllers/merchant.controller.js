@@ -174,6 +174,19 @@ exports.getGoodsList = async (req, res) => {
       return fail(res, '无权查看该店铺商品', 403);
     }
 
+    // 上架筛选：on = 与小程序列表一致（在售且已发布）；off = 其余
+    const shelf = query.shelf || query.on_shelf;
+    const Op = db.Sequelize.Op;
+    if (shelf === 'on' || shelf === '1' || shelf === 'published') {
+      where.status = 'on_sale';
+      where.is_published = 1;
+    } else if (shelf === 'off' || shelf === '0' || shelf === 'unpublished') {
+      where[Op.or] = [
+        { status: { [Op.ne]: 'on_sale' } },
+        { is_published: { [Op.ne]: 1 } }
+      ];
+    }
+
     const { count, rows } = await MerchantGoods.findAndCountAll({
       where,
       order: [['sort_order', 'DESC'], ['created_at', 'DESC']],

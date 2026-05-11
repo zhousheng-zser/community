@@ -53,6 +53,10 @@
         </el-row>
 
         <el-divider />
+        <el-form-item v-if="form.id || form.profile_id" label="档案 ID">
+          <span class="mono">{{ form.profile_id || form.id }}</span>
+          <span class="hint">（联调：node backend/scripts/portal-bind-test.js &lt;userId&gt; --provider-id {{ form.profile_id || form.id }}）</span>
+        </el-form-item>
         <el-form-item label="审核状态">
           <el-tag :type="statusType(form.status)">{{ statusLabel(form.status) }}</el-tag>
           <span v-if="form.reject_reason" class="reject-tip">拒因：{{ form.reject_reason }}</span>
@@ -119,4 +123,6 @@ onMounted(load)
 .page-wrap { padding: 4px; }
 .card-hd { display: flex; justify-content: space-between; align-items: center; }
 .reject-tip { color: #e53e3e; font-size: 13px; margin-left: 12px; }
+.mono { font-family: ui-monospace, monospace; }
+.hint { margin-left: 10px; font-size: 12px; color: #909399; }
 </style>

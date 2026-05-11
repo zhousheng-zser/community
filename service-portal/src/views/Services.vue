@@ -4,9 +4,19 @@
       <template #header>
         <div class="card-hd">
           <span>服务项目管理</span>
-          <el-button type="primary" @click="openCreate">+ 新增服务</el-button>
+          <div class="toolbar">
+            <el-radio-group v-model="shelfFilter" size="small" @change="onShelfFilter">
+              <el-radio-button label="all">全部</el-radio-button>
+              <el-radio-button label="on">已上架</el-radio-button>
+              <el-radio-button label="off">已下架</el-radio-button>
+            </el-radio-group>
+            <el-button type="primary" @click="openCreate">+ 新增服务</el-button>
+          </div>
         </div>
       </template>
+
+      <el-alert type="info" show-icon :closable="false" class="tip-alert"
+        title="「已上架」与小程序可售态一致：在售且已发布；上下架会同步写入数据库。" />
 
       <el-table :data="list" border stripe v-loading="loading" style="width:100%">
         <el-table-column prop="id" label="ID" width="65" />
@@ -23,18 +33,20 @@
           <template #default="s">¥{{ s.row.price }} / {{ s.row.unit || '次' }}</template>
         </el-table-column>
         <el-table-column prop="category_key" label="分类" width="100" />
-        <el-table-column label="状态" width="90">
+        <el-table-column label="上架状态" width="120">
           <template #default="s">
-            <el-tag :type="s.row.is_published ? 'success' : 'info'">
-              {{ s.row.is_published ? '已上架' : '已下架' }}
-            </el-tag>
+            <el-tag v-if="isListed(s.row)" type="success" size="small">小程序可见</el-tag>
+            <template v-else>
+              <el-tag type="info" size="small">未上架</el-tag>
+              <div v-if="s.row.status === 'on_sale' && Number(s.row.is_published) !== 1" class="sub-hint">仅未发布</div>
+            </template>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="s">
             <el-button size="small" type="primary" @click="openEdit(s.row)">编辑</el-button>
-            <el-button size="small" :type="s.row.is_published ? 'warning' : 'success'" @click="toggleShelf(s.row)">
-              {{ s.row.is_published ? '下架' : '上架' }}
+            <el-button size="small" :type="isListed(s.row) ? 'warning' : 'success'" @click="toggleShelf(s.row)">
+              {{ isListed(s.row) ? '下架' : '上架' }}
             </el-button>
             <el-button size="small" type="danger" plain @click="del(s.row)">删除</el-button>
           </template>
@@ -72,6 +84,7 @@ import request from '../utils/request.js'
 
 const loading = ref(false)
 const list = ref([])
+const shelfFilter = ref('all')
 const dialogVisible = ref(false)
 const editing = ref(null)
 const form = ref({})
@@ -83,12 +96,22 @@ function imgUrl(url) {
   return base.replace(/\/api\/v1$/, '') + url
 }
 
+function isListed(row) {
+  return row.status === 'on_sale' && Number(row.is_published) === 1
+}
+
+function onShelfFilter() {
+  load()
+}
+
 async function load() {
   loading.value = true
   try {
-    const res = await request.get('/service-provider/services')
+    const params = {}
+    if (shelfFilter.value === 'on' || shelfFilter.value === 'off') params.shelf = shelfFilter.value
+    const res = await request.get('/service-provider/services', { params })
     const d = res.data || {}
-    list.value = d.data || d.list || (Array.isArray(d) ? d : [])
+    list.value = d.list ?? d.data ?? (Array.isArray(d) ? d : [])
   } catch (e) { ElMessage.error(e.message) }
   finally { loading.value = false }
 }
@@ -122,16 +145,19 @@ async function save() {
 
 async function toggleShelf(row) {
   try {
-    await request.post(`/service-provider/services/${row.id}/shelf`, { is_published: row.is_published ? 0 : 1 })
-    ElMessage.success(row.is_published ? '已下架' : '已上架')
+    const toOn = !isListed(row)
+    await request.post(`/service-provider/services/${row.id}/shelf`, {
+      status: toOn ? 'on_sale' : 'off_sale'
+    })
+    ElMessage.success(toOn ? '已上架（小程序可见）' : '已下架')
     load()
   } catch (e) { ElMessage.error(e.message) }
 }
 
 async function del(row) {
   try {
-    await ElMessageBox.confirm(`确认下架并删除【${row.title}】？`, '确认', { type: 'warning' })
-    await request.post(`/service-provider/services/${row.id}/shelf`, { is_published: 0 })
+    await ElMessageBox.confirm(`确认下架【${row.title}】？`, '确认', { type: 'warning' })
+    await request.post(`/service-provider/services/${row.id}/shelf`, { status: 'off_sale' })
     ElMessage.success('已下架')
     load()
   } catch {}
@@ -142,6 +168,9 @@ onMounted(load)
 
 <style scoped>
 .page-wrap { padding: 4px; }
-.card-hd { display: flex; justify-content: space-between; align-items: center; }
+.card-hd { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tip-alert { margin-bottom: 12px; }
+.sub-hint { font-size: 11px; color: #909399; margin-top: 2px; }
 .empty { color: #ccc; font-size: 12px; }
 </style>

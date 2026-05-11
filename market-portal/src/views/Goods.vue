@@ -4,11 +4,21 @@
       <template #header>
         <div class="card-hd">
           <span>商品管理</span>
-          <el-button type="primary" @click="openCreate">+ 新增商品</el-button>
+          <div class="toolbar">
+            <el-radio-group v-model="shelfFilter" size="small" @change="onShelfFilter">
+              <el-radio-button label="all">全部</el-radio-button>
+              <el-radio-button label="on">已上架</el-radio-button>
+              <el-radio-button label="off">已下架</el-radio-button>
+            </el-radio-group>
+            <el-button type="primary" @click="openCreate">+ 新增商品</el-button>
+          </div>
         </div>
       </template>
 
-      <el-table :data="list" border stripe v-loading="loading" style="width:100%">
+      <el-alert type="info" show-icon :closable="false" class="tip-alert"
+        title="「已上架」与小程序列表一致：状态为在售且已发布；修改后立即写入数据库。" />
+
+      <el-table :data="list" border stripe v-loading="loading" style="width:100%" class="goods-table">
         <el-table-column prop="id" label="ID" width="65" />
         <el-table-column label="图片" width="75">
           <template #default="s">
@@ -26,18 +36,20 @@
         </el-table-column>
         <el-table-column prop="stock" label="库存" width="80" />
         <el-table-column prop="sales_count" label="销量" width="70" />
-        <el-table-column label="状态" width="90">
+        <el-table-column label="上架状态" width="120">
           <template #default="s">
-            <el-tag :type="s.row.status === 'on_sale' ? 'success' : 'info'">
-              {{ s.row.status === 'on_sale' ? '在售' : '下架' }}
-            </el-tag>
+            <el-tag v-if="isListed(s.row)" type="success" size="small">小程序可见</el-tag>
+            <template v-else>
+              <el-tag type="info" size="small">未上架</el-tag>
+              <div v-if="s.row.status === 'on_sale' && Number(s.row.is_published) !== 1" class="sub-hint">仅未发布</div>
+            </template>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="230" fixed="right">
           <template #default="s">
             <el-button size="small" type="primary" @click="openEdit(s.row)">编辑</el-button>
-            <el-button size="small" :type="s.row.status === 'on_sale' ? 'warning' : 'success'" @click="toggleShelf(s.row)">
-              {{ s.row.status === 'on_sale' ? '下架' : '上架' }}
+            <el-button size="small" :type="isListed(s.row) ? 'warning' : 'success'" @click="toggleShelf(s.row)">
+              {{ isListed(s.row) ? '下架' : '上架' }}
             </el-button>
             <el-button size="small" @click="openRestock(s.row)">补货</el-button>
           </template>
@@ -96,6 +108,7 @@ const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
+const shelfFilter = ref('all')
 const dialogVisible = ref(false)
 const editing = ref(null)
 const form = ref({})
@@ -109,12 +122,24 @@ function imgUrl(url) {
   return (import.meta.env.VITE_API_BASE || '/api/v1').replace(/\/api\/v1$/, '') + url
 }
 
+/** 与集市小程序列表一致：在售 + 已发布 */
+function isListed(row) {
+  return row.status === 'on_sale' && Number(row.is_published) === 1
+}
+
+function onShelfFilter() {
+  page.value = 1
+  load()
+}
+
 async function load() {
   loading.value = true
   try {
-    const res = await request.get('/merchant/goods', { params: { page: page.value, limit: pageSize.value } })
+    const params = { page: page.value, limit: pageSize.value }
+    if (shelfFilter.value === 'on' || shelfFilter.value === 'off') params.shelf = shelfFilter.value
+    const res = await request.get('/merchant/goods', { params })
     const d = res.data || {}
-    list.value = d.data || d.list || []
+    list.value = d.list ?? d.data ?? []
     total.value = d.total || 0
   } catch (e) { ElMessage.error(e.message) }
   finally { loading.value = false }
@@ -149,9 +174,9 @@ async function save() {
 
 async function toggleShelf(row) {
   try {
-    const newStatus = row.status === 'on_sale' ? 'off_sale' : 'on_sale'
-    await request.post(`/merchant/goods/${row.id}/shelf`, { status: newStatus })
-    ElMessage.success(newStatus === 'on_sale' ? '已上架' : '已下架')
+    const toOn = !isListed(row)
+    await request.post(`/merchant/goods/${row.id}/shelf`, { status: toOn ? 'on_sale' : 'off_sale' })
+    ElMessage.success(toOn ? '已上架（小程序可见）' : '已下架')
     load()
   } catch (e) { ElMessage.error(e.message) }
 }
@@ -175,7 +200,10 @@ onMounted(load)
 
 <style scoped>
 .page-wrap { padding: 4px; }
-.card-hd { display: flex; justify-content: space-between; align-items: center; }
+.card-hd { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tip-alert { margin-bottom: 12px; }
+.sub-hint { font-size: 11px; color: #909399; margin-top: 2px; }
 .empty { color: #ccc; font-size: 12px; }
 .original-price { font-size: 11px; color: #a0aec0; text-decoration: line-through; margin-left: 4px; }
 </style>
