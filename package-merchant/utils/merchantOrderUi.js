@@ -12,8 +12,9 @@ const TAB_DEF = [
 ];
 
 function inferBucket(o) {
-  const t = String(o.statusText || o.status_text || o.status || '').toLowerCase();
-  const code = String(o.status != null ? o.status : o.status_code || '').toLowerCase();
+  const statusRaw = o.status || o.order_status || '';
+  const t = String(o.statusText || o.status_text || statusRaw || '').toLowerCase();
+  const code = String(statusRaw || o.status_code || '').toLowerCase();
   const hay = `${t} ${code}`;
 
   if (/退|售后|退款|refund|after/.test(hay)) return 'after_sale';
@@ -34,7 +35,8 @@ function formatTimeLine(t) {
 function enrichItem(o) {
   const orderNo = o.order_no || o.orderNo || o.id;
   const rowId = o.id != null ? o.id : orderNo;
-  const statusText = o.status_text || o.status_label || o.status || '处理中';
+  const statusRaw = o.status || o.order_status || '';
+  const statusText = o.status_text || o.status_label || statusRaw || '处理中';
   const title = o.goods_title || o.title || o.shop_name || '购物订单';
   const time = o.created_at || o.createdAt || '';
   const bucket = inferBucket(Object.assign({}, o, { statusText, status_text: statusText }));

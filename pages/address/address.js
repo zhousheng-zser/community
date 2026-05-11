@@ -252,9 +252,9 @@ Page({
     wx.showLoading({ title: '保存中...' });
     try {
       if (form.id) {
-        await util.post('user/addresses/' + form.id, payload);
+        await api.user.updateAddress(form.id, payload);
       } else {
-        await util.post('user/addresses', payload);
+        await api.user.addAddress(payload);
       }
       wx.hideLoading();
       wx.showToast({ title: '保存成功', icon: 'success' });
@@ -301,7 +301,7 @@ Page({
     } catch (e) {
       // 本地模拟
       let list = this.data.list.map(item =>
-        Object.assign({}, item, { isDefault: item.id === id })
+        Object.assign({}, item, { isDefault: item.id == id })
       );
       wx.setStorageSync('address_list', list);
       this.setData({ list });
@@ -364,12 +364,13 @@ Page({
       success: async (res) => {
         if (!res.confirm) return;
         try {
-          await util.post('user/addresses/' + id + '/delete', {});
+          await api.user.deleteAddress(id);
           notifyHomeMarketAddressChanged();
+          wx.showToast({ title: '已删除', icon: 'success' });
           this.loadAddresses();
         } catch (err) {
           // 本地模拟
-          let list = this.data.list.filter(item => item.id !== id);
+          let list = this.data.list.filter(item => item.id != id);
           wx.setStorageSync('address_list', list);
           this.setData({ list });
           notifyHomeMarketAddressChanged();
