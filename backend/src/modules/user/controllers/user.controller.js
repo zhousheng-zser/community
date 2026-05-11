@@ -315,3 +315,138 @@ exports.clearFootprints = async (req, res) => {
     fail(res, '清空足迹失败', 500);
   }
 };
+
+// ─── 服务/服务商收藏 ─────────────────────────────────────────────────────────
+
+const { ServiceFavorite } = require('../../../models');
+
+// POST /user/service-favorites - 添加收藏
+exports.addServiceFav = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { kind, target_id, title, cover, price, url } = req.body || {};
+    if (!kind || !target_id || !url) return fail(res, '参数不完整');
+
+    const [row] = await ServiceFavorite.upsert({
+      user_id: userId,
+      kind: String(kind).slice(0, 32),
+      target_id: Number(target_id),
+      title: String(title || '').slice(0, 200),
+      cover: String(cover || '').slice(0, 500),
+      price: String(price || '').slice(0, 32),
+      url: String(url).slice(0, 500)
+    });
+
+    ok(res, { id: row.id });
+  } catch (err) {
+    console.error('[user/service-favorites] add', err);
+    fail(res, '收藏失败', 500);
+  }
+};
+
+// DELETE /user/service-favorites - 取消收藏
+exports.removeServiceFav = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { kind, target_id } = req.body || {};
+    if (!kind || !target_id) return fail(res, '参数不完整');
+
+    await ServiceFavorite.destroy({
+      where: { user_id: userId, kind, target_id: Number(target_id) }
+    });
+    ok(res, null, '已取消收藏');
+  } catch (err) {
+    console.error('[user/service-favorites] remove', err);
+    fail(res, '取消收藏失败', 500);
+  }
+};
+
+// GET /user/service-favorites - 获取列表
+exports.getServiceFavs = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+
+    const kind = req.query.kind || null;
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+
+    const where = { user_id: userId };
+    if (kind) where.kind = kind;
+
+    const result = await ServiceFavorite.findAndCountAll({
+      where,
+      order: [['updated_at', 'DESC']],
+      limit,
+      offset,
+      attributes: ['id', 'kind', 'target_id', 'title', 'cover', 'price', 'url', 'updated_at']
+    });
+
+    const list = result.rows.map(r => ({
+      kind: r.kind,
+      id: r.target_id,
+      dedupeKey: `${r.kind}:${r.target_id}`,
+      title: r.title,
+      cover: r.cover,
+      price: r.price,
+      url: r.url,
+      t: new Date(r.updated_at).getTime()
+    }));
+
+    ok(res, { list, total: result.count, page });
+  } catch (err) {
+    console.error('[user/service-favorites] list', err);
+    fail(res, '获取收藏失败', 500);
+  }
+};
+
+// POST /user/service-favorites/batch - 批量同步（本地→后端）
+exports.batchServiceFavs = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { list } = req.body || {};
+    if (!Array.isArray(list) || !list.length) return fail(res, '空列表');
+
+    const rows = list.slice(0, 200).map(item => ({
+      user_id: userId,
+      kind: String(item.kind || '').slice(0, 32),
+      target_id: Number(item.id || item.target_id || 0),
+      title: String(item.title || '').slice(0, 200),
+      cover: String(item.cover || '').slice(0, 500),
+      price: String(item.price || '').slice(0, 32),
+      url: String(item.url || '').slice(0, 500)
+    })).filter(r => r.kind && r.target_id && r.url);
+
+    if (rows.length) {
+      await ServiceFavorite.bulkCreate(rows, {
+        updateOnDuplicate: ['title', 'cover', 'price', 'url', 'updated_at']
+      });
+    }
+    ok(res, { synced: rows.length });
+  } catch (err) {
+    console.error('[user/service-favorites] batch', err);
+    fail(res, '同步失败', 500);
+  }
+};
+
+// GET /user/service-favorites/check - 检查是否已收藏
+exports.checkServiceFav = async (req, res) => {
+  try {
+    const userId = req.user && req.user.id;
+    if (!userId) return fail(res, '未登录', 401);
+    const { kind, target_id } = req.query;
+    if (!kind || !target_id) return fail(res, '参数不完整');
+
+    const row = await ServiceFavorite.findOne({
+      where: { user_id: userId, kind, target_id: Number(target_id) }
+    });
+    ok(res, { favorited: !!row });
+  } catch (err) {
+    console.error('[user/service-favorites] check', err);
+    fail(res, '查询失败', 500);
+  }
+};

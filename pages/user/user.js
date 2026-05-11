@@ -244,6 +244,7 @@ Page({
       });
       this.loadCommissionBalance();
       browseFootprint.syncLocalToServer();
+      serviceFavStore.syncLocalToServer();
     }).catch(() => {
       this.setData({ balance: '0.00' });
     });

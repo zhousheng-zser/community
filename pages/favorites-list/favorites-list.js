@@ -34,8 +34,8 @@ Page({
     this.setData({ tab });
   },
 
-  loadServiceList() {
-    const serviceList = serviceFavStore.getAll();
+  async loadServiceList() {
+    const serviceList = await serviceFavStore.fetchList();
     this.setData({ serviceList });
   },
 

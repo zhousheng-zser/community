@@ -1,10 +1,9 @@
 /**
- * 服务/服务商 收藏（本地 Storage）
- *
- * 参考 browseFootprint.js，用本地 Storage 存储服务和服务商的收藏。
- * 与 favoritesStore.js（仅市场商品）独立，互不干扰。
+ * 服务/服务商 收藏 — 后端优先 + 本地 Storage 备份
  */
-const KEY = 'user_service_favorites_v1';
+const { get, post } = require('../utils/util.js');
+
+const LOCAL_KEY = 'user_service_favorites_v1';
 const MAX = 200;
 
 const KIND_LABELS = {
@@ -12,27 +11,57 @@ const KIND_LABELS = {
   service_provider: '服务商'
 };
 
+// ─── 本地存储 ────────────────────────────────────────────────────────────────
+
 function getAll() {
   try {
-    const arr = wx.getStorageSync(KEY);
+    const arr = wx.getStorageSync(LOCAL_KEY);
     return Array.isArray(arr) ? arr : [];
   } catch (e) { return []; }
 }
 
 function saveAll(arr) {
-  try { wx.setStorageSync(KEY, arr); } catch (e) {}
+  try { wx.setStorageSync(LOCAL_KEY, arr); } catch (e) {}
 }
 
-/**
- * 添加收藏
- * @param {Object} opt
- * @param {string} opt.kind - 'service' | 'service_provider'
- * @param {string|number} opt.id - 服务ID或服务商ID
- * @param {string} opt.title
- * @param {string} [opt.cover]
- * @param {string} [opt.price]
- * @param {string} opt.url - 跳转路径（/ 开头）
- */
+function isLoggedIn() {
+  return !!wx.getStorageSync('token');
+}
+
+// ─── 后端 API ────────────────────────────────────────────────────────────────
+
+function apiAdd(opt) {
+  return post('/user/service-favorites', {
+    kind: opt.kind,
+    target_id: opt.id,
+    title: opt.title,
+    cover: opt.cover,
+    price: opt.price || '',
+    url: opt.url
+  }).catch(() => {});
+}
+
+function apiRemove(kind, id) {
+  return post('/user/service-favorites/remove', { kind, target_id: id }).catch(() => {});
+}
+
+function apiGetList(kind, page, limit) {
+  const params = { page, limit };
+  if (kind) params.kind = kind;
+  return get('/user/service-favorites', params);
+}
+
+function apiBatchSync(list) {
+  if (!list.length) return Promise.resolve();
+  return post('/user/service-favorites/batch', { list }).catch(() => {});
+}
+
+function apiCheck(kind, id) {
+  return get('/user/service-favorites/check', { kind, target_id: id });
+}
+
+// ─── 对外接口 ────────────────────────────────────────────────────────────────
+
 function add(opt) {
   if (!opt || !opt.kind || !opt.id || !opt.url) return;
   const dedupeKey = `${opt.kind}:${opt.id}`;
@@ -49,11 +78,15 @@ function add(opt) {
   });
   list = list.slice(0, MAX);
   saveAll(list);
+
+  if (isLoggedIn()) apiAdd(opt);
 }
 
 function remove(kind, id) {
   const dedupeKey = `${kind}:${id}`;
   saveAll(getAll().filter(x => x.dedupeKey !== dedupeKey));
+
+  if (isLoggedIn()) apiRemove(kind, id);
 }
 
 function has(kind, id) {
@@ -68,6 +101,31 @@ function toggle(opt) {
   } else {
     add(opt);
     return true;
+  }
+}
+
+/**
+ * 获取收藏列表（优先后端，降级本地）
+ */
+async function fetchList(kind) {
+  if (!isLoggedIn()) {
+    const all = getAll();
+    return kind ? all.filter(x => x.kind === kind) : all;
+  }
+  try {
+    const res = await apiGetList(kind, 1, MAX);
+    const data = res && res.data ? res.data : res;
+    if (data && Array.isArray(data.list) && data.list.length > 0) {
+      // 合并到本地缓存
+      const remote = data.list;
+      saveAll(remote);
+      return kind ? remote.filter(x => x.kind === kind) : remote;
+    }
+    const all = getAll();
+    return kind ? all.filter(x => x.kind === kind) : all;
+  } catch (e) {
+    const all = getAll();
+    return kind ? all.filter(x => x.kind === kind) : all;
   }
 }
 
@@ -97,6 +155,15 @@ function open(item) {
   });
 }
 
+/**
+ * 登录后将本地收藏同步到后端
+ */
+function syncLocalToServer() {
+  if (!isLoggedIn()) return;
+  const list = getAll();
+  if (list.length > 0) apiBatchSync(list);
+}
+
 module.exports = {
   KIND_LABELS,
   add,
@@ -104,8 +171,10 @@ module.exports = {
   has,
   toggle,
   getList,
+  fetchList,
   getAll,
   count,
   clear,
-  open
+  open,
+  syncLocalToServer
 };

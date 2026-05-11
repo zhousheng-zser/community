@@ -18,5 +18,10 @@ router.post('/footprints', ctrl.recordFootprint);
 router.post('/footprints/batch', ctrl.batchFootprints);
 router.get('/footprints', ctrl.getFootprints);
 router.delete('/footprints', ctrl.clearFootprints);
+router.post('/service-favorites', ctrl.addServiceFav);
+router.post('/service-favorites/remove', ctrl.removeServiceFav);
+router.get('/service-favorites', ctrl.getServiceFavs);
+router.post('/service-favorites/batch', ctrl.batchServiceFavs);
+router.get('/service-favorites/check', ctrl.checkServiceFav);
 
 module.exports = router;
