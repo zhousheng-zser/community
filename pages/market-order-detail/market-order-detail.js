@@ -8,7 +8,7 @@ const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
   pending_service: { text: '备货中', class: 'primary' },
-  pending_receipt: { text: '待收货', class: 'primary' },
+  pending_receipt: { text: '待确认收货', class: 'primary' },
   paid: { text: '待接单', class: 'primary' },
   delivering: { text: '待收货', class: 'primary' },
   closed: { text: '已取消', class: 'cancel' },

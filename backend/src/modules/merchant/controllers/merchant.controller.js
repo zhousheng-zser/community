@@ -1,5 +1,5 @@
 const db = require('../../../models');
-const { MerchantShop, MerchantGoods, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
+const { MerchantShop, MerchantGoods, MarketOrder, MarketOrderItem, MarketRefundOrder, User } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
@@ -432,6 +432,19 @@ exports.getOrders = async (req, res) => {
       limit,
       offset
     });
+    const buyerIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+    let buyerNickMap = {};
+    if (buyerIds.length && User) {
+      const buyers = await User.findAll({
+        where: { id: buyerIds },
+        attributes: ['id', 'nickname', 'userName', 'name', 'phone', 'userMobile']
+      });
+      buyers.forEach((u) => {
+        const plain = u.get ? u.get({ plain: true }) : u;
+        const nm = plain.nickname || plain.userName || plain.name || plain.phone || plain.userMobile || '';
+        buyerNickMap[plain.id] = nm;
+      });
+    }
     const list = [];
     for (const row of rows) {
       const items = await MarketOrderItem.findAll({ where: { order_no: row.order_no } });
@@ -440,6 +453,7 @@ exports.getOrders = async (req, res) => {
         order_no: row.order_no,
         user_id: row.user_id,
         buyer_user_id: row.user_id,
+        buyer_nickname: buyerNickMap[row.user_id] || '',
         order_status: row.order_status,
         pay_status: row.pay_status,
         payable_amount: Number(row.payable_amount).toFixed(2),

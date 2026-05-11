@@ -23,7 +23,7 @@ export const SERVICE_ORDER_STATUS_TEXT = {
     [SERVICE_ORDER_STATUS.PENDING_WORKER_ACCEPT]: '待技师接单',
     [SERVICE_ORDER_STATUS.DISPATCHED]: '已派单',
     [SERVICE_ORDER_STATUS.IN_SERVICE]: '服务中',
-    [SERVICE_ORDER_STATUS.PENDING_USER_CONFIRM]: '待确认',
+    [SERVICE_ORDER_STATUS.PENDING_USER_CONFIRM]: '待确认完成',
     [SERVICE_ORDER_STATUS.COMPLETED]: '已完成',
     [SERVICE_ORDER_STATUS.CANCELLED]: '已取消',
     [SERVICE_ORDER_STATUS.REFUNDED]: '已退款'
@@ -59,8 +59,8 @@ export const NEIGHBOR_ASSIST_STATUS_TEXT = {
 export const MARKET_ORDER_STATUS = {
     PENDING_PAYMENT: 'pending_payment',  // 待付款
     PENDING_ACCEPT: 'pending_accept',    // 待接单
-    PENDING_SERVICE: 'pending_service',  // 备货中
-    PENDING_RECEIPT: 'pending_receipt',  // 待收货
+    PENDING_SERVICE: 'pending_service',  // 备货配送中
+    PENDING_RECEIPT: 'pending_receipt',  // 待确认收货
     COMPLETED: 'completed',              // 已完成
     CANCELLED: 'cancelled',              // 已取消
     REFUNDED: 'refunded'                 // 已退款
@@ -70,8 +70,8 @@ export const MARKET_ORDER_STATUS = {
 export const MARKET_ORDER_STATUS_TEXT = {
     [MARKET_ORDER_STATUS.PENDING_PAYMENT]: '待付款',
     [MARKET_ORDER_STATUS.PENDING_ACCEPT]: '待接单',
-    [MARKET_ORDER_STATUS.PENDING_SERVICE]: '备货中',
-    [MARKET_ORDER_STATUS.PENDING_RECEIPT]: '待收货',
+    [MARKET_ORDER_STATUS.PENDING_SERVICE]: '备货配送中',
+    [MARKET_ORDER_STATUS.PENDING_RECEIPT]: '待确认收货',
     [MARKET_ORDER_STATUS.COMPLETED]: '已完成',
     [MARKET_ORDER_STATUS.CANCELLED]: '已取消',
     [MARKET_ORDER_STATUS.REFUNDED]: '已退款'

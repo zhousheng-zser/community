@@ -6,8 +6,8 @@ const config = require('../../utils/config.js');
 const MARKET_STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
-  pending_service: { text: '备货中', class: 'primary' },
-  pending_receipt: { text: '待收货', class: 'primary' },
+  pending_service: { text: '备货配送中', class: 'primary' },
+  pending_receipt: { text: '待确认收货', class: 'primary' },
   completed: { text: '已完成', class: 'done' },
   cancelled: { text: '已取消', class: 'cancel' },
   refunded: { text: '已退款', class: 'cancel' }
@@ -15,11 +15,11 @@ const MARKET_STATUS_MAP = {
 
 const SERVICE_STATUS_MAP = {
   pending_pay: { text: '待付款', class: 'primary' },
-  paid_pending_dispatch: { text: '待平台派单', class: 'primary' },
+  paid_pending_dispatch: { text: '待上门', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
   dispatched: { text: '已派单', class: 'primary' },
   in_service: { text: '服务中', class: 'primary' },
-  pending_user_confirm: { text: '待确认', class: 'primary' },
+  pending_user_confirm: { text: '待确认完成', class: 'primary' },
   completed: { text: '已完成', class: 'done' },
   cancelled: { text: '已取消', class: 'cancel' },
   refunded: { text: '已退款', class: 'cancel' }
@@ -29,8 +29,8 @@ const MARKET_TABS = [
   { key: 'all', label: '全部' },
   { key: 'pending_payment', label: '待付款' },
   { key: 'pending_accept', label: '待接单' },
-  { key: 'pending_service', label: '待服务/备货中' },
-  { key: 'pending_receipt', label: '待收货' },
+  { key: 'pending_service', label: '备货配送中' },
+  { key: 'pending_receipt', label: '待确认收货' },
   { key: 'completed', label: '已完成' },
   { key: 'cancelled', label: '已取消' },
   { key: 'refunded', label: '已退款' }
@@ -39,11 +39,11 @@ const MARKET_TABS = [
 const SERVICE_TABS = [
   { key: 'all', label: '全部' },
   { key: 'pending_pay', label: '待付款' },
-  { key: 'paid_pending_dispatch', label: '待派单' },
+  { key: 'paid_pending_dispatch', label: '待上门' },
   { key: 'pending_accept', label: '待接单' },
   { key: 'dispatched', label: '已派单' },
   { key: 'in_service', label: '服务中' },
-  { key: 'pending_user_confirm', label: '待确认' },
+  { key: 'pending_user_confirm', label: '待确认完成' },
   { key: 'completed', label: '已完成' },
   { key: 'cancelled', label: '已取消' },
   { key: 'refunded', label: '已退款' }

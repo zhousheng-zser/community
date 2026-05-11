@@ -5,13 +5,14 @@
         <div class="card-hd">
           <span>订单管理</span>
           <div class="toolbar">
-            <el-select v-model="filter.status" placeholder="全部状态" clearable style="width:150px" @change="load">
+            <el-select v-model="filter.status" placeholder="全部状态" clearable style="width:168px" @change="load">
               <el-option label="待接单" value="pending_accept" />
               <el-option label="待上门" value="paid_pending_dispatch" />
               <el-option label="服务中" value="in_service" />
-              <el-option label="待用户确认" value="pending_user_confirm" />
+              <el-option label="待用户确认完成" value="pending_user_confirm" />
               <el-option label="已完成" value="completed" />
               <el-option label="已取消" value="cancelled" />
+              <el-option label="已退款" value="refunded" />
             </el-select>
             <el-button @click="load">刷新</el-button>
           </div>
@@ -33,19 +34,19 @@
         <el-table-column label="预约时间" width="160">
           <template #default="s">{{ fmt(s.row.appointment_time) }}</template>
         </el-table-column>
-        <el-table-column label="状态" width="110">
+        <el-table-column label="状态" width="140">
           <template #default="s">
             <el-tag :type="statusTagType(s.row.status)">{{ statusLabel(s.row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right">
+        <el-table-column label="操作" width="268" fixed="right">
           <template #default="s">
             <el-button size="small" @click="openDetail(s.row)">详情</el-button>
             <el-button v-if="s.row.status === 'pending_accept'" size="small" type="primary" @click="doAction(s.row, 'accept')">接单</el-button>
             <el-button v-if="s.row.status === 'pending_accept'" size="small" type="danger" plain @click="doAction(s.row, 'reject')">拒绝</el-button>
             <el-button v-if="s.row.status === 'paid_pending_dispatch'" size="small" type="success" @click="doAction(s.row, 'check-in')">到达打卡</el-button>
             <el-button v-if="s.row.status === 'in_service'" size="small" type="primary" @click="doAction(s.row, 'complete')">完成服务</el-button>
-            <el-button v-if="s.row.status === 'pending_user_confirm'" size="small" type="info" disabled>待用户确认</el-button>
+            <el-button v-if="s.row.status === 'pending_user_confirm'" size="small" type="info" disabled>待用户确认完成</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -93,8 +94,9 @@ const STATUS_MAP = {
   pending_pay: { label: '待支付', type: 'info' },
   pending_accept: { label: '待接单', type: 'warning' },
   paid_pending_dispatch: { label: '待上门', type: 'warning' },
+  dispatched: { label: '已派单', type: 'warning' },
   in_service: { label: '服务中', type: 'primary' },
-  pending_user_confirm: { label: '待确认', type: 'primary' },
+  pending_user_confirm: { label: '待用户确认完成', type: 'primary' },
   completed: { label: '已完成', type: 'success' },
   cancelled: { label: '已取消', type: 'danger' },
   refunded: { label: '已退款', type: 'danger' }
