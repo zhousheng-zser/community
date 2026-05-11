@@ -4,6 +4,7 @@ const images = require('../../utils/images.js');
 const { buildServiceMockMap } = require('../../utils/serviceMockData.js');
 const { listImageFromHome3, home3PathForTitle } = require('../../utils/serviceHome3.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
+const serviceFavStore = require('../../utils/serviceFavStore.js');
 
 Page({
   data: {
@@ -14,7 +15,8 @@ Page({
     service: {},
     specs: [],
     detailImages: [],
-    descText: ""
+    descText: "",
+    favorited: false
   },
   async onLoad(options) {
     const sys = wx.getSystemInfoSync();
@@ -101,6 +103,32 @@ Page({
         url
       });
     } catch (e) {}
+
+    this.setData({ favorited: serviceFavStore.has('service', this.data.serviceId) });
+  },
+
+  onShow() {
+    if (this.data.serviceId) {
+      this.setData({ favorited: serviceFavStore.has('service', this.data.serviceId) });
+    }
+  },
+
+  toggleFavorite() {
+    const svc = this.data.service || {};
+    const sid = this.data.serviceId;
+    let url = `/pages/service/service?id=${encodeURIComponent(String(sid))}`;
+    if (this.data.workerId != null) url += `&worker_id=${encodeURIComponent(String(this.data.workerId))}`;
+    if (this.data.groupKey) url += `&group_key=${encodeURIComponent(this.data.groupKey)}`;
+    const now = serviceFavStore.toggle({
+      kind: 'service',
+      id: sid,
+      title: svc.title || '服务',
+      cover: svc.banner || '',
+      price: svc.price != null ? String(svc.price) : '',
+      url
+    });
+    this.setData({ favorited: now });
+    wx.showToast({ title: now ? '已收藏' : '已取消收藏', icon: 'none' });
   },
   orderConfrim() {
     const svc = this.data.service || {};

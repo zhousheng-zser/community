@@ -28,7 +28,7 @@
     </view>
 
     <view class="header-stats">
-      <view class="hstat">
+      <view class="hstat" bindtap="showPointsRule">
         <view class="hstat-icon-wrap">
           <image class="hstat-icon-img" src="/img/home_icons2/points.png" mode="aspectFit"></image>
         </view>

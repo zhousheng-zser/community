@@ -1,9 +1,12 @@
 const util = require('../../utils/util.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
+const serviceFavStore = require('../../utils/serviceFavStore.js');
 
 Page({
   data: {
+    tab: 'goods', // 'goods' | 'service'
     list: [],
+    serviceList: [],
     loading: true,
     loadingMore: false,
     hasMore: true,
@@ -11,19 +14,29 @@ Page({
     pageSize: 20,
     total: 0,
     loggedIn: false,
-    isLocal: false   // true = API 未就绪，使用本地 Storage 临时存储
+    isLocal: false
   },
 
   onShow() {
     const loggedIn = favoritesStore.isLoggedIn();
     this.setData({ loggedIn });
     if (loggedIn) {
-      // 每次进入页面都从第一页刷新
       this.setData({ page: 1, list: [], hasMore: true });
       this.loadList(true);
     } else {
       this.setData({ loading: false, list: [] });
     }
+    this.loadServiceList();
+  },
+
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab || 'goods';
+    this.setData({ tab });
+  },
+
+  loadServiceList() {
+    const serviceList = serviceFavStore.getAll();
+    this.setData({ serviceList });
   },
 
   async loadList(reset = false) {
@@ -118,5 +131,29 @@ Page({
 
   goLogin() {
     wx.navigateTo({ url: '/pages/login/login' });
+  },
+
+  goService(e) {
+    const { url } = e.currentTarget.dataset;
+    if (!url) return;
+    wx.navigateTo({
+      url,
+      fail() { wx.switchTab({ url: '/pages/index/index' }); }
+    });
+  },
+
+  onRemoveService(e) {
+    const { kind, id } = e.currentTarget.dataset;
+    if (!kind || !id) return;
+    wx.showModal({
+      title: '取消收藏',
+      content: '确定要取消收藏吗？',
+      success: (res) => {
+        if (!res.confirm) return;
+        serviceFavStore.remove(kind, id);
+        this.loadServiceList();
+        wx.showToast({ title: '已取消收藏', icon: 'success' });
+      }
+    });
   }
 });

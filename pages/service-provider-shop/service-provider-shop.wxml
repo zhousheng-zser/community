@@ -42,6 +42,10 @@
 </view>
 
 <view class="sps-bar">
+  <view class="sps-fav {{favorited ? 'sps-fav-active' : ''}}" bindtap="toggleFavorite">
+    <text class="sps-fav-icon">{{favorited ? '★' : '☆'}}</text>
+    <text class="sps-fav-text">{{favorited ? '已收藏' : '收藏'}}</text>
+  </view>
   <view class="sps-total">合计 ￥{{totalText}}</view>
   <view class="sps-go" bindtap="checkout">去结算</view>
 </view>

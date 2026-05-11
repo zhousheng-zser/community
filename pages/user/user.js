@@ -7,6 +7,7 @@ const balance = require('../../utils/balance.js');
 const localPrefs = require('../../utils/localPrefs.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
+const serviceFavStore = require('../../utils/serviceFavStore.js');
 
 Page({
   data: {
@@ -97,6 +98,26 @@ Page({
     this.setData({ workbenchCollapsed: !this.data.workbenchCollapsed });
   },
 
+  showPointsRule() {
+    wx.showModal({
+      title: '积分规则',
+      content: '每完成一笔订单，实际支付金额×10即为获得积分（如支付25.2元得252积分）。退款成功后将扣除对应积分。',
+      showCancel: false,
+      confirmText: '知道了'
+    });
+  },
+
+  async loadCommissionBalance() {
+    try {
+      const res = await api.promoter.getCommission();
+      const data = res.data || res;
+      const available = Number(data.available_amount || data.availAcount || 0);
+      this.setData({ balance: available.toFixed(2) });
+    } catch (e) {
+      // keep existing balance
+    }
+  },
+
   async goWorkerPortal() {
     rolePortals.navigateToWorkerHome();
   },
@@ -177,9 +198,10 @@ Page({
   async loadFavoriteCount() {
     try {
       const { total } = await favoritesStore.fetchList({ page: 1, page_size: 1 });
-      this.setData({ favoriteCount: total || 0 });
+      const svcCount = serviceFavStore.count();
+      this.setData({ favoriteCount: (total || 0) + svcCount });
     } catch (e) {
-      this.setData({ favoriteCount: 0 });
+      this.setData({ favoriteCount: serviceFavStore.count() });
     }
   },
 
@@ -217,8 +239,10 @@ Page({
       this.setData({
         balance: balanceValue,
         user,
-        roleLabel: this.computeRoleLabel(user)
+        roleLabel: this.computeRoleLabel(user),
+        points: data.points != null ? Number(data.points) : (user.points || this.data.points || 0)
       });
+      this.loadCommissionBalance();
     }).catch(() => {
       this.setData({ balance: '0.00' });
     });

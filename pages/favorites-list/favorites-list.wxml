@@ -1,69 +1,108 @@
 <view class="fp-page">
 
+  <!-- Tab 切换 -->
+  <view class="fp-tabs">
+    <view class="fp-tab {{tab === 'goods' ? 'fp-tab-active' : ''}}" bindtap="switchTab" data-tab="goods">集市商品</view>
+    <view class="fp-tab {{tab === 'service' ? 'fp-tab-active' : ''}}" bindtap="switchTab" data-tab="service">服务收藏</view>
+  </view>
+
   <!-- 本地模式提示（API 未就绪时） -->
-  <view class="fp-local-tip" wx:if="{{isLocal && loggedIn}}">
+  <view class="fp-local-tip" wx:if="{{isLocal && loggedIn && tab === 'goods'}}">
     <text>💾 当前处于本地存储模式，换设备后收藏可能丢失</text>
   </view>
 
-  <!-- 未登录 -->
-  <view class="fp-unlogin" wx:if="{{!loggedIn}}">
-    <text class="fp-empty-icon">🔐</text>
-    <text class="fp-empty-text">请先登录</text>
-    <text class="fp-empty-sub">登录后即可查看云端收藏夹，换设备也不丢失</text>
-    <button class="fp-login-btn" bindtap="goLogin">去登录</button>
-  </view>
-
-  <block wx:elif="{{loggedIn}}">
-
-    <!-- 工具栏 -->
-    <view class="fp-toolbar" wx:if="{{!loading}}">
-      <text class="fp-hint">共收藏 {{total}} 件</text>
+  <!-- ========= 集市商品 Tab ========= -->
+  <block wx:if="{{tab === 'goods'}}">
+    <!-- 未登录 -->
+    <view class="fp-unlogin" wx:if="{{!loggedIn}}">
+      <text class="fp-empty-icon">🔐</text>
+      <text class="fp-empty-text">请先登录</text>
+      <text class="fp-empty-sub">登录后即可查看云端收藏夹，换设备也不丢失</text>
+      <button class="fp-login-btn" bindtap="goLogin">去登录</button>
     </view>
 
-    <!-- 加载中骨架 -->
-    <view class="fp-skeleton" wx:if="{{loading}}">
-      <view class="fp-skel-item" wx:for="{{[1,2,3]}}" wx:key="*this"></view>
+    <block wx:elif="{{loggedIn}}">
+      <!-- 工具栏 -->
+      <view class="fp-toolbar" wx:if="{{!loading}}">
+        <text class="fp-hint">共收藏 {{total}} 件</text>
+      </view>
+
+      <!-- 加载中骨架 -->
+      <view class="fp-skeleton" wx:if="{{loading}}">
+        <view class="fp-skel-item" wx:for="{{[1,2,3]}}" wx:key="*this"></view>
+      </view>
+
+      <!-- 列表 -->
+      <view class="fp-list" wx:elif="{{list.length > 0}}">
+        <view class="fp-item" wx:for="{{list}}" wx:key="goodsId">
+          <view class="fp-main" bindtap="goGoods"
+            data-goods-id="{{item.goodsId}}"
+            data-shop-id="{{item.shopId}}"
+            data-cover="{{item.cover}}"
+            data-goods-name="{{item.goodsName}}"
+            data-price="{{item.price}}">
+            <view class="fp-cover-wrap">
+              <image class="fp-cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}"></image>
+              <view class="fp-cover fp-cover-placeholder" wx:else>🛍</view>
+              <view class="fp-off-tag" wx:if="{{item.status === 0}}">已下架</view>
+            </view>
+            <view class="fp-body">
+              <text class="fp-title {{item.status === 0 ? 'muted' : ''}}">{{item.goodsName}}</text>
+              <view class="fp-meta">
+                <text class="fp-shop">{{item.shopName}}</text>
+                <text class="fp-price" wx:if="{{item.price}}">￥{{item.price}}</text>
+              </view>
+            </view>
+            <text class="fp-arrow">›</text>
+          </view>
+          <view class="fp-unfav" catchtap="onRemove" data-goods-id="{{item.goodsId}}">取消</view>
+        </view>
+
+        <!-- 加载更多 -->
+        <view class="fp-load-more" wx:if="{{loadingMore}}">加载中…</view>
+        <view class="fp-no-more" wx:elif="{{!hasMore && list.length > 0}}">— 已全部加载 —</view>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:elif="{{!loading}}" class="fp-empty">
+        <text class="fp-empty-icon">⭐</text>
+        <text class="fp-empty-text">暂无收藏</text>
+        <text class="fp-empty-sub">在商品详情页点击「收藏」可将商品加入收藏夹</text>
+      </view>
+    </block>
+  </block>
+
+  <!-- ========= 服务收藏 Tab ========= -->
+  <block wx:if="{{tab === 'service'}}">
+    <view class="fp-toolbar" wx:if="{{serviceList.length > 0}}">
+      <text class="fp-hint">共收藏 {{serviceList.length}} 项</text>
     </view>
 
-    <!-- 列表 -->
-    <view class="fp-list" wx:elif="{{list.length > 0}}">
-      <view class="fp-item" wx:for="{{list}}" wx:key="goodsId">
-        <view class="fp-main" bindtap="goGoods"
-          data-goods-id="{{item.goodsId}}"
-          data-shop-id="{{item.shopId}}"
-          data-cover="{{item.cover}}"
-          data-goods-name="{{item.goodsName}}"
-          data-price="{{item.price}}">
+    <view class="fp-list" wx:if="{{serviceList.length > 0}}">
+      <view class="fp-item" wx:for="{{serviceList}}" wx:key="dedupeKey">
+        <view class="fp-main" bindtap="goService" data-url="{{item.url}}">
           <view class="fp-cover-wrap">
             <image class="fp-cover" src="{{item.cover}}" mode="aspectFill" wx:if="{{item.cover}}"></image>
-            <view class="fp-cover fp-cover-placeholder" wx:else>🛍</view>
-            <!-- 下架标记 -->
-            <view class="fp-off-tag" wx:if="{{item.status === 0}}">已下架</view>
+            <view class="fp-cover fp-cover-placeholder" wx:else>🔧</view>
           </view>
           <view class="fp-body">
-            <text class="fp-title {{item.status === 0 ? 'muted' : ''}}">{{item.goodsName}}</text>
+            <text class="fp-title">{{item.title}}</text>
             <view class="fp-meta">
-              <text class="fp-shop">{{item.shopName}}</text>
+              <text class="fp-shop">{{item.kind === 'service' ? '到家服务' : '服务商'}}</text>
               <text class="fp-price" wx:if="{{item.price}}">￥{{item.price}}</text>
             </view>
           </view>
           <text class="fp-arrow">›</text>
         </view>
-        <view class="fp-unfav" catchtap="onRemove" data-goods-id="{{item.goodsId}}">取消</view>
+        <view class="fp-unfav" catchtap="onRemoveService" data-kind="{{item.kind}}" data-id="{{item.id}}">取消</view>
       </view>
-
-      <!-- 加载更多 -->
-      <view class="fp-load-more" wx:if="{{loadingMore}}">加载中…</view>
-      <view class="fp-no-more" wx:elif="{{!hasMore && list.length > 0}}">— 已全部加载 —</view>
     </view>
 
-    <!-- 空状态 -->
-    <view wx:elif="{{!loading}}" class="fp-empty">
+    <view wx:else class="fp-empty">
       <text class="fp-empty-icon">⭐</text>
-      <text class="fp-empty-text">暂无收藏</text>
-      <text class="fp-empty-sub">在商品详情页点击「收藏」可将商品加入收藏夹</text>
+      <text class="fp-empty-text">暂无服务收藏</text>
+      <text class="fp-empty-sub">在服务详情页或服务商页点击「收藏」可将其加入收藏夹</text>
     </view>
-
   </block>
 
 </view>

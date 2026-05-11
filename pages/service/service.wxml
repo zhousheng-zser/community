@@ -50,6 +50,10 @@
   </view>
 
   <view class="bottom-bar">
+    <view class="fav-btn {{favorited ? 'fav-btn-active' : ''}}" bindtap="toggleFavorite">
+      <text class="fav-icon">{{favorited ? '★' : '☆'}}</text>
+      <text class="fav-text">{{favorited ? '已收藏' : '收藏'}}</text>
+    </view>
     <text class="consult">在线咨询</text>
     <view class="buy-btn" bindtap="orderConfrim">立即购买</view>
   </view>

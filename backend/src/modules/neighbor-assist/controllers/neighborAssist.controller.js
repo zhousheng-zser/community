@@ -207,6 +207,13 @@ exports.mockPay = async (req, res) => {
     await order.save();
     await order.reload();
     await orderPoints.grantPointsOnOrderPaid(NeighborAssistOrder, order, null);
+    try {
+      const commissionService = require('../../commission/services/commission.service');
+      const payAmount = Number(order.amount || order.pay_amount || 0);
+      if (payAmount > 0) {
+        await commissionService.distributeCommission(String(order.id), 'neighbor_assist', payAmount, order.user_id);
+      }
+    } catch (ce) { console.warn('[neighbor-assist/commission]', ce.message); }
     return ok(res, order.get({ plain: true }));
   } catch (e) {
     console.error('neighborAssist mockPay', e);

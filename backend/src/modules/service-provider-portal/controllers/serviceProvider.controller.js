@@ -1,6 +1,7 @@
 const db = require('../../../models');
 const { ServiceProviderProfile, ServiceItem, ServiceOrder } = db;
 const orderPoints = require('../../../services/orderPoints.service');
+const commissionService = require('../../commission/services/commission.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -481,6 +482,7 @@ exports.orderAction = async (req, res) => {
       if (row.status !== 'pending_accept') return fail(res, '当前状态不可拒单');
       if (row.pay_status === 'paid') {
         await orderPoints.revokePointsOnOrderRefund(ServiceOrder, row, null);
+        try { await commissionService.revertCommission(String(row.id)); } catch (ce) { console.warn('[sp/commission-revert]', ce.message); }
       }
       await row.update({
         status: 'cancelled',
@@ -664,6 +666,7 @@ exports.rejectOrder = async (req, res) => {
     const note = String((req.body || {}).reason || '商家拒单').trim();
     if (row.pay_status === 'paid') {
       await orderPoints.revokePointsOnOrderRefund(ServiceOrder, row, null);
+      try { await commissionService.revertCommission(String(row.id)); } catch (ce) { console.warn('[sp/reject-commission-revert]', ce.message); }
     }
     await row.update({
       status: 'cancelled',

@@ -2,6 +2,7 @@ const util = require('../../utils/util.js');
 const { unwrapList } = util;
 const app = getApp();
 const browseFootprint = require('../../utils/browseFootprint.js');
+const serviceFavStore = require('../../utils/serviceFavStore.js');
 
 function moneyText(v) {
   if (v == null || v === '') return '0';
@@ -121,7 +122,8 @@ Page({
     providerPhone: '',
     groups: [],
     cart: {},
-    totalText: '0'
+    totalText: '0',
+    favorited: false
   },
 
   onLoad(q) {
@@ -136,6 +138,26 @@ Page({
 
   onPullDownRefresh() {
     this.load().finally(() => wx.stopPullDownRefresh());
+  },
+
+  onShow() {
+    if (this.data.providerId) {
+      this.setData({ favorited: serviceFavStore.has('service_provider', this.data.providerId) });
+    }
+  },
+
+  toggleFavorite() {
+    const pid = this.data.providerId;
+    if (!pid) return;
+    const now = serviceFavStore.toggle({
+      kind: 'service_provider',
+      id: pid,
+      title: this.data.providerName || '服务商',
+      cover: this.data.providerCover || '',
+      url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(pid))}`
+    });
+    this.setData({ favorited: now });
+    wx.showToast({ title: now ? '已收藏' : '已取消收藏', icon: 'none' });
   },
 
   async load() {
@@ -180,6 +202,7 @@ Page({
           url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(this.data.providerId))}`
         });
       } catch (e) {}
+      this.setData({ favorited: serviceFavStore.has('service_provider', this.data.providerId) });
       this._recalcTotal();
     } catch (e) {
       this.setData({ loading: false });

@@ -182,3 +182,32 @@
   border-radius: 40rpx;
 }
 
+.sps-fav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90rpx;
+  flex-shrink: 0;
+}
+
+.sps-fav-icon {
+  font-size: 38rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.sps-fav-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 2rpx;
+}
+
+.sps-fav-active .sps-fav-icon {
+  color: #ff6146;
+}
+
+.sps-fav-active .sps-fav-text {
+  color: #ff6146;
+}
+

@@ -1,6 +1,7 @@
 const db = require('../../../models');
 const { MerchantShop, MerchantGoods, MarketCartItem, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
 const orderPoints = require('../../../services/orderPoints.service');
+const commissionService = require('../../commission/services/commission.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -786,6 +787,7 @@ exports.cancelOrder = async (req, res) => {
     const nextPayStatus = row.pay_status === 'paid' ? 'refunded' : row.pay_status;
     if (row.pay_status === 'paid') {
       await orderPoints.revokePointsOnOrderRefund(MarketOrder, row, t);
+      try { await commissionService.revertCommission(row.order_no); } catch (ce) { console.warn('[market/commission-revert]', ce.message); }
     }
     await row.update({
       order_status: row.pay_status === 'paid' ? 'refunded' : 'cancelled',
@@ -923,6 +925,12 @@ exports.mockPaymentSuccess = async (req, res) => {
     await row.update({ pay_status: 'paid', order_status: 'pending_accept', paid_at: new Date() });
     await row.reload();
     await orderPoints.grantPointsOnOrderPaid(MarketOrder, row, null);
+    try {
+      const payAmount = Number(row.payable_amount || row.pay_amount || row.total_amount || row.amount || 0);
+      if (payAmount > 0) {
+        await commissionService.distributeCommission(row.order_no, 'market', payAmount, userId);
+      }
+    } catch (ce) { console.warn('[market/commission]', ce.message); }
     ok(res, { order_no: row.order_no, pay_status: row.pay_status, order_status: row.order_status }, '支付成功');
   } catch (err) {
     console.error('[market/payments/mock-success]', err);
