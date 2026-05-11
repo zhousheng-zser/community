@@ -477,7 +477,7 @@ exports.orderAction = async (req, res) => {
 
     if (action === 'accept') {
       if (row.status !== 'pending_accept') return fail(res, '当前状态不可接单');
-      await row.update({ status: 'in_service', provider_user_id: userId });
+      await row.update({ status: 'paid_pending_dispatch', provider_user_id: userId });
     } else if (action === 'reject' || action === 'cancel') {
       if (row.status !== 'pending_accept') return fail(res, '当前状态不可拒单');
       if (row.pay_status === 'paid') {
@@ -498,7 +498,7 @@ exports.orderAction = async (req, res) => {
       if (!workerId) return fail(res, '请选择技工');
       await row.update({ status: 'dispatched', worker_id: workerId, provider_user_id: userId });
     } else if (action === 'check-in') {
-      if (!['pending_accept', 'dispatched', 'in_service'].includes(String(row.status))) {
+      if (!['paid_pending_dispatch', 'dispatched', 'in_service'].includes(String(row.status))) {
         return fail(res, '当前状态不可打卡');
       }
       await row.update({ status: 'in_service', check_in_at: new Date(), check_in_location: note || '', provider_user_id: userId });
@@ -602,7 +602,7 @@ exports.acceptOrder = async (req, res) => {
     if (!row) return fail(res, '订单不存在', 404);
     if (row.status !== 'pending_accept') return fail(res, '当前状态不可接单');
 
-    await row.update({ status: 'in_service', provider_user_id: userId });
+    await row.update({ status: 'paid_pending_dispatch', provider_user_id: userId });
     ok(res, { id: row.id, status: row.status }, '接单成功');
   } catch (err) {
     console.error('[sp/order/accept]', err);
@@ -697,7 +697,7 @@ exports.checkIn = async (req, res) => {
       where: { id, provider_id: profile.id }
     });
     if (!row) return fail(res, '订单不存在', 404);
-    if (!['pending_accept', 'dispatched', 'in_service'].includes(String(row.status))) {
+    if (!['paid_pending_dispatch', 'dispatched', 'in_service'].includes(String(row.status))) {
       return fail(res, '当前状态不可打卡');
     }
 

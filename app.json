@@ -79,8 +79,7 @@
     "pages/after-sale-apply/after-sale-apply",
     "pages/login/login",
     "pages/register/register",
-    "pages/forget-password/forget-password",
-    "pages/env-switcher/env-switcher"
+    "pages/forget-password/forget-password"
   ],
   "subPackages": [
     {

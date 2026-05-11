@@ -1,6 +1,6 @@
 // pages/commission-records/commission-records.js
 const app = getApp();
-const api = require('../../api/index.js');
+const api = require('../../../api/index.js');
 
 const ROLE_LABEL = {
   headquarters: '总部',

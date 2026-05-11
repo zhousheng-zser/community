@@ -9,7 +9,7 @@
               <el-option label="待接单" value="pending_accept" />
               <el-option label="待上门" value="paid_pending_dispatch" />
               <el-option label="服务中" value="in_service" />
-              <el-option label="待确认" value="pending_user_confirm" />
+              <el-option label="待用户确认" value="pending_user_confirm" />
               <el-option label="已完成" value="completed" />
               <el-option label="已取消" value="cancelled" />
             </el-select>
@@ -43,8 +43,9 @@
             <el-button size="small" @click="openDetail(s.row)">详情</el-button>
             <el-button v-if="s.row.status === 'pending_accept'" size="small" type="primary" @click="doAction(s.row, 'accept')">接单</el-button>
             <el-button v-if="s.row.status === 'pending_accept'" size="small" type="danger" plain @click="doAction(s.row, 'reject')">拒绝</el-button>
-            <el-button v-if="s.row.status === 'paid_pending_dispatch'" size="small" type="success" @click="doAction(s.row, 'dispatch')">出发</el-button>
-            <el-button v-if="s.row.status === 'in_service'" size="small" type="primary" @click="doAction(s.row, 'complete')">完成</el-button>
+            <el-button v-if="s.row.status === 'paid_pending_dispatch'" size="small" type="success" @click="doAction(s.row, 'check-in')">到达打卡</el-button>
+            <el-button v-if="s.row.status === 'in_service'" size="small" type="primary" @click="doAction(s.row, 'complete')">完成服务</el-button>
+            <el-button v-if="s.row.status === 'pending_user_confirm'" size="small" type="info" disabled>待用户确认</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -121,7 +122,7 @@ async function load() {
 
 function openDetail(row) { detailRow.value = row; detailVisible.value = true }
 
-const ACTION_LABELS = { accept: '接单', reject: '拒绝', dispatch: '出发上门', complete: '完成服务' }
+const ACTION_LABELS = { accept: '接单', reject: '拒绝', 'check-in': '到达打卡', complete: '完成服务' }
 async function doAction(row, action) {
   const label = ACTION_LABELS[action] || action
   try {

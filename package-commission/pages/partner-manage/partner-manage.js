@@ -1,6 +1,6 @@
 // pages/partner-manage/partner-manage.js
 const app = getApp();
-const api = require('../../api/index.js');
+const api = require('../../../api/index.js');
 
 const ROLE_LABEL = {
   promoter: '推广者',

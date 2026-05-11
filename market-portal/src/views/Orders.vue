@@ -5,12 +5,13 @@
         <div class="card-hd">
           <span>订单管理</span>
           <div class="toolbar">
-            <el-select v-model="filter.status" placeholder="全部状态" clearable style="width:150px" @change="load">
+            <el-select v-model="filter.order_status" placeholder="全部状态" clearable style="width:150px" @change="load">
               <el-option label="待接单" value="pending_accept" />
-              <el-option label="待发货" value="paid" />
-              <el-option label="已发货" value="shipped" />
+              <el-option label="备货中" value="pending_service" />
+              <el-option label="待收货" value="pending_receipt" />
               <el-option label="已完成" value="completed" />
               <el-option label="已取消" value="cancelled" />
+              <el-option label="已退款" value="refunded" />
             </el-select>
             <el-button @click="load">刷新</el-button>
           </div>
@@ -25,26 +26,26 @@
           </template>
         </el-table-column>
         <el-table-column label="买家" width="120">
-          <template #default="s">{{ (s.row.buyer && (s.row.buyer.nickname || s.row.buyer.phone)) || s.row.contact_name || '-' }}</template>
+          <template #default="s">{{ s.row.buyer_nickname || s.row.receiver_name || '-' }}</template>
         </el-table-column>
         <el-table-column label="金额" width="90">
-          <template #default="s">¥{{ s.row.total_amount || s.row.amount }}</template>
+          <template #default="s">¥{{ s.row.payable_amount || s.row.goods_amount || '0' }}</template>
         </el-table-column>
-        <el-table-column label="状态" width="100">
+        <el-table-column label="状态" width="110">
           <template #default="s">
-            <el-tag :type="statusTagType(s.row.status)">{{ statusLabel(s.row.status) }}</el-tag>
+            <el-tag :type="statusTagType(s.row.order_status)">{{ statusLabel(s.row.order_status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="下单时间" width="160">
           <template #default="s">{{ fmt(s.row.created_at) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="230" fixed="right">
+        <el-table-column label="操作" width="260" fixed="right">
           <template #default="s">
             <el-button size="small" @click="openDetail(s.row)">详情</el-button>
-            <el-button v-if="s.row.status === 'pending_accept'" size="small" type="primary" @click="doAction(s.row, 'accept')">接单</el-button>
-            <el-button v-if="s.row.status === 'pending_accept'" size="small" type="danger" plain @click="doAction(s.row, 'cancel')">拒绝</el-button>
-            <el-button v-if="s.row.status === 'paid'" size="small" type="success" @click="doAction(s.row, 'ship')">发货</el-button>
-            <el-button v-if="s.row.status === 'shipped'" size="small" type="primary" @click="doAction(s.row, 'complete-delivery')">确认送达</el-button>
+            <el-button v-if="s.row.order_status === 'pending_accept'" size="small" type="primary" @click="doAction(s.row, 'accept')">接单</el-button>
+            <el-button v-if="s.row.order_status === 'pending_accept'" size="small" type="danger" plain @click="doAction(s.row, 'cancel')">拒绝</el-button>
+            <el-button v-if="s.row.order_status === 'pending_service'" size="small" type="success" @click="doAction(s.row, 'ship')">发货</el-button>
+            <el-tag v-if="s.row.order_status === 'pending_receipt'" size="small" type="info">等待买家确认收货</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -58,21 +59,22 @@
       <div v-if="detailRow">
         <el-descriptions :column="1" border>
           <el-descriptions-item label="订单号">{{ detailRow.order_no }}</el-descriptions-item>
-          <el-descriptions-item label="买家">{{ (detailRow.buyer && (detailRow.buyer.nickname || detailRow.buyer.phone)) || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="收货人">{{ detailRow.contact_name || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="联系电话">{{ detailRow.contact_phone || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="收货地址">{{ detailRow.address || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="总金额">¥{{ detailRow.total_amount || detailRow.amount }}</el-descriptions-item>
+          <el-descriptions-item label="买家">{{ detailRow.buyer_nickname || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="收货人">{{ detailRow.receiver_name || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="联系电话">{{ detailRow.receiver_phone || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="收货地址">{{ detailRow.receiver_address || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="总金额">¥{{ detailRow.payable_amount || detailRow.goods_amount || '0' }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="statusTagType(detailRow.status)">{{ statusLabel(detailRow.status) }}</el-tag>
+            <el-tag :type="statusTagType(detailRow.order_status)">{{ statusLabel(detailRow.order_status) }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="备注">{{ detailRow.remark || '-' }}</el-descriptions-item>
           <el-descriptions-item label="下单时间">{{ fmt(detailRow.created_at) }}</el-descriptions-item>
         </el-descriptions>
         <el-table v-if="detailRow.items && detailRow.items.length" :data="detailRow.items" style="margin-top:12px" size="small" border>
           <el-table-column prop="goods_name" label="商品" min-width="150" />
-          <el-table-column prop="qty" label="数量" width="70" />
-          <el-table-column label="单价" width="90"><template #default="s">¥{{ s.row.price }}</template></el-table-column>
+          <el-table-column prop="quantity" label="数量" width="70" />
+          <el-table-column label="单价" width="90"><template #default="s">¥{{ s.row.unit_price }}</template></el-table-column>
+          <el-table-column label="小计" width="90"><template #default="s">¥{{ s.row.amount }}</template></el-table-column>
         </el-table>
       </div>
     </el-dialog>
@@ -89,20 +91,20 @@ const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
-const filter = ref({ status: '' })
+const filter = ref({ order_status: '' })
 const detailVisible = ref(false)
 const detailRow = ref(null)
 
 const STATUS_MAP = {
-  pending_pay: { label: '待支付', type: 'info' },
+  pending_payment: { label: '待支付', type: 'info' },
   pending_accept: { label: '待接单', type: 'warning' },
-  paid: { label: '待发货', type: 'warning' },
-  shipped: { label: '已发货', type: 'primary' },
+  pending_service: { label: '备货中', type: '' },
+  pending_receipt: { label: '待收货', type: 'primary' },
   completed: { label: '已完成', type: 'success' },
   cancelled: { label: '已取消', type: 'danger' },
   refunded: { label: '已退款', type: 'danger' }
 }
-function statusLabel(s) { return (STATUS_MAP[s] || {}).label || s }
+function statusLabel(s) { return (STATUS_MAP[s] || {}).label || s || '-' }
 function statusTagType(s) { return (STATUS_MAP[s] || {}).type || 'info' }
 function fmt(d) {
   if (!d) return '-'
@@ -114,7 +116,7 @@ async function load() {
   loading.value = true
   try {
     const res = await request.get('/merchant/orders', {
-      params: { status: filter.value.status || undefined, page: page.value, limit: pageSize.value }
+      params: { order_status: filter.value.order_status || undefined, page: page.value, limit: pageSize.value }
     })
     const d = res.data || {}
     list.value = d.data || d.list || []
@@ -125,7 +127,7 @@ async function load() {
 
 function openDetail(row) { detailRow.value = row; detailVisible.value = true }
 
-const ACTION_LABELS = { accept: '接单', cancel: '拒绝/取消', ship: '发货', 'complete-delivery': '确认送达' }
+const ACTION_LABELS = { accept: '接单', cancel: '拒绝', ship: '发货', 'complete-delivery': '确认送达' }
 async function doAction(row, action) {
   const label = ACTION_LABELS[action] || action
   try {

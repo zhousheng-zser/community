@@ -1,10 +1,14 @@
 <view class="wt-page">
   <view class="wt-item" wx:for="{{list}}" wx:key="id">
-    <view>
-      <text class="wt-title">{{item.title || '交易'}}</text>
-      <text class="wt-time">{{item.timeLabel || ''}}</text>
+    <view class="wt-left">
+      <text class="wt-title">{{item.title}}</text>
+      <text class="wt-time">{{item.timeLabel}}</text>
+      <text class="wt-order" wx:if="{{item.orderNo}}">订单: {{item.orderNo}}</text>
     </view>
-    <text class="wt-amt {{item.amount && item.amount.indexOf('-')===0 ? 'out' : ''}}">{{item.amount || ''}}</text>
+    <text class="wt-amt">{{item.amount}}</text>
   </view>
-  <view class="wt-empty" wx:if="{{!list.length}}">暂无本地记录；提现成功后会记一笔。</view>
+
+  <view class="wt-loading" wx:if="{{loading}}">加载中...</view>
+  <view class="wt-empty" wx:if="{{!loading && !list.length}}">暂无交易记录</view>
+  <view class="wt-nomore" wx:if="{{!hasMore && list.length > 0}}">— 没有更多了 —</view>
 </view>

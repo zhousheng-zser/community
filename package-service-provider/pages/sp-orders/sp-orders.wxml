@@ -2,8 +2,9 @@
   <view class="sp-tabs">
     <view class="sp-tab-item {{activeTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
     <view class="sp-tab-item {{activeTab === 'pending_accept' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending_accept">待接单</view>
-    <view class="sp-tab-item {{activeTab === 'dispatching' ? 'active' : ''}}" bindtap="switchTab" data-tab="dispatching">派单中</view>
-    <view class="sp-tab-item {{activeTab === 'in_progress' ? 'active' : ''}}" bindtap="switchTab" data-tab="in_progress">服务中</view>
+    <view class="sp-tab-item {{activeTab === 'paid_pending_dispatch' ? 'active' : ''}}" bindtap="switchTab" data-tab="paid_pending_dispatch">待上门</view>
+    <view class="sp-tab-item {{activeTab === 'in_service' ? 'active' : ''}}" bindtap="switchTab" data-tab="in_service">服务中</view>
+    <view class="sp-tab-item {{activeTab === 'pending_user_confirm' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending_user_confirm">待确认</view>
     <view class="sp-tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
   </view>
 
