@@ -79,11 +79,14 @@ Page({
     try {
       const res = await api.promoter.getCommission();
       const account = res.data || res;
+      const total = Number(account.total_amount || account.totalAcount || 0).toFixed(2);
+      const avail = Number(account.available_amount || account.availAcount || 0).toFixed(2);
+      const pending = Number(account.pending_amount || account.unPointAcount || 0).toFixed(2);
       this.setData({
         account: {
-          totalAcount: account.total_amount || account.totalAcount || 0,
-          availAcount: account.available_amount || account.availAcount || 0,
-          unPointAcount: account.pending_amount || account.unPointAcount || 0
+          totalAcount: total,
+          availAcount: avail,
+          unPointAcount: pending
         },
         loading: false
       });

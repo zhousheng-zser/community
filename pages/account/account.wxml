@@ -9,21 +9,47 @@
       <view>
         <text class='name'>可提现金额</text>
         <view class='btn-wrap'>
-          <text wx:if='{{account.remark1==1}}' class='btn'  bindtap='extracting'>提现中</text>
-          <text wx:else class='btn'  bindtap='extract'>提现</text>
+          <text wx:if='{{account.remark1==1}}' class='btn' bindtap='extracting'>提现中</text>
+          <text wx:else class='btn' bindtap='extract'>提现</text>
         </view>
       </view>
       <view class='money-wrap'>
         <text class='money green'>{{account.availAcount}}</text>
       </view>
-
     </view>
     <view class='item'>
       <text class='name'>冻结金额</text>
       <text class='money red'>{{account.unPointAcount}}</text>
     </view>
   </view>
-  <navigator class="wt-link" url="/package-account/pages/wallet-transactions/wallet-transactions">查看交易明细 ›</navigator>
-  <navigator class="wt-link" url="/package-commission/pages/commission-overview/commission-overview">合伙人中心（4方分佣）›</navigator>
-  <navigator class="wt-link" url="/package-commission/pages/commission-records/commission-records">佣金明细 ›</navigator>
+
+  <!-- 功能入口卡片区 -->
+  <view class="func-cards">
+    <navigator class="func-card" url="/package-account/pages/wallet-transactions/wallet-transactions">
+      <view class="func-icon icon-records"></view>
+      <view class="func-info">
+        <text class="func-title">交易明细</text>
+        <text class="func-desc">查看收入、提现等交易记录</text>
+      </view>
+      <view class="func-arrow">›</view>
+    </navigator>
+
+    <navigator class="func-card" url="/package-commission/pages/commission-overview/commission-overview">
+      <view class="func-icon icon-partner"></view>
+      <view class="func-info">
+        <text class="func-title">合伙人中心</text>
+        <text class="func-desc">4方分佣体系，查看团队与收益</text>
+      </view>
+      <view class="func-arrow">›</view>
+    </navigator>
+
+    <navigator class="func-card" url="/package-commission/pages/commission-records/commission-records">
+      <view class="func-icon icon-commission"></view>
+      <view class="func-info">
+        <text class="func-title">佣金明细</text>
+        <text class="func-desc">每笔订单的分佣详情与状态</text>
+      </view>
+      <view class="func-arrow">›</view>
+    </navigator>
+  </view>
 </view>
