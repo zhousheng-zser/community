@@ -12,4 +12,4 @@ conn.on('ready', () => {
       conn.end();
     });
   });
-}).connect({ host: 'jshsp1.eds-tech.cn', username: 'cw', readyTimeout: 10000 });
+}).connect({ host: 'ancientscrolllibrary.cn', username: 'cw', readyTimeout: 10000 });

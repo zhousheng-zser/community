@@ -65,7 +65,7 @@ function getApiBaseUrl() {
     case ENV.TESTING:
       return 'https://test-api.yourdomain.com';
     default:
-      return 'https://jshsp1.eds-tech.cn';
+      return 'https://ancientscrolllibrary.cn';
   }
 }
 

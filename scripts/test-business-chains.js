@@ -2,7 +2,7 @@
 const http = require('http');
 const jwt = require('jsonwebtoken');
 const JWT = 'jwt_key_cwsgwbd';
-const BASE = 'http://jshsp1.eds-tech.cn:3002/api/v1';
+const BASE = 'http://ancientscrolllibrary.cn:3002/api/v1';
 
 let N = 0, P = 0, F = 0;
 const fails = [];

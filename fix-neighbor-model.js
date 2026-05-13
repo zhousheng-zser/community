@@ -66,4 +66,4 @@ conn.on('ready', () => {
 }).on('error', err => {
   console.error('SSH error:', err.message);
   process.exit(1);
-}).connect({ host: 'jshsp1.eds-tech.cn', username: 'cw', readyTimeout: 10000 });
+}).connect({ host: 'ancientscrolllibrary.cn', username: 'cw', readyTimeout: 10000 });

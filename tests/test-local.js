@@ -40,7 +40,7 @@ async function main() {
     console.log('  测试后端服务连通性');
     console.log('========================================');
 
-    const IP = 'jshsp1.eds-tech.cn';
+    const IP = 'ancientscrolllibrary.cn';
 
     // Test port 3000
     const result1 = await testConnection(IP, 3000, '/health');

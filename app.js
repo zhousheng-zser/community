@@ -90,7 +90,7 @@ App({
     }
     return {
       title: '家政服务小程序',
-      imageUrl: 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png',
+      imageUrl: 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png',
       path: '/pages/index/index?openid=' + openid
     }
   }

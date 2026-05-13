@@ -7,7 +7,7 @@
  *   npm run deploy:backend
  *
  * 可选环境变量：
- *   DEPLOY_HOST          默认 jshsp1.eds-tech.cn
+ *   DEPLOY_HOST          默认 ancientscrolllibrary.cn
  *   DEPLOY_USER          默认 root
  *   REMOTE_BACKEND_DIR   默认 /root/community-backend/backend
  *   DEPLOY_RESTART_CMD   非空则在远端执行（如 pm2 restart all 或 pm2 restart community-api）

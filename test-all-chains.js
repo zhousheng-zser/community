@@ -5,7 +5,7 @@
 
 const http = require('http');
 
-const BASE = 'http://jshsp1.eds-tech.cn:3001';
+const BASE = 'http://ancientscrolllibrary.cn:3001';
 const API = '/api/v1';
 const TOKENS = { user: '', merchant: '', worker: '', admin: '' };
 const RESULTS = { pass: 0, fail: 0, warn: 0, err: [] };

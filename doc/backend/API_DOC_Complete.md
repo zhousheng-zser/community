@@ -3,11 +3,11 @@
 > **文档版本**: v1.1
 > **最后更新**: 2026-04-25
 > **基于**: 前端 API 定义文件 + 后端接口实际测试
-> **测试服务器**: http://jshsp1.eds-tech.cn:3001
+> **测试服务器**: http://ancientscrolllibrary.cn:3001
 
 **基础信息**
 
-- **服务地址**: `http://jshsp1.eds-tech.cn:3001`
+- **服务地址**: `http://ancientscrolllibrary.cn:3001`
 - **统一前缀**: `/api/v1`
 - **数据格式**: `Content-Type: application/json`（上传文件接口除外）
 - **鉴权方式**: 登录成功后返回 `token`（JWT），前端在需要登录的接口上通过：

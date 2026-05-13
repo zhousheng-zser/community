@@ -4,7 +4,7 @@
  * Run via SSH on the server
  */
 const { execSync } = require('child_process');
-const SSH = 'ssh cw@jshsp1.eds-tech.cn';
+const SSH = 'ssh cw@ancientscrolllibrary.cn';
 
 // 1. Add missing market routes (confirm-receipt, refund, buy-again, logistics, shop-contact)
 const marketRoutesAppend = `

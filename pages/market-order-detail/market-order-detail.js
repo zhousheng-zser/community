@@ -143,7 +143,7 @@ Page({
         name: g.name || g.goods_name || g.goods_name_snapshot,
         price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
         quantity: g.quantity || 1,
-        image: (g.image || g.main_image || g.goods_image_snapshot) ? util.imgUrl(g.image || g.main_image || g.goods_image_snapshot) : 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'
+        image: (g.image || g.main_image || g.goods_image_snapshot) ? util.imgUrl(g.image || g.main_image || g.goods_image_snapshot) : 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'
       }))
     });
     this.initCountdown(order);
