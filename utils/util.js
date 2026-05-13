@@ -76,6 +76,20 @@ const buildUrl = (url) => {
   return finalUrl + url;
 };
 
+/** 将 wx.request fail 的 errMsg 转成用户可读短句（完整 errMsg 见控制台） */
+function formatRequestFailToast(errMsg) {
+  const m = String(errMsg || '');
+  if (m.includes('timeout') || m.includes('超时')) return '请求超时，请检查网络';
+  if (m.includes('fail to load') || m.includes('fail to connect') || m.includes('connection refused')) {
+    return '无法连接到服务器';
+  }
+  if (m.includes('url not in domain list') || m.includes('not in domain list')) {
+    return '域名未在公众平台配置';
+  }
+  if (/ssl|certificate|handshake|证书/i.test(m)) return 'HTTPS 证书异常';
+  return '网络错误';
+}
+
 const request = (method, url, data, contentType = 'application/json') => {
   const finalUrl = buildUrl(url);
 
@@ -142,8 +156,11 @@ const request = (method, url, data, contentType = 'application/json') => {
       },
       fail: (res) => {
         const errorMsg = res.errMsg || '网络连接失败';
+        try {
+          console.warn('[wx.request fail]', finalUrl, errorMsg);
+        } catch (e) { /* ignore */ }
         wx.showToast({
-          title: errorMsg.includes('timeout') ? '请求超时，请检查网络' : errorMsg.includes('fail to load') ? '无法连接到服务器' : '网络错误',
+          title: formatRequestFailToast(errorMsg),
           icon: 'none'
         });
         reject(res);

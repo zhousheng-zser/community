@@ -57,16 +57,9 @@ function shouldUseMockData() {
   return isDevelopment();
 }
 
-/** 获取API基础URL */
+/** 获取 API 根域名（与 utils/config.js 生产环境一致；若未使用请仍以 config.baseUrl 为准） */
 function getApiBaseUrl() {
-  switch (getCurrentEnv()) {
-    case ENV.PRODUCTION:
-      return 'https://api.yourdomain.com';
-    case ENV.TESTING:
-      return 'https://test-api.yourdomain.com';
-    default:
-      return 'https://ancientscrolllibrary.cn';
-  }
+  return 'https://ancientscrolllibrary.cn';
 }
 
 module.exports = {
