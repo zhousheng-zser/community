@@ -55,7 +55,7 @@ Page({
           ? res.detail_images
           : (typeof res.detail_images === 'string' ? JSON.parse(res.detail_images || '[]') : []);
         const title = res.title || res.name || '';
-        const apiBanner = imgUrl(res.cover_image || res.banner || 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png');
+        const apiBanner = imgUrl(res.cover_image || res.banner || 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png');
         let imgs = (Array.isArray(detailImages) ? detailImages : []).map((p) => imgUrl(p));
         const home3 = home3PathForTitle(title);
         if (home3) {
@@ -73,7 +73,7 @@ Page({
           detailImages: imgs
         };
       }
-    } catch (e) {}
+    } catch (e) { }
 
     service = service || mockMap[id] || mockMap[1];
     const resolvedServiceId =
@@ -102,7 +102,7 @@ Page({
         cover: (service && service.banner) || '',
         url
       });
-    } catch (e) {}
+    } catch (e) { }
 
     this.setData({ favorited: serviceFavStore.has('service', this.data.serviceId) });
   },

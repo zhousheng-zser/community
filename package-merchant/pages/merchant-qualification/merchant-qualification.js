@@ -2,7 +2,7 @@ const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
 const mshop = require('../../utils/merchantShopContext.js');
 
-const FALLBACK_IMG = 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png';
+const FALLBACK_IMG = 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png';
 
 function pick() {
   for (let i = 0; i < arguments.length; i += 1) {

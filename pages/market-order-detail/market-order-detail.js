@@ -34,7 +34,7 @@ Page({
     buyerName: '',
     fulfillmentEvents: [],
     items: [],
-    
+
     // 金额信息
     goodsAmount: '0.00',
     deliveryFee: '0.00',
@@ -122,7 +122,7 @@ Page({
         createdAt: ev.created_at || '',
         proofImages: Array.isArray(ev.proof_images) ? ev.proof_images : []
       })),
-      
+
       goodsAmount: String(order.goods_amount || detail.goods_amount || '0.00'),
       deliveryFee: String(order.delivery_fee || detail.delivery_fee || '0.00'),
       discountAmount: String(order.discount_amount || detail.discount_amount || '0.00'),
@@ -143,7 +143,7 @@ Page({
         name: g.name || g.goods_name || g.goods_name_snapshot,
         price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
         quantity: g.quantity || 1,
-        image: (g.image || g.main_image || g.goods_image_snapshot) ? util.imgUrl(g.image || g.main_image || g.goods_image_snapshot) : 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'
+        image: (g.image || g.main_image || g.goods_image_snapshot) ? util.imgUrl(g.image || g.main_image || g.goods_image_snapshot) : 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'
       }))
     });
     this.initCountdown(order);
@@ -222,10 +222,10 @@ Page({
   // ---- 动作区 ----
   async cancelOrder() {
     wx.showModal({
-      title: '取消订单', 
+      title: '取消订单',
       content: '确定取消吗？',
-      success: async (res) => { 
-        if(res.confirm) {
+      success: async (res) => {
+        if (res.confirm) {
           try {
             await api.market.cancelOrder(this.data.orderNo);
             wx.showToast({ title: '已取消', icon: 'success' });
@@ -233,7 +233,7 @@ Page({
           } catch (err) {
             wx.showToast({ title: '取消失败', icon: 'none' });
           }
-        } 
+        }
       }
     });
   },
@@ -241,7 +241,7 @@ Page({
   async payNow() {
     try {
       const payRes = await api.market.createPayment({ order_no: this.data.orderNo, pay_type: 'wechat' });
-      
+
       wx.requestPayment({
         timeStamp: payRes.timeStamp,
         nonceStr: payRes.nonceStr,
@@ -316,7 +316,7 @@ Page({
           wx.makePhoneCall({ phoneNumber: phone });
           return;
         }
-      } catch (e) {}
+      } catch (e) { }
       wx.showToast({ title: '获取商家信息失败', icon: 'none' });
     }
   },
@@ -370,13 +370,13 @@ Page({
       wx.showToast({ title: '获取商家信息失败', icon: 'none' });
     }
   },
-  
+
   async viewLogistics() {
     try {
       const logisticsRes = await api.market.getOrderLogistics(this.data.orderNo);
       const trackingNo = logisticsRes.tracking_no || logisticsRes.trackingNo;
       const company = logisticsRes.company || logisticsRes.express_company;
-      
+
       wx.navigateTo({
         url: `/pages/order-logistics/order-logistics?orderNo=${this.data.orderNo}&trackingNo=${trackingNo}&company=${company}`
       });
@@ -387,10 +387,10 @@ Page({
 
   async confirmReceipt() {
     wx.showModal({
-      title: '确认收货', 
+      title: '确认收货',
       content: '确认收到所有商品了吗？',
-      success: async (res) => { 
-        if(res.confirm) {
+      success: async (res) => {
+        if (res.confirm) {
           try {
             await api.market.confirmReceipt(this.data.orderNo);
             wx.showToast({ title: '已确认收货', icon: 'success' });
@@ -398,17 +398,17 @@ Page({
           } catch (err) {
             wx.showToast({ title: '操作失败', icon: 'none' });
           }
-        } 
+        }
       }
     });
   },
 
   async deleteOrder() {
     wx.showModal({
-      title: '删除订单', 
+      title: '删除订单',
       content: '不可恢复，确定删除？',
-      success: async (res) => { 
-        if(res.confirm) {
+      success: async (res) => {
+        if (res.confirm) {
           try {
             await api.market.deleteOrder(this.data.orderNo);
             wx.showToast({ title: '订单已删除', icon: 'success' });
@@ -416,7 +416,7 @@ Page({
           } catch (err) {
             wx.showToast({ title: '删除失败', icon: 'none' });
           }
-        } 
+        }
       }
     });
   },
@@ -431,10 +431,10 @@ Page({
 
   async cancelRefund() {
     wx.showModal({
-      title: '取消售后', 
+      title: '取消售后',
       content: '确定放弃售后申请吗？',
-      success: async (res) => { 
-        if(res.confirm) {
+      success: async (res) => {
+        if (res.confirm) {
           try {
             await api.market.cancelRefund(this.data.orderNo);
             wx.showToast({ title: '已撤销', icon: 'success' });
@@ -442,7 +442,7 @@ Page({
           } catch (err) {
             wx.showToast({ title: '操作失败', icon: 'none' });
           }
-        } 
+        }
       }
     });
   }

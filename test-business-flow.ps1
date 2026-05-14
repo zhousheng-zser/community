@@ -2,7 +2,7 @@
 # 测试角色: 用户、商家、服务商、管理员
 # 测试目标: 完整订单流程、退单流程、管理员介入
 
-$BASE_URL = "http://ancientscrolllibrary.cn:3001"
+$BASE_URL = "http://120.27.239.244:3001:3001"
 $USER_TOKEN = ""
 $MERCHANT_TOKEN = ""
 $ADMIN_TOKEN = ""

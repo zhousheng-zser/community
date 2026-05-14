@@ -1,13 +1,13 @@
 const http = require('http');
 
-const BASE_URL = 'http://ancientscrolllibrary.cn:3001';
+const BASE_URL = 'http://120.27.239.244:3001:3001';
 const results = [];
 
 function testImage(path) {
     return new Promise((resolve) => {
         const encodedPath = encodeURI(path);
         const req = http.request({
-            hostname: 'ancientscrolllibrary.cn',
+            hostname: '120.27.239.244:3001',
             port: 3001,
             path: encodedPath,
             method: 'GET',

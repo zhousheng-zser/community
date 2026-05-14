@@ -2,11 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const replacements = {
-  '/img/placeholders/home_cleaning.png': 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png',
-  '/img/placeholders/sale_banner.png': 'https://ancientscrolllibrary.cn/uploads/file-1773395942500-585304598.png',
-  '/img/placeholders/avatar_worker.png': 'https://ancientscrolllibrary.cn/uploads/file-1773395942842-959042242.png',
-  '/img/placeholders/avatar_worker_1772546547875.png': 'https://ancientscrolllibrary.cn/uploads/file-1773395942842-959042242.png',
-  '/img/head.jpg': 'https://ancientscrolllibrary.cn/uploads/file-1773395943186-905167166.jpg'
+  '/img/placeholders/home_cleaning.png': 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png',
+  '/img/placeholders/sale_banner.png': 'https://120.27.239.244:3001/uploads/file-1773395942500-585304598.png',
+  '/img/placeholders/avatar_worker.png': 'https://120.27.239.244:3001/uploads/file-1773395942842-959042242.png',
+  '/img/placeholders/avatar_worker_1772546547875.png': 'https://120.27.239.244:3001/uploads/file-1773395942842-959042242.png',
+  '/img/head.jpg': 'https://120.27.239.244:3001/uploads/file-1773395943186-905167166.jpg'
 };
 
 function walk(dir) {
@@ -41,4 +41,3 @@ function walk(dir) {
 console.log('Starting global placeholder replacement...');
 walk(__dirname);
 console.log('Done.');
-

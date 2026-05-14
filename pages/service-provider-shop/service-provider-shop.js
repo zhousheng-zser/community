@@ -99,7 +99,7 @@ function normalizeCatalogGroups(raw, imgUrlFn) {
         desc: line.description ? String(line.description).slice(0, 60) : '',
         price: line.price,
         priceText: moneyText(line.price),
-        cover: imgUrlFn(line.cover_image || line.image || 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'),
+        cover: imgUrlFn(line.cover_image || line.image || 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'),
         cartKey,
         unsupported: sale.unsupported,
         saleStatusText: sale.saleStatusText,
@@ -201,7 +201,7 @@ Page({
           cover: cover || '',
           url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(this.data.providerId))}`
         });
-      } catch (e) {}
+      } catch (e) { }
       this.setData({ favorited: serviceFavStore.has('service_provider', this.data.providerId) });
       this._recalcTotal();
     } catch (e) {
@@ -224,7 +224,7 @@ Page({
           title: (s.title || s.name || '').replace(/【.*?】/g, '').trim() || '服务',
           price: s.price,
           priceText: moneyText(s.price),
-          cover: imgUrl(s.cover_image || s.image || 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'),
+          cover: imgUrl(s.cover_image || s.image || 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'),
           cartKey: `${gk}:${sid}`,
           unsupported: sale.unsupported,
           saleStatusText: sale.saleStatusText,

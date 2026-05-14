@@ -16,7 +16,7 @@ App({
       wx.removeStorageSync('market_snap_address_id');
       wx.removeStorageSync('market_snap_distance_km');
       wx.removeStorageSync('market_location_label');
-    } catch (e) {}
+    } catch (e) { }
   },
   globalData: {
     userInfo: null,
@@ -90,7 +90,7 @@ App({
     }
     return {
       title: '家政服务小程序',
-      imageUrl: 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png',
+      imageUrl: 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png',
       path: '/pages/index/index?openid=' + openid
     }
   }

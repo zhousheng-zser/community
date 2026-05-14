@@ -37,7 +37,7 @@ Page({
         name: `${providerName} · 打包服务`,
         sub: sub || '所选服务',
         price: total.toFixed(2),
-        image: 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'
+        image: 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'
       };
       const totalPrice = total.toFixed(2).replace(/\.00$/, '');
       this.setData({
@@ -88,7 +88,7 @@ Page({
       }
       if (patch.contactGender) next.contactGender = patch.contactGender;
       if (Object.keys(next).length) this.setData(next);
-    } catch (e) {}
+    } catch (e) { }
   },
 
   onOcInput(e) {

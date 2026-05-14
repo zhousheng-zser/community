@@ -7,7 +7,7 @@
  *   npm run deploy:backend
  *
  * 可选环境变量：
- *   DEPLOY_HOST          默认 ancientscrolllibrary.cn
+ *   DEPLOY_HOST          默认 120.27.239.244:3001
  *   DEPLOY_USER          默认 root
  *   REMOTE_BACKEND_DIR   默认 /root/community-backend/backend
  *   DEPLOY_RESTART_CMD   非空则在远端执行（如 pm2 restart all 或 pm2 restart community-api）
@@ -91,7 +91,7 @@ async function main() {
     for (const { full, rel } of files) {
       const remotePath = `${remoteDir}/${rel}`;
       const remoteParent = path.posix.dirname(remotePath);
-      await sftp.mkdir(remoteParent, true).catch(() => {});
+      await sftp.mkdir(remoteParent, true).catch(() => { });
       await sftp.put(full, remotePath);
     }
     await sftp.end();

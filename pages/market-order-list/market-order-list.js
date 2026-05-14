@@ -192,7 +192,7 @@ Page({
         name: g.name || g.goods_name || g.goods_name_snapshot,
         price: String(g.price || g.unit_price || g.unit_price_snapshot || '0.00'),
         quantity: g.quantity || 1,
-        image: rawImage ? util.imgUrl(rawImage) : 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png'
+        image: rawImage ? util.imgUrl(rawImage) : 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'
       };
     });
     return {
@@ -225,7 +225,7 @@ Page({
     const merchantUserId = order.merchant_user_id || detail.merchant_user_id || order.provider_user_id || detail.provider_user_id || provider.id || merchant.id || null;
 
     const rawImage = service.image || service.main_image || service.cover_image || service.cover || '';
-    const image = rawImage ? util.imgUrl(rawImage) : 'https://ancientscrolllibrary.cn/uploads/file-1773395942165-45947155.png';
+    const image = rawImage ? util.imgUrl(rawImage) : 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png';
 
     const title = order.service_title || order.title || service.title || '到家服务';
     const amount = order.amount || order.pay_amount || detail.amount || detail.pay_amount || '0.00';
@@ -526,13 +526,13 @@ Page({
       };
       const res = merchantUid
         ? await util.post('messages/order-conversation/ensure', Object.assign({}, base, {
-            channel: 'merchant_customer',
-            merchant_user_id: merchantUid
-          }))
+          channel: 'merchant_customer',
+          merchant_user_id: merchantUid
+        }))
         : await util.post('messages/order-conversation/ensure', Object.assign({}, base, {
-            channel: 'worker_customer',
-            worker_user_id: workerUid
-          }));
+          channel: 'worker_customer',
+          worker_user_id: workerUid
+        }));
       const data = res && res.data !== undefined ? res.data : res;
       const cid = data && (data.conversation_id || data.conversationId);
       wx.hideLoading();

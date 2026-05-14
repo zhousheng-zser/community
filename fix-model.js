@@ -12,4 +12,4 @@ conn.on('ready', () => {
       conn.end();
     });
   });
-}).connect({ host: 'ancientscrolllibrary.cn', username: 'cw', readyTimeout: 10000 });
+}).connect({ host: '120.27.239.244:3001', username: 'cw', readyTimeout: 10000 });

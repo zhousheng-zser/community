@@ -4,7 +4,7 @@
  * Tests: Auth, Neighbor Assist, Market Shopping, Service Orders, Messages, User Profile
  */
 const http = require('http');
-const BASE = 'http://ancientscrolllibrary.cn:3001';
+const BASE = 'http://120.27.239.244:3001:3001';
 const R = { pass: 0, fail: 0, warn: 0, errors: [] };
 
 function api(method, path, body, token) {

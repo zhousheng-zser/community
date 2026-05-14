@@ -1,6 +1,6 @@
 const http = require('http');
 
-const BASE_URL = 'http://ancientscrolllibrary.cn:3001';
+const BASE_URL = 'http://120.27.239.244:3001:3001';
 const API = `${BASE_URL}/api/v1`;
 const results = [];
 

@@ -4,7 +4,7 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 const sequelize = new Sequelize('community_db', 'root', 'CommunityPwd123!', {
-  host: 'ancientscrolllibrary.cn',
+  host: '120.27.239.244:3001',
   dialect: 'mysql',
   logging: console.log
 });
