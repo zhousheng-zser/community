@@ -15,7 +15,6 @@ Page({
     user: {},
     loggedIn: false,
     roleLabel: '普通用户',
-    points: 0,
     couponCount: 0,
     footprintCount: 0,
     favoriteCount: 0,
@@ -27,8 +26,7 @@ Page({
       { name: "帮帮订单", icon: "combo_package", url: "../neighbor-assist-orders-my/neighbor-assist-orders-my" },
       { name: "惠民卡订单", icon: "benefit_card_order", url: "../benefit-orders/benefit-orders" },
       { name: "推客订单", icon: "promoter_order", url: "../promoter-orders/promoter-orders" },
-      { name: "合伙人中心", icon: "promoter_order", url: "/package-commission/pages/commission-overview/commission-overview" },
-      { name: "组合套餐", icon: "combo_package", url: "../combo-orders/combo-orders" }
+      { name: "合伙人中心", icon: "promoter_order", url: "/package-commission/pages/commission-overview/commission-overview" }
     ],
     communityMenus: [
       { name: "我的帖子", icon: "my_posts", url: "../my-posts/my-posts?type=myposts&title=我的帖子" },
@@ -98,15 +96,6 @@ Page({
     this.setData({ workbenchCollapsed: !this.data.workbenchCollapsed });
   },
 
-  showPointsRule() {
-    wx.showModal({
-      title: '积分规则',
-      content: '每完成一笔订单，实际支付金额×10即为获得积分（如支付25.2元得252积分）。退款成功后将扣除对应积分。',
-      showCancel: false,
-      confirmText: '知道了'
-    });
-  },
-
   async loadCommissionBalance() {
     try {
       const res = await api.promoter.getCommission();
@@ -132,6 +121,8 @@ Page({
       const data = await api.user.getUserProfile();
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const sid = data.id != null ? Number(data.id) : null;
+        if (sid != null) app.globalData.user.id = sid;
         const st = data.merchant_status != null ? data.merchant_status : data.merchantStatus;
         if (st != null) app.globalData.user.merchant_status = st;
       }
@@ -185,7 +176,6 @@ Page({
       user,
       roleLabel,
       loggedIn,
-      points: user.points || 0,
       footprintCount: browseFootprint.count(),
       favoriteCount: 0  // 先置 0，异步更新
     });
@@ -210,8 +200,14 @@ Page({
     const prevStatus = (app.globalData.user || {}).worker_status || (app.globalData.user || {}).workerStatus || '';
     api.user.getUserProfile().then((data) => {
       const cid = data.community_id != null ? data.community_id : data.communityId;
+      const sid = data.id != null ? Number(data.id) : null;
+      const gid = app.globalData.user && app.globalData.user.id != null ? Number(app.globalData.user.id) : null;
+      if (sid != null && gid != null && sid !== gid) {
+        console.warn('[getProfile] 用户 id 与登录缓存不一致，以服务端资料为准', { cached: gid, profile: sid });
+      }
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        if (sid != null) app.globalData.user.id = sid;
         if (cid != null) app.globalData.user.communityId = cid;
         // 同步头像、昵称等用户信息
         const nickname = data.nickname || data.userName || data.name;
@@ -220,6 +216,7 @@ Page({
         if (nickname != null) app.globalData.user.userName = nickname;
         if (avatar != null) app.globalData.user.userPhoto = avatar;
         if (mobile != null) app.globalData.user.userMobile = mobile;
+        if (data.points != null) app.globalData.user.points = Number(data.points);
       }
       const user = app.globalData.user || {};
       const newStatus = user.worker_status || user.workerStatus || '';
@@ -239,8 +236,7 @@ Page({
       this.setData({
         balance: balanceValue,
         user,
-        roleLabel: this.computeRoleLabel(user),
-        points: data.points != null ? Number(data.points) : (user.points || this.data.points || 0)
+        roleLabel: this.computeRoleLabel(user)
       });
       this.loadCommissionBalance();
       browseFootprint.syncLocalToServer();

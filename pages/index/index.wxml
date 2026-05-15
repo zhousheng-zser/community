@@ -419,21 +419,48 @@
         </view>
       </view>
 
-      <!-- ===== 其他大牌优惠 ===== -->
-      <view class="benefit-section">
+      <!-- ===== 大牌餐饮（肯德基 / 星巴克 / 百果园 · 版式对齐京东联盟） ===== -->
+      <view class="benefit-section" wx:for="{{benefitBrandList}}" wx:key="key">
+        <view class="card benefit-hero-banner benefit-hero-banner--alliance">
+          <image src="{{item.banner}}" mode="aspectFill" class="benefit-hero-img"></image>
+          <view class="benefit-hero-mask benefit-hero-mask--light">
+            <text class="benefit-hero-title">{{item.heroTitle}}</text>
+            <text class="benefit-hero-sub">{{item.heroSub}}</text>
+          </view>
+        </view>
         <view class="card section-card">
           <view class="section-head">
-            <text class="title">大牌餐饮优惠</text>
+            <text class="title">{{item.listTitle}}</text>
           </view>
-          <view class="benefit-brand-list">
-            <view class="benefit-brand-row" wx:for="{{benefitBrandList}}" wx:key="key" bindtap="copyBrandKeyword" data-keyword="{{item.keyword}}">
-              <view class="benefit-brand-info">
-                <text class="benefit-brand-name">{{item.title}}</text>
-                <text class="benefit-brand-desc">{{item.sub}}</text>
+          <view class="fuka-goods-grid">
+            <view
+              class="fuka-goods-item"
+              bindtap="onBenefitBrandTap"
+              data-keyword="{{item.keyword}}"
+              data-miniappid="{{item.miniAppId}}"
+              data-minipath="{{item.miniPath}}"
+            >
+              <view class="fuka-goods-img-wrap">
+                <image src="{{item.cardImage}}" mode="aspectFill"></image>
               </view>
-              <text class="benefit-brand-action">复制关键词</text>
+              <text class="name">{{item.cardTitle}}</text>
+              <text class="price jd-price-hint">{{item.priceHint}}</text>
             </view>
           </view>
+        </view>
+        <view
+          class="card fuka-open-card benefit-cta-jd"
+          wx:if="{{item.miniAppId}}"
+          bindtap="onBenefitBrandTap"
+          data-keyword="{{item.keyword}}"
+          data-miniappid="{{item.miniAppId}}"
+          data-minipath="{{item.miniPath}}"
+        >
+          <view class="left">
+            <text class="title">{{item.ctaTitle}}</text>
+            <text class="sub">{{item.ctaSub}}</text>
+          </view>
+          <text class="go">GO ></text>
         </view>
       </view>
     </scroll-view>
@@ -537,12 +564,6 @@
       </view>
     </view>
   </view>
-
-  <swiper class="promo-swiper card" autoplay="{{true}}" indicator-dots="{{true}}" circular="{{true}}">
-    <swiper-item wx:for="{{banner}}" wx:key="id" bindtap="onHomeBannerTap" data-idx="{{index}}">
-      <image src="{{item.imageUrl}}" class="slide-image" mode="aspectFill" />
-    </swiper-item>
-  </swiper>
 
   <view class="card section-card">
     <view class="section-head neighborhood-head">

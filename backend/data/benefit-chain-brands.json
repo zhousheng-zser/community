@@ -1,0 +1,34 @@
+{
+  "brands": [
+    {
+      "key": "kfc",
+      "db_platform": "chain_kfc",
+      "title": "肯德基",
+      "subtitle": "炸鸡汉堡 · 在线点餐（聚推客）",
+      "keyword": "肯德基",
+      "mini_app_id": "wx89752980e795bfde",
+      "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=16&source=jutuike",
+      "image_url": "/img/benefit_chain/kfc.png"
+    },
+    {
+      "key": "xbk",
+      "db_platform": "chain_xbk",
+      "title": "星巴克",
+      "subtitle": "咖啡星享 · 在线点单（聚推客）",
+      "keyword": "星巴克",
+      "mini_app_id": "wx89752980e795bfde",
+      "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=34&source=jutuike",
+      "image_url": "/img/benefit_chain/xbk.png"
+    },
+    {
+      "key": "bgy",
+      "db_platform": "chain_bgy",
+      "title": "百果园",
+      "subtitle": "时令水果 · 外送门店（聚推客）",
+      "keyword": "百果园",
+      "mini_app_id": "wx89752980e795bfde",
+      "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=31&source=jutuike",
+      "image_url": "/img/benefit_chain/bgy.png"
+    }
+  ]
+}

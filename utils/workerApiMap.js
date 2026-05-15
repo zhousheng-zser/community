@@ -48,12 +48,51 @@ const FALLBACK_WORKER_GOODS = {
   ]
 };
 
+function pickRawAvatarPath(w) {
+  if (!w || typeof w !== 'object') return '';
+  const tryVal = (v) => {
+    if (v == null) return '';
+    const s = String(v).trim();
+    if (!s || s === 'null' || s === 'undefined') return '';
+    return s;
+  };
+  const keys = [
+    'avatar_url',
+    'avatar',
+    'head_img',
+    'headImg',
+    'headimgurl',
+    'photo',
+    'portrait',
+    'cover_image',
+    'user_avatar',
+    'image',
+    'face_url'
+  ];
+  for (let i = 0; i < keys.length; i++) {
+    const s = tryVal(w[keys[i]]);
+    if (s) return s;
+  }
+  const u = w.user || w.User;
+  if (u && typeof u === 'object') {
+    const s = tryVal(u.avatar_url || u.avatar || u.headimgurl);
+    if (s) return s;
+  }
+  return '';
+}
+
 function pickWorkerAvatar(w) {
   if (!w || typeof w !== 'object') {
     return workerAvatarUrl(0);
   }
-  const av = w.avatar_url || w.avatar;
-  return av ? imgUrl(av) : workerAvatarUrl(w.id);
+  const stableId = w.id != null ? w.id : w.worker_id || w.user_id || 0;
+  const av = pickRawAvatarPath(w);
+  if (!av) return workerAvatarUrl(stableId);
+  const resolved = imgUrl(av);
+  if (!resolved || String(resolved).startsWith('data:image/gif')) {
+    return workerAvatarUrl(stableId);
+  }
+  return resolved;
 }
 
 /** 男/女展示（与后端 gender 枚举对齐） */

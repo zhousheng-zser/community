@@ -1,28 +1,4 @@
 <view class="container">
-  <!-- 佣金配置 -->
-  <view class="config-card" wx:if="{{config}}">
-    <view class="config-title">佣金分配比例</view>
-    <view class="config-row">
-      <view class="config-item">
-        <text class="config-label">总部</text>
-        <text class="config-value">{{config.headquartersPct * 100}}%</text>
-      </view>
-      <view class="config-item">
-        <text class="config-label">市场合伙人</text>
-        <text class="config-value">{{config.marketPartnerPct * 100}}%</text>
-      </view>
-      <view class="config-item">
-        <text class="config-label">区县合伙人</text>
-        <text class="config-value">{{config.districtPartnerPct * 100}}%</text>
-      </view>
-      <view class="config-item">
-        <text class="config-label">推广者</text>
-        <text class="config-value">{{config.promoterPct * 100}}%</text>
-      </view>
-    </view>
-    <view class="config-note">佣金池比例: {{config.globalRate * 100}}%（订单金额 x 佣金池比例 = 可分配佣金）</view>
-  </view>
-
   <!-- 总览卡片 -->
   <view class="summary-card" wx:if="{{summary}}">
     <view class="summary-title">佣金总览</view>

@@ -102,6 +102,10 @@ const images = {
   // ── 惠民卡 · 联盟头图（源：流量联盟/京东联盟.png、拼多多.png，同步至 img/benefit_alliance/）──
   benefitJdAllianceHero: '/img/benefit_alliance/jd-alliance.png',
   benefitPddAllianceHero: '/img/benefit_alliance/pdd-alliance.png',
+  /** 惠民卡 · 肯德基 / 星巴克 / 百果园（源 kfcdot，同步至 img/benefit_chain/） */
+  benefitChainKfc: '/img/benefit_chain/kfc.png',
+  benefitChainXbk: '/img/benefit_chain/xbk.png',
+  benefitChainBgy: '/img/benefit_chain/bgy.png',
 
   // ── 直播封面 ────────────────────────────────────────────────────────────────
   // ── 便捷方法：根据原始本地路径返回服务器/CDN 地址 ──────────────────────────

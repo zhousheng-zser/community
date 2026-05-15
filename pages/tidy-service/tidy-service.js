@@ -1,5 +1,7 @@
 const images = require('../../utils/images.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 
 Page({
   data: {
@@ -135,41 +137,112 @@ Page({
         ]
       }
     };
-    return allConfigs[key] || allConfigs.tidy;
+    return (
+      allConfigs[key] || {
+        title: '生活服务',
+        categories: ['热门服务'],
+        priceUnit: '次',
+        services: []
+      }
+    );
   },
 
   onLoad(options) {
     const sys = wx.getSystemInfoSync();
-    const key = (options && options.key) || "tidy";
+    const key = (options && options.key) || 'tidy';
     this._groupKey = key;
     const config = this.getPageConfig(key);
+    this._applyLocalPageConfig(sys, config);
+    this.mergeRemoteHomeModule(key);
+  },
 
+  _applyLocalPageConfig(sys, config) {
     const icons = [
       '/img/index/menuicon1.png',
       '/img/index/menuicon2.png',
       '/img/index/menuicon3.png',
       '/img/index/menuicon4.png'
     ];
-
-    // 立即用本地数据渲染（无需等待网络）
     const categories = config.categories.map((name, idx) => ({
-      key: idx === 0 ? "hot" : name,
+      key: idx === 0 ? 'hot' : name,
       name,
       icon: icons[idx % icons.length]
     }));
     const services = config.services.map((item) => this.decorateService(item));
-
     this.setData({
       navTopPadding: (sys.statusBarHeight || 20) + 6,
       pageTitle: config.title,
       categories,
       services,
-      loading: true
+      loading: false
     });
-    this.filterServices("hot");
+    this.filterServices('hot');
+  },
 
-    // [后端接口暂未实现且返回测试脏数据，暂时禁用覆盖，使用本地配置数据]
-    this.setData({ loading: false });
+  buildPagePayloadFromRemoteModule(mod) {
+    const icons = [
+      '/img/index/menuicon1.png',
+      '/img/index/menuicon2.png',
+      '/img/index/menuicon3.png',
+      '/img/index/menuicon4.png'
+    ];
+    const servicesRaw = Array.isArray(mod.services) ? mod.services : [];
+    let categoriesArr = Array.isArray(mod.categories)
+      ? mod.categories.map((c) => String(c).trim()).filter(Boolean)
+      : [];
+    if (categoriesArr.length === 0) {
+      const set = new Set();
+      servicesRaw.forEach((s) => {
+        if (s && s.category) set.add(String(s.category).trim());
+      });
+      categoriesArr = ['热门服务', ...Array.from(set)];
+    } else if (!categoriesArr.some((c) => c === '热门服务')) {
+      categoriesArr = ['热门服务', ...categoriesArr];
+    }
+    const categories = categoriesArr.map((name, idx) => ({
+      key: idx === 0 ? 'hot' : name,
+      name,
+      icon: icons[idx % icons.length]
+    }));
+    const services = servicesRaw.map((s, i) => ({
+      id: s.id != null ? s.id : `r${i}`,
+      category: (s.category && String(s.category).trim()) || '热门服务',
+      title: (s.title != null && String(s.title)) || '',
+      price: s.price != null ? String(s.price) : '',
+      description: s.description != null ? String(s.description) : '',
+      image: util.imgUrl(s.image_url || s.imageUrl || s.image || '')
+    }));
+    return {
+      pageTitle: (mod.name != null && String(mod.name).trim()) || '生活服务',
+      categories,
+      services
+    };
+  },
+
+  async mergeRemoteHomeModule(key) {
+    try {
+      const payload = await api.core.getHomeModules();
+      const modules = (payload && payload.modules) || [];
+      const mod = modules.find((m) => String(m.group_key || m.groupKey).trim() === key);
+      if (!mod) return;
+      if (Array.isArray(mod.services) && mod.services.length > 0) {
+        const built = this.buildPagePayloadFromRemoteModule(mod);
+        const services = built.services.map((item) => this.decorateService(item));
+        this.setData({
+          pageTitle: built.pageTitle,
+          categories: built.categories,
+          services,
+          loading: false
+        });
+        this.filterServices('hot');
+        return;
+      }
+      if (mod.name) {
+        this.setData({ pageTitle: String(mod.name) });
+      }
+    } catch (e) {
+      console.log('[tidy-service] core/home-modules 不可用', e);
+    }
   },
 
   decorateService(item) {

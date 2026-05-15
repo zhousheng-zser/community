@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('./controllers/core.controller');
 
+router.get('/home-modules', ctrl.getHomeModules);
 router.get('/banners', ctrl.getBanners);
 router.get('/categories', ctrl.getCategories);
 router.get('/services/hot', ctrl.getHotServices);

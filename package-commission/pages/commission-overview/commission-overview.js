@@ -18,13 +18,11 @@ Page({
   data: {
     summary: null,
     roles: [],
-    config: null,
     loading: true
   },
 
   onShow() {
     this.loadBalance();
-    this.loadConfig();
   },
 
   async loadBalance() {
@@ -51,16 +49,6 @@ Page({
       console.error('获取佣金余额失败:', e);
       this.setData({ loading: false });
       wx.showToast({ title: '获取余额失败', icon: 'none' });
-    }
-  },
-
-  async loadConfig() {
-    try {
-      const res = await api.commission.getConfig();
-      const data = res && res.data ? res.data : res;
-      this.setData({ config: data });
-    } catch (e) {
-      console.error('获取佣金配置失败:', e);
     }
   },
 

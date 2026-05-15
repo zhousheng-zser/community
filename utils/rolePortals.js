@@ -71,6 +71,8 @@ function mergePortalFlags(target, src) {
   if (!target || !src || typeof src !== 'object') return target;
   const next = Object.assign({}, target);
   const keys = [
+    'id',
+    'openid',
     'worker_status', 'workerStatus',
     'merchant_status', 'merchantStatus',
     'shop_status', 'shopStatus',
@@ -82,6 +84,7 @@ function mergePortalFlags(target, src) {
       next[k] = src[k];
     }
   });
+  if (src.openid != null && src.openid !== '') next.opId = src.openid;
   if (src.roles != null) next.roles = src.roles;
   return next;
 }

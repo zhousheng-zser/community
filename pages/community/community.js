@@ -62,10 +62,16 @@ Page({
   },
   fetchPosts() {
     const category = this.data.activeTab;
+    // 「邻里互动」展示帮帮订单池，不走帖子接口（后端无该 category 会报错并弹「加载失败」）
+    if (category === '邻里互动') {
+      this.setData({ posts: [] });
+      this.fetchAssistFeed();
+      return;
+    }
     console.log(`[社区] 正在拉取分类 [${category}] 的帖子...`);
-    
+
     // 使用相对路径，斜杠由 util 处理
-    util.get("/posts", { 
+    util.get("/posts", {
       category: category,
       page: 1,
       limit: 20

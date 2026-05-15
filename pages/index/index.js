@@ -11,9 +11,86 @@ const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
+const { mapRawModulesToCategoryRows } = require('../../utils/homeModulesMap.js');
 
 // 首页「直约技工」本地兜底数据（后端 core/workers 不可用时的展示）
 const FALLBACK_WORKERS = FALLBACK_WORKER_ROWS.map(mapWorkerForHomeCard);
+
+/** 惠民卡 · 肯德基/星巴克/百果园：与「京东联盟」区块同一套字段（头图 + 精选网格 + GO） */
+function mapChainBrandToAllianceSection(raw, imgUrlFn) {
+  const key = String(raw.key || '').trim();
+  const title = raw.title || '';
+  const subtitle = raw.subtitle != null ? String(raw.subtitle) : String(raw.sub || '');
+  const keyword = (raw.keyword != null ? String(raw.keyword) : '').trim();
+  const miniAppId = (raw.miniAppId || raw.mini_app_id || '').trim();
+  const miniPath = (raw.miniPath || raw.mini_path || '').trim();
+  const imgByKey = {
+    kfc: images.benefitChainKfc,
+    xbk: images.benefitChainXbk,
+    bgy: images.benefitChainBgy
+  };
+  const imgRaw = (raw.imageUrl || raw.image_url || '').trim() || imgByKey[key] || '';
+  const cardImage = imgRaw ? imgUrlFn(imgRaw) : imgUrlFn(images.benefitJdAllianceHero);
+  const banner = cardImage;
+  return {
+    key,
+    title,
+    sub: subtitle,
+    keyword,
+    miniAppId,
+    miniPath,
+    banner,
+    cardImage,
+    heroTitle: raw.heroTitle ? String(raw.heroTitle) : `惠民卡 · ${title}`,
+    heroSub: raw.heroSub ? String(raw.heroSub) : (subtitle || '聚推客 · 先领券再下单'),
+    listTitle: raw.listTitle ? String(raw.listTitle) : `${title} · 精选`,
+    cardTitle: raw.cardTitle ? String(raw.cardTitle) : `${title}在线点餐`,
+    priceHint: raw.priceHint ? String(raw.priceHint) : '活动价以小程序为准 · 点击进入',
+    ctaTitle: raw.ctaTitle ? String(raw.ctaTitle) : `去${title}小程序`,
+    ctaSub: raw.ctaSub ? String(raw.ctaSub) : '打开合作方微信小程序（与活动页路径一致）'
+  };
+}
+
+function defaultBenefitChainBrandList(imgUrlFn) {
+  return [
+    mapChainBrandToAllianceSection(
+      {
+        key: 'kfc',
+        title: '肯德基',
+        subtitle: '炸鸡汉堡 · 在线点餐（聚推客）',
+        keyword: '肯德基',
+        miniAppId: 'wx89752980e795bfde',
+        miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=16&source=jutuike',
+        image_url: '/img/benefit_chain/kfc.png'
+      },
+      imgUrlFn
+    ),
+    mapChainBrandToAllianceSection(
+      {
+        key: 'xbk',
+        title: '星巴克',
+        subtitle: '咖啡星享 · 在线点单（聚推客）',
+        keyword: '星巴克',
+        miniAppId: 'wx89752980e795bfde',
+        miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=34&source=jutuike',
+        image_url: '/img/benefit_chain/xbk.png'
+      },
+      imgUrlFn
+    ),
+    mapChainBrandToAllianceSection(
+      {
+        key: 'bgy',
+        title: '百果园',
+        subtitle: '时令水果 · 外送门店（聚推客）',
+        keyword: '百果园',
+        miniAppId: 'wx89752980e795bfde',
+        miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=31&source=jutuike',
+        image_url: '/img/benefit_chain/bgy.png'
+      },
+      imgUrlFn
+    )
+  ];
+}
 
 Page({
   data: {
@@ -88,32 +165,8 @@ Page({
     txBanner: "",
     txHeroTitle: "",
     txHeroSubtitle: "",
-    /** 大牌餐饮栏目：文案与搜索关键词，SKU 可在后台/本地清单后续挂载 */
-    benefitBrandColumns: {
-      kfc: {
-        title: '肯德基',
-        sub: '炸鸡汉堡 · 先领券再下单（可配置联盟 SKU）',
-        keyword: '肯德基',
-        hint: '复制关键词到京东/拼多多 App 搜索；后续可在此挂载联盟直链商品。'
-      },
-      mcd: {
-        title: '麦当劳',
-        sub: '巨无霸 · 麦乐送 · 惠民卡入口',
-        keyword: '麦当劳',
-        hint: '复制关键词到电商平台搜索；商品以实际页面为准。'
-      },
-      starbucks: {
-        title: '星巴克',
-        sub: '咖啡星享 · 券包与周边',
-        keyword: '星巴克',
-        hint: '支持后续配置京东/拼多多联盟商品位。'
-      }
-    },
-    benefitBrandList: [
-      { key: 'kfc', title: '肯德基', sub: '炸鸡汉堡 · 先领券再下单', keyword: '肯德基' },
-      { key: 'mcd', title: '麦当劳', sub: '巨无霸 · 麦乐送 · 惠民卡入口', keyword: '麦当劳' },
-      { key: 'starbucks', title: '星巴克', sub: '咖啡星享 · 券包与周边', keyword: '星巴克' }
-    ],
+    /** 大牌餐饮：与京东联盟同版式（头图+精选+GO），接口 chainBrands 覆盖 */
+    benefitBrandList: defaultBenefitChainBrandList(imgUrl),
     pddGoods: [],
     pddBanner: '',
     pddHeroTitle: "",
@@ -663,6 +716,17 @@ Page({
     });
 
     try {
+      const hm = await util.get('core/home-modules');
+      const rows = mapRawModulesToCategoryRows((hm && hm.modules) || []);
+      if (rows.length > 0) {
+        categoryList = mapHomeIcon(rows);
+        this.setData({ categoryList });
+      }
+    } catch (eHm) {
+      console.log('core/home-modules 不可用，使用本地九宫格', eHm);
+    }
+
+    try {
       const bRes = await util.get('core/banners', { scene: 'home' });
       const rows = unwrapList(bRes);
       if (rows.length > 0) {
@@ -937,6 +1001,7 @@ Page({
     let jdGoods = [];
     let jdEntry = { skuId: '', spreadUrl: '' };
     let pddGoods = [];
+    let benefitBrandList = defaultBenefitChainBrandList(imgUrl);
     const pickAllianceList = (res) => {
       if (Array.isArray(res)) return res;
       if (res && res.data && Array.isArray(res.data.list)) return res.data.list;
@@ -1083,6 +1148,9 @@ Page({
         if (disp5.tuixiao.image) txBanner = imgUrl(disp5.tuixiao.image);
         txHeroTitle = disp5.tuixiao.title || '';
         txHeroSubtitle = disp5.tuixiao.subtitle || '';
+      }
+      if (Array.isArray(disp5.chainBrands) && disp5.chainBrands.length > 0) {
+        benefitBrandList = disp5.chainBrands.map((b) => mapChainBrandToAllianceSection(b, imgUrl));
       }
     } catch (e) {
       console.warn('[惠民卡] benefit-alliance/display(5platform) 失败', e && (e.errmsg || e.message || e));
@@ -1243,6 +1311,7 @@ Page({
       txBanner,
       txHeroTitle,
       txHeroSubtitle,
+      benefitBrandList,
       assistMarqueeList,
       marketTopCats,
       marketFilters: [
@@ -1299,6 +1368,26 @@ Page({
       pushFeedGoods: [...(this.data.pushFeedGoodsDict[tabName] || [])],
       isLoadingMore: false
     });
+  },
+  onBenefitBrandTap(e) {
+    const ds = (e && e.currentTarget && e.currentTarget.dataset) || {};
+    const appId = ds.miniappid != null ? String(ds.miniappid).trim() : (ds.miniAppId != null ? String(ds.miniAppId).trim() : '');
+    let miniPath = ds.minipath != null ? String(ds.minipath).trim() : (ds.miniPath != null ? String(ds.miniPath).trim() : '');
+    if (appId && miniPath) {
+      if (!miniPath.startsWith('/')) miniPath = `/${miniPath}`;
+      wx.navigateToMiniProgram({
+        appId,
+        path: miniPath,
+        envVersion: 'release',
+        fail: (err) => {
+          console.warn('[惠民卡] 大牌连锁跳转失败', err);
+          wx.showToast({ title: '跳转失败，已改复制关键词', icon: 'none' });
+          this.copyBrandKeyword(e);
+        }
+      });
+      return;
+    }
+    this.copyBrandKeyword(e);
   },
   copyBrandKeyword(e) {
     const kw = e.currentTarget.dataset.keyword ? String(e.currentTarget.dataset.keyword).trim() : '';

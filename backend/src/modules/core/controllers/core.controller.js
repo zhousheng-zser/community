@@ -1,3 +1,16 @@
+const { loadModulesPayload } = require('./homeModules.shared');
+
+// GET /core/home-modules — 首页九宫格 / 生活服务专区（九州中台维护 JSON，见 backend/data/home-service-modules.json）
+exports.getHomeModules = async (req, res) => {
+  try {
+    const data = loadModulesPayload();
+    res.json({ code: 0, data });
+  } catch (err) {
+    console.error('[getHomeModules]', err);
+    res.status(500).json({ code: 1, msg: '读取首页模块配置失败' });
+  }
+};
+
 // GET /core/banners
 exports.getBanners = async (req, res) => {
   res.status(501).json({ code: 1, msg: '由主后端实现' });

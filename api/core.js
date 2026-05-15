@@ -12,6 +12,11 @@ const getBanners = () => {
   return get('/core/banners');
 };
 
+/** 首页生活服务九宫格 + 各模块下服务清单（九州中台） GET /core/home-modules */
+const getHomeModules = () => {
+  return get('/core/home-modules');
+};
+
 /**
  * 获取服务分类
  * GET /core/categories
@@ -70,6 +75,7 @@ const getServiceProviderList = (params) => {
 
 module.exports = {
   getBanners,
+  getHomeModules,
   getCategories,
   getHotServices,
   getServiceList,

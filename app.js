@@ -38,10 +38,10 @@ App({
     wx.login({
       success: res => {
         if (res.code) {
-          // 2. 将 code 发给后端换取 Token 和用户信息
-          util.post("auth/login", {
-            code: res.code
-          }).then((data) => {
+          // 2. 将 code 发给后端换取 Token 和用户信息（可选：分享场景带来的上级 openid，后端若支持则用于邀请绑定）
+          const payload = { code: res.code };
+          if (parentOpenid) payload.inviter_openid = String(parentOpenid).trim();
+          util.post("auth/login", payload).then((data) => {
             wx.hideLoading();
             // 保存 Token 到本地，供之后的所有请求鉴权使用
             wx.setStorageSync('token', data.token);

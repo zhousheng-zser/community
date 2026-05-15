@@ -11,7 +11,7 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(50),
       allowNull: false,
       defaultValue: 'jd',
-      comment: '平台：jd京东 pdd拼多多 taobao淘宝 meituan美团 brand品牌餐饮 shangou闪购 shequn社群 tuixiao推销',
+      comment: '平台：jd京东 pdd拼多多 taobao淘宝 meituan美团 brand品牌餐饮 shangou闪购 shequn社群 tuixiao推销；连锁大牌用 chain_kfc chain_xbk chain_bgy（sku_id 存合作小程序 AppId）',
     },
     title: {
       type: DataTypes.STRING(200),
@@ -47,7 +47,7 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(100),
       allowNull: true,
       defaultValue: '',
-      comment: '京东SKU',
+      comment: '京东SKU；连锁大牌(chain_*)时存合作方微信小程序 AppId',
     },
     goods_id: {
       type: DataTypes.STRING(100),
