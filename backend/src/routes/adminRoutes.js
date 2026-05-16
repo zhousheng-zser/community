@@ -17,6 +17,8 @@ const adminUserController = require('../controllers/adminUserController');
 const adminSystemController = require('../controllers/adminSystemController');
 const adminLocalGoodsHomeController = require('../controllers/adminLocalGoodsHomeController');
 const adminAuthMiddleware = require('../middlewares/adminAuthMiddleware');
+const adminHomeDisplayController = require('../controllers/adminHomeDisplayController');
+
 
 router.use(adminAuthMiddleware);
 
@@ -117,5 +119,15 @@ router.post('/service-providers/:id/services', adminMarketController.createSpSer
 router.put('/service-providers/:id/services/:sid', adminMarketController.updateSpService);
 router.delete('/service-providers/:id/services/:sid', adminMarketController.deleteSpService);
 router.get('/sp-orders', adminMarketController.listSpOrders);
+
+
+// ---- 首页展示管理 ----
+router.get('/home-display/items', adminHomeDisplayController.listItems);
+router.post('/home-display/items', adminHomeDisplayController.createItem);
+router.put('/home-display/items/:id', adminHomeDisplayController.updateItem);
+router.delete('/home-display/items/:id', adminHomeDisplayController.deleteItem);
+router.get('/home-display/search/workers', adminHomeDisplayController.searchWorkers);
+router.get('/home-display/search/services', adminHomeDisplayController.searchServices);
+router.get('/home-display/search/service-providers', adminHomeDisplayController.searchServiceProviders);
 
 module.exports = router;

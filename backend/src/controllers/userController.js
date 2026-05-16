@@ -1,15 +1,20 @@
 const { User, UserFollow, UserAddress, MarketApplication, MarketShop } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
 
 exports.getProfile = async (req, res) => {
     try {
-        const user = await User.findByPk(req.user.id, {
-            attributes: ['id', 'openid', 'nickname', 'avatar_url', 'phone', 'address', 'bank_num', 'wx_id', 'role', 'balance']
+        const userId = resolveUserId(req.user && req.user.id);
+        if (!userId) {
+            return res.status(401).json({ error: '未登录' });
+        }
+        const user = await User.findByPk(userId, {
+            attributes: ['id', 'openid', 'nickname', 'avatar_url', 'phone', 'address', 'role', 'balance', 'community_id', 'invited_by']
         });
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
         }
         const latestMarketApplication = await MarketApplication.findOne({
-            where: { user_id: req.user.id },
+            where: { user_id: userId },
             attributes: ['id', 'status', 'shop_name', 'phone'],
             order: [['created_at', 'DESC'], ['id', 'DESC']]
         });

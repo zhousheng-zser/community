@@ -118,5 +118,13 @@ module.exports = (sequelize, DataTypes) => {
     updatedAt: 'updated_at'
   });
 
+  // 须与 src/models/index.js 加载顺序一致：本文件会覆盖同名主模型，若不声明 associate，
+  // Admin GET /admin/worker-applications 里 include User 会报「未关联」导致 500。
+  WorkerApplication.associate = (models) => {
+    if (models.User) {
+      WorkerApplication.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
+    }
+  };
+
   return WorkerApplication;
 };

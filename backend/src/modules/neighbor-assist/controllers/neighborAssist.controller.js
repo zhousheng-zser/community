@@ -8,6 +8,7 @@ const db = require('../../../models');
 const NeighborAssistOrder = db.NeighborAssistOrder;
 const User = db.User;
 const WorkerApplication = db.WorkerApplication;
+const orderPoints = require('../../../services/orderPoints.service');
 // WorkerProfile 可能由主后端提供，当前环境缺失时降级处理
 const WorkerProfile = db.WorkerProfile || null;
 
@@ -204,6 +205,15 @@ exports.mockPay = async (req, res) => {
     order.pay_status = 'paid';
     order.status = 'paid_pending_dispatch';
     await order.save();
+    await order.reload();
+    await orderPoints.grantPointsOnOrderPaid(NeighborAssistOrder, order, null);
+    try {
+      const commissionService = require('../../commission/services/commission.service');
+      const payAmount = Number(order.amount || order.pay_amount || 0);
+      if (payAmount > 0) {
+        await commissionService.distributeCommission(String(order.id), 'neighbor_assist', payAmount, order.user_id);
+      }
+    } catch (ce) { console.warn('[neighbor-assist/commission]', ce.message); }
     return ok(res, order.get({ plain: true }));
   } catch (e) {
     console.error('neighborAssist mockPay', e);

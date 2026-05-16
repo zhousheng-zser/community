@@ -762,8 +762,19 @@ exports.orderCheckIn = async (req, res) => {
     });
     order.fulfillment_meta = { ...meta0, check_ins: checkIns };
     order.changed('fulfillment_meta', true);
+    const prevStatus = order.status;
+    if (['paid_pending_dispatch', 'dispatched'].includes(prevStatus)) {
+      order.status = 'in_service';
+    }
     await order.save();
-    return res.json({ errno: 0, data: { id: order.id, check_ins: order.fulfillment_meta.check_ins } });
+    if (prevStatus !== order.status) {
+      const buyerId2 = order.user_id || order.buyer_id;
+      if (buyerId2) {
+        const orderNo2 = order.order_no || String(order.id);
+        pushSpOrderNodeMessage(buyerId2, orderNo2, '服务商已到达', '服务人员已到达您的位置，正在为您提供服务。').catch(() => {});
+      }
+    }
+    return res.json({ errno: 0, data: { id: order.id, status: order.status, check_ins: order.fulfillment_meta.check_ins } });
   } catch (e) {
     console.error('spPortal orderCheckIn', e);
     return res.status(500).json({ errno: 500, errmsg: '打卡失败' });

@@ -67,6 +67,14 @@ async function virtualPaySuccessFlow(order, orderNo) {
   order.paid_at = now;
   await order.save();
 
+  // Distribute commission
+  if (commissionService) {
+    try {
+      const payAmount = Number(order.payable_amount || order.total_amount || 0);
+      if (payAmount > 0) await commissionService.distributeCommission(orderNo, 'market', payAmount, order.user_id);
+    } catch (ce) { console.warn('[market/commission]', ce.message); }
+  }
+
   return { tx, wxPayParams: buildVirtualWxPayParams() };
 }
 

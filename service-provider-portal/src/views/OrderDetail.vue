@@ -60,16 +60,27 @@
       <div class="panel sp-card actions-panel">
         <h3 class="sec-h">履约操作</h3>
         <el-space wrap size="large">
+          <!-- 待接单：接单 -->
           <el-button
-            v-if="order.status === 'pending_accept' && order.pay_status === 'paid'"
+            v-if="order.status === 'pending_accept'"
             type="primary"
             size="large"
             :loading="acting"
             @click="doAccept"
           >
-            接单并开始服务
+            接单
           </el-button>
-          <el-button v-if="order.status === 'in_service'" size="large" :loading="acting" @click="doCheckIn">上门打卡</el-button>
+          <!-- 待上门：到达打卡 -->
+          <el-button
+            v-if="order.status === 'paid_pending_dispatch'"
+            type="primary"
+            size="large"
+            :loading="acting"
+            @click="doCheckIn"
+          >
+            到达打卡
+          </el-button>
+          <!-- 服务中：上传凭证 + 完成 -->
           <el-button v-if="order.status === 'in_service'" size="large" :loading="acting" @click="doEvidence('before')">上传服务前照片</el-button>
           <el-button v-if="order.status === 'in_service'" size="large" :loading="acting" @click="doEvidence('after')">上传服务后照片</el-button>
           <el-button v-if="order.status === 'in_service'" type="success" size="large" :loading="acting" @click="doComplete">完成服务</el-button>
@@ -103,9 +114,13 @@ const metaKeys = computed(() => {
 function statusTag(st) {
   const m = {
     pending_accept: 'warning',
+    paid_pending_dispatch: 'warning',
+    dispatched: 'warning',
     in_service: 'primary',
     pending_user_confirm: 'info',
-    completed: 'success'
+    completed: 'success',
+    cancelled: 'danger',
+    refunded: 'danger'
   }
   return m[st] || 'info'
 }

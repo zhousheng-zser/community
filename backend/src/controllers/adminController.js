@@ -21,12 +21,25 @@ exports.getWorkerApplications = async (req, res) => {
         const offset = (page - 1) * limit;
         const status = req.query.status;
         const where = status ? { status } : {};
+        const include = [];
+        if (
+            User &&
+            WorkerApplication.associations &&
+            WorkerApplication.associations.user
+        ) {
+            include.push({
+                model: User,
+                as: 'user',
+                attributes: ['id', 'nickname', 'avatar_url', 'phone'],
+                required: false
+            });
+        }
         const { rows, count } = await WorkerApplication.findAndCountAll({
             where,
             offset,
             limit,
             order: [['created_at', 'DESC']],
-            include: [{ model: User, as: 'user', attributes: ['id', 'nickname', 'avatar_url', 'phone'] }]
+            include
         });
         res.json({ message: 'ok', total: count, page, limit, data: rows });
     } catch (e) {

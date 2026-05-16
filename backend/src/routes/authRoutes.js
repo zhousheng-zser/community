@@ -8,10 +8,13 @@ router.post('/sms/send', authController.sendSmsCode);
 router.post('/register', authController.register);
 router.post('/password_reset', authController.passwordReset);
 
-// POST /api/v1/auth/login
+// POST /api/v1/auth/login — 微信已注册直接登录
 router.post('/login', authController.login);
 
-// POST /api/v1/auth/login_password
+// POST /api/v1/auth/login_sms — 手机号 + 验证码
+router.post('/login_sms', authController.loginSms);
+
+// POST /api/v1/auth/login_password — 手机号 + 密码
 router.post('/login_password', authController.loginPassword);
 
 // POST /api/v1/auth/logout

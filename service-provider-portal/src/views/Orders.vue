@@ -8,6 +8,7 @@
           <el-select v-model="status" clearable placeholder="全部" style="width: 170px" @change="search">
             <el-option label="待支付" value="pending_pay" />
             <el-option label="待接单" value="pending_accept" />
+            <el-option label="待上门" value="paid_pending_dispatch" />
             <el-option label="服务中" value="in_service" />
             <el-option label="待用户确认" value="pending_user_confirm" />
             <el-option label="已完成" value="completed" />
@@ -101,6 +102,8 @@ function tagType(st) {
   const m = {
     pending_pay: 'info',
     pending_accept: 'warning',
+    paid_pending_dispatch: 'warning',
+    dispatched: 'warning',
     in_service: 'primary',
     pending_user_confirm: '',
     completed: 'success',
