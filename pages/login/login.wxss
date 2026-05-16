@@ -17,12 +17,57 @@
   font-size: 28rpx;
   color: #999;
 }
+.login-tabs {
+  display: flex;
+  margin-bottom: 40rpx;
+  border-bottom: 1rpx solid #eeeeee;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  color: #666;
+  padding: 20rpx 0;
+  position: relative;
+}
+.tab.active {
+  color: #000;
+  font-weight: bold;
+}
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 6rpx;
+  background-color: #000;
+  border-radius: 4rpx;
+}
 .input-group {
   display: flex;
   align-items: center;
   border-bottom: 1rpx solid #eeeeee;
   padding: 20rpx 0;
   margin-bottom: 40rpx;
+}
+.sms-btn {
+  font-size: 28rpx;
+  color: #07c160;
+  background: transparent;
+  border: none;
+  padding: 0 20rpx;
+  margin: 0;
+  width: auto;
+  line-height: inherit;
+}
+.sms-btn::after {
+  display: none;
+}
+.sms-btn[disabled] {
+  color: #999 !important;
+  background: transparent !important;
 }
 .input-icon {
   width: 40rpx;

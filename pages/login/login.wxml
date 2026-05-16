@@ -4,19 +4,31 @@
     <text class="subtitle">请登录后继续体验优质社区服务</text>
   </view>
 
+  <view class="login-tabs">
+    <view class="tab {{loginType === 'password' ? 'active' : ''}}" bindtap="switchTab" data-type="password">密码登录</view>
+    <view class="tab {{loginType === 'sms' ? 'active' : ''}}" bindtap="switchTab" data-type="sms">验证码登录</view>
+  </view>
+
   <view class="login-form">
     <view class="input-group">
       <image class="input-icon" src="/img/icon-phone.png" mode="aspectFit"></image>
       <input type="number" class="input-field" placeholder="请输入手机号码" bindinput="onPhoneInput" value="{{phone}}" />
     </view>
-    <view class="input-group">
+
+    <view class="input-group" wx:if="{{loginType === 'password'}}">
       <image class="input-icon" src="/img/icon-lock.png" mode="aspectFit"></image>
       <input type="password" class="input-field" placeholder="请输入密码" bindinput="onPasswordInput" value="{{password}}" />
     </view>
 
+    <view class="input-group" wx:if="{{loginType === 'sms'}}">
+      <image class="input-icon" src="/img/icon-lock.png" mode="aspectFit"></image>
+      <input type="number" class="input-field" placeholder="请输入验证码" bindinput="onCodeInput" value="{{code}}" />
+      <button class="sms-btn" disabled="{{smsCount > 0}}" bindtap="sendSms">{{smsCount > 0 ? smsCount + 's后重发' : '获取验证码'}}</button>
+    </view>
+
     <button class="primary-btn login-btn" bindtap="doLogin">登录</button>
     <button class="wechat-btn" bindtap="quickLogin">
-      <image class="wechat-icon" src="/img/icon-wechat.png" mode="aspectFit"></image>微信快捷登录
+      <image class="wechat-icon" src="/img/icon-wechat.png" mode="aspectFit"></image>微信一键登录
     </button>
   </view>
 

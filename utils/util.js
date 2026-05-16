@@ -115,7 +115,8 @@ const request = (method, url, data, contentType = 'application/json') => {
           } catch (e) { }
           reject({
             errno: 401,
-            errmsg: (body && body.errmsg) || '请先登录'
+            errmsg: (body && (body.msg || body.message || body.errmsg || body.error)) || '请先登录',
+            msg: body && (body.msg || body.message || body.errmsg)
           });
           return;
         }
@@ -129,7 +130,8 @@ const request = (method, url, data, contentType = 'application/json') => {
         if (hasCode && codeNum !== 0) {
           reject({
             errno: body.code,
-            errmsg: body.message || body.errmsg || body.error || '请求失败'
+            errmsg: body.msg || body.message || body.errmsg || body.error || '请求失败',
+            msg: body.msg || body.message || body.errmsg
           });
           return;
         }
@@ -137,7 +139,8 @@ const request = (method, url, data, contentType = 'application/json') => {
         if (hasErrno && errnoNum !== 0) {
           reject({
             errno: body.errno,
-            errmsg: body.errmsg || body.message || body.error || '请求失败'
+            errmsg: body.msg || body.errmsg || body.message || body.error || '请求失败',
+            msg: body.msg || body.errmsg || body.message
           });
           return;
         }
@@ -148,11 +151,17 @@ const request = (method, url, data, contentType = 'application/json') => {
         if (!ok) {
           reject({
             errno: res.statusCode,
-            errmsg: (body && body.errmsg) || '请求失败'
+            errmsg: (body && (body.msg || body.message || body.errmsg || body.error)) || '请求失败',
+            msg: body && (body.msg || body.message || body.errmsg)
           });
           return;
         }
-        resolve(body.data !== undefined ? body.data : body);
+        let finalData = body.data !== undefined ? body.data : body;
+        if (finalData && typeof finalData === 'object' && body && typeof body === 'object') {
+          if (body.user !== undefined && finalData.user === undefined) finalData.user = body.user;
+          if (body.token !== undefined && finalData.token === undefined) finalData.token = body.token;
+        }
+        resolve(finalData);
       },
       fail: (res) => {
         const errorMsg = res.errMsg || '网络连接失败';
@@ -219,12 +228,20 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
           try {
             wx.removeStorageSync('token');
           } catch (e) { }
-          reject({ errno: 401, errmsg: (data && data.errmsg) || '请先登录' });
+          reject({ 
+            errno: 401, 
+            errmsg: (data && (data.msg || data.message || data.errmsg || data.error)) || '请先登录',
+            msg: data && (data.msg || data.message || data.errmsg)
+          });
           return;
         }
         const hasErrno = data != null && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'errno');
         if (hasErrno && Number(data.errno) !== 0) {
-          reject({ errno: data.errno, errmsg: data.errmsg || '上传失败' });
+          reject({ 
+            errno: data.errno, 
+            errmsg: data.msg || data.message || data.errmsg || data.error || '上传失败',
+            msg: data.msg || data.message || data.errmsg
+          });
           return;
         }
         if (res.statusCode === 200 || res.statusCode === 201) {

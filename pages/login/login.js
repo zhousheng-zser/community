@@ -6,7 +6,10 @@ const api = require('../../api/index.js');
 Page({
   data: {
     phone: '',
-    password: ''
+    password: '',
+    code: '',
+    loginType: 'password', // 'password' or 'sms'
+    smsCount: 0
   },
   onPhoneInput(e) {
     this.setData({ phone: e.detail.value });
@@ -14,14 +17,59 @@ Page({
   onPasswordInput(e) {
     this.setData({ password: e.detail.value });
   },
-  doLogin() {
-    const { phone, password } = this.data;
-    if (!phone || !password) {
-      wx.showToast({ title: '请输入手机号和密码', icon: 'none' });
+  onCodeInput(e) {
+    this.setData({ code: e.detail.value });
+  },
+  switchTab(e) {
+    const type = e.currentTarget.dataset.type;
+    this.setData({ loginType: type, password: '', code: '' });
+  },
+  sendSms() {
+    const { phone } = this.data;
+    if (!/^1\d{10}$/.test(phone)) {
+      wx.showToast({ title: '请输入正确的手机号', icon: 'none' });
       return;
     }
+    wx.showLoading({ title: '发送中' });
+    api.auth.sendSmsCode({ phone, type: 'login' }).then(() => {
+      wx.hideLoading();
+      wx.showToast({ title: '发送成功' });
+      this.setData({ smsCount: 60 });
+      this.timer = setInterval(() => {
+        if (this.data.smsCount <= 1) {
+          clearInterval(this.timer);
+          this.setData({ smsCount: 0 });
+        } else {
+          this.setData({ smsCount: this.data.smsCount - 1 });
+        }
+      }, 1000);
+    }).catch(err => {
+      wx.hideLoading();
+      wx.showToast({ title: this.getErrorMessage(err, '发送失败'), icon: 'none' });
+    });
+  },
+  doLogin() {
+    const { phone, password, code, loginType } = this.data;
+    if (!phone) {
+      wx.showToast({ title: '请输入手机号', icon: 'none' });
+      return;
+    }
+    if (loginType === 'password' && !password) {
+      wx.showToast({ title: '请输入密码', icon: 'none' });
+      return;
+    }
+    if (loginType === 'sms' && !code) {
+      wx.showToast({ title: '请输入验证码', icon: 'none' });
+      return;
+    }
+
     wx.showLoading({ title: '登录中' });
-    api.auth.accountLogin({ phone, password }).then(data => {
+    
+    const loginPromise = loginType === 'sms' 
+      ? api.auth.smsLogin({ phone, code }) 
+      : api.auth.accountLogin({ phone, password });
+
+    loginPromise.then(data => {
       wx.hideLoading();
       this.handleLoginSuccess(data);
     }).catch(err => {
@@ -29,7 +77,7 @@ Page({
       wx.showToast({ title: this.getErrorMessage(err, '登录失败'), icon: 'none' });
     });
   },
-  doWechatLogin(extraPayload = {}, failFallbackMsg = '快捷登录失败') {
+  doWechatLogin(extraPayload = {}, failFallbackMsg = '一键登录失败') {
     wx.login({
       success: res => {
         if (!res.code) {
@@ -41,32 +89,27 @@ Page({
           wx.hideLoading();
           this.handleLoginSuccess(data);
         }).catch(err => {
-          this.tryTestAccountLogin(this.getErrorMessage(err, failFallbackMsg));
+          wx.hideLoading();
+          if (err && err.code === 404) {
+            wx.showModal({
+              title: '提示',
+              content: '该微信尚未注册，请先注册',
+              confirmText: '去注册',
+              success: (res) => {
+                if (res.confirm) {
+                  wx.navigateTo({ url: '/pages/register/register' });
+                }
+              }
+            });
+          } else {
+            wx.showToast({ title: this.getErrorMessage(err, failFallbackMsg), icon: 'none' });
+          }
         });
       },
       fail: () => {
-        this.tryTestAccountLogin('微信登录失败');
-      }
-    });
-  },
-  tryTestAccountLogin(prevMsg = '') {
-    // 应急兜底：用于开发联调阶段快速进入系统测试业务功能
-    const phone = `199${String(Date.now()).slice(-8)}`;
-    const password = '123456';
-    const afterFail = () => {
-      wx.hideLoading();
-      wx.showToast({ title: prevMsg || '请求失败', icon: 'none' });
-    };
-    api.auth.register({ phone, code: '024680', password }).then(data => {
-      wx.hideLoading();
-      wx.showToast({ title: '已进入测试账号', icon: 'none' });
-      this.handleLoginSuccess(data);
-    }).catch(() => {
-      api.auth.accountLogin({ phone, password }).then(data => {
         wx.hideLoading();
-        wx.showToast({ title: '已进入测试账号', icon: 'none' });
-        this.handleLoginSuccess(data);
-      }).catch(afterFail);
+        wx.showToast({ title: '微信登录失败', icon: 'none' });
+      }
     });
   },
   getErrorMessage(err, fallback = '请求失败') {

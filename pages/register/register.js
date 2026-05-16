@@ -90,25 +90,49 @@ Page({
       return;
     }
 
-    wx.showLoading({ title: '注册中' });
-    util.post('auth/register', {
-      phone,
-      code,
-      password,
-      address,
-      lat: latitude,
-      lng: longitude
-    }).then(data => {
-      wx.hideLoading();
-      wx.showToast({ title: '注册成功' });
-      // 注册成功后拿到了 Token 进入登录态
-      wx.setStorageSync('token', data.token);
-      setTimeout(() => {
-        wx.reLaunch({ url: '/pages/index/index' });
-      }, 1500);
-    }).catch(err => {
-      wx.hideLoading();
-      wx.showToast({ title: err.errmsg || '注册失败', icon: 'none' });
+    wx.showLoading({ title: '获取微信授权中' });
+    wx.login({
+      success: (res) => {
+        if (!res.code) {
+          wx.hideLoading();
+          wx.showToast({ title: '微信授权失败', icon: 'none' });
+          return;
+        }
+
+        wx.showLoading({ title: '注册中' });
+        util.post('auth/register', {
+          phone,
+          sms_code: code,
+          password,
+          wx_code: res.code,
+          address,
+          lat: latitude,
+          lng: longitude
+        }).then(data => {
+          wx.hideLoading();
+          wx.showToast({ title: '注册成功' });
+          // 注册成功后拿到了 Token 进入登录态
+          wx.setStorageSync('token', data.token || data.data?.token);
+          setTimeout(() => {
+            wx.reLaunch({ url: '/pages/index/index' });
+          }, 1500);
+        }).catch(err => {
+          wx.hideLoading();
+          if (err && err.code === 409) {
+            wx.showModal({
+              title: '提示',
+              content: err.msg || err.errmsg || '该账号或微信已注册',
+              showCancel: false
+            });
+          } else {
+            wx.showToast({ title: err.errmsg || err.msg || '注册失败', icon: 'none' });
+          }
+        });
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '微信授权失败', icon: 'none' });
+      }
     });
   },
 

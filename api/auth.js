@@ -21,6 +21,14 @@ const accountLogin = (data) => {
 };
 
 /**
+ * 手机号验证码登录
+ * POST /auth/login_sms
+ */
+const smsLogin = (data) => {
+  return post('/auth/login_sms', data);
+};
+
+/**
  * 用户注册
  * POST /auth/register
  */
@@ -71,6 +79,7 @@ const workerLogin = (data) => {
 module.exports = {
   wechatLogin,
   accountLogin,
+  smsLogin,
   register,
   sendSmsCode,
   adminLogin,

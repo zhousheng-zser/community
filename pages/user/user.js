@@ -121,7 +121,7 @@ Page({
       const data = await api.user.getUserProfile();
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
-        const sid = data.id != null ? Number(data.id) : null;
+        const sid = data.id != null ? String(data.id) : null;
         if (sid != null) app.globalData.user.id = sid;
         const st = data.merchant_status != null ? data.merchant_status : data.merchantStatus;
         if (st != null) app.globalData.user.merchant_status = st;
@@ -200,8 +200,8 @@ Page({
     const prevStatus = (app.globalData.user || {}).worker_status || (app.globalData.user || {}).workerStatus || '';
     api.user.getUserProfile().then((data) => {
       const cid = data.community_id != null ? data.community_id : data.communityId;
-      const sid = data.id != null ? Number(data.id) : null;
-      const gid = app.globalData.user && app.globalData.user.id != null ? Number(app.globalData.user.id) : null;
+      const sid = data.id != null ? String(data.id) : null;
+      const gid = app.globalData.user && app.globalData.user.id != null ? String(app.globalData.user.id) : null;
       if (sid != null && gid != null && sid !== gid) {
         console.warn('[getProfile] 用户 id 与登录缓存不一致，以服务端资料为准', { cached: gid, profile: sid });
       }

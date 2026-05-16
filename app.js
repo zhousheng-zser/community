@@ -30,6 +30,44 @@ App({
       return;
     }
 
+    if (wx.getStorageSync('token')) {
+      if (this.globalData.user) {
+        if (callback) { callback(); }
+        return;
+      }
+      // 冷启动有 token 无 user 时，拉取当前 token 的用户信息，而不该走静默登录覆盖它
+      util.get('/user/profile').then(data => {
+        const u = data;
+        this.globalData.user = rolePortals.mergePortalFlags({
+          id: u.id,
+          opId: u.openid,
+          userName: u.nickname || '微信用户',
+          userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
+          userMobile: u.phone || '13800000000',
+          userAddress: u.address || '',
+          userBankNum: u.bank_num || '',
+          userWxId: u.wx_id || '',
+          role: u.role || 'user',
+          roles: u.roles,
+          worker_status: u.worker_status != null ? u.worker_status : u.workerStatus,
+          merchant_status: u.merchant_status != null ? u.merchant_status : u.merchantStatus,
+          shop_id: u.shop_id != null ? u.shop_id : u.shopId,
+          shop_status: u.shop_status != null ? u.shop_status : u.shopStatus,
+          communityId: u.community_id != null ? u.community_id : u.communityId,
+          points: u.points,
+          userState: 0,
+          remark2: 2,
+          vipFlag: 0
+        }, u);
+        if (callback) callback();
+      }).catch(() => {
+        // token 失效或异常，清除后重新走静默登录
+        wx.removeStorageSync('token');
+        this.save(parentOpenid, callback);
+      });
+      return;
+    }
+
     wx.showLoading({
       title: '正在登录'
     });
