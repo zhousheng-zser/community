@@ -877,10 +877,10 @@ Page({
 
     // 模块二：分类金刚
     const pushCategories = mapHomeIcon([
-      { name: "爆款专区", icon: "/img/local_goods_icons/fire.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=1" },
-      { name: "礼物专区", icon: "/img/local_goods_icons/gift.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=2" },
-      { name: "本地商城甄选", icon: "/img/local_goods_icons/star.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=3" },
-      { name: "高佣专区", icon: "/img/local_goods_icons/money.png", url: "/package-push/pages/push-goods-list/push-goods-list?id=4" }
+      { name: "爆款专区", icon: images.pushCateFire, url: "/package-push/pages/push-goods-list/push-goods-list?id=1" },
+      { name: "礼物专区", icon: images.pushCateGift, url: "/package-push/pages/push-goods-list/push-goods-list?id=2" },
+      { name: "本地商城甄选", icon: images.pushCateStar, url: "/package-push/pages/push-goods-list/push-goods-list?id=3" },
+      { name: "高佣专区", icon: images.pushCateMoney, url: "/package-push/pages/push-goods-list/push-goods-list?id=4" }
     ]);
 
     // 模块三：导购窗

@@ -52,15 +52,15 @@
 
     <!-- 模块三：三花聚顶导购窗 -->
     <view class="jt-promo-grid">
-      <navigator class="jt-promo-left" url="../push-channel/push-channel?title=品牌好货">
+      <navigator class="jt-promo-left" url="/package-push/pages/push-channel/push-channel?title=品牌好货">
         <image src="{{pushPromoCards.left.image}}" mode="aspectFill"></image>
         <text class="tag">{{pushPromoCards.left.title}}</text>
       </navigator>
-      <navigator class="jt-promo-mid" url="../push-channel/push-channel?title=寻找九州好物">
+      <navigator class="jt-promo-mid" url="/package-push/pages/push-channel/push-channel?title=寻找九州好物">
         <text class="title">寻找九州好物</text>
         <text class="sub">溯源地道，严选品质</text>
       </navigator>
-      <navigator class="jt-promo-right" url="../push-channel/push-channel?title=秋冬好物">
+      <navigator class="jt-promo-right" url="/package-push/pages/push-channel/push-channel?title=秋冬好物">
         <image src="{{pushPromoCards.right.image}}" mode="aspectFill"></image>
         <text class="tag">{{pushPromoCards.right.title}}</text>
       </navigator>

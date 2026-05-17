@@ -57,7 +57,7 @@
   <navigator class="wallet-card" url="../account/account">
     <view class="wallet-left">
       <view class="wallet-icon-bg">
-        <image class="wallet-icon-img" src="/img/local_goods_icons/money.png" mode="aspectFit"></image>
+        <image class="wallet-icon-img" src="https://120.27.239.244:3001/uploads/img/local_goods_icons/money.png" mode="aspectFit"></image>
       </view>
       <view class="wallet-text">
         <text class="wallet-label">可提现余额</text>

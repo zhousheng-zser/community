@@ -2,6 +2,7 @@ const util = require('../../utils/util.js');
 
 const TITLE_TO_CHANNEL = {
   品牌好货: "brand_goods",
+  品牌好物: "brand_goods",
   寻找九州好物: "jiuzhou_haowu",
   秋冬好物: "autumn_winter",
   九州好食: "jiuzhou_haoshi",

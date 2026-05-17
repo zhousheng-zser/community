@@ -87,7 +87,7 @@ const images = {
   hotClean: '/img/home_service_photos/daily_clean.png',
 
   // ── 管家精选商品 ────────────────────────────────────────────────────────────
-  goodsSkincare1: usp('1522335789203-aabd1fc54bc9', 500),
+  goodsSkincare1: base + '/uploads/file-1773325942165-459472452.jpg',
   goodsSkincare2: usp('1604654894610-df63bc536371', 500),
   goodsLocal: base + '/uploads/file-1773395942165-45947155.png',
 
@@ -96,8 +96,14 @@ const images = {
   pushFood2: usp('1498837167922-ddd27525d352', 400),
   pushDaily1: usp('1583947215259-255857837bc1', 400),
   pushDaily2: usp('1556228453-efd6c1ff04f6', 400),
-  pushFashion1: usp('1523275335684-37898b6baf30', 400),
+  pushFashion1: base + '/uploads/file-17733293942125-459452655.jpg',
   pushBeauty1: usp('1522335789203-aabd1fc54bc9', 400),
+
+  // ── 本地商城金刚区图标 ──────────────────────────────────────────────────────
+  pushCateFire: base + '/uploads/img/local_goods_icons/fire.png',
+  pushCateGift: base + '/uploads/img/local_goods_icons/gift.png',
+  pushCateStar: base + '/uploads/img/local_goods_icons/star.png',
+  pushCateMoney: base + '/uploads/img/local_goods_icons/money.png',
 
   // ── 惠民卡 · 联盟头图（源：流量联盟/京东联盟.png、拼多多.png，同步至 img/benefit_alliance/）──
   benefitJdAllianceHero: '/img/benefit_alliance/jd-alliance.png',
