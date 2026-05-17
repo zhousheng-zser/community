@@ -22,6 +22,47 @@
       </view>
 
       <view class="field">
+        <text class="field-label">店铺内分类</text>
+        
+        <!-- 场景 A：店铺配置了分类，展示下拉选择器（Picker） -->
+        <block wx:if="{{shopCategories && shopCategories.length > 0}}">
+          <picker
+            mode="selector"
+            range="{{shopCategories}}"
+            range-key="name"
+            bindchange="onCategoryPickerChange"
+          >
+            <view class="picker-display-box">
+              <text class="picker-value" wx:if="{{categoryKey}}">{{selectedCategoryName || categoryKey}}</text>
+              <text class="picker-placeholder" wx:else>请选择店铺内分类</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </block>
+        
+        <!-- 场景 B：店铺未配置分类，允许手动输入，并提供常用推荐快捷标签 -->
+        <block wx:else>
+          <input
+            class="field-input"
+            placeholder="如：热销爆款、今日特惠、招牌菜"
+            value="{{categoryKey}}"
+            maxlength="50"
+            bindinput="onCategoryInput"
+          />
+          <view class="quick-tags">
+            <text class="tag-title">常用推荐：</text>
+            <view class="tag-list">
+              <text class="quick-tag {{categoryKey === '今日特惠' ? 'active' : ''}}" bindtap="onCategoryInput" data-value="今日特惠">今日特惠</text>
+              <text class="quick-tag {{categoryKey === '招牌推荐' ? 'active' : ''}}" bindtap="onCategoryInput" data-value="招牌推荐">招牌推荐</text>
+              <text class="quick-tag {{categoryKey === '热销爆款' ? 'active' : ''}}" bindtap="onCategoryInput" data-value="热销爆款">热销爆款</text>
+              <text class="quick-tag {{categoryKey === '酒水饮料' ? 'active' : ''}}" bindtap="onCategoryInput" data-value="酒水饮料">酒水饮料</text>
+              <text class="quick-tag {{categoryKey === '新鲜水果' ? 'active' : ''}}" bindtap="onCategoryInput" data-value="新鲜水果">新鲜水果</text>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <view class="field">
         <text class="field-label">商品图片（最多 6 张）</text>
         <view class="img-row">
           <image

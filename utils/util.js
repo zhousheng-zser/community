@@ -630,7 +630,7 @@ const extractDistanceKmFromProduct = (item) => {
   return null;
 };
 
-const filterShopProductsByDistance = (list, maxKm = 5) => {
+const filterShopProductsByDistance = (list, maxKm = 10) => {
   if (!Array.isArray(list)) return [];
   return list.filter((g) => {
     const km = extractDistanceKmFromProduct(g);
@@ -687,7 +687,7 @@ const buildShopGoodsQuery = (extra = {}) => {
     q.user_lat = Number(lat);
     q.user_lng = Number(lng);
   }
-  q.distance_km = q.distance_km != null ? q.distance_km : 5;
+  q.distance_km = q.distance_km != null ? q.distance_km : (config.marketShopRadiusKm != null ? config.marketShopRadiusKm : 10);
   return q;
 };
 

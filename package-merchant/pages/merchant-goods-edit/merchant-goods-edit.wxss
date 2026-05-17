@@ -197,3 +197,65 @@ page {
 .save-btn {
   margin-top: 16rpx;
 }
+
+.quick-tags {
+  margin-top: 14rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.tag-title {
+  font-size: 22rpx;
+  color: #78716c;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.quick-tag {
+  font-size: 22rpx;
+  color: #7a5c28;
+  background: #faf8f4;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #e7dfd0;
+  transition: all 0.2s ease;
+}
+
+.quick-tag.active {
+  color: #fff;
+  background: linear-gradient(135deg, #6b4f2a 0%, #9a7340 100%);
+  border-color: #6b4f2a;
+}
+
+.picker-display-box {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 72rpx;
+  padding: 14rpx 20rpx;
+  font-size: 30rpx;
+  background: #faf8f4;
+  border-radius: 16rpx;
+  border: 1rpx solid #e7dfd0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.picker-value {
+  color: #1c1917;
+  font-weight: 500;
+}
+
+.picker-placeholder {
+  color: #a8a29e;
+}
+
+.picker-arrow {
+  font-size: 20rpx;
+  color: #7a5c28;
+}

@@ -6,6 +6,19 @@
 const util = require('./util.js');
 const { imgUrl, pickMarketShopAvatarPath, normalizeShopProductRow, extractDistanceKmFromProduct, filterShopProductsByDistance, buildShopGoodsQuery, unwrapList } = util;
 
+const CATEGORY_MAP = {
+  '食品生鲜': 'AAAA',
+  '美妆洗护': 'AAAB',
+  '居家百货': 'AAAC',
+  '服装箱包': 'AAAD',
+  '母婴系列': 'AAAE',
+  '家用电器': 'AAAF',
+  '数码产品': 'AAAG',
+  '珠宝饰品': 'AAAH',
+  '旅游出行': 'AAAI',
+  '传统工艺': 'AAAJ'
+};
+
 /**
  * 规范化集市店铺数据（用于首页店铺卡片展示）
  */
@@ -32,7 +45,7 @@ const normalizeMarketShop = (item) => {
   const coverPath = pickMarketShopAvatarPath(item);
   return {
     id: item.id,
-    cat: item.category || '本地集市',
+    cat: CATEGORY_MAP[item.category] || item.category || 'AAAA',
     name: item.name || item.shop_name || '社区店铺',
     badge: item.delivery_type_text || item.delivery_type || '商家自送',
     delivery: deliveryText,
@@ -131,14 +144,14 @@ const normalizeModuleGoods = (item, i, extra = {}) => {
  */
 const normalizeModuleList = (list, extra = {}) => {
   const arr = Array.isArray(list) ? list : pickModuleGoodsList(list);
-  return filterShopProductsByDistance(arr, 5).map((item, idx) => normalizeModuleGoods(item, idx, extra));
+  return filterShopProductsByDistance(arr, 10).map((item, idx) => normalizeModuleGoods(item, idx, extra));
 };
 
 /**
  * 构建本地商品查询参数
  */
 const buildLocalGoodsQuery = (extra = {}) => {
-  return buildShopGoodsQuery({ distance_km: 5, ...extra });
+  return buildShopGoodsQuery({ distance_km: 10, ...extra });
 };
 
 /**

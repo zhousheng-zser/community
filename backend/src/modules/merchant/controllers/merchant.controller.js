@@ -70,6 +70,8 @@ function normalizeGoods(row) {
     status: row.status,
     is_published: row.is_published,
     sort_order: row.sort_order,
+    category_key: row.category_key || 'local',
+    categoryKey: row.category_key || 'local',
     created_at: row.created_at,
     updated_at: row.updated_at
   };
@@ -175,6 +177,10 @@ exports.getGoodsList = async (req, res) => {
     }
 
     // 上架筛选：on = 与小程序列表一致（在售且已发布）；off = 其余
+    if (query.category_key) {
+      where.category_key = query.category_key;
+    }
+
     const shelf = query.shelf || query.on_shelf;
     const Op = db.Sequelize.Op;
     if (shelf === 'on' || shelf === '1' || shelf === 'published') {
@@ -249,7 +255,8 @@ exports.createGoods = async (req, res) => {
       description: body.description || body.desc || '',
       status: isPublished ? 'on_sale' : status,
       is_published: isPublished,
-      sort_order: parseInt(body.sort_order, 10) || 0
+      sort_order: parseInt(body.sort_order, 10) || 0,
+      category_key: String(body.category_key || body.categoryKey || 'local').trim()
     });
 
     ok(res, normalizeGoods(row), '创建成功');
@@ -327,6 +334,8 @@ exports.updateGoods = async (req, res) => {
     if (body.description !== undefined) updateData.description = body.description;
     if (body.desc !== undefined) updateData.description = body.desc;
     if (body.sort_order !== undefined) updateData.sort_order = parseInt(body.sort_order, 10) || 0;
+    if (body.category_key !== undefined) updateData.category_key = String(body.category_key || 'local').trim();
+    else if (body.categoryKey !== undefined) updateData.category_key = String(body.categoryKey || 'local').trim();
 
     // status 和 is_published 在 toggleShelf 中单独处理，这里不覆盖
 

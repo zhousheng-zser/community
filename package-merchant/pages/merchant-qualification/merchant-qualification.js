@@ -4,6 +4,19 @@ const mshop = require('../../utils/merchantShopContext.js');
 
 const FALLBACK_IMG = 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png';
 
+const REVERSE_CATEGORY_MAP = {
+  'AAAA': '食品生鲜',
+  'AAAB': '美妆洗护',
+  'AAAC': '居家百货',
+  'AAAD': '服装箱包',
+  'AAAE': '母婴系列',
+  'AAAF': '家用电器',
+  'AAAG': '数码产品',
+  'AAAH': '珠宝饰品',
+  'AAAI': '旅游出行',
+  'AAAJ': '传统工艺'
+};
+
 function pick() {
   for (let i = 0; i < arguments.length; i += 1) {
     const v = arguments[i];
@@ -55,7 +68,7 @@ function normalizeDetail(input) {
 
   return {
     shopName: pick(shop.name, shop.shop_name, shop.shopName, apply.shop_name, apply.shopName),
-    category: pick(shop.category, apply.category),
+    category: REVERSE_CATEGORY_MAP[pick(shop.category, apply.category)] || pick(shop.category, apply.category),
     contactName: pick(shop.contact_name, shop.contactName, apply.contact_name, apply.contactName),
     phone: pick(shop.phone, shop.contact_phone, apply.phone),
     entityName: pick(shop.entity_name, shop.entityName, apply.entity_name, apply.entityName),

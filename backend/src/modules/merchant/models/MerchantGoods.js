@@ -84,9 +84,15 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0,
       comment: '排序权重'
+    },
+    category_key: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      defaultValue: 'local',
+      comment: '店铺内分类Key'
     }
   }, {
-    tableName: 'merchant_goods',
+    tableName: 'market_goods',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',

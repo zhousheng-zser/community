@@ -2,6 +2,19 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
+const CATEGORY_CODE_MAP = {
+  '食品生鲜': 'AAAA',
+  '美妆洗护': 'AAAB',
+  '居家百货': 'AAAC',
+  '服装箱包': 'AAAD',
+  '母婴系列': 'AAAE',
+  '家用电器': 'AAAF',
+  '数码产品': 'AAAG',
+  '珠宝饰品': 'AAAH',
+  '旅游出行': 'AAAI',
+  '传统工艺': 'AAAJ'
+};
+
 Page({
   data: {
     agreed: false,
@@ -290,7 +303,7 @@ Page({
         contact_name: form.contact, 
         phone: form.phone, 
         shop_name: form.shopName,
-        category: form.category, 
+        category: CATEGORY_CODE_MAP[form.category] || form.category, 
         address: form.address,
         latitude: form.lat || undefined,
         longitude: form.lng || undefined,

@@ -25,8 +25,8 @@ const config = {
         'chat',
     ],
 
-    // 本地集市店铺列表：默认筛选半径（公里），与 GET market/shops 的 radius_km 及后端配置对齐（产品约定 X=5）
-    marketShopRadiusKm: 5,
+    // 本地集市店铺列表：默认筛选半径（公里），与 GET market/shops 的 radius_km 及后端配置对齐（产品约定 X=10）
+    marketShopRadiusKm: 10,
 
     /**
      * 首页「小区热卖榜」：false 时请求 core/community/hot（可带 community_id），失败则回退 core/services/hot；

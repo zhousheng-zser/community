@@ -591,7 +591,7 @@ Page({
     const name = e.currentTarget.dataset.name || '';
     const price = e.currentTarget.dataset.price || '';
     const shopId = e.currentTarget.dataset.shopId || '';
-    wx.navigateTo({ url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + encodeURIComponent(shopId) + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price) });
+    wx.navigateTo({ url: "/package-push/pages/push-product-detail/push-product-detail?id=" + id + "&shopId=" + encodeURIComponent(shopId) + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price) });
   },
 
   onTapHomeCategory(e) {
@@ -950,16 +950,16 @@ Page({
       { id: 3004, name: "黄冰糖", price: "29.9", image: images.pushFood1 }
     ];
     const marketTopCats = mapHomeIcon([
-      { name: "食品生鲜", code: "食品生鲜", icon: "/img/market_icons/food.png" },
-      { name: "美妆洗护", code: "美妆洗护", icon: "/img/market_icons/star.png" },
-      { name: "居家百货", code: "居家百货", icon: "/img/market_icons/supermarket.png" },
-      { name: "服装箱包", code: "服装箱包", icon: "/img/market_icons/clothes.png" },
-      { name: "母婴系列", code: "母婴系列", icon: "/img/market_icons/baby.png" },
-      { name: "家用电器", code: "家用电器", icon: "/img/market_icons/home.png" },
-      { name: "数码产品", code: "数码产品", icon: "/img/market_icons/tech.png" },
-      { name: "珠宝饰品", code: "珠宝饰品", icon: "/img/market_icons/money.png" },
-      { name: "旅游出行", code: "旅游出行", icon: "/img/market_icons/fun.png" },
-      { name: "传统工艺", code: "传统工艺", icon: "/img/market_icons/gift.png" }
+      { name: "食品生鲜", code: "AAAA", icon: "/img/market_icons/food.png" },
+      { name: "美妆洗护", code: "AAAB", icon: "/img/market_icons/star.png" },
+      { name: "居家百货", code: "AAAC", icon: "/img/market_icons/supermarket.png" },
+      { name: "服装箱包", code: "AAAD", icon: "/img/market_icons/clothes.png" },
+      { name: "母婴系列", code: "AAAE", icon: "/img/market_icons/baby.png" },
+      { name: "家用电器", code: "AAAF", icon: "/img/market_icons/home.png" },
+      { name: "数码产品", code: "AAAG", icon: "/img/market_icons/tech.png" },
+      { name: "珠宝饰品", code: "AAAH", icon: "/img/market_icons/money.png" },
+      { name: "旅游出行", code: "AAAI", icon: "/img/market_icons/fun.png" },
+      { name: "传统工艺", code: "AAAJ", icon: "/img/market_icons/gift.png" }
     ]);
     const allMarketShops = [];
 

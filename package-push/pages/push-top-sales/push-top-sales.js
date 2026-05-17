@@ -14,11 +14,11 @@ Page({
     async loadTopSales() {
         try {
             await util.ensureUserCoordsForShop();
-            const q = util.buildShopGoodsQuery({ distance_km: 5 });
+            const q = util.buildShopGoodsQuery({ distance_km: 10 });
             const res = await util.get('local-goods-home/modules', q);
             const payload = res && typeof res === 'object' ? (res.data || res) : {};
             const rawList = payload.top_sales || payload.topSales || [];
-            const filtered = util.filterShopProductsByDistance(rawList, 5);
+            const filtered = util.filterShopProductsByDistance(rawList, 10);
             // 保留后端返回的 rank 字段；若无则按顺序生成 01/02/...
             const topList = filtered.map((it, i) => {
                 const row = util.normalizeShopProductRow(it, i);

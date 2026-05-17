@@ -14,11 +14,11 @@ Page({
     async loadDailyNews() {
         try {
             await util.ensureUserCoordsForShop();
-            const q = util.buildShopGoodsQuery({ distance_km: 5 });
+            const q = util.buildShopGoodsQuery({ distance_km: 10 });
             const res = await util.get('local-goods-home/modules', q);
             const payload = res && typeof res === 'object' ? (res.data || res) : {};
             const rawList = payload.daily_news || payload.dailyNews || [];
-            const filtered = util.filterShopProductsByDistance(rawList, 5);
+            const filtered = util.filterShopProductsByDistance(rawList, 10);
             const goodsList = filtered.map((it, i) => util.normalizeShopProductRow(it, i));
             this.setData({ goodsList, loading: false });
         } catch (e) {

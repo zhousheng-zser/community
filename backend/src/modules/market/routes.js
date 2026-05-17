@@ -11,6 +11,7 @@ router.get('/search', ctrl.search);
 router.get('/shops', ctrl.getShops);
 router.get('/shops/:shopId', ctrl.getShopDetail);
 router.get('/shops/:shopId/goods', ctrl.getShopGoods);
+router.get('/shops/:shopId/categories', ctrl.getShopCategories);
 router.get('/shop/goods', ctrl.getShopGoodsCompat); // 兼容前端 fallback 调用
 router.get('/goods/:goodsId', ctrl.getGoodsDetail);
 router.get('/shops/:shopId/contact', ctrl.getShopContact);

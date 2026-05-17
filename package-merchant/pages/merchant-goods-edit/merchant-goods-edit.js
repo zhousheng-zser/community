@@ -174,12 +174,28 @@ Page({
     stock: 0,
     safeStock: 5,
     description: '',
-    descLen: 0
+    descLen: 0,
+    categoryKey: 'local',
+    shopId: '',
+    shopCategories: [],
+    selectedCategoryName: ''
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     const id = options && (options.id != null ? options.id : options.goodsId);
     const mode = options && options.mode;
+
+    // 解析绑定店铺并加载分类
+    try {
+      const { shopId } = await resolveBoundShop();
+      this.setData({ shopId });
+      if (shopId) {
+        await this.loadShopCategories(shopId);
+      }
+    } catch (err) {
+      console.log('获取店铺与分类失败', err);
+    }
+
     if ((id == null || id === '') && mode === 'create') {
       this.setData({
         isCreate: true,
@@ -192,7 +208,8 @@ Page({
         stock: 0,
         safeStock: 5,
         description: '',
-        descLen: 0
+        descLen: 0,
+        categoryKey: 'local'
       });
       return;
     }
@@ -203,6 +220,53 @@ Page({
     }
     this.setData({ id: String(id), isCreate: false });
     this.load();
+  },
+
+  async loadShopCategories(shopId) {
+    try {
+      const res = await util.get(`market/shops/${shopId}/categories`);
+      const list = Array.isArray(res)
+        ? res
+        : (res && Array.isArray(res.list))
+          ? res.list
+          : (res && res.data && Array.isArray(res.data.list))
+            ? res.data.list
+            : (res && res.data && Array.isArray(res.data))
+              ? res.data
+              : [];
+      if (list && list.length > 0) {
+        const shopCategories = list.map(c => ({
+          key: c.category_key || c.categoryKey || c.key || '',
+          name: c.category_name || c.categoryName || c.name || ''
+        })).filter(c => c.key);
+        this.setData({ shopCategories }, () => {
+          this.matchCategoryName(this.data.categoryKey);
+        });
+      }
+    } catch (e) {
+      console.error('加载店内分类失败', e);
+    }
+  },
+
+  matchCategoryName(key) {
+    const list = this.data.shopCategories || [];
+    const found = list.find(c => c.key === key);
+    if (found) {
+      this.setData({ selectedCategoryName: found.name });
+    } else {
+      this.setData({ selectedCategoryName: key || '' });
+    }
+  },
+
+  onCategoryPickerChange(e) {
+    const idx = Number(e.detail.value);
+    const selected = this.data.shopCategories[idx];
+    if (selected) {
+      this.setData({
+        categoryKey: selected.key,
+        selectedCategoryName: selected.name
+      });
+    }
   },
 
   applyCoverDisplay(path) {
@@ -239,6 +303,7 @@ Page({
       const title = g.title || g.goods_title || g.name || '';
       const description = g.description || g.desc || '';
       const priceInput = Number.isFinite(price) ? String(price) : '';
+      const categoryKey = g.category_key || g.categoryKey || 'local';
       this.setData({
         loading: false,
         title,
@@ -248,7 +313,10 @@ Page({
         safeStock: clampInt(safe, 0, 999999),
         priceInput,
         description,
-        descLen: String(description).length
+        descLen: String(description).length,
+        categoryKey
+      }, () => {
+        this.matchCategoryName(categoryKey);
       });
       this.applyCoverDisplay(imageList[0] || rawPath);
     } catch (e) {
@@ -260,6 +328,11 @@ Page({
 
   onTitleInput(e) {
     this.setData({ title: e.detail.value || '' });
+  },
+
+  onCategoryInput(e) {
+    const value = e.detail && e.detail.value !== undefined ? e.detail.value : (e.currentTarget.dataset.value || '');
+    this.setData({ categoryKey: value });
   },
 
   onPriceInput(e) {
@@ -391,6 +464,7 @@ Page({
       return;
     }
     const images = (this.data.imageList || []).slice(0, 6);
+    const categoryKey = String(this.data.categoryKey || '').trim() || 'local';
     const body = {
       name,
       title: name,
@@ -399,7 +473,9 @@ Page({
       price,
       stock,
       safe_stock: safeStock,
-      description: description || ''
+      description: description || '',
+      category_key: categoryKey,
+      categoryKey
     };
     this.setData({ saving: true });
     try {
@@ -408,13 +484,16 @@ Page({
         if (shopId == null || shopId === '') {
           throw { errmsg: '未获取到绑定店铺，请先在工作台完成店铺绑定后再新增商品' };
         }
-        const categoryKey = await resolveCategoryKeyForShop(shopId);
+        let createCategoryKey = categoryKey;
+        if (!createCategoryKey || createCategoryKey === 'local') {
+          createCategoryKey = await resolveCategoryKeyForShop(shopId);
+        }
         const createBody = {
           ...body,
           shop_id: shopId,
           shopId: shopId,
-          category_key: categoryKey,
-          categoryKey,
+          category_key: createCategoryKey,
+          categoryKey: createCategoryKey,
           status: 'on_sale',
           is_published: 1,
           published: true,

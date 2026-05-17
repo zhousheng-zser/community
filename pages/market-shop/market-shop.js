@@ -508,7 +508,7 @@ Page({
     const price = e.currentTarget.dataset.price || '';
     const shopId = this.data.shop.id;
     wx.navigateTo({
-      url: "../push-product-detail/push-product-detail?id=" + id + "&shopId=" + shopId + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price)
+      url: "/package-push/pages/push-product-detail/push-product-detail?id=" + id + "&shopId=" + shopId + "&image=" + encodeURIComponent(image) + "&name=" + encodeURIComponent(name) + "&price=" + encodeURIComponent(price)
     });
   }
 });

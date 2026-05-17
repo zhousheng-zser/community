@@ -1,5 +1,5 @@
 const db = require('../../../models');
-const { MerchantShop, MerchantGoods, MarketCartItem, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
+const { MerchantShop, MerchantGoods, MarketShopCategory, MarketCartItem, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
 
@@ -280,6 +280,10 @@ exports.getShopGoods = async (req, res) => {
       is_published: 1
     };
 
+    if (query.category_key) {
+      where.category_key = query.category_key;
+    }
+
     const { count, rows } = await MerchantGoods.findAndCountAll({
       where,
       order: [['sort_order', 'DESC'], ['created_at', 'DESC']],
@@ -302,6 +306,8 @@ exports.getShopGoods = async (req, res) => {
         description: r.description,
         desc: r.description,
         status: r.status,
+        category_key: r.category_key || 'local',
+        categoryKey: r.category_key || 'local',
         created_at: r.created_at
       })),
       total: count,
@@ -311,6 +317,34 @@ exports.getShopGoods = async (req, res) => {
   } catch (err) {
     console.error('[market/shops/goods]', err);
     fail(res, '获取店铺商品失败', 500);
+  }
+};
+
+// GET /market/shops/:shopId/categories
+exports.getShopCategories = async (req, res) => {
+  try {
+    const shopId = Number(req.params.shopId);
+    if (!shopId) return fail(res, '无效店铺ID');
+
+    const rows = await MarketShopCategory.findAll({
+      where: { shop_id: shopId },
+      order: [['sort_order', 'ASC'], ['id', 'ASC']]
+    });
+
+    ok(res, {
+      list: rows.map((r) => ({
+        id: r.id,
+        shop_id: r.shop_id,
+        category_key: r.category_key,
+        categoryKey: r.category_key,
+        category_name: r.category_name,
+        categoryName: r.category_name,
+        sort_order: r.sort_order
+      }))
+    });
+  } catch (err) {
+    console.error('[market/shops/categories]', err);
+    fail(res, '获取店铺分类失败', 500);
   }
 };
 
@@ -342,6 +376,8 @@ exports.getGoodsDetail = async (req, res) => {
       desc: row.description,
       status: row.status,
       is_published: row.is_published,
+      category_key: row.category_key || 'local',
+      categoryKey: row.category_key || 'local',
       shop: shop ? {
         id: shop.id,
         name: shop.name,

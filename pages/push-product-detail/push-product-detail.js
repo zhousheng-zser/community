@@ -364,7 +364,7 @@ Page({
   },
   async loadFallbackRecommendedGoods(currentId) {
     try {
-      const res = await util.get('local-goods-home/modules', util.buildShopGoodsQuery({ distance_km: 5 }));
+      const res = await util.get('local-goods-home/modules', util.buildShopGoodsQuery({ distance_km: 10 }));
       const payload = this.unwrapLocalGoodsPayload(res);
       const candidates = [];
       this.collectGoodsFromPayload(payload, candidates);
