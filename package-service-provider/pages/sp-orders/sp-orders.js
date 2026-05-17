@@ -201,7 +201,7 @@ Page({
         try {
           const uploaded = [];
           for (const p of paths) {
-            try { const url = await uploadProof(p); if (url) uploaded.push(url); } catch (e) {}
+            try { const url = await uploadProof(p); if (url) uploaded.push(util.imgUrl(url)); } catch (e) {}
           }
           await api.serviceProvider.completeOrder(id, { proof_images: uploaded, note: '服务完成' });
           wx.hideLoading();

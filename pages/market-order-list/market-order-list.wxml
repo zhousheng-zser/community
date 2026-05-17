@@ -76,16 +76,9 @@
             <button class="action-btn default" wx:if="{{orderType === 'market'}}" catchtap="applyRefund" data-id="{{item.orderNo}}">申请退款</button>
           </block>
 
-          <!-- 待服务/备货中 / 已派单 / 服务中 -->
-          <block wx:if="{{item.status === 'pending_service' || item.status === 'dispatched' || item.status === 'in_service'}}">
+          <!-- 待服务/备货中/配送中 / 已派单 / 服务中 -->
+          <block wx:if="{{item.status === 'pending_service' || item.status === 'pending_receipt' || item.status === 'dispatched' || item.status === 'in_service'}}">
             <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}" data-orderno="{{item.orderNo}}" data-workeruid="{{item.workerUserId}}" data-merchantuid="{{item.merchantUserId}}">联系商家</button>
-          </block>
-
-          <!-- 待收货（仅market） -->
-          <block wx:if="{{item.status === 'pending_receipt'}}">
-            <button class="action-btn" catchtap="viewLogistics" data-id="{{item.orderNo}}">跟踪骑手</button>
-            <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}">联系商家</button>
-            <button class="action-btn primary" catchtap="confirmReceipt" data-id="{{item.orderNo}}">确认收货</button>
           </block>
 
           <!-- 待确认（仅service） -->

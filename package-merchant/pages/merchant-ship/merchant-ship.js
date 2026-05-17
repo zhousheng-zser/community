@@ -60,7 +60,7 @@ Page({
           for (const filePath of files) {
             const data = await util.uploadFile('upload', filePath, 'file');
             const p = data && (data.url || data.path || data.data);
-            if (p) uploaded.push(p);
+            if (p) uploaded.push(util.imgUrl(p));
           }
           wx.hideLoading();
           const next = (this.data.deliveryProofImages || []).concat(uploaded).slice(0, 3);
@@ -114,6 +114,13 @@ Page({
           logistics_no: logisticsNo,
           note: remark || '商家已开始配送'
         });
+      }
+      if (mode === 'delivered') {
+        const local = wx.getStorageSync('local_delivered_orders') || [];
+        if (!local.includes(orderNo)) {
+          local.push(orderNo);
+          wx.setStorageSync('local_delivered_orders', local);
+        }
       }
       wx.hideLoading();
       wx.showToast({ title: mode === 'delivered' ? '已提交配送完成' : '开始配送成功', icon: 'success' });

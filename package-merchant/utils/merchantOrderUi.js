@@ -19,8 +19,8 @@ function inferBucket(o) {
 
   if (/退|售后|退款|refund|after/.test(hay)) return 'after_sale';
   if (/待付|未付|未支付|unpaid|wait_pay|pending_payment/.test(hay)) return 'unpaid';
-  if (/配送中|送货中|shipping|delivering|派送/.test(hay)) return 'shipping';
-  if (/待发货|待出库|拣货|paid|wait_ship|待处理|待接单/.test(hay)) return 'to_ship';
+  if (/配送中|送货中|shipping|delivering|派送|pending_receipt/.test(hay)) return 'shipping';
+  if (/待发货|待出库|拣货|paid|wait_ship|待处理|待接单|pending_accept|pending_service|pending_shipment/.test(hay)) return 'to_ship';
   if (/完成|已完|签收|completed|done|finished|success/.test(hay)) return 'done';
   if (/取消|关闭|cancel|closed/.test(hay)) return 'cancel';
   return 'other';

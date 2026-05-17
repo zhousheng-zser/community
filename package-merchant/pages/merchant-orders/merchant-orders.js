@@ -405,8 +405,9 @@ Page({
           const uploaded = [];
           for (const p of paths) {
             try {
-              const url = await util.uploadFile(p, 'service-provider-portal/upload');
-              if (url) uploaded.push(url);
+              const resData = await util.uploadFile('service-provider-portal/upload', p, 'file');
+              const url = resData && (resData.url || resData.path || resData.data);
+              if (url) uploaded.push(util.imgUrl(url));
             } catch (e2) { console.warn('proof upload fail', e2); }
           }
           await api.serviceProvider.orderAction(id, { action: 'complete', proof_images: uploaded });

@@ -7,7 +7,7 @@ const MARKET_STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
   pending_service: { text: '备货配送中', class: 'primary' },
-  pending_receipt: { text: '待确认收货', class: 'primary' },
+  pending_receipt: { text: '配送中', class: 'primary' },
   completed: { text: '已完成', class: 'done' },
   cancelled: { text: '已取消', class: 'cancel' },
   refunded: { text: '已退款', class: 'cancel' }
@@ -30,7 +30,6 @@ const MARKET_TABS = [
   { key: 'pending_payment', label: '待付款' },
   { key: 'pending_accept', label: '待接单' },
   { key: 'pending_service', label: '备货配送中' },
-  { key: 'pending_receipt', label: '待确认收货' },
   { key: 'completed', label: '已完成' },
   { key: 'cancelled', label: '已取消' },
   { key: 'refunded', label: '已退款' }
