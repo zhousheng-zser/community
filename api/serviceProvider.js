@@ -7,11 +7,35 @@ const { get, post, patch } = require('../utils/util.js');
 
 const BASE = '/service-provider';
 
+/**
+ * 交换服务商工作台 token
+ * POST /service-provider-portal/token/exchange (或 /service-provider/token/exchange)
+ */
+const exchangeServiceProviderToken = async () => {
+  const res = await post(`/service-provider-portal/token/exchange`);
+  if (res && res.token) {
+    wx.setStorageSync('service_provider_token', res.token);
+  }
+  return res;
+};
+
 /** 获取服务商个人信息（含 profile_id、shop_name 等） */
 const getProfile = () => get(`${BASE}/me`);
 
 /** 更新服务商信息 */
 const updateProfile = (data) => patch(`${BASE}/profile`, data);
+
+/**
+ * 服务商入驻申请
+ * POST /service-provider/apply
+ */
+const applyServiceProvider = (data) => post(`${BASE}/apply`, data);
+
+/**
+ * 获取服务商入驻申请详情
+ * GET /service-provider/application/me
+ */
+const getServiceProviderApplication = () => get(`${BASE}/application/me`);
 
 /** 获取仪表盘统计 */
 const getDashboard = () => get(`${BASE}/dashboard`);
@@ -74,8 +98,11 @@ const getIncomeDaily = (params) => get(`${BASE}/finance/income/daily`, params);
 const getBalance = () => get(`${BASE}/finance/balance`);
 
 module.exports = {
+  exchangeServiceProviderToken,
   getProfile,
   updateProfile,
+  applyServiceProvider,
+  getServiceProviderApplication,
   getDashboard,
   getCategories,
   getServices,

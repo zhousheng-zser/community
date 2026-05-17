@@ -201,7 +201,7 @@ Page({
     }
     wx.showLoading({ title: '查询中', mask: true });
     try {
-      const res = await util.get(`service-provider/apply/status`, { user_id: userId });
+      const res = await util.get('service-provider/application/me');
       const data = res && res.data !== undefined ? res.data : res;
       wx.hideLoading();
       const statusMap = {

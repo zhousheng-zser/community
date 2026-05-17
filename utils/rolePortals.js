@@ -21,9 +21,13 @@ function hasRole(user, role) {
   return normalizeRoles(user).indexOf(role) !== -1;
 }
 
-/** 是否具备技工工作台能力：登录即可使用 */
+/** 是否具备技工工作台能力 */
 function canUseWorkerPortal(user) {
-  return !!user;
+  if (!user) return false;
+  if (hasRole(user, 'admin')) return true;
+  const st = user.worker_status != null ? user.worker_status : user.workerStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
 }
 
 /** 是否具备商家工作台能力 */
@@ -44,9 +48,13 @@ function canUseMarketPortal(user) {
   return false;
 }
 
-/** 是否具备服务商工作台能力（独立于集市商家）：登录即可使用 */
+/** 是否具备服务商工作台能力（独立于集市商家） */
 function canUseServiceProviderPortal(user) {
-  return !!user;
+  if (!user) return false;
+  if (hasRole(user, 'admin')) return true;
+  const st = user.service_provider_status != null ? user.service_provider_status : user.serviceProviderStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
 }
 
 /** 是否具备推广者能力 */
@@ -75,6 +83,7 @@ function mergePortalFlags(target, src) {
     'openid',
     'worker_status', 'workerStatus',
     'merchant_status', 'merchantStatus',
+    'service_provider_status', 'serviceProviderStatus',
     'shop_status', 'shopStatus',
     'shop_id', 'shopId',
     'roles', 'role'

@@ -5,6 +5,22 @@
 const { get, post, patch } = require('../utils/util.js');
 
 /**
+ * 技工入驻申请
+ * POST /worker/apply
+ */
+const applyWorker = (data) => {
+  return post('/worker/apply', data);
+};
+
+/**
+ * 获取技工申请详情
+ * GET /worker/application/me
+ */
+const getWorkerApplication = () => {
+  return get('/worker/application/me');
+};
+
+/**
  * 获取订单列表
  * GET /worker/service-orders
  */
@@ -95,6 +111,8 @@ const deleteService = (id) => {
 };
 
 module.exports = {
+  applyWorker,
+  getWorkerApplication,
   getOrders,
   getOrderDetail,
   acceptOrder,

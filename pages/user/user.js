@@ -108,11 +108,57 @@ Page({
   },
 
   async goWorkerPortal() {
-    rolePortals.navigateToWorkerHome();
+    wx.showLoading({ title: '加载中', mask: true });
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const sid = data.id != null ? String(data.id) : null;
+        if (sid != null) app.globalData.user.id = sid;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    wx.hideLoading();
+
+    const user = app.globalData.user || {};
+    if (rolePortals.canUseWorkerPortal(user)) {
+      rolePortals.navigateToWorkerHome();
+    } else {
+      const st = user.worker_status != null ? user.worker_status : user.workerStatus;
+      if (st === 'pending' || st === 'reviewing') {
+        wx.showToast({ title: '技工入驻审核中', icon: 'none' });
+      } else {
+        wx.navigateTo({ url: '../join-worker/join-worker' });
+      }
+    }
   },
 
   async goServiceProviderPortal() {
-    rolePortals.navigateToServiceProviderHome();
+    wx.showLoading({ title: '加载中', mask: true });
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const sid = data.id != null ? String(data.id) : null;
+        if (sid != null) app.globalData.user.id = sid;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    wx.hideLoading();
+
+    const user = app.globalData.user || {};
+    if (rolePortals.canUseServiceProviderPortal(user)) {
+      rolePortals.navigateToServiceProviderHome();
+    } else {
+      const st = user.service_provider_status != null ? user.service_provider_status : user.serviceProviderStatus;
+      if (st === 'pending' || st === 'reviewing') {
+        wx.showToast({ title: '服务商入驻审核中', icon: 'none' });
+      } else {
+        wx.navigateTo({ url: '../join-service/join-service' });
+      }
+    }
   },
 
   async goMarketPortal() {

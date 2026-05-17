@@ -62,6 +62,7 @@ Page({
       const profile = spCtx.normalizeProfilePayload(res);
       if (profile && profile.status === 'active') {
         spCtx.syncBoundProfile(app, profile);
+        try { await api.serviceProvider.exchangeServiceProviderToken(); } catch (e) {}
         this.setData({
           spOk: true,
           shopName: profile.shop_name || '',
@@ -78,6 +79,7 @@ Page({
 
     // Fallback: check local role
     if (hasRole || user.service_provider_status) {
+      try { await api.serviceProvider.exchangeServiceProviderToken(); } catch (e) {}
       this.setData({
         spOk: true,
         displayName: user.userName || '服务商',

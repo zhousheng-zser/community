@@ -94,19 +94,30 @@ const request = (method, url, data, contentType = 'application/json') => {
   const finalUrl = buildUrl(url);
 
   return new Promise((resolve, reject) => {
-    const token = wx.getStorageSync('token');
-    // DEBUG: 打印请求信息
-    if (url.includes('service-orders') || url.includes('service-order')) {
-      console.log('[DEBUG request]', method, url, 'data=', JSON.stringify(data));
-    }
-    wx.request({
-      url: finalUrl,
-      method,
-      data,
-      header: {
-        'content-type': contentType,
-        'Authorization': token ? 'Bearer ' + token : ''
-      },
+      const token = wx.getStorageSync('token');
+      let finalToken = token;
+      
+      // 独立工作台令牌路由（排除 token/exchange 本身，它需要用主用户 token 来换取）
+      if (url.indexOf('token/exchange') === -1) {
+        if (url.indexOf('/market/merchant/') !== -1) {
+          finalToken = wx.getStorageSync('merchant_token') || token;
+        } else if (url.indexOf('/service-provider-portal/') !== -1 || url.indexOf('/service-provider/') !== -1) {
+          finalToken = wx.getStorageSync('service_provider_token') || token;
+        }
+      }
+
+      // DEBUG: 打印请求信息
+      if (url.includes('service-orders') || url.includes('service-order')) {
+        console.log('[DEBUG request]', method, url, 'data=', JSON.stringify(data));
+      }
+      wx.request({
+        url: finalUrl,
+        method,
+        data,
+        header: {
+          'content-type': contentType,
+          'Authorization': finalToken ? 'Bearer ' + finalToken : ''
+        },
       success: (res) => {
         const body = res.data;
         if (res.statusCode === 401) {
@@ -202,13 +213,23 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
 
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('token');
+    let finalToken = token;
+    
+    if (url.indexOf('token/exchange') === -1) {
+      if (url.indexOf('/market/merchant/') !== -1) {
+        finalToken = wx.getStorageSync('merchant_token') || token;
+      } else if (url.indexOf('/service-provider-portal/') !== -1 || url.indexOf('/service-provider/') !== -1) {
+        finalToken = wx.getStorageSync('service_provider_token') || token;
+      }
+    }
+
     wx.uploadFile({
       url: finalUrl,
       filePath: filePath,
       name: name,
       formData: formData,
       header: {
-        'Authorization': token ? 'Bearer ' + token : ''
+        'Authorization': finalToken ? 'Bearer ' + finalToken : ''
       },
       success: (res) => {
         let data = res.data;

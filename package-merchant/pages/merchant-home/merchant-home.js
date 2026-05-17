@@ -39,16 +39,22 @@ Page({
     lowStockCount: 0
   },
 
-  onShow() {
+  async onShow() {
     this.refresh();
-    this.loadOrderStats();
-    this.loadGoodsStats();
+    if (this.data.merchantOk) {
+      try { await api.merchant.exchangeMerchantToken(); } catch (e) {}
+      this.loadOrderStats();
+      this.loadGoodsStats();
+    }
   },
 
-  onPullDownRefresh() {
+  async onPullDownRefresh() {
     this.refresh();
-    this.loadOrderStats();
-    this.loadGoodsStats();
+    if (this.data.merchantOk) {
+      try { await api.merchant.exchangeMerchantToken(); } catch (e) {}
+      this.loadOrderStats();
+      this.loadGoodsStats();
+    }
     wx.stopPullDownRefresh();
   },
 

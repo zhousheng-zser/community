@@ -7,9 +7,22 @@
  */
 const { get, post, patch } = require('../utils/util.js');
 
-// 保留空操作，兼容外部引用
-const exchangeMerchantToken = async () => ({ token: '', expires_in: 7200 });
-const ensureMerchantSession = async () => true;
+const exchangeMerchantToken = async () => {
+  const res = await post('/market/merchant/token/exchange');
+  if (res && res.token) {
+    wx.setStorageSync('merchant_token', res.token);
+  }
+  return res;
+};
+const ensureMerchantSession = async () => exchangeMerchantToken();
+
+/**
+ * 获取商家入驻申请详情 (需 merchant_token)
+ * GET /market/merchant/application
+ */
+const getMerchantApplication = () => {
+  return get('/market/merchant/application');
+};
 
 /**
  * 获取仪表盘数据
@@ -248,6 +261,7 @@ const getRefundStats = () => {
 module.exports = {
   exchangeMerchantToken,
   ensureMerchantSession,
+  getMerchantApplication,
   getDashboard,
   getShop,
   updateShop,
