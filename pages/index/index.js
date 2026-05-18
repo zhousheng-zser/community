@@ -598,6 +598,14 @@ Page({
     if (!url) return;
     wx.navigateTo({ url });
   },
+
+  onCategoryIconError(e) {
+    const idx = e.currentTarget.dataset.index;
+    const list = this.data.categoryList;
+    if (idx == null || !list[idx]) return;
+    const updated = list.map((item, i) => i === Number(idx) ? { ...item, iconOk: false } : item);
+    this.setData({ categoryList: updated });
+  },
   async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
     const communityId = (app.globalData.user || {}).communityId;

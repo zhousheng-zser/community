@@ -534,8 +534,8 @@
         data-url="{{item.url}}"
         data-unsupported="{{item.unsupported}}"
       >
-        <view class="svc-icon-wrap svc-home-cat {{item.unsupported ? 'svc-home-cat-off' : ''}}" style="{{item.icon ? '' : 'background:' + item.bgColor + ';'}}">
-          <image wx:if="{{item.icon}}" class="svc-icon-img" src="{{item.icon}}" mode="aspectFill" />
+        <view class="svc-icon-wrap svc-home-cat {{item.unsupported ? 'svc-home-cat-off' : ''}}" style="{{item.iconOk === false || !item.icon ? 'background:' + item.bgColor + ';' : ''}}">
+          <image wx:if="{{item.icon && item.iconOk !== false}}" class="svc-icon-img" src="{{item.icon}}" mode="aspectFill" binderror="onCategoryIconError" data-index="{{index}}" />
           <text wx:else class="svc-emoji">{{item.emoji}}</text>
         </view>
         <text class="svc-home-cat-label">{{item.name}}</text>

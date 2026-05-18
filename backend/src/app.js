@@ -22,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ── 静态资源 ───────────────────────────────────────────────────────────────
 // 上传图片通过 /uploads/ 路径访问
+app.use('/uploads', express.static(path.join(__dirname, '../data/uploads/images')));
 app.use('/uploads', express.static(path.join(__dirname, '../data/uploads')));
 
 // ── 健康检查 ───────────────────────────────────────────────────────────────
@@ -33,6 +34,19 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ── 图片上传（中台服务管理图标/封面等）────────────────────────────────────
+const { uploadMarketImage } = require('./utils/marketUpload');
+function handleUpload(req, res) {
+  if (!req.file) {
+    return res.status(400).json({ code: 1, msg: '未选择文件' });
+  }
+  res.json({
+    code: 0,
+    data: { url: `/uploads/${req.file.filename}` }
+  });
+}
+app.post('/api/v1/upload', uploadMarketImage, handleUpload);
 
 // ── API 路由 ───────────────────────────────────────────────────────────────
 app.use('/api/v1', routes);
