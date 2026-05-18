@@ -13,6 +13,7 @@ const routes = [
     component: Layout,
     redirect: '/dashboard',
     children: [
+            { path: 'service-home-manage', name: 'ServiceHomeManage', component: () => import('../views/ServiceHomeManage.vue'), meta: { title: '服务管理' } },
       { path: 'dashboard', name: 'Dashboard', component: () => import('../views/Dashboard.vue'), meta: { title: '工作台' } },
       { path: 'user-management', name: 'UserManagement', component: () => import('../views/UserManagement.vue'), meta: { title: '用户管理' } },
       { path: 'ops-hub', name: 'OperationsHub', component: () => import('../views/OperationsHub.vue'), meta: { title: '运营快捷入口' } },

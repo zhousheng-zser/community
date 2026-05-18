@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
         server: {
             host: true, // 监听 0.0.0.0，否则仅本机可访问，公网 IP:5173 会失败
             port: 5173,
-            open: true,
+            open: false,
             proxy: {
                 '/api': {
                     target: apiTarget,

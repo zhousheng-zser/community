@@ -1,11 +1,7 @@
-const { User } = require('../../../models');
+const { User, CommunityStewardApplication } = require('../../../models');
 const { MerchantShop } = require('../../../models');
+const couponService = require('../../coupon/services/coupon.service');
 const crypto = require('crypto');
-const { resolveUserId } = require('../../../utils/resolveUserId');
-
-function authUserId(req) {
-  return resolveUserId(req.user && req.user.id);
-}
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -13,31 +9,45 @@ const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code:
 // GET /user/profile
 exports.getProfile = async (req, res) => {
   try {
-    const userId = authUserId(req);
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
     if (!userId) return fail(res, '未登录', 401);
 
-    const user = await User.findByPk(userId, {
-      attributes: ['id', 'nickname', 'avatar_url', 'phone', 'role', 'community_id', 'openid', 'invite_code', 'invited_by']
-    });
-    if (!user) return fail(res, '用户不存在', 404);
+    try {
+      await couponService.ensureWelcomeCoupon(userId);
+    } catch (e) {
+      console.warn('[user/profile] ensureWelcomeCoupon', e.message);
+    }
 
-    const dbPhone = user.phone || '';
-    const nick = user.nickname || '';
-    const avatar = user.avatar_url || '';
+    // 优先从本地 User 表查询
+    let user = null;
+    try {
+      user = await User.findByPk(userId, {
+        attributes: ['id', 'nickname', 'userName', 'name', 'avatar_url', 'avatarUrl', 'avatar',
+          'phone', 'userMobile', 'mobile', 'role', 'roles', 'community_id', 'communityId',
+          'worker_status', 'workerStatus', 'points', 'created_at', 'updated_at']
+      });
+    } catch (e) {
+      // User 表可能由主后端管理，本地缺失则跳过
+    }
+
+    // 基础用户信息（从 JWT token 中回退）
+    const baseUser = req.user || {};
     const result = {
-      id: String(user.id),
-      nickname: nick,
-      userName: nick,
-      name: nick,
-      avatar_url: avatar,
-      avatarUrl: avatar,
-      phone: dbPhone,
-      userMobile: dbPhone,
-      role: user.role || 'user',
-      roles: [user.role || 'user'],
-      community_id: user.community_id != null ? user.community_id : null,
-      communityId: user.community_id != null ? user.community_id : null,
-      openid: user.openid || ''
+      id: userId,
+      nickname: user && (user.nickname || user.userName || user.name) ? (user.nickname || user.userName || user.name) : (baseUser.nickname || baseUser.name || ''),
+      userName: user && (user.nickname || user.userName || user.name) ? (user.nickname || user.userName || user.name) : (baseUser.nickname || baseUser.name || ''),
+      name: user && (user.nickname || user.userName || user.name) ? (user.nickname || user.userName || user.name) : (baseUser.nickname || baseUser.name || ''),
+      avatar_url: user && (user.avatar_url || user.avatarUrl || user.avatar) ? (user.avatar_url || user.avatarUrl || user.avatar) : (baseUser.avatar_url || baseUser.avatar || ''),
+      avatarUrl: user && (user.avatar_url || user.avatarUrl || user.avatar) ? (user.avatar_url || user.avatarUrl || user.avatar) : (baseUser.avatar_url || baseUser.avatar || ''),
+      phone: user && (user.phone || user.userMobile || user.mobile) ? (user.phone || user.userMobile || user.mobile) : (baseUser.phone || baseUser.mobile || ''),
+      userMobile: user && (user.phone || user.userMobile || user.mobile) ? (user.phone || user.userMobile || user.mobile) : (baseUser.phone || baseUser.mobile || ''),
+      role: user && user.role ? user.role : (baseUser.role || 'user'),
+      roles: user && user.roles ? user.roles : (baseUser.roles || [baseUser.role || 'user']),
+      community_id: user && (user.community_id != null ? user.community_id : user.communityId) ? (user.community_id != null ? user.community_id : user.communityId) : (baseUser.community_id || baseUser.communityId || null),
+      communityId: user && (user.community_id != null ? user.community_id : user.communityId) ? (user.community_id != null ? user.community_id : user.communityId) : (baseUser.community_id || baseUser.communityId || null),
+      worker_status: user && (user.worker_status || user.workerStatus) ? (user.worker_status || user.workerStatus) : (baseUser.worker_status || baseUser.workerStatus || ''),
+      workerStatus: user && (user.worker_status || user.workerStatus) ? (user.worker_status || user.workerStatus) : (baseUser.worker_status || baseUser.workerStatus || ''),
+      points: user && user.points != null ? Number(user.points) : (baseUser.points || 0)
     };
 
     // 查询集市商家店铺信息
@@ -68,6 +78,21 @@ exports.getProfile = async (req, res) => {
       result.merchantStatus = '';
       result.shop_id = null;
       result.shopId = null;
+    }
+
+    try {
+      if (CommunityStewardApplication) {
+        const stewardApp = await CommunityStewardApplication.findOne({ where: { user_id: userId } });
+        const st = stewardApp ? stewardApp.status : '';
+        result.steward_status = st === 'approved' ? 'approved' : (st || '');
+        result.stewardStatus = result.steward_status;
+      } else {
+        result.steward_status = '';
+        result.stewardStatus = '';
+      }
+    } catch (e) {
+      result.steward_status = '';
+      result.stewardStatus = '';
     }
 
     ok(res, result);
@@ -105,7 +130,7 @@ exports.deleteAddress = async (req, res) => {
 // GET /user/invite-code
 exports.getInviteCode = async (req, res) => {
   try {
-    const userId = authUserId(req);
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
     if (!userId) return fail(res, '未登录', 401);
 
     const user = await User.findByPk(userId);
@@ -142,7 +167,7 @@ exports.getInviteCode = async (req, res) => {
 // POST /user/bind-inviter
 exports.bindInviter = async (req, res) => {
   try {
-    const userId = authUserId(req);
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
     if (!userId) return fail(res, '未登录', 401);
 
     const { invite_code } = req.body;
@@ -179,7 +204,7 @@ exports.bindInviter = async (req, res) => {
 // GET /user/invitees
 exports.getInvitees = async (req, res) => {
   try {
-    const userId = authUserId(req);
+    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
     if (!userId) return fail(res, '未登录', 401);
 
     const page = parseInt(req.query.page) || 1;

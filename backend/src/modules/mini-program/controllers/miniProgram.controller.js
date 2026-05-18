@@ -1,10 +1,14 @@
 const { MiniProgram } = require('../../../models');
+const { Op } = require('sequelize');
 
 // GET /mini-programs - Get list (public)
 exports.getMiniPrograms = async (req, res) => {
     try {
         const programs = await MiniProgram.findAll({
-            where: { is_active: true },
+            where: {
+                is_active: true,
+                app_id: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] }
+            },
             order: [['sort_order', 'ASC'], ['created_at', 'DESC']]
         });
 

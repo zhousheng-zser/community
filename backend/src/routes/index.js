@@ -8,9 +8,7 @@ const express = require('express');
 const router = express.Router();
 
 // ── 认证 ──────────────────────────────────────────────────────────────────
-// 注意：使用实际实现的路由（src/routes/authRoutes.js）
-// 而非模块中的 501 桩代码（src/modules/auth/routes.js）
-const authRoutes = require('./authRoutes');
+const authRoutes = require('../modules/auth/routes');
 
 // ── 用户 ──────────────────────────────────────────────────────────────────
 const userRoutes = require('../modules/user/routes');
@@ -50,19 +48,16 @@ const miniProgramRoutes = require('../modules/mini-program/routes');
 const neighborAssistRoutes = require('../modules/neighbor-assist/routes');
 
 // ── 技工工作台 ───────────────────────────────────────────────────────────
-// 注意：使用实际实现的路由（src/routes/workerRoutes.js）
-// 而非模块中的 501 桩代码（src/modules/worker/routes.js）
-const workerRoutes = require('./workerRoutes');
+const workerRoutes = require('../modules/worker/routes');
+
+// ── 小区管家 ───────────────────────────────────────────────────────────────
+const stewardRoutes = require('../modules/steward/routes');
 
 // ── 商家后台 ─────────────────────────────────────────────────────────────
 const merchantRoutes = require('../modules/merchant/routes');
 
 // ── 服务商后台 ───────────────────────────────────────────────────────────
-// 注意：使用实际实现的路由（src/routes/serviceProviderPortalRoutes.js）
-// 而非模块中的 501 桩代码（src/modules/service-provider-portal/routes.js）
-const serviceProviderRoutes = require('./serviceProviderPortalRoutes');
-const serviceProviderWorkerRoutes = require('./serviceProviderWorkerRoutes');
-const serviceProviderFinanceRoutes = require('./serviceProviderFinanceRoutes');
+const serviceProviderRoutes = require('../modules/service-provider-portal/routes');
 
 // ── 骑手端（预留） ───────────────────────────────────────────────────────
 // const riderRoutes = require('../modules/rider/routes');
@@ -70,10 +65,8 @@ const serviceProviderFinanceRoutes = require('./serviceProviderFinanceRoutes');
 // ── 社区 ─────────────────────────────────────────────────────────────────
 const communityRoutes = require('../modules/community/routes');
 
-// ── 服务订单 ─────────────────────────────────────────────────────────────
-// 注意：使用实际实现的路由（src/routes/serviceOrderRoutes.js）
-// 而非模块中的 501 桩代码（src/modules/service-order/routes.js）
-const serviceOrderRoutes = require('./serviceOrderRoutes');
+// ── 服务订单（线上见 src/routes/serviceOrderRoutes.js + controllers/serviceOrderController.js）
+const serviceOrderRoutes = require('../modules/service-order/routes');
 
 // ── 消息通知 ─────────────────────────────────────────────────────────────
 const messageRoutes = require('../modules/message/routes');
@@ -88,7 +81,13 @@ router.use('/market', marketRoutes);
 router.use('/benefit-coin', benefitCardRoutes);
 router.use('/benefit-alliance', benefitAllianceRoutes);
 router.use('/admin', benefitAllianceAdminRoutes);
+const adminDispatchRoutes = require('../modules/service-order/adminDispatch.routes');
+// 九州派单（到家）：线上 adminRoutes 亦挂载 assign；本地用 adminDispatch 子路由
+router.use('/admin', adminDispatchRoutes);
 router.use('/coupons', couponRoutes);
+const couponCtrl = require('../modules/coupon/controllers/coupon.controller');
+const authMiddleware = require('../middlewares/authMiddleware');
+router.get('/wx/user/coupon/:id', authMiddleware, couponCtrl.getMyCouponsLegacy);
 router.use('/chat', chatRoutes);
 router.use('/commission', commissionRoutes);
 router.use('/partner', partnerRoutes);
@@ -96,24 +95,15 @@ router.use('/promoter', promoterRoutes);
 router.use('/mini-programs', miniProgramRoutes);
 router.use('/neighbor-assist', neighborAssistRoutes);
 router.use('/worker', workerRoutes);
+router.use('/steward', stewardRoutes);
 router.use('/merchant', merchantRoutes);
-
-// 服务商后台登录（独立端点，需放在 router.use('/service-provider-portal', ...) 之前）
-const serviceProviderPortalController = require('../controllers/serviceProviderPortalController');
-const workerPortalLoginController = require('../controllers/workerPortalLoginController');
-const merchantPortalController = require('../controllers/merchantPortalController');
-router.post('/service-provider-portal/login', serviceProviderPortalController.login);
-router.post('/worker-portal/login', workerPortalLoginController.login);
-router.post('/merchant-portal/login', merchantPortalController.login);
-
-router.use('/service-provider-portal', serviceProviderRoutes);
-router.use('/service-provider-portal/workers', serviceProviderWorkerRoutes);
-router.use('/service-provider-portal/finance', serviceProviderFinanceRoutes);
-// 兼容旧路径
 router.use('/service-provider', serviceProviderRoutes);
+router.use('/service-provider-portal', serviceProviderRoutes); // 兼容旧路径
 router.use('/community', communityRoutes);
-router.use('/service-orders', serviceOrderRoutes);
+router.use('/service-order', serviceOrderRoutes);
+router.use('/service-orders', serviceOrderRoutes); // 兼容前端复数路径
 router.use('/message', messageRoutes);
+router.use('/messages', messageRoutes); // 兼容前端复数路径
 
 // ── 文件上传（独立端点） ─────────────────────────────────────────────────
 // 注：上传端点通常需要 multipart 解析，此处保留结构，
