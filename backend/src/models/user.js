@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: 'User',
-      tableName: 'Users',
+      tableName: 'users',
       hooks: {
         beforeValidate(user) {
           if (!user.id) {
