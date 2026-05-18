@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const workerPortalController = require('../controllers/workerPortalController');
 
 router.post('/apply', authMiddleware, applicationController.workerApply);
+router.get('/application/me', authMiddleware, applicationController.getWorkerApplicationMe);
 
 router.get('/service-orders', authMiddleware, workerPortalController.listOrders);
 router.get('/service-orders/:id', authMiddleware, workerPortalController.getOrder);

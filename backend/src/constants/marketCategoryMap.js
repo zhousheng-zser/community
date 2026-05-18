@@ -29,9 +29,37 @@ function normalizeShopCategory(input) {
   return raw;
 }
 
+/** 列表筛选：同时匹配稳定编码与中文名（兼容历史脏数据） */
+function categoryWhereValues(input) {
+  const code = normalizeShopCategory(input);
+  if (!code) return [];
+  const set = new Set([code]);
+  if (CATEGORY_CODE_TO_NAME[code]) set.add(CATEGORY_CODE_TO_NAME[code]);
+  const raw = String(input == null ? '' : input).trim();
+  if (raw && raw !== code) set.add(raw);
+  return [...set];
+}
+
+/** 审核建店时无坐标则使用默认点（合川路联调区，可用环境变量覆盖） */
+function resolveShopCoordinates(fields = {}) {
+  const lat = fields.latitude ?? fields.lat;
+  const lng = fields.longitude ?? fields.lng;
+  const latN = Number(lat);
+  const lngN = Number(lng);
+  if (Number.isFinite(latN) && Number.isFinite(lngN)) {
+    return { latitude: latN, longitude: lngN };
+  }
+  return {
+    latitude: Number(process.env.MARKET_DEFAULT_LAT || 31.166564),
+    longitude: Number(process.env.MARKET_DEFAULT_LNG || 121.384776)
+  };
+}
+
 module.exports = {
   MARKET_CATEGORY_MAPPINGS,
   CATEGORY_NAME_TO_CODE,
   CATEGORY_CODE_TO_NAME,
-  normalizeShopCategory
+  normalizeShopCategory,
+  categoryWhereValues,
+  resolveShopCoordinates
 };

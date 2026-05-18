@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
 const { MarketApplication, MarketShop } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
 
 async function resolveShopIdFromUserToken(decoded) {
-  const userId = decoded && (decoded.id || decoded.user_id || decoded.sub);
+  const userId = resolveUserId(decoded && (decoded.id || decoded.user_id || decoded.sub));
   if (!userId) return null;
   const latestApprovedApp = await MarketApplication.findOne({
-    where: { user_id: Number(userId), status: 'approved' },
+    where: { user_id: userId, status: 'approved' },
     attributes: ['shop_name', 'phone'],
     order: [['created_at', 'DESC'], ['id', 'DESC']]
   });

@@ -6,7 +6,8 @@
  */
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
+const { resolveUserId } = require('../utils/resolveUserId');
 
 module.exports = (req, res, next) => {
   if (process.env.DEBUG_SKIP_AUTH === '1') {
@@ -15,13 +16,22 @@ module.exports = (req, res, next) => {
       const token = authHeader.substring(7);
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.id != null) {
+          decoded.id = String(decoded.id);
+        }
         req.user = decoded;
         return next();
-      } catch (_err) {
-        // 调试模式下忽略无效 token，走兜底用户
+      } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json({ code: 401, msg: '登录已过期，请重新登录' });
+        }
+        return res.status(401).json({ code: 1, msg: '无效的认证信息' });
       }
     }
-    const fallbackUserId = parseInt(process.env.DEBUG_DEFAULT_USER_ID || '1', 10) || 1;
+    const fallbackUserId = resolveUserId(process.env.DEBUG_DEFAULT_USER_ID);
+    if (!fallbackUserId) {
+      return res.status(401).json({ code: 1, msg: '缺少认证信息' });
+    }
     req.user = {
       id: fallbackUserId,
       user_id: fallbackUserId,
@@ -39,6 +49,9 @@ module.exports = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded && decoded.id != null) {
+      decoded.id = String(decoded.id);
+    }
     req.user = decoded;
     next();
   } catch (err) {

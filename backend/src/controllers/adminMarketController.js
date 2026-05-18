@@ -18,6 +18,7 @@ const {
     sequelize
 } = require('../models');
 const { logAdminAction } = require('./adminAuditHelper');
+const { normalizeShopCategory, resolveShopCoordinates } = require('../constants/marketCategoryMap');
 
 function hashSpPortalPassword(raw) {
     return crypto.createHash('sha256').update(String(raw)).digest('hex');
@@ -204,7 +205,12 @@ exports.createShop = async (req, res) => {
     try {
         const b = req.body || {};
         if (!b.name || !b.category) return res.status(400).json({ error: 'name、category 必填' });
-        const body = { shop_no: genShopNo(), name: b.name, category: b.category };
+        const body = {
+            shop_no: genShopNo(),
+            name: b.name,
+            category: normalizeShopCategory(b.category),
+            ...resolveShopCoordinates(b)
+        };
         shopWritableFields.forEach(f => { if (b[f] !== undefined) body[f] = b[f]; });
         const row = await MarketShop.create(body);
         await logAdminAction(req, 'create_shop', 'market_shop', row.id, body);
@@ -411,6 +417,8 @@ exports.updateMarketApplication = async (req, res) => {
         await row.save();
         let shop = null;
         if (status === 'approved') {
+            const plainRow = row.get ? row.get({ plain: true }) : row;
+            const coords = resolveShopCoordinates({ ...plainRow, ...(req.body || {}) });
             shop = await MarketShop.findOne({
                 where: { name: row.shop_name, contact_phone: row.phone },
                 order: [['id', 'DESC']]
@@ -420,7 +428,7 @@ exports.updateMarketApplication = async (req, res) => {
                 shop = await MarketShop.create({
                     shop_no: genShopNo(),
                     name: row.shop_name,
-                    category: row.category,
+                    category: normalizeShopCategory(row.category),
                     logo_url: row.logo_url || null,
                     cover_url: row.background_url || null,
                     notice: row.description || null,
@@ -431,17 +439,21 @@ exports.updateMarketApplication = async (req, res) => {
                     interior_image: placeList[1] || null,
                     license_image: row.license_url || null,
                     is_open: 1,
-                    is_active: 1
+                    is_active: 1,
+                    ...coords
                 });
             } else {
-                const changed = {};
+                const changed = { ...coords };
                 if (!shop.logo_url && row.logo_url) changed.logo_url = row.logo_url;
                 if (!shop.cover_url && row.background_url) changed.cover_url = row.background_url;
                 if (!shop.license_image && row.license_url) changed.license_image = row.license_url;
                 if (!shop.address && row.address) changed.address = row.address;
                 if (!shop.contact_name && row.contact_name) changed.contact_name = row.contact_name;
                 if (!shop.contact_phone && row.phone) changed.contact_phone = row.phone;
-                if (Object.keys(changed).length) await shop.update(changed);
+                if (shop.category !== normalizeShopCategory(row.category)) {
+                    changed.category = normalizeShopCategory(row.category);
+                }
+                await shop.update(changed);
             }
         }
         await writeApproval('market_application', row.id, fromStatus, status, (req.admin && req.admin.sub) || 'admin', note);

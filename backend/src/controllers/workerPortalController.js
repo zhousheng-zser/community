@@ -1,5 +1,10 @@
 const { Op } = require('sequelize');
 const { ServiceOrder, Service, User, WorkerApplication, WorkerProfile } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
+
+function authUserId(req) {
+  return resolveUserId(req.user && req.user.id);
+}
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -74,7 +79,8 @@ function serializeOrder(row, { detail = false } = {}) {
 
 exports.listOrders = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
 
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -107,7 +113,8 @@ exports.listOrders = async (req, res) => {
 
 exports.getOrder = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -125,7 +132,8 @@ exports.getOrder = async (req, res) => {
 
 exports.accept = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const order = await ServiceOrder.findOne({ where: workerOrderWhere(userId, { id }) });
@@ -147,7 +155,8 @@ exports.accept = async (req, res) => {
 
 exports.reject = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const reason = (req.body && (req.body.reason || req.body.reject_reason)) || '';
@@ -173,7 +182,8 @@ exports.reject = async (req, res) => {
 
 exports.checkIn = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const { latitude, longitude, accuracy } = req.body || {};
@@ -201,7 +211,8 @@ exports.checkIn = async (req, res) => {
 
 exports.evidence = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const kind = req.body && req.body.kind;
@@ -231,7 +242,8 @@ exports.evidence = async (req, res) => {
 
 exports.addonRequest = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const remark = (req.body && (req.body.remark || req.body.content)) || '';
@@ -257,7 +269,8 @@ exports.addonRequest = async (req, res) => {
 
 exports.complete = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = authUserId(req);
+    if (!userId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(userId))) return fail(res, 403, '非已入驻技工', 403);
     const id = parseInt(req.params.id, 10);
     const order = await ServiceOrder.findOne({ where: workerOrderWhere(userId, { id }) });

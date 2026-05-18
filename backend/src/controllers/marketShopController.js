@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { MarketShop, MarketShopCategory, MarketGood, MarketShopReview, sequelize } = require('../models');
-const { normalizeShopCategory } = require('../constants/marketCategoryMap');
+const { categoryWhereValues } = require('../constants/marketCategoryMap');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -67,7 +67,11 @@ exports.listShops = async (req, res) => {
     const pageSize = parseInt(req.query.page_size, 10) || 10;
     const offset = (page - 1) * pageSize;
     const where = { is_active: 1 };
-    if (req.query.category) where.category = normalizeShopCategory(req.query.category);
+    if (req.query.category) {
+      const cats = categoryWhereValues(req.query.category);
+      if (cats.length === 1) where.category = cats[0];
+      else if (cats.length > 1) where.category = { [Op.in]: cats };
+    }
 
     let sort = req.query.sort || 'comprehensive';
     const coords = parseUserCoords(req.query);

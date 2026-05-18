@@ -57,7 +57,9 @@ function mapGoodRow(g) {
     published: onShelf,
     on_shelf: onShelf,
     status: j.status,
-    shop_id: j.shop_id
+    shop_id: j.shop_id,
+    category_key: j.category_key || 'local',
+    sort_order: j.sort_order != null ? j.sort_order : 0
   };
 }
 
@@ -232,6 +234,8 @@ exports.listGoods = async (req, res) => {
     if (req.query.status === 'on_sale' || req.query.status === 'off_sale') {
       where.status = req.query.status;
     }
+    const catKey = req.query.category_key != null ? String(req.query.category_key).trim() : '';
+    if (catKey) where.category_key = catKey.slice(0, 50);
     if (andParts.length) {
       where[Op.and] = andParts;
     }
@@ -280,6 +284,9 @@ exports.patchGood = async (req, res) => {
     if (b.stock != null) g.stock = parseInt(b.stock, 10);
     if (b.safe_stock != null) g.safe_stock = parseInt(b.safe_stock, 10);
     if (b.sort_order != null) g.sort_order = parseInt(b.sort_order, 10);
+    if (b.category_key != null || b.category != null) {
+      g.category_key = String(b.category_key != null ? b.category_key : b.category).slice(0, 50) || 'local';
+    }
     await g.save();
     return ok(res, { goods: mapGoodRow(g) });
   } catch (e) {
@@ -350,9 +357,31 @@ const MERCHANT_ORDER_ACTIONS = {
   accept: { from: ['pending_accept'], to: 'pending_service' },
   reject: { from: ['pending_accept'], to: 'cancelled' },
   dispatch: { from: ['pending_service'], to: 'pending_receipt' },
-  delivered: { from: ['pending_receipt'], to: 'pending_receipt' },
+  /** 外卖场景：送达即完成，不再等待买家确认收货 */
+  delivered: { from: ['pending_receipt'], to: 'completed' },
+  complete_delivery: { from: ['pending_receipt'], to: 'completed' },
   complete: { from: ['pending_receipt'], to: 'completed' }
 };
+
+/** 送达/完成后的后置处理（视为买家已收货） */
+async function onMarketOrderCompleted(order) {
+  if (!order || order.order_status !== 'completed') return;
+  try {
+    const items = await MarketOrderItem.findAll({
+      where: { order_no: order.order_no },
+      attributes: ['goods_id', 'quantity']
+    });
+    let totalQty = 0;
+    for (const it of items) {
+      totalQty += Math.max(0, parseInt(it.quantity, 10) || 0);
+    }
+    if (totalQty > 0 && order.shop_id) {
+      await MarketShop.increment('sold_count', { by: totalQty, where: { id: order.shop_id } });
+    }
+  } catch (e) {
+    console.warn('[market] onMarketOrderCompleted sold_count:', e.message);
+  }
+}
 
 async function ensureOrderEventTable() {
   await sequelize.query(
@@ -949,9 +978,7 @@ exports.applyOrderAction = async (req, res) => {
       return bizErr(res, 400, `当前状态 ${row.order_status} 不可执行 ${action}`);
     }
     const fromStatus = row.order_status;
-    if (action !== 'delivered') {
-      row.order_status = config.to;
-    }
+    row.order_status = config.to;
     if (action === 'reject') {
       row.cancel_reason = note || '商家拒单';
       row.cancelled_at = new Date();
@@ -960,21 +987,25 @@ exports.applyOrderAction = async (req, res) => {
       }
     }
     await row.save();
+    if (row.order_status === 'completed' && fromStatus !== 'completed') {
+      await onMarketOrderCompleted(row);
+    }
     await writeMerchantApproval(orderNo, fromStatus, row.order_status, `shop:${shopId}`, note);
     const nodeTitleMap = {
       accept: '商家已接单',
       reject: '商家已拒单并退款',
       dispatch: '商家已开始配送',
-      delivered: '商家已上门配送完成'
+      delivered: '商家已送达，订单已完成',
+      complete_delivery: '商家已送达，订单已完成',
+      complete: '订单已完成'
     };
     const nodeTitle = nodeTitleMap[action] || '订单状态更新';
+    const notifyContent =
+      row.order_status === 'completed'
+        ? (note || '商品已送达，感谢您的购买，欢迎评价')
+        : (note || `当前状态：${ORDER_STATUS_TEXT[row.order_status] || row.order_status}`);
     await appendOrderEvent(orderNo, shopId, row.user_id, action, nodeTitle, note || '', proofImages);
-    await pushOrderNodeMessage(
-      row.user_id,
-      orderNo,
-      nodeTitle,
-      note || `当前状态：${ORDER_STATUS_TEXT[row.order_status] || row.order_status}`
-    );
+    await pushOrderNodeMessage(row.user_id, orderNo, nodeTitle, notifyContent);
     const j = row.get({ plain: true });
     return ok(res, {
       order_no: j.order_no,

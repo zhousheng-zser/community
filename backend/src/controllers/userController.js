@@ -1,4 +1,9 @@
-const { User, UserFollow, UserAddress, MarketApplication, MarketShop } = require('../models');
+const {
+    User, UserFollow, UserAddress,
+    MarketApplication, MarketShop,
+    WorkerApplication, WorkerProfile,
+    ServiceProviderApplication, ServiceProviderProfile
+} = require('../models');
 const { resolveUserId } = require('../utils/resolveUserId');
 
 exports.getProfile = async (req, res) => {
@@ -41,13 +46,60 @@ exports.getProfile = async (req, res) => {
             roles.push('merchant');
         }
 
+        const latestWorkerApplication = await WorkerApplication.findOne({
+            where: { user_id: userId },
+            attributes: ['id', 'status'],
+            order: [['created_at', 'DESC'], ['id', 'DESC']]
+        });
+        const workerStatus = latestWorkerApplication ? latestWorkerApplication.status : null;
+        if (workerStatus === 'approved' && !roles.includes('worker')) {
+            roles.push('worker');
+        }
+
+        const latestServiceProviderApplication = await ServiceProviderApplication.findOne({
+            where: { user_id: userId },
+            attributes: ['id', 'status'],
+            order: [['created_at', 'DESC'], ['id', 'DESC']]
+        });
+        const serviceProviderStatus = latestServiceProviderApplication
+            ? latestServiceProviderApplication.status
+            : null;
+
+        let workerProfileId = null;
+        if (workerStatus === 'approved') {
+            const wp = await WorkerProfile.findOne({
+                where: { user_id: userId, status: 'active' },
+                attributes: ['id'],
+                order: [['id', 'DESC']]
+            });
+            workerProfileId = wp ? wp.id : null;
+        }
+
+        let serviceProviderProfileId = null;
+        if (serviceProviderStatus === 'approved') {
+            const sp = await ServiceProviderProfile.findOne({
+                where: { user_id: userId, status: 'active' },
+                attributes: ['id'],
+                order: [['id', 'DESC']]
+            });
+            serviceProviderProfileId = sp ? sp.id : null;
+        }
+
         res.json({
             ...profile,
             role: roles.join(','),
             merchant_status: merchantStatus,
             shop_status: merchantStatus,
             shop_id: shopId,
-            merchant_application_id: latestMarketApplication ? latestMarketApplication.id : null
+            merchant_application_id: latestMarketApplication ? latestMarketApplication.id : null,
+            worker_status: workerStatus,
+            worker_application_id: latestWorkerApplication ? latestWorkerApplication.id : null,
+            worker_profile_id: workerProfileId,
+            service_provider_status: serviceProviderStatus,
+            service_provider_application_id: latestServiceProviderApplication
+                ? latestServiceProviderApplication.id
+                : null,
+            service_provider_profile_id: serviceProviderProfileId
         });
     } catch (error) {
         console.error('Get Profile Error:', error);

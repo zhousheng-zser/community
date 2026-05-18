@@ -100,6 +100,8 @@ router.put('/community-featured-goods/:id', adminCommunityOpsController.updateCo
 router.delete('/community-featured-goods/:id', adminCommunityOpsController.deleteCommunityFeatured);
 router.get('/benefit-alliance-config', adminCommunityOpsController.getBenefitAllianceConfig);
 router.put('/benefit-alliance-config', adminCommunityOpsController.upsertBenefitAllianceConfig);
+router.get('/local-goods-home/ui-assets', adminLocalGoodsHomeController.listUiAssets);
+router.put('/local-goods-home/ui-assets', adminLocalGoodsHomeController.updateUiAssets);
 router.get('/local-goods-home/definitions', adminLocalGoodsHomeController.listDefinitions);
 router.get('/local-goods-home/items', adminLocalGoodsHomeController.listItems);
 router.get('/local-goods-home/goods/search', adminLocalGoodsHomeController.searchGoods);

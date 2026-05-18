@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
     shop_name: { type: DataTypes.STRING(100), allowNull: false },
     category: { type: DataTypes.STRING(50), allowNull: false },
     address: { type: DataTypes.STRING(255), allowNull: false },
+    latitude: { type: DataTypes.DECIMAL(10, 7), allowNull: true },
+    longitude: { type: DataTypes.DECIMAL(10, 7), allowNull: true },
     description: DataTypes.TEXT,
     promoter_id: DataTypes.INTEGER,
     credit_code: DataTypes.STRING(100),

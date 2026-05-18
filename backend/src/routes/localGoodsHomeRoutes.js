@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const localGoodsHomeController = require('../controllers/localGoodsHomeController');
 
+router.get('/ui-assets', localGoodsHomeController.getUiAssets);
 router.get('/modules', localGoodsHomeController.getModules);
 router.get('/feed-products', localGoodsHomeController.getFeedProducts);
 router.get('/zone-products', localGoodsHomeController.getZoneProducts);

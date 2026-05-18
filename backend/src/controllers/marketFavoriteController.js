@@ -1,17 +1,15 @@
 const { Op } = require('sequelize');
 const { MarketFavoriteItem, MarketGood, MarketShop } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
 }
 
-/** 与 authMiddleware、部分网关解析保持一致 */
+/** 雪花 id 保持字符串，与 authMiddleware 一致 */
 function reqUserId(req) {
   const u = req.user || {};
-  const raw = u.id ?? u.user_id ?? u.userId;
-  if (raw === undefined || raw === null || raw === '') return NaN;
-  const n = parseInt(String(raw), 10);
-  return Number.isFinite(n) ? n : NaN;
+  return resolveUserId(u.id ?? u.user_id ?? u.userId);
 }
 
 function enrichGoodJson(j) {
@@ -36,7 +34,7 @@ function enrichShopJson(j) {
 exports.listFavorites = async (req, res) => {
   try {
     const userId = reqUserId(req);
-    if (!Number.isFinite(userId)) {
+    if (!userId) {
       return res.status(401).json({ code: 401, msg: '未识别用户', data: null });
     }
     const page = parseInt(req.query.page, 10) || 1;
@@ -54,12 +52,12 @@ exports.listFavorites = async (req, res) => {
         {
           model: MarketGood,
           as: 'good',
-          required: true
+          required: false
         },
         {
           model: MarketShop,
           as: 'shop',
-          required: true,
+          required: false,
           attributes: ['id', 'name', 'logo_url', 'cover_url', 'is_active', 'category']
         }
       ],
@@ -76,12 +74,12 @@ exports.listFavorites = async (req, res) => {
         shop_id: j.shop_id,
         created_at: j.created_at,
         updated_at: j.updated_at,
-        good: enrichGoodJson(j.good),
-        shop: enrichShopJson(j.shop)
+        good: j.good ? enrichGoodJson(j.good) : null,
+        shop: j.shop ? enrichShopJson(j.shop) : null
       };
     });
 
-    res.json(ok({ list, page, page_size: pageSize, total: count }));
+    res.json(ok({ list: list || [], page, page_size: pageSize, total: count || 0 }));
   } catch (e) {
     console.error('listFavorites error:', e);
     res.status(500).json({ code: 500, msg: '获取收藏列表失败', data: null });
@@ -95,7 +93,7 @@ exports.listFavorites = async (req, res) => {
 exports.addFavorite = async (req, res) => {
   try {
     const userId = reqUserId(req);
-    if (!Number.isFinite(userId)) {
+    if (!userId) {
       return res.status(401).json({ code: 401, msg: '未识别用户', data: null });
     }
     const goodsId = parseInt(req.body.goods_id, 10);
@@ -147,7 +145,7 @@ exports.addFavorite = async (req, res) => {
 exports.removeFavorite = async (req, res) => {
   try {
     const userId = reqUserId(req);
-    if (!Number.isFinite(userId)) {
+    if (!userId) {
       return res.status(401).json({ code: 401, msg: '未识别用户', data: null });
     }
     const goodsId = parseInt(req.params.goodsId, 10);
@@ -173,7 +171,7 @@ exports.removeFavorite = async (req, res) => {
 exports.status = async (req, res) => {
   try {
     const userId = reqUserId(req);
-    if (!Number.isFinite(userId)) {
+    if (!userId) {
       return res.status(401).json({ code: 401, msg: '未识别用户', data: null });
     }
     const raw = req.query.goods_ids || req.query.goodsIds || '';

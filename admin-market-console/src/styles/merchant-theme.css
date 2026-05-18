@@ -1,0 +1,50 @@
+/* 商家中台主题 */
+:root {
+  --mp-bg: #f0f2f5;
+  --mp-surface: #ffffff;
+  --mp-aside: #1e222d;
+  --mp-aside-text: #a3b1c6;
+  --mp-aside-active: #cda05b;
+  --mp-accent: #b8860b;
+  --mp-header-h: 56px;
+  --mp-aside-w: 232px;
+  --mp-radius: 12px;
+  --mp-shadow: 0 4px 24px rgba(30, 34, 45, 0.08);
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  background: var(--mp-bg);
+  color: #303133;
+}
+
+.merchant-page {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.merchant-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1d26;
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+}
+
+.merchant-page-desc {
+  color: #909399;
+  font-size: 14px;
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.merchant-card {
+  background: var(--mp-surface);
+  border-radius: var(--mp-radius);
+  box-shadow: var(--mp-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}

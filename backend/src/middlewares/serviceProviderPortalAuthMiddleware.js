@@ -1,17 +1,18 @@
 const jwt = require('jsonwebtoken');
 const { sequelize } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
 
 /** 查找当前用户的 service_provider_profiles 记录 */
 async function resolveProfileFromUserToken(decoded) {
-  const userId = decoded && (decoded.id || decoded.user_id || decoded.sub);
+  const userId = resolveUserId(decoded && (decoded.id || decoded.user_id || decoded.sub));
   if (!userId) return null;
   try {
     const [rows] = await sequelize.query(
       'SELECT id FROM service_provider_profiles WHERE user_id = ? AND status = ? LIMIT 1',
-      { replacements: [Number(userId), 'active'] }
+      { replacements: [userId, 'active'] }
     );
     if (!rows || !rows.length) return null;
-    return { profile_id: Number(rows[0].id), provider_user_id: Number(userId) };
+    return { profile_id: Number(rows[0].id), provider_user_id: userId };
   } catch (e) {
     console.error('resolveProfileFromUserToken error:', e.message);
     return null;

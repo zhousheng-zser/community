@@ -37,6 +37,7 @@ const routes = [
       { path: 'benefit-display-config', name: 'BenefitDisplayConfig', component: () => import('../views/BenefitDisplayConfig.vue'), meta: { title: '惠民卡·运营位' } },
       { path: 'community-featured', name: 'CommunityFeatured', component: () => import('../views/CommunityFeatured.vue'), meta: { title: '小区管家精选' } },
       { path: 'coupon-center', name: 'CouponCenter', component: () => import('../views/CouponCenter.vue'), meta: { title: '券码中心' } },
+      { path: 'local-goods-home-ui-assets', name: 'LocalGoodsHomeUiAssets', component: () => import('../views/LocalGoodsHomeUiAssets.vue'), meta: { title: '本地商城运营图' } },
       { path: 'local-goods-home-config', redirect: '/local-goods-home/hot_zone' },
       { path: 'local-goods-home/:listKey', name: 'LocalGoodsHomeConfig', component: () => import('../views/LocalGoodsHomeConfig.vue'), meta: { title: '本地商城榜单' } },
       { path: 'finance', name: 'Finance', component: () => import('../views/Finance.vue'), meta: { title: '提现审核（演示）' } },

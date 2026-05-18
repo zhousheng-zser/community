@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const uiAssetsService = require('../services/localGoodsHomeUiAssetsService');
 const {
   MarketGood,
   MarketShop,
@@ -484,5 +485,16 @@ exports.getWeekSelect = async (req, res) => {
   } catch (e) {
     console.error('local-goods-home week-select error:', e);
     return res.status(500).json({ code: 500, msg: '获取本周甄选失败', data: null });
+  }
+};
+
+/** 小程序本地商城首页运营图（banner / 金刚区 / 导购卡片） */
+exports.getUiAssets = async (_req, res) => {
+  try {
+    const images = await uiAssetsService.getAssetsMap();
+    return res.json(ok({ images }));
+  } catch (e) {
+    console.error('local-goods-home ui-assets error:', e);
+    return res.status(500).json({ code: 500, msg: '获取运营图失败', data: null });
   }
 };

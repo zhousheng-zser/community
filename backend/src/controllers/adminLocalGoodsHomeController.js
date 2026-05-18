@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const uiAssetsService = require('../services/localGoodsHomeUiAssetsService');
 const {
   MarketGood,
   MarketShop,
@@ -175,16 +176,20 @@ exports.listItems = async (req, res) => {
     const goodsIds = [...new Set(rawData.map((x) => Number(x.goods_id)).filter((x) => Number.isFinite(x) && x > 0))];
     const shopIds = [...new Set(rawData.map((x) => Number(x.shop_id)).filter((x) => Number.isFinite(x) && x > 0))];
     const [goodsRows, shopRows] = await Promise.all([
-      goodsIds.length ? MarketGood.findAll({ where: { id: { [Op.in]: goodsIds } }, attributes: ['id', 'name'] }) : [],
+      goodsIds.length ? MarketGood.findAll({ where: { id: { [Op.in]: goodsIds } }, attributes: ['id', 'name', 'main_image'] }) : [],
       shopIds.length ? MarketShop.findAll({ where: { id: { [Op.in]: shopIds } }, attributes: ['id', 'name'] }) : []
     ]);
-    const goodsMap = new Map(goodsRows.map((x) => [Number(x.id), x.name]));
+    const goodsMap = new Map(goodsRows.map((x) => [Number(x.id), { name: x.name, main_image: x.main_image || '' }]));
     const shopMap = new Map(shopRows.map((x) => [Number(x.id), x.name]));
-    const data = rawData.map((item) => ({
-      ...item,
-      goods_name: goodsMap.get(Number(item.goods_id)) || '',
-      shop_name: shopMap.get(Number(item.shop_id)) || ''
-    }));
+    const data = rawData.map((item) => {
+      const good = goodsMap.get(Number(item.goods_id));
+      return {
+        ...item,
+        goods_name: good?.name || '',
+        goods_image: good?.main_image || '',
+        shop_name: shopMap.get(Number(item.shop_id)) || ''
+      };
+    });
     return res.json({ message: 'ok', total: count, page, limit, data, meta });
   } catch (e) {
     console.error('admin local-goods-home listItems:', e);
@@ -382,5 +387,26 @@ exports.searchGoods = async (req, res) => {
   } catch (e) {
     console.error('admin local-goods-home searchGoods:', e);
     return res.status(500).json({ error: '搜索商品失败' });
+  }
+};
+
+exports.listUiAssets = async (_req, res) => {
+  try {
+    const data = await uiAssetsService.listAssets();
+    return res.json({ message: 'ok', data });
+  } catch (e) {
+    console.error('admin local-goods-home listUiAssets:', e);
+    return res.status(500).json({ error: '加载运营图失败' });
+  }
+};
+
+exports.updateUiAssets = async (req, res) => {
+  try {
+    const assets = req.body.assets || req.body;
+    const data = await uiAssetsService.updateAssets(Array.isArray(assets) ? assets : [assets]);
+    return res.json({ message: '保存成功', data });
+  } catch (e) {
+    console.error('admin local-goods-home updateUiAssets:', e);
+    return res.status(400).json({ error: e.message || '保存失败' });
   }
 };

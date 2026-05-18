@@ -10,6 +10,7 @@
     "db:sync": "node sync_db.js",
     "db:setup": "node init_db.js && node sync_db.js",
     "migrate:benefit": "node scripts/run-benefit-alliance-migrations.js",
+    "migrate:lg-home-ui-assets": "node scripts/run-lg-home-ui-assets-migration.js",
     "seed:jd-benefit": "node scripts/seed-benefit.js jd",
     "seed:pdd-benefit": "node scripts/seed-benefit.js pdd",
     "seed:benefit-alliance-config": "node scripts/seed-benefit.js config",

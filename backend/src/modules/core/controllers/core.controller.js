@@ -48,15 +48,28 @@ exports.getCommunities = async (req, res) => {
     }
     const rows = await Community.findAll({
       where: { status: 'active' },
-      order: [['sort_order', 'ASC'], ['id', 'ASC']],
-      attributes: ['id', 'name', 'address']
+      order: [['id', 'ASC']],
+      attributes: ['id', 'name', 'address', 'latitude', 'longitude']
     });
     res.json({
+      code: 0,
+      msg: 'ok',
       success: true,
-      list: rows.map(r => ({
+      data: {
+        list: rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          address: r.address || '',
+          latitude: r.latitude,
+          longitude: r.longitude
+        }))
+      },
+      list: rows.map((r) => ({
         id: r.id,
         name: r.name,
-        address: r.address
+        address: r.address || '',
+        latitude: r.latitude,
+        longitude: r.longitude
       }))
     });
   } catch (err) {

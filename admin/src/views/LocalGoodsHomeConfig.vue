@@ -19,6 +19,18 @@
       <el-table v-loading="loading" :data="rows" border stripe>
         <el-table-column prop="id" label="ID" width="72" />
         <el-table-column prop="goods_id" label="商品ID" width="100" />
+        <el-table-column label="商品图片" width="90">
+          <template #default="{ row }">
+            <el-image
+              v-if="row.goods_image"
+              :src="imgUrl(row.goods_image)"
+              style="width: 56px; height: 56px; border-radius: 4px"
+              fit="cover"
+              :preview-src-list="[imgUrl(row.goods_image)]"
+            />
+            <span v-else class="no-img">无图</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="goods_name" label="商品名" min-width="180" show-overflow-tooltip />
         <el-table-column prop="shop_id" label="店铺ID" width="100" />
         <el-table-column prop="shop_name" label="店铺名" min-width="160" show-overflow-tooltip />
@@ -166,6 +178,13 @@ const form = reactive({
 
 const showModuleSelect = computed(() => currentDef.value && ['periodic_modules', 'feed_modules', 'feed_products_paged'].includes(currentDef.value.key))
 const showTabSelect = computed(() => currentDef.value && currentDef.value.key === 'jiuzhou_haowu_multi_tab')
+
+function imgUrl(url) {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  const base = import.meta.env.VITE_API_BASE || '/api/v1'
+  return base.replace(/\/api\/v1$/, '') + url
+}
 
 function resetForm() {
   form.goods_id = null
@@ -365,5 +384,9 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.no-img {
+  color: #bfbfbf;
+  font-size: 12px;
 }
 </style>

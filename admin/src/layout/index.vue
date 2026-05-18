@@ -63,6 +63,7 @@
             <el-icon><ShoppingBag /></el-icon>
             <span>本地商城</span>
           </template>
+          <el-menu-item index="/local-goods-home-ui-assets">00 首页运营图（8张）</el-menu-item>
           <el-menu-item v-for="item in localGoodsLinks" :key="item.key" :index="`/local-goods-home/${item.key}`">
             {{ item.name }}
           </el-menu-item>

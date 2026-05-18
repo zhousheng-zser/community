@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   MarketFavoriteItem.init(
     {
-      user_id: { type: DataTypes.INTEGER, allowNull: false },
+      user_id: { type: DataTypes.BIGINT, allowNull: false },
       goods_id: { type: DataTypes.INTEGER, allowNull: false },
       shop_id: { type: DataTypes.INTEGER, allowNull: false }
     },

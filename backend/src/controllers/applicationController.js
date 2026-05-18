@@ -1,4 +1,17 @@
 const { WorkerApplication, ServiceProviderApplication, MarketApplication } = require('../models');
+const { resolveUserId } = require('../utils/resolveUserId');
+const { normalizeShopCategory, resolveShopCoordinates } = require('../constants/marketCategoryMap');
+
+function authUserId(req) {
+    return resolveUserId(req.user && req.user.id);
+}
+
+async function findLatestApplication(Model, userId) {
+    return Model.findOne({
+        where: { user_id: userId },
+        order: [['created_at', 'DESC'], ['id', 'DESC']]
+    });
+}
 
 function handleDbError(res, e, label) {
     const msg = e && (e.original && e.original.message || e.message) || String(e);
@@ -64,9 +77,39 @@ exports.serviceProviderApply = async (req, res) => {
             certificate_url: Array.isArray(certificate_url) ? certificate_url : null,
             status: 'pending'
         });
-        res.status(201).json({ code: 0, msg: '申请提交成功' });
+        res.status(201).json({
+            code: 0,
+            msg: '申请提交成功，请等待运营审核',
+            data: { application_id: row.id, status: row.status }
+        });
     } catch (e) {
         return handleDbError(res, e, '服务商入驻申请失败');
+    }
+};
+
+// GET /api/v1/worker/application/me — 当前用户最新技工入驻申请
+exports.getWorkerApplicationMe = async (req, res) => {
+    try {
+        const userId = authUserId(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+        const row = await findLatestApplication(WorkerApplication, userId);
+        return res.json({ code: 0, msg: row ? 'ok' : '暂无申请记录', data: row });
+    } catch (e) {
+        console.error('getWorkerApplicationMe:', e);
+        return res.status(500).json({ code: 1, msg: '查询失败' });
+    }
+};
+
+// GET /api/v1/service-provider/application/me — 当前用户最新服务商入驻申请
+exports.getServiceProviderApplicationMe = async (req, res) => {
+    try {
+        const userId = authUserId(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+        const row = await findLatestApplication(ServiceProviderApplication, userId);
+        return res.json({ code: 0, msg: row ? 'ok' : '暂无申请记录', data: row });
+    } catch (e) {
+        console.error('getServiceProviderApplicationMe:', e);
+        return res.status(500).json({ code: 1, msg: '查询失败' });
     }
 };
 
@@ -81,8 +124,10 @@ exports.marketApply = async (req, res) => {
             shop_name, contact_name, phone, category, address, description,
             promoter_id, promoter_name, promoter,
             credit_code, legal_person, entity_name,
-            place_photo_url, license_url, logo_url, background_url, community_id
+            place_photo_url, license_url, logo_url, background_url, community_id,
+            latitude, longitude, lat, lng
         } = req.body;
+        const coords = resolveShopCoordinates({ latitude, longitude, lat, lng });
         if (!contact_name || !phone || !shop_name || !category || !address) {
             return res.status(400).json({ error: '请填写必填项：shop_name、contact_name、phone、category、address' });
         }
@@ -93,13 +138,15 @@ exports.marketApply = async (req, res) => {
             return res.status(400).json({ error: '请上传图片：logo_url、background_url、license_url' });
         }
         const promoterLabel = promoter_name != null && promoter_name !== '' ? promoter_name : promoter;
-        await MarketApplication.create({
+        const row = await MarketApplication.create({
             user_id: userId,
             contact_name,
             phone,
             shop_name,
-            category,
+            category: normalizeShopCategory(category),
             address,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
             description: description || null,
             promoter_id: promoter_id || null,
             promoter_name: promoterLabel || null,
@@ -113,7 +160,18 @@ exports.marketApply = async (req, res) => {
             community_id: community_id || null,
             status: 'pending'
         });
-        res.status(201).json({ code: 0, msg: '申请提交成功', data: null });
+        res.status(201).json({
+            code: 0,
+            msg: '申请提交成功',
+            data: row
+                ? {
+                    application_id: row.id,
+                    status: row.status,
+                    latitude: row.latitude,
+                    longitude: row.longitude
+                }
+                : null
+        });
     } catch (e) {
         return handleDbError(res, e, '集市入驻申请失败');
     }
