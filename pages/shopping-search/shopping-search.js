@@ -56,8 +56,8 @@ Page({
   loadGuess() {
     // 模拟或调用最近浏览的拉取逻辑
     const guess = [
-      { id: 1001, name: "居家常备好物", image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" },
-      { id: 1002, name: "智能保温杯", image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" }
+      { id: 1001, name: "居家常备好物", image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" },
+      { id: 1002, name: "智能保温杯", image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" }
     ];
     this.setData({ guess });
   },
@@ -103,8 +103,8 @@ Page({
     if (this.data.searchMode === 'goods') {
       this.setData({
         results: [
-          { id: 200, name: `[商品] 搜索到的 ${this.data.keyword}`, price: "59.90", origPrice: "99.00", sales: 456, image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" },
-          { id: 201, name: "本地土鸡蛋30枚", price: "29.90", sales: 2011, image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" }
+          { id: 200, name: `[商品] 搜索到的 ${this.data.keyword}`, price: "59.90", origPrice: "99.00", sales: 456, image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" },
+          { id: 201, name: "本地土鸡蛋30枚", price: "29.90", sales: 2011, image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" }
         ]
       });
     } else {
@@ -115,8 +115,8 @@ Page({
             name: `${this.data.keyword} 专营店`,
             type: "官方旗舰店",
             followers: 12500,
-            image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png",
-            goods: [{ image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" }, { image: "https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png" }]
+            image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png",
+            goods: [{ image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" }, { image: "https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png" }]
           }
         ]
       });

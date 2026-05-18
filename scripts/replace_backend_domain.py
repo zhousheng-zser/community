@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-将仓库内旧后端主机名全文替换为新主机名（默认 jshsp1.eds-tech.cn -> 120.27.239.244:3001）。
+将仓库内旧后端主机名全文替换为新主机名（默认 jshsp1.eds-tech.cn -> jshsp1.eds-tech.cn）。
 
 用法:
   python scripts/replace_backend_domain.py
@@ -126,8 +126,8 @@ def main() -> int:
     ap.add_argument(
         "--to",
         dest="to_host",
-        default="120.27.239.244:3001",
-        help="新主机名（默认: 120.27.239.244:3001）",
+        default="jshsp1.eds-tech.cn",
+        help="新主机名（默认: jshsp1.eds-tech.cn）",
     )
     ap.add_argument(
         "--dry-run",
