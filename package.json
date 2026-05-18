@@ -17,7 +17,9 @@
     "preview:auto": "node scripts/wechat-preview.js --auto-preview",
     "preview:email": "node scripts/wechat-preview.js --email",
     "upload": "node scripts/wechat-preview.js --upload",
-    "release:preview-email": "node scripts/upload-preview-email.js"
+    "release:preview-email": "node scripts/upload-preview-email.js",
+    "release:experience": "node scripts/wechat-experience.js --email",
+    "experience": "node scripts/wechat-experience.js"
   },
   "devDependencies": {
     "nodemailer": "^8.0.7",

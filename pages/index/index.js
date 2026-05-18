@@ -61,7 +61,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '肯德基',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=16&source=jutuike',
-        image_url: '/img/benefit_chain/kfc.png'
+        image_url: '/img/benefit_chain/kfc.jpg'
       },
       imgUrlFn
     ),
@@ -73,7 +73,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '星巴克',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=34&source=jutuike',
-        image_url: '/img/benefit_chain/xbk.png'
+        image_url: '/img/benefit_chain/xbk.jpg'
       },
       imgUrlFn
     ),
@@ -85,7 +85,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '百果园',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=31&source=jutuike',
-        image_url: '/img/benefit_chain/bgy.png'
+        image_url: '/img/benefit_chain/bgy.jpg'
       },
       imgUrlFn
     )
@@ -716,14 +716,15 @@ Page({
     });
 
     try {
-      const hm = await util.get('core/home-modules');
-      const rows = mapRawModulesToCategoryRows((hm && hm.modules) || []);
+      const hm = await api.core.getServiceHomeModules();
+      const list = Array.isArray(hm) ? hm : (hm && hm.modules) || [];
+      const rows = mapRawModulesToCategoryRows(list);
       if (rows.length > 0) {
         categoryList = mapHomeIcon(rows);
         this.setData({ categoryList });
       }
     } catch (eHm) {
-      console.log('core/home-modules 不可用，使用本地九宫格', eHm);
+      console.log('core/service-home-modules 不可用，使用本地九宫格', eHm);
     }
 
     try {

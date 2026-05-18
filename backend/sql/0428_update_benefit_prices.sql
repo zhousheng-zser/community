@@ -95,7 +95,7 @@ UPDATE benefit_alliance_goods SET
   image_url = '/uploads/benefit/taobao-6.png'
 WHERE platform = 'taobao' AND scene = 'benefit_card' AND sort_order = 6;
 
--- ==================== 闪购（9条）====================
+-- ==================== 闪购（7条，sort 3/8 无效链已删）====================
 UPDATE benefit_alliance_goods SET
   price = 15.00,
   coupon_price = 0.00,
@@ -109,13 +109,6 @@ UPDATE benefit_alliance_goods SET
   rebate_amount = 1.50,
   image_url = '/uploads/benefit/shangou-2.png'
 WHERE platform = 'shangou' AND scene = 'benefit_card' AND sort_order = 2;
-
-UPDATE benefit_alliance_goods SET
-  price = 15.00,
-  coupon_price = 0.00,
-  rebate_amount = 1.00,
-  image_url = '/uploads/benefit/shangou-3.png'
-WHERE platform = 'shangou' AND scene = 'benefit_card' AND sort_order = 3;
 
 UPDATE benefit_alliance_goods SET
   price = 10.00,
@@ -144,13 +137,6 @@ UPDATE benefit_alliance_goods SET
   rebate_amount = 0.80,
   image_url = '/uploads/benefit/shangou-7.png'
 WHERE platform = 'shangou' AND scene = 'benefit_card' AND sort_order = 7;
-
-UPDATE benefit_alliance_goods SET
-  price = 19.90,
-  coupon_price = 4.90,
-  rebate_amount = 1.00,
-  image_url = '/uploads/benefit/shangou-8.png'
-WHERE platform = 'shangou' AND scene = 'benefit_card' AND sort_order = 8;
 
 UPDATE benefit_alliance_goods SET
   price = 30.00,

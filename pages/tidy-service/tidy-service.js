@@ -1,5 +1,5 @@
 const images = require('../../utils/images.js');
-const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const { listImageFromHome3, resolveServiceListImage } = require('../../utils/serviceHome3.js');
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 
@@ -153,7 +153,7 @@ Page({
     this._groupKey = key;
     const config = this.getPageConfig(key);
     this._applyLocalPageConfig(sys, config);
-    this.mergeRemoteHomeModule(key);
+    this.mergeRemoteServiceGroup(key);
   },
 
   _applyLocalPageConfig(sys, config) {
@@ -210,7 +210,11 @@ Page({
       title: (s.title != null && String(s.title)) || '',
       price: s.price != null ? String(s.price) : '',
       description: s.description != null ? String(s.description) : '',
-      image: util.imgUrl(s.image_url || s.imageUrl || s.image || '')
+      image: resolveServiceListImage(
+        (s.title != null && String(s.title)) || '',
+        s.image_url || s.imageUrl || s.image || '',
+        null
+      )
     }));
     return {
       pageTitle: (mod.name != null && String(mod.name).trim()) || '生活服务',
@@ -219,37 +223,94 @@ Page({
     };
   },
 
-  async mergeRemoteHomeModule(key) {
+  buildPagePayloadFromServiceGroup(data, priceUnitFallback, localConfig) {
+    const unit = (data && data.price_unit) ? String(data.price_unit) : (priceUnitFallback || '次');
+    const icons = [
+      '/img/index/menuicon1.png',
+      '/img/index/menuicon2.png',
+      '/img/index/menuicon3.png',
+      '/img/index/menuicon4.png'
+    ];
+    const catRows = Array.isArray(data.categories) ? data.categories : [];
+    let categoriesArr = catRows.map((c) => (c && c.name != null ? String(c.name).trim() : '')).filter(Boolean);
+    const servicesRaw = Array.isArray(data.services) ? data.services : [];
+    if (categoriesArr.length === 0) {
+      const set = new Set();
+      servicesRaw.forEach((s) => {
+        const n = s && s.category && s.category.name ? String(s.category.name).trim() : '';
+        if (n) set.add(n);
+      });
+      categoriesArr = ['热门服务', ...Array.from(set)];
+    } else if (!categoriesArr.some((c) => c === '热门服务')) {
+      categoriesArr = ['热门服务', ...categoriesArr];
+    }
+    const categories = categoriesArr.map((name, idx) => {
+      const fromApi = catRows.find((c) => c && String(c.name).trim() === name);
+      const iconRaw = fromApi && (fromApi.icon_url || fromApi.icon) ? (fromApi.icon_url || fromApi.icon) : icons[idx % icons.length];
+      return {
+        key: idx === 0 ? 'hot' : name,
+        name,
+        icon: util.imgUrl(iconRaw)
+      };
+    });
+    const services = servicesRaw.map((s, i) => {
+      const catName = (s.category && s.category.name) ? String(s.category.name).trim() : '热门服务';
+      const priceNum = s.price != null ? Number(s.price) : NaN;
+      const priceStr = !Number.isNaN(priceNum) ? `${priceNum}元/${unit}` : (s.price != null ? String(s.price) : '');
+      return {
+        id: s.id != null ? s.id : `r${i}`,
+        category: catName,
+        title: (s.title != null && String(s.title)) || '',
+        price: priceStr,
+        description: s.description != null ? String(s.description) : '',
+        image: resolveServiceListImage(
+          (s.title != null && String(s.title)) || '',
+          s.cover_image || s.image_url || s.imageUrl || s.image || '',
+          localConfig
+        )
+      };
+    });
+    return {
+      pageTitle: (data.title != null && String(data.title).trim()) || '生活服务',
+      categories,
+      services
+    };
+  },
+
+  async mergeRemoteServiceGroup(key) {
     try {
-      const payload = await api.core.getHomeModules();
-      const modules = (payload && payload.modules) || [];
-      const mod = modules.find((m) => String(m.group_key || m.groupKey).trim() === key);
-      if (!mod) return;
-      if (Array.isArray(mod.services) && mod.services.length > 0) {
-        const built = this.buildPagePayloadFromRemoteModule(mod);
-        const services = built.services.map((item) => this.decorateService(item));
-        this.setData({
-          pageTitle: built.pageTitle,
-          categories: built.categories,
-          services,
-          loading: false
-        });
-        this.filterServices('hot');
+      const data = await api.core.getServiceGroup(key);
+      if (!data || typeof data !== 'object') return;
+      const config = this.getPageConfig(key);
+      const built = this.buildPagePayloadFromServiceGroup(data, config.priceUnit, config);
+      if (!built.services.length && !built.categories.length) {
+        if (data.title) this.setData({ pageTitle: String(data.title), loading: false });
         return;
       }
-      if (mod.name) {
-        this.setData({ pageTitle: String(mod.name) });
-      }
+      const services = built.services.map((item) => this.decorateService(item));
+      this.setData({
+        pageTitle: built.pageTitle,
+        categories: built.categories,
+        services,
+        loading: false
+      });
+      this.filterServices('hot');
     } catch (e) {
-      console.log('[tidy-service] core/home-modules 不可用', e);
+      console.log('[tidy-service] core/service-groups 不可用', key, e);
     }
   },
 
   decorateService(item) {
+    const title = item.title != null ? String(item.title) : '';
+    const config = this.getPageConfig(this._groupKey || 'tidy');
+    const image =
+      (item.image && String(item.image).trim()) ||
+      resolveServiceListImage(title, '', config) ||
+      listImageFromHome3(title, images.svcTidyCloset);
     return {
       ...item,
       sold: item.sold || "已售0 好评率100%",
-      image: item.image || images.homeCleaning,
+      image,
       unsupported: false,
       saleStatusText: ''
     };
