@@ -2,7 +2,7 @@ const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
 const mshop = require('../../utils/merchantShopContext.js');
 
-const FALLBACK_IMG = 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png';
+const FALLBACK_IMG = 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png';
 
 const REVERSE_CATEGORY_MAP = {
   'AAAA': '食品生鲜',

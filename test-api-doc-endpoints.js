@@ -4,7 +4,7 @@
  */
 const http = require('http');
 
-const BASE_URL = 'http://120.27.239.244:3001:3001';
+const BASE_URL = 'http://jshsp1.eds-tech.cn:3001';
 const API_PREFIX = '/api/v1';
 
 // 测试结果统计

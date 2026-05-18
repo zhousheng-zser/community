@@ -25,7 +25,7 @@ function request(method, path, body, token) {
     const postData = body ? JSON.stringify(body) : null;
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = 'Bearer ' + token;
-    const opts = { method, path, hostname: '120.27.239.244:3001', port: 3001, headers, rejectUnauthorized: false };
+    const opts = { method, path, hostname: 'jshsp1.eds-tech.cn', port: 3001, headers, rejectUnauthorized: false };
     const req = https.request(opts, (res) => {
       let data = '';
       res.on('data', (chunk) => data += chunk);

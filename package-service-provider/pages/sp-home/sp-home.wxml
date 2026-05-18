@@ -93,7 +93,7 @@
       </view>
       <view class="grid-btn" bindtap="goAccount">
         <view class="grid-btn-icon">
-          <image src="https://120.27.239.244:3001/uploads/img/local_goods_icons/money.png" mode="aspectFit"></image>
+          <image src="https://jshsp1.eds-tech.cn/uploads/img/local_goods_icons/money.png" mode="aspectFit"></image>
         </view>
         <view class="grid-btn-main">
           <text class="grid-btn-title">资金与对账</text>

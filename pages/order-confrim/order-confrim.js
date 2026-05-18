@@ -53,7 +53,7 @@ Page({
         name: `${providerName} · 打包服务`,
         sub: sub || '所选服务',
         price: total.toFixed(2),
-        image: 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'
+        image: 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'
       };
       this.setData({
         bundleMode: true,

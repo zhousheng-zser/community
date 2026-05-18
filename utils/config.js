@@ -2,7 +2,7 @@
  * 小程序全局配置文件
  */
 const config = {
-    // API / 图片走 nginx 443（jshsp1.eds-tech.cn → 127.0.0.1:3002）；勿用 IP:3001（外网不可达且微信合法域名不支持 IP）
+    // 当前使用的 API 基础地址（走网关 443，不再直连 :3001）
     baseUrl: 'https://jshsp1.eds-tech.cn/api/v1',
 
     // 静态资源（图片）基础地址

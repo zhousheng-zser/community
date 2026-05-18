@@ -59,7 +59,7 @@ function shouldUseMockData() {
 
 /** 获取 API 根域名（与 utils/config.js 生产环境一致；若未使用请仍以 config.baseUrl 为准） */
 function getApiBaseUrl() {
-  return 'https://120.27.239.244:3001';
+  return 'https://jshsp1.eds-tech.cn';
 }
 
 module.exports = {
