@@ -65,11 +65,15 @@
   </view>
 
   <!-- 优惠券 -->
-  <view class="oc-card">
-    <view class="oc-row">
+  <view class="oc-card" wx:if="{{!bundleMode}}">
+    <view class="oc-row" bindtap="pickCoupon">
       <text class="oc-label">优惠券</text>
-      <text class="oc-val oc-ph">暂无可用优惠券</text>
+      <text class="oc-val {{selectedCoupon ? '' : 'oc-ph'}}">{{couponLabel}}</text>
       <text class="oc-arrow">›</text>
+    </view>
+    <view class="oc-row oc-row-sub" wx:if="{{hasDiscount}}">
+      <text class="oc-label">优惠抵扣</text>
+      <text class="oc-val oc-discount">-¥{{discountAmount}}</text>
     </view>
   </view>
 
@@ -96,6 +100,7 @@
   <view class="oc-total">
     <text class="oc-total-label">待支付</text>
     <text class="oc-total-price">{{totalPrice}}元</text>
+    <text class="oc-total-origin" wx:if="{{hasDiscount}}">原价{{originalTotal}}元</text>
   </view>
   <view class="oc-submit-btn" bindtap="submitOrder">立即购买</view>
 </view>

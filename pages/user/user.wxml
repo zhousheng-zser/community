@@ -74,7 +74,7 @@
     <view class="card-head" bindtap="toggleWorkbench">
       <view class="workbench-head-left">
         <text class="card-title">工作台</text>
-        <text class="card-more muted">技工 / 服务商 / 集市商家</text>
+        <text class="card-more muted">技工 / 管家 / 服务商 / 商家</text>
       </view>
       <text class="collapse-arrow {{workbenchCollapsed ? '' : 'expanded'}}">▶</text>
     </view>
@@ -85,6 +85,13 @@
         </view>
         <text class="portal-name">技工工作台</text>
         <text class="portal-sub">接单与服务</text>
+      </view>
+      <view class="portal-item" bindtap="goStewardPortal">
+        <view class="portal-icon-wrap steward-tone">
+          <image class="portal-icon-img" src="/img/other_services/community_manager.png" mode="aspectFit"></image>
+        </view>
+        <text class="portal-name">小区管家工作台</text>
+        <text class="portal-sub">社区服务与热线</text>
       </view>
       <view class="portal-item" bindtap="goServiceProviderPortal">
         <view class="portal-icon-wrap merchant-tone">
@@ -157,16 +164,23 @@
     </view>
     <view class="join-grid">
       <block wx:for="{{joinMenus}}" wx:key="name">
-        <navigator wx:if="{{item.url}}" class="join-item" url="{{item.url}}">
+        <navigator wx:if="{{item.url && !item.tap}}" class="join-item" url="{{item.url}}">
           <view class="join-icon-wrap">
-            <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+            <image class="join-icon-img" src="/img/{{item.iconDir || 'join_services'}}/{{item.icon}}.png" mode="aspectFit"></image>
           </view>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
         </navigator>
+        <view wx:elif="{{item.tap === 'steward'}}" class="join-item" bindtap="goStewardJoin">
+          <view class="join-icon-wrap steward-join-tone">
+            <image class="join-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
+          <text class="join-name">{{item.name}}</text>
+          <text class="join-sub">{{item.sub}}</text>
+        </view>
         <view wx:else class="join-item" bindtap="showToastWait">
           <view class="join-icon-wrap">
-            <image class="join-icon-img" src="/img/join_services/{{item.icon}}.png" mode="aspectFit"></image>
+            <image class="join-icon-img" src="/img/{{item.iconDir || 'join_services'}}/{{item.icon}}.png" mode="aspectFit"></image>
           </view>
           <text class="join-name">{{item.name}}</text>
           <text class="join-sub">{{item.sub}}</text>
@@ -181,13 +195,20 @@
     </view>
     <view class="list-menu">
       <block wx:for="{{serviceMenus}}" wx:key="name">
-        <navigator wx:if="{{item.url}}" class="list-item" url="{{item.url}}">
+        <navigator wx:if="{{item.url && !item.tap}}" class="list-item" url="{{item.url}}">
           <view class="list-icon-wrap">
             <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
           </view>
           <text class="list-name">{{item.name}}</text>
           <text class="list-arrow">›</text>
         </navigator>
+        <view wx:elif="{{item.tap === 'steward_menu'}}" class="list-item" bindtap="goStewardMenu">
+          <view class="list-icon-wrap">
+            <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>
+          </view>
+          <text class="list-name">{{item.name}}</text>
+          <text class="list-arrow">›</text>
+        </view>
         <view wx:else class="list-item" bindtap="showToastWait">
           <view class="list-icon-wrap">
             <image class="list-icon-img" src="/img/other_services/{{item.icon}}.png" mode="aspectFit"></image>

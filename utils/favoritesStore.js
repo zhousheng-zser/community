@@ -7,20 +7,25 @@
  * API 文档：doc/前端对接_集市商品收藏夹.md
  */
 const util = require('./util.js');
+const userSession = require('./userSession.js');
 
-// ─── 本地 Storage 兜底 ──────────────────────────────────────────────────────
-const LOCAL_KEY = 'user_favorites_v2';
+// ─── 本地 Storage 兜底（按 userId 隔离）──────────────────────────────────────
+const LOCAL_KEY_BASE = 'user_favorites_v2';
 const LOCAL_MAX = 300;
+
+function localKey() {
+  return userSession.scopedStorageKey(LOCAL_KEY_BASE);
+}
 
 function localGet() {
   try {
-    const arr = wx.getStorageSync(LOCAL_KEY);
+    const arr = wx.getStorageSync(localKey());
     return Array.isArray(arr) ? arr : [];
   } catch (e) { return []; }
 }
 
 function localSave(arr) {
-  try { wx.setStorageSync(LOCAL_KEY, arr); } catch (e) {}
+  try { wx.setStorageSync(localKey(), arr); } catch (e) {}
 }
 
 function localHas(goodsId) {

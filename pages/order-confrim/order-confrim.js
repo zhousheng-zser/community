@@ -18,9 +18,24 @@ Page({
     groupKey: '',
     product: { name: '', sub: '', price: '0', image: '' },
     totalPrice: '0',
+    originalTotal: '0',
+    discountAmount: '0',
+    hasDiscount: false,
+    couponLabel: '请选择优惠券',
+    selectedCoupon: null,
     bundleMode: false,
     bundleLines: [],
     spProviderId: ''
+  },
+
+  onShow() {
+    const cached = wx.getStorageSync('checkout_selected_coupon');
+    if (cached && cached.id) {
+      this.setData({ selectedCoupon: cached });
+    } else if (!this.data.selectedCoupon) {
+      this.setData({ selectedCoupon: null });
+    }
+    this._recalcPayable();
   },
 
   onLoad(options) {
@@ -40,19 +55,18 @@ Page({
         price: total.toFixed(2),
         image: 'https://120.27.239.244:3001/uploads/file-1773395942165-45947155.png'
       };
-      const totalPrice = total.toFixed(2).replace(/\.00$/, '');
       this.setData({
         bundleMode: true,
         spProviderId: providerId,
         bundleLines: items,
         product,
         qty: 1,
-        totalPrice,
         workerId: '',
         serviceId: '',
         groupKey: ''
       });
       this.prefillDefaultAddress();
+      this._recalcPayable();
       return;
     }
     const name = decodeURIComponent(options.name || '');
@@ -65,8 +79,9 @@ Page({
     const workerId = options.workerId != null && options.workerId !== '' ? String(options.workerId) : '';
     const serviceId = options.serviceId != null && options.serviceId !== '' ? String(options.serviceId) : '';
     const groupKey = options.groupKey ? decodeURIComponent(options.groupKey) : '';
-    this.setData({ product, qty, totalPrice, workerId, serviceId, groupKey });
+    this.setData({ product, qty, workerId, serviceId, groupKey });
     this.prefillDefaultAddress();
+    this._recalcPayable();
   },
 
   async prefillDefaultAddress() {
@@ -119,8 +134,54 @@ Page({
   _updateTotal(qty) {
     if (this.data.bundleMode) return;
     const q = qty !== undefined ? qty : this.data.qty;
-    const totalPrice = (Number(this.data.product.price) * q).toFixed(2).replace(/\.00$/, '');
-    this.setData({ qty: q, totalPrice });
+    this.setData({ qty: q });
+    this._recalcPayable();
+  },
+
+  _goodsAmount() {
+    if (this.data.bundleMode) return Number(this.data.product.price) || 0;
+    return (Number(this.data.product.price) || 0) * (this.data.qty || 1);
+  },
+
+  _recalcPayable() {
+    const goods = this._goodsAmount();
+    let discount = 0;
+    let couponLabel = '请选择优惠券';
+    const coupon = this.data.selectedCoupon;
+    if (coupon && coupon.id) {
+      const threshold = Number(coupon.threshold_amount) || 0;
+      const money = Number(coupon.coupon_money) || 0;
+      if (goods >= threshold) {
+        discount = Math.min(money, goods);
+        couponLabel = coupon.coupon_name || `满${threshold}减${money}`;
+      } else {
+        couponLabel = `未满${threshold}元，不可用`;
+        wx.removeStorageSync('checkout_selected_coupon');
+        this.setData({ selectedCoupon: null });
+      }
+    } else if (!wx.getStorageSync('token')) {
+      couponLabel = '登录后可使用优惠券';
+    }
+    const payable = Math.max(goods - discount, 0);
+    const fmt = (n) => n.toFixed(2).replace(/\.00$/, '');
+    this.setData({
+      originalTotal: fmt(goods),
+      discountAmount: discount > 0 ? fmt(discount) : '0',
+      hasDiscount: discount > 0,
+      totalPrice: fmt(payable),
+      couponLabel
+    });
+  },
+
+  pickCoupon() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    const amount = this._goodsAmount();
+    wx.navigateTo({
+      url: `/package-customer/pages/coupon-select/coupon-select?order_amount=${amount}&from=service`
+    });
   },
 
   submitOrder() {
@@ -222,8 +283,13 @@ Page({
     const sid = Number(serviceId);
     if (Number.isFinite(sid) && sid > 0) body.service_id = sid;
     if (groupKey) body.group_key = groupKey;
+    const coupon = this.data.selectedCoupon;
+    if (coupon && coupon.id) {
+      body.coupon_issue_id = Number(coupon.id);
+    }
 
     const doneOk = (data) => {
+      wx.removeStorageSync('checkout_selected_coupon');
       wx.hideLoading();
       const oid = data && (data.id || data.order_id);
       if (oid) {

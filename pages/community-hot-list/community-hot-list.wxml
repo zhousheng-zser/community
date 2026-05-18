@@ -1,0 +1,32 @@
+<view class="chl-page">
+  <view class="chl-header">
+    <text class="chl-title">小区热卖榜</text>
+    <text class="chl-sub">本小区近期最受欢迎的服务</text>
+  </view>
+
+  <view class="chl-loading" wx:if="{{loading}}">加载中…</view>
+
+  <view class="chl-list" wx:elif="{{list.length}}">
+    <view
+      class="chl-card"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="goDetail"
+      data-id="{{item.id}}"
+      data-type="{{item.itemType}}"
+    >
+      <view class="chl-cover-wrap">
+        <image class="chl-cover" src="{{item.image}}" mode="aspectFill" lazy-load></image>
+        <text class="chl-rank">{{item.rank}}</text>
+      </view>
+      <view class="chl-info">
+        <text class="chl-name">{{item.name}}</text>
+        <text class="chl-price" wx:if="{{item.price}}">￥{{item.price}}/次</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="chl-empty" wx:else>
+    <text>暂无热卖数据</text>
+  </view>
+</view>

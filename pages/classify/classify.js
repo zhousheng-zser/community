@@ -1,6 +1,7 @@
 const util = require('../../utils/util.js');
 const { unwrapList } = util;
 const { mapWorkerForClassifyCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
+const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
 
 const MOCK_WORKER_ROWS = FALLBACK_WORKER_ROWS;
 
@@ -68,5 +69,14 @@ Page({
     wx.navigateTo({
       url: "../worker-detail/worker-detail?id=" + e.currentTarget.dataset.id
     });
+  },
+
+  onWorkerAvatarError(e) {
+    const idx = e.currentTarget.dataset.idx;
+    const workers = this.data.workers || [];
+    if (idx == null || !workers[idx]) return;
+    const fallback = workerAvatarUrl(workers[idx].id);
+    if (workers[idx].avatar === fallback) return;
+    this.setData({ [`workers[${idx}].avatar`]: fallback });
   }
 });

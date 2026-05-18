@@ -1,0 +1,27 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="tip">加载中...</view>
+  <view wx:elif="{{!list.length}}" class="tip">暂无可用优惠券</view>
+  <block wx:else>
+    <view
+      class="item {{selectedId === item.id ? 'on' : ''}}"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="pick"
+      data-id="{{item.id}}"
+    >
+      <view class="left">
+        <text class="money">¥{{item.coupon_money}}</text>
+        <text class="cond">满{{item.threshold_amount}}可用</text>
+      </view>
+      <view class="right">
+        <text class="name">{{item.coupon_name}}</text>
+        <text class="sub" wx:if="{{item.end_time}}">有效期至 {{item.end_time_text}}</text>
+      </view>
+      <text class="check">{{selectedId === item.id ? '✓' : ''}}</text>
+    </view>
+  </block>
+  <view class="foot">
+    <button class="btn ghost" bindtap="clearPick">不使用优惠券</button>
+    <button class="btn" bindtap="confirm">确定</button>
+  </view>
+</view>

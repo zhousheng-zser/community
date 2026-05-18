@@ -2,6 +2,7 @@ const db = require('../../../models');
 const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication, User } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
+const couponService = require('../../coupon/services/coupon.service');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -121,6 +122,10 @@ function normalizeServiceOrder(row) {
     pay_status: row.pay_status,
     pay_amount: Number(row.pay_amount || row.amount || 0).toFixed(2),
     amount: Number(row.pay_amount || row.amount || 0).toFixed(2),
+    discount_amount: fulfillmentMeta.coupon_discount != null
+      ? Number(fulfillmentMeta.coupon_discount).toFixed(2)
+      : '0.00',
+    coupon_issue_id: fulfillmentMeta.coupon_issue_id || null,
     contact_name: row.contact_name || '',
     contact_phone: row.contact_phone || '',
     address: row.address || row.service_address || '',
@@ -212,6 +217,19 @@ exports.create = async (req, res) => {
       total = parseMoney(body.pay_amount) || parseMoney(body.amount) || 0;
     }
 
+    const goodsAmountBeforeCoupon = total;
+    let couponDiscount = 0;
+    let couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
+    if (couponIssueId > 0) {
+      try {
+        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmountBeforeCoupon);
+        couponDiscount = applied.discount;
+        total = applied.payableAmount;
+      } catch (couponErr) {
+        return fail(res, couponErr.message || '优惠券不可用', couponErr.statusCode || 400);
+      }
+    }
+
     const groupKey = String(body.group_key || body.groupKey || '').trim();
     const communityId = await resolveUserCommunityId(userId, body);
     const addrSnap = body.address_snapshot && typeof body.address_snapshot === 'object'
@@ -229,6 +247,11 @@ exports.create = async (req, res) => {
         dispatch_mode: 'admin_dispatch',
         await_user_confirm: true
       };
+    }
+    if (couponIssueId > 0 && couponDiscount > 0) {
+      fulfillmentMeta.coupon_issue_id = couponIssueId;
+      fulfillmentMeta.coupon_discount = couponDiscount;
+      fulfillmentMeta.goods_amount_before_coupon = goodsAmountBeforeCoupon;
     }
 
     const rowPayload = {
@@ -259,7 +282,17 @@ exports.create = async (req, res) => {
     }
 
     const row = await ServiceOrder.create(rowPayload);
-    ok(res, { id: row.id, orderNo: row.order_no, status: row.status, pay_status: row.pay_status }, '订单创建成功');
+    if (couponIssueId > 0) {
+      await couponService.markCouponUsed(couponIssueId, 'service', row.order_no || row.id);
+    }
+    ok(res, {
+      id: row.id,
+      orderNo: row.order_no,
+      status: row.status,
+      pay_status: row.pay_status,
+      pay_amount: Number(row.pay_amount || 0).toFixed(2),
+      discount_amount: couponDiscount.toFixed(2)
+    }, '订单创建成功');
   } catch (err) {
     console.error('[service-order/create]', err);
     fail(res, '创建订单失败', 500);

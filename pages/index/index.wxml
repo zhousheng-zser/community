@@ -598,7 +598,7 @@
   <view class="card section-card">
     <view class="section-head hot">
       <text class="title">小区热卖榜</text>
-      <text class="more">查看更多 ></text>
+      <text class="more" bindtap="goHotListMore">查看更多 ></text>
     </view>
     <scroll-view class="hot-scroll" scroll-x="{{true}}">
       <view class="hot-wrap">
@@ -620,7 +620,7 @@
       <text class="title">直约服务商</text>
       <view class="section-head-actions">
         <view class="portal-entry-btn" bindtap="goServiceProviderPortal">进入工作台</view>
-        <navigator class="more" url="../classify/classify">全部 ></navigator>
+        <navigator class="more" url="../service-provider-list/service-provider-list">全部 ></navigator>
       </view>
     </view>
     <view class="merchant-list">

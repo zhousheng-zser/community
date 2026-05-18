@@ -44,6 +44,9 @@ page { background: #f5f0e8; }
 }
 
 .oc-val { flex: 1; font-size: 28rpx; color: #333; }
+.oc-row-sub { padding-top: 0; border-top: none; }
+.oc-discount { color: #e74c3c; }
+.oc-total-origin { display: block; font-size: 22rpx; color: #999; text-decoration: line-through; margin-top: 4rpx; }
 .oc-ph { color: #c8c8c8 !important; }
 
 .oc-input {

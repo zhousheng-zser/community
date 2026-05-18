@@ -1,0 +1,70 @@
+<view class="portal-page">
+  <view class="portal-top steward-gradient hero-steward">
+    <view class="hero-row">
+      <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="hero-text">
+        <text class="hero-greet">{{greeting}}，{{displayName}}</text>
+        <text class="portal-sub hero-sub">用心服务本社区邻居</text>
+      </view>
+    </view>
+    <text class="portal-title hero-title">小区管家工作台</text>
+  </view>
+
+  <view class="portal-banner banner-ok" wx:if="{{bannerText}}">{{bannerText}}</view>
+
+  <view class="community-tag" wx:if="{{communityName}}">
+    <view><text class="label">服务社区</text>{{communityName}}</view>
+    <view class="hotline-row" wx:if="{{hotline}}">
+      <text class="label">管家热线</text>
+      <text class="hotline-num" bindtap="copyHotline">{{hotline}}</text>
+    </view>
+  </view>
+
+  <view class="back-user" bindtap="backUser">返回用户端「我的」</view>
+
+  <view class="portal-card">
+    <view class="card-title">常用功能</view>
+    <view class="grid-2">
+      <view class="grid-btn" bindtap="goResidentPage">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/community_manager.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">居民服务页</text>
+          <text class="grid-btn-desc">热线与在线客服入口</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goFeedback">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/help_feedback.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">意见反馈</text>
+          <text class="grid-btn-desc">查看与处理居民留言</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goMessage">
+        <view class="grid-btn-icon">
+          <image src="/img/home_icons2/coupon.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">消息通知</text>
+          <text class="grid-btn-desc">系统与业务提醒</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+      <view class="grid-btn" bindtap="goAbout">
+        <view class="grid-btn-icon">
+          <image src="/img/other_services/about_us.png" mode="aspectFit"></image>
+        </view>
+        <view class="grid-btn-main">
+          <text class="grid-btn-title">服务规范</text>
+          <text class="grid-btn-desc">管家服务说明</text>
+        </view>
+        <text class="grid-btn-arrow">›</text>
+      </view>
+    </view>
+  </view>
+</view>

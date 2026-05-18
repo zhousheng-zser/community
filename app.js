@@ -1,6 +1,7 @@
 //app.js
 const util = require('utils/util.js');
 const rolePortals = require('utils/rolePortals.js');
+const userSession = require('utils/userSession.js');
 const env = require('utils/env.js');
 App({
   onLaunch: function (query) {
@@ -38,6 +39,7 @@ App({
       // 冷启动有 token 无 user 时，拉取当前 token 的用户信息，而不该走静默登录覆盖它
       util.get('/user/profile').then(data => {
         const u = data;
+        if (u.id != null) userSession.rememberUserId(u.id);
         this.globalData.user = rolePortals.mergePortalFlags({
           id: u.id,
           opId: u.openid,
@@ -86,6 +88,7 @@ App({
 
             // 3. 将后端返回的字段映射到小程序全局数据中
             const u = data.user;
+            if (u && u.id != null) userSession.rememberUserId(u.id);
             this.globalData.user = rolePortals.mergePortalFlags({
               id: u.id,
               opId: u.openid,

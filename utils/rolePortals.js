@@ -21,6 +21,15 @@ function hasRole(user, role) {
   return normalizeRoles(user).indexOf(role) !== -1;
 }
 
+/** 是否具备小区管家工作台能力 */
+function canUseStewardPortal(user) {
+  if (!user) return false;
+  if (hasRole(user, 'admin')) return true;
+  const st = user.steward_status != null ? user.steward_status : user.stewardStatus;
+  if (st === 'approved' || st === 'active' || st === 1) return true;
+  return false;
+}
+
 /** 是否具备技工工作台能力 */
 function canUseWorkerPortal(user) {
   if (!user) return false;
@@ -82,6 +91,7 @@ function mergePortalFlags(target, src) {
     'id',
     'openid',
     'worker_status', 'workerStatus',
+    'steward_status', 'stewardStatus',
     'merchant_status', 'merchantStatus',
     'service_provider_status', 'serviceProviderStatus',
     'shop_status', 'shopStatus',
@@ -100,6 +110,17 @@ function mergePortalFlags(target, src) {
 
 function requireLoginToast() {
   wx.showToast({ title: '请先登录', icon: 'none' });
+}
+
+function navigateToStewardHome() {
+  const token = wx.getStorageSync('token');
+  if (!token) {
+    requireLoginToast();
+    return;
+  }
+  wx.navigateTo({
+    url: '/package-steward/pages/steward-home/steward-home'
+  });
 }
 
 function navigateToWorkerHome() {
@@ -169,6 +190,7 @@ function serviceProvTabUrl(path) {
 module.exports = {
   normalizeRoles,
   hasRole,
+  canUseStewardPortal,
   canUseWorkerPortal,
   canUseMerchantPortal,
   canUseMarketPortal,
@@ -177,6 +199,7 @@ module.exports = {
   canUseDistrictPartnerPortal,
   canUseMarketPartnerPortal,
   mergePortalFlags,
+  navigateToStewardHome,
   navigateToWorkerHome,
   navigateToMerchantHome,
   navigateToMarketHome,

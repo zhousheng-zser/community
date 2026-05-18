@@ -69,11 +69,17 @@ function normalizeHomeModuleRow(m) {
   };
 }
 
+/** 首页九宫格仅展示到家服务分组，排除中台误配的 shop 等非到家 key */
+const HOME_SERVICE_GROUP_KEYS = new Set(Object.keys(HOME_CATEGORY_ICON_BY_KEY));
+
 function mapRawModulesToCategoryRows(modules) {
   if (!Array.isArray(modules) || modules.length === 0) return [];
-  return sortModulesStable(modules).map(normalizeHomeModuleRow).filter(Boolean);
+  return sortModulesStable(modules)
+    .map(normalizeHomeModuleRow)
+    .filter((row) => row && HOME_SERVICE_GROUP_KEYS.has(row.groupKey));
 }
 
 module.exports = {
-  mapRawModulesToCategoryRows
+  mapRawModulesToCategoryRows,
+  HOME_SERVICE_GROUP_KEYS
 };

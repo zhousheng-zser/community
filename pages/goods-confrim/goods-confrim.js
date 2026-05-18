@@ -19,6 +19,8 @@ Page({
     discountAmount: '0.00',
     payableAmount: '0.00',
     previewReady: false,
+    selectedCoupon: null,
+    couponLabel: '请选择优惠券',
     
     remark: '',
     submitting: false
@@ -76,9 +78,26 @@ Page({
 
     this.setData({ items });
     this.calcPrices();
-
-    // 初始化默认地址
     this.loadDefaultAddress();
+  },
+
+  onShow() {
+    const cached = wx.getStorageSync('checkout_selected_coupon');
+    if (cached && cached.id) {
+      this.setData({ selectedCoupon: cached });
+    }
+    if (this.data.items.length) this.calcPrices();
+  },
+
+  pickCoupon() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+    const goods = Number(this.data.goodsAmount) || 0;
+    wx.navigateTo({
+      url: `/package-customer/pages/coupon-select/coupon-select?order_amount=${goods}&from=market`
+    });
   },
 
   switchDelivery(e) {
@@ -121,6 +140,8 @@ Page({
         quantity: it.quantity
       }))
     };
+    const coupon = this.data.selectedCoupon;
+    if (coupon && coupon.id) payload.coupon_issue_id = Number(coupon.id);
     try {
       const res = await util.post('market/orders/preview', payload);
       const data = (res && typeof res === 'object' && res.data && typeof res.data === 'object') ? res.data : (res || {});
@@ -132,12 +153,24 @@ Page({
         throw new Error('preview fields missing');
       }
 
+      const disc = Number(discountAmount || 0);
+      let couponLabel = '请选择优惠券';
+      if (coupon && coupon.id) {
+        couponLabel = disc > 0
+          ? (coupon.coupon_name || `已减¥${disc}`)
+          : `未满${coupon.threshold_amount || 0}元不可用`;
+        if (disc <= 0) {
+          wx.removeStorageSync('checkout_selected_coupon');
+          this.setData({ selectedCoupon: null });
+        }
+      }
       this.setData({
         goodsAmount: Number(goodsAmount || 0).toFixed(2),
         deliveryFee: Number(deliveryFee || 0).toFixed(2),
-        discountAmount: Number(discountAmount || 0).toFixed(2),
+        discountAmount: disc.toFixed(2),
         payableAmount: Number(payableAmount || 0).toFixed(2),
-        previewReady: true
+        previewReady: true,
+        couponLabel
       });
     } catch (err) {
       this.setData({
@@ -180,6 +213,8 @@ Page({
         quantity: it.quantity
       }))
     };
+    const coupon = this.data.selectedCoupon;
+    if (coupon && coupon.id) payload.coupon_issue_id = Number(coupon.id);
 
     try {
       // 真实创单API
@@ -193,6 +228,7 @@ Page({
       const orderNo = res.orderNo || res.order_no;
 
       if (!orderNo) throw new Error('创建订单失败，未返回单号');
+      wx.removeStorageSync('checkout_selected_coupon');
 
       // 因为联调阶段，可以通过 mock-success 接口直接模拟支付成功
       // 先获取支付参数 (仅作展示或将来真实调用wx.requestPayment)

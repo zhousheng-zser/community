@@ -184,11 +184,8 @@ Page({
     allMarketShops: [],
     marketShops: [],
     marketShopsCacheByCat: {}, // { [catName]: mappedShopList }
-    thirdPartyMiniPrograms: [
-      { name: '易达速递', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
-      { name: '啄木鸟', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
-      { name: '榕益收', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' }
-    ]
+    /** 第三方便民小程序：仅展示中台配置了 appId 的项，无配置时不占位 */
+    thirdPartyMiniPrograms: []
   },
   onLoad: function (options) {
     const sysInfo = wx.getSystemInfoSync();
@@ -540,6 +537,10 @@ Page({
     wx.switchTab({ url: '/pages/community/community' });
   },
 
+  goHotListMore() {
+    wx.navigateTo({ url: '../community-hot-list/community-hot-list' });
+  },
+
   goServiceProviderPortal() {
     const token = wx.getStorageSync('token');
     if (!token) {
@@ -554,10 +555,7 @@ Page({
     const mp = this.data.thirdPartyMiniPrograms[idx];
     if (!mp) return;
 
-    if (!mp.appId) {
-      wx.showToast({ title: '该功能暂未开放', icon: 'none' });
-      return;
-    }
+    if (!mp.appId) return;
 
     wx.navigateToMiniProgram({
       appId: mp.appId,
@@ -746,16 +744,18 @@ Page({
     try {
       const res = await api.miniProgram.getMiniPrograms();
       const programs = res.list || (res.data && res.data.list) || [];
-      if (programs.length > 0) {
-        thirdPartyMiniPrograms = programs.map(p => ({
+      const mapped = programs
+        .map((p) => ({
           name: p.name,
-          icon: p.icon || '/img/index/menuicon1.png',
-          appId: p.appId,
-          path: p.path
-        }));
-      }
+          icon: imgUrl(p.icon || p.icon_url || '/img/index/menuicon1.png'),
+          appId: String(p.appId || p.app_id || '').trim(),
+          path: p.path || ''
+        }))
+        .filter((p) => p.name && p.appId);
+      thirdPartyMiniPrograms = mapped;
     } catch (e) {
-      console.log('加载第三方小程序配置失败，使用默认配置', e);
+      console.log('加载第三方小程序配置失败', e);
+      thirdPartyMiniPrograms = [];
     }
 
     if (!config.useCuratedHomeHotList) {

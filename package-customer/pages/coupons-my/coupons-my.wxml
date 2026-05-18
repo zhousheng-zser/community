@@ -1,19 +1,23 @@
-<!--pages/coupons-my/coupons-my.wxml-->
-<view wx:for="{{coupons}}">
-  <view class='item {{item.sendType==2?"yellow":"red"}}'>
-    <view class='left'>
-      <view class='icon'>券</view>
-      <text class='money'>{{item.couponMoney}}</text>
-    </view>
-    <view class='right'>
-      <text class='name'>{{item.couponName}}</text>
-      <text class='time'>过期时间：{{item.time}}</text>
-      <view>
+<view class="tabs">
+  <view class="tab {{activeTab==='unused'?'on':''}}" data-tab="unused" bindtap="switchTab">未使用</view>
+  <view class="tab {{activeTab==='used'?'on':''}}" data-tab="used" bindtap="switchTab">已使用</view>
+  <view class="tab {{activeTab==='expired'?'on':''}}" data-tab="expired" bindtap="switchTab">已过期</view>
+</view>
 
-        <view wx:if='{{item.hasEnd}}' class='btn grey'>已过期</view>
-        <navigator wx:else class='btn' url='/pages/goods-classify/goods-classify' open-type='switchTab'>立即使用</navigator>
-        
-      </view>
-    </view>
+<view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+<view wx:elif="{{!coupons.length}}" class="empty-tip">暂无优惠券</view>
+
+<view wx:for="{{coupons}}" wx:key="id" class="item yellow {{item.status!=='unused'?'grey':''}}">
+  <view class="left">
+    <view class="icon">券</view>
+    <text class="money">{{item.couponMoney}}</text>
+    <text class="threshold" wx:if="{{item.thresholdText}}">{{item.thresholdText}}</text>
+  </view>
+  <view class="right">
+    <text class="name">{{item.couponName}}</text>
+    <text class="time" wx:if="{{item.time}}">有效期至 {{item.time}}</text>
+    <view wx:if="{{item.status==='unused' && !item.hasEnd}}" class="btn" bindtap="goUse">去使用</view>
+    <view wx:elif="{{item.status==='used'}}" class="btn grey">已使用</view>
+    <view wx:else class="btn grey">已过期</view>
   </view>
 </view>

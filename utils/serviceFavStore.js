@@ -2,9 +2,14 @@
  * 服务/服务商 收藏 — 后端优先 + 本地 Storage 备份
  */
 const { get, post } = require('../utils/util.js');
+const userSession = require('./userSession.js');
 
-const LOCAL_KEY = 'user_service_favorites_v1';
+const LOCAL_KEY_BASE = 'user_service_favorites_v1';
 const MAX = 200;
+
+function localKey() {
+  return userSession.scopedStorageKey(LOCAL_KEY_BASE);
+}
 
 const KIND_LABELS = {
   service: '到家服务',
@@ -15,13 +20,13 @@ const KIND_LABELS = {
 
 function getAll() {
   try {
-    const arr = wx.getStorageSync(LOCAL_KEY);
+    const arr = wx.getStorageSync(localKey());
     return Array.isArray(arr) ? arr : [];
   } catch (e) { return []; }
 }
 
 function saveAll(arr) {
-  try { wx.setStorageSync(LOCAL_KEY, arr); } catch (e) {}
+  try { wx.setStorageSync(localKey(), arr); } catch (e) {}
 }
 
 function isLoggedIn() {
