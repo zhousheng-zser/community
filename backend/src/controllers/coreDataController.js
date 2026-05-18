@@ -1,4 +1,5 @@
 const { Op, QueryTypes } = require('sequelize');
+const { toAbsoluteAssetUrl } = require('../utils/assetUrl');
 const {
   Category,
   Service,
@@ -82,15 +83,16 @@ function publishedWhere() {
   };
 }
 
-function normalizeServiceRow(s) {
+function normalizeServiceRow(s, req) {
   const j = s && typeof s.toJSON === 'function' ? s.toJSON() : s;
   const cat = j.category || {};
   const price = Number(j.price);
+  const cover = j.cover_image || null;
   return {
     id: j.id,
     title: j.title,
     price: Number.isFinite(price) ? Math.round(price * 100) / 100 : j.price,
-    cover_image: j.cover_image || null,
+    cover_image: req ? toAbsoluteAssetUrl(req, cover) : cover,
     sales_count: j.sales_count != null ? Number(j.sales_count) : 0,
     category: cat.name ? { name: cat.name } : null
   };
@@ -386,10 +388,11 @@ exports.getServiceHomeModules = async (req, res) => {
     }
     const data = rows.map((r) => {
       const j = r.toJSON();
+      const icon = j.icon_url || null;
       return {
         group_key: j.group_key,
         title: j.title,
-        icon_url: j.icon_url || null,
+        icon_url: toAbsoluteAssetUrl(req, icon) || icon,
         price_unit: j.price_unit || '次',
         sort_order: j.sort_order != null ? j.sort_order : 0
       };
@@ -422,13 +425,18 @@ exports.getServiceGroup = async (req, res) => {
     });
     const catPayload = categories.map((c) => {
       const x = c.toJSON();
-      return { name: x.name, icon_url: x.icon_url || null, sort_order: x.sort_order != null ? x.sort_order : 0 };
+      const icon = x.icon_url || null;
+      return {
+        name: x.name,
+        icon_url: toAbsoluteAssetUrl(req, icon) || icon,
+        sort_order: x.sort_order != null ? x.sort_order : 0
+      };
     });
     return ok(res, {
       title: meta.title,
       price_unit: meta.price_unit,
       categories: catPayload,
-      services: services.map(normalizeServiceRow)
+      services: services.map((s) => normalizeServiceRow(s, req))
     });
   } catch (e) {
     console.error('getServiceGroup', e);

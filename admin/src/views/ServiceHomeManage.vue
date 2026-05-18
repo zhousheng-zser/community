@@ -21,7 +21,18 @@
           <el-table-column prop="group_key" label="group_key" min-width="120" show-overflow-tooltip />
           <el-table-column prop="title" label="标题" min-width="100" />
           <el-table-column prop="price_unit" label="计价单位" width="90" />
-          <el-table-column prop="icon_url" label="图标URL" min-width="160" show-overflow-tooltip />
+          <el-table-column label="图标" width="72">
+            <template #default="{ row }">
+              <el-image
+                v-if="row.icon_url"
+                :src="rowImg(row, 'icon_url', 'icon_url_abs')"
+                style="width:48px;height:48px;border-radius:4px"
+                fit="contain"
+              />
+              <span v-else class="text-muted">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="icon_url" label="图标URL" min-width="140" show-overflow-tooltip />
           <el-table-column prop="sort_order" label="排序" width="80" />
           <el-table-column label="启用" width="80">
             <template #default="{ row }">
@@ -53,7 +64,18 @@
         <el-table v-loading="loadingCat" :data="categories" border stripe size="small" class="mb-3">
           <el-table-column prop="id" label="ID" width="70" />
           <el-table-column prop="name" label="名称" min-width="120" />
-          <el-table-column prop="icon_url" label="图标" min-width="140" show-overflow-tooltip />
+          <el-table-column label="图标" width="72">
+            <template #default="{ row }">
+              <el-image
+                v-if="row.icon_url"
+                :src="rowImg(row, 'icon_url', 'icon_url_abs')"
+                style="width:40px;height:40px;border-radius:4px"
+                fit="contain"
+              />
+              <span v-else class="text-muted">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="icon_url" label="图标URL" min-width="120" show-overflow-tooltip />
           <el-table-column prop="sort_order" label="排序" width="80" />
           <el-table-column label="操作" width="140">
             <template #default="{ row }">
@@ -79,7 +101,18 @@
               <el-tag :type="row.is_published ? 'success' : 'info'" size="small">{{ row.is_published ? '是' : '否' }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column prop="cover_image" label="封面" min-width="120" show-overflow-tooltip />
+          <el-table-column label="封面" width="72">
+            <template #default="{ row }">
+              <el-image
+                v-if="row.cover_image"
+                :src="rowImg(row, 'cover_image', 'cover_image_abs')"
+                style="width:48px;height:48px;border-radius:4px"
+                fit="cover"
+              />
+              <span v-else class="text-muted">—</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="cover_image" label="封面URL" min-width="120" show-overflow-tooltip />
           <el-table-column label="操作" width="160" fixed="right">
             <template #default="{ row }">
               <el-button type="primary" link @click="openSvcDialog(row)">编辑</el-button>
@@ -113,6 +146,7 @@
               <el-upload
                 :action="uploadAction"
                 name="file"
+                :headers="uploadHeaders"
                 :show-file-list="false"
                 accept="image/jpeg,image/png,image/webp"
                 :on-success="onModuleIconUploaded"
@@ -160,6 +194,7 @@
               <el-upload
                 :action="uploadAction"
                 name="file"
+                :headers="uploadHeaders"
                 :show-file-list="false"
                 accept="image/jpeg,image/png,image/webp"
                 :on-success="onCatIconUploaded"
@@ -212,6 +247,7 @@
               <el-upload
                 :action="uploadAction"
                 name="file"
+                :headers="uploadHeaders"
                 :show-file-list="false"
                 accept="image/jpeg,image/png,image/webp"
                 :on-success="onSvcCoverUploaded"
@@ -245,11 +281,31 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '../utils/request'
 
 const uploadAction = `${import.meta.env.VITE_API_BASE || '/api/v1'}/upload`
+
+const uploadHeaders = computed(() => {
+  const token = localStorage.getItem('admin_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+})
+
+/** 优先用后端返回的绝对地址（小程序同源）；否则相对路径走 Vite 代理 */
+function imgUrl(url) {
+  if (!url) return ''
+  const u = String(url).trim()
+  if (u.startsWith('http://') || u.startsWith('https://')) return u
+  const base = import.meta.env.VITE_API_BASE || '/api/v1'
+  const origin = base.replace(/\/api\/v1\/?$/, '') || ''
+  return origin + (u.startsWith('/') ? u : `/${u}`)
+}
+
+function rowImg(row, relKey, absKey) {
+  if (!row) return ''
+  return imgUrl(row[absKey] || row[relKey])
+}
 
 const mainTab = ref('modules')
 const modules = ref([])
@@ -271,17 +327,22 @@ const moduleForm = ref({
   is_active: true
 })
 
-const moduleIconPreview = computed(() => {
-  const u = moduleForm.value.icon_url && String(moduleForm.value.icon_url).trim()
-  return u || ''
-})
+const moduleIconPreview = computed(() => imgUrl(moduleForm.value.icon_url))
+
+function uploadUrlFromRes(res) {
+  if (!res || typeof res !== 'object') return null
+  if (res.errno === 0 && res.data?.url) return res.data.url
+  if ((res.code === 0 || res.code === 200) && res.data?.url) return res.data.url
+  return null
+}
 
 function onModuleIconUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    moduleForm.value.icon_url = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    moduleForm.value.icon_url = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 
@@ -293,17 +354,15 @@ const catDlg = ref(false)
 const catEditId = ref(null)
 const catForm = ref({ name: '', icon_url: '', sort_order: 0 })
 
-const catIconPreview = computed(() => {
-  const u = catForm.value.icon_url && String(catForm.value.icon_url).trim()
-  return u || ''
-})
+const catIconPreview = computed(() => imgUrl(catForm.value.icon_url))
 
 function onCatIconUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    catForm.value.icon_url = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    catForm.value.icon_url = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 
@@ -318,17 +377,15 @@ const svcForm = ref({
   is_published: true
 })
 
-const svcCoverPreview = computed(() => {
-  const u = svcForm.value.cover_image && String(svcForm.value.cover_image).trim()
-  return u || ''
-})
+const svcCoverPreview = computed(() => imgUrl(svcForm.value.cover_image))
 
 function onSvcCoverUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    svcForm.value.cover_image = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    svcForm.value.cover_image = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 
@@ -420,6 +477,7 @@ function resetModuleForm() {
 
 async function saveModule() {
   try {
+    const gk = String(moduleForm.value.group_key || '').trim()
     if (moduleEditId.value) {
       await request.put(`/admin/service-home/modules/${moduleEditId.value}`, {
         title: moduleForm.value.title,
@@ -430,8 +488,12 @@ async function saveModule() {
       })
       ElMessage.success('已保存')
     } else {
+      if (!gk) {
+        ElMessage.warning('请填写 group_key')
+        return
+      }
       await request.post('/admin/service-home/modules', {
-        group_key: moduleForm.value.group_key,
+        group_key: gk,
         title: moduleForm.value.title,
         price_unit: moduleForm.value.price_unit,
         icon_url: moduleForm.value.icon_url,
@@ -439,9 +501,15 @@ async function saveModule() {
         is_active: moduleForm.value.is_active ? 1 : 0
       })
       ElMessage.success('已创建')
+      activeGroupKey.value = gk
+      mainTab.value = 'cats'
     }
     moduleDlg.value = false
     await loadModules()
+    if (activeGroupKey.value) {
+      await loadCategories()
+      await loadServices()
+    }
   } catch (e) {
     ElMessage.error(e.message || '保存失败')
   }
@@ -493,6 +561,7 @@ async function saveCat() {
     ElMessage.success('已保存')
     catDlg.value = false
     await loadCategories()
+    await loadServices()
   } catch (e) {
     ElMessage.error(e.message || '保存失败')
   }
@@ -577,6 +646,21 @@ async function offlineSvc(row) {
   }
 }
 
+async function ensureCatsTabData() {
+  if (!modules.value.length) await loadModules()
+  if (!activeGroupKey.value && modules.value.length) {
+    activeGroupKey.value = modules.value[0].group_key
+  }
+  if (activeGroupKey.value) {
+    await loadCategories()
+    await loadServices()
+  }
+}
+
+watch(mainTab, (tab) => {
+  if (tab === 'cats') ensureCatsTabData()
+})
+
 onMounted(() => {
   loadModules()
 })
@@ -635,5 +719,9 @@ onMounted(() => {
 .cover-preview {
   width: 120px;
   height: 120px;
+}
+.text-muted {
+  color: #c0c4cc;
+  font-size: 12px;
 }
 </style>

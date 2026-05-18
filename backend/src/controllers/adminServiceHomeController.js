@@ -1,5 +1,42 @@
 const { Op } = require('sequelize');
 const { ServiceHomeModule, Category, Service } = require('../models');
+const { toAbsoluteAssetUrl } = require('../utils/assetUrl');
+
+function mapModuleJson(req, row) {
+  const j = row.toJSON ? row.toJSON() : row;
+  const icon = j.icon_url || null;
+  return {
+    ...j,
+    icon_url: icon,
+    icon_url_abs: toAbsoluteAssetUrl(req, icon) || icon
+  };
+}
+
+function mapCategoryJson(req, row) {
+  const j = row.toJSON ? row.toJSON() : row;
+  const icon = j.icon_url || null;
+  return {
+    ...j,
+    icon_url: icon,
+    icon_url_abs: toAbsoluteAssetUrl(req, icon) || icon
+  };
+}
+
+function mapServiceJson(req, row) {
+  const j = row.toJSON ? row.toJSON() : { ...row };
+  const cover = j.cover_image || null;
+  let category = j.category || null;
+  if (category) {
+    const cIcon = category.icon_url || null;
+    category = { ...category, icon_url_abs: toAbsoluteAssetUrl(req, cIcon) || cIcon };
+  }
+  return {
+    ...j,
+    category,
+    cover_image: cover,
+    cover_image_abs: toAbsoluteAssetUrl(req, cover) || cover
+  };
+}
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, httpStatus = 200) => res.status(httpStatus).json({ errno, errmsg });
@@ -16,7 +53,7 @@ exports.listModules = async (req, res) => {
     const rows = await ServiceHomeModule.findAll({
       order: [['sort_order', 'ASC'], ['id', 'ASC']]
     });
-    return ok(res, rows.map((r) => r.toJSON()));
+    return ok(res, rows.map((r) => mapModuleJson(req, r)));
   } catch (e) {
     console.error('admin listModules', e);
     return fail(res, 500, '查询失败');
@@ -42,7 +79,7 @@ exports.createModule = async (req, res) => {
       sort_order: body.sort_order != null ? parseInt(body.sort_order, 10) || 0 : 0,
       is_active: body.is_active === undefined || body.is_active === 1 || body.is_active === true ? 1 : 0
     });
-    return ok(res, row.toJSON());
+    return ok(res, mapModuleJson(req, row));
   } catch (e) {
     console.error('admin createModule', e);
     return fail(res, 500, '创建失败');
@@ -68,7 +105,7 @@ exports.updateModule = async (req, res) => {
     if (body.sort_order != null) row.sort_order = parseInt(body.sort_order, 10) || 0;
     if (body.is_active !== undefined) row.is_active = body.is_active === 1 || body.is_active === true ? 1 : 0;
     await row.save();
-    return ok(res, row.toJSON());
+    return ok(res, mapModuleJson(req, row));
   } catch (e) {
     console.error('admin updateModule', e);
     return fail(res, 500, '更新失败');
@@ -97,7 +134,7 @@ exports.listCategories = async (req, res) => {
       where: { group_type: gk },
       order: [['sort_order', 'ASC'], ['id', 'ASC']]
     });
-    return ok(res, rows.map((r) => r.toJSON()));
+    return ok(res, rows.map((r) => mapCategoryJson(req, r)));
   } catch (e) {
     console.error('admin listCategories', e);
     return fail(res, 500, '查询失败');
@@ -117,7 +154,7 @@ exports.createCategory = async (req, res) => {
       icon_url: body.icon_url != null && String(body.icon_url).trim() ? String(body.icon_url).trim() : null,
       sort_order: body.sort_order != null ? parseInt(body.sort_order, 10) || 0 : 0
     });
-    return ok(res, row.toJSON());
+    return ok(res, mapCategoryJson(req, row));
   } catch (e) {
     console.error('admin createCategory', e);
     return fail(res, 500, '创建失败');
@@ -145,7 +182,7 @@ exports.updateCategory = async (req, res) => {
       if (gt) row.group_type = gt;
     }
     await row.save();
-    return ok(res, row.toJSON());
+    return ok(res, mapCategoryJson(req, row));
   } catch (e) {
     console.error('admin updateCategory', e);
     return fail(res, 500, '更新失败');
@@ -184,7 +221,7 @@ exports.listServices = async (req, res) => {
       include: [{ model: Category, as: 'category', attributes: ['id', 'name', 'group_type'] }],
       order: [['id', 'DESC']]
     });
-    return ok(res, rows.map((r) => r.toJSON()));
+    return ok(res, rows.map((r) => mapServiceJson(req, r)));
   } catch (e) {
     console.error('admin listServices', e);
     return fail(res, 500, '查询失败');
@@ -215,7 +252,7 @@ exports.createService = async (req, res) => {
     const withCat = await Service.findByPk(row.id, {
       include: [{ model: Category, as: 'category', attributes: ['id', 'name', 'group_type'] }]
     });
-    return ok(res, withCat.toJSON());
+    return ok(res, mapServiceJson(req, withCat));
   } catch (e) {
     console.error('admin createService', e);
     return fail(res, 500, '创建失败');
@@ -257,7 +294,7 @@ exports.updateService = async (req, res) => {
     const withCat = await Service.findByPk(row.id, {
       include: [{ model: Category, as: 'category', attributes: ['id', 'name', 'group_type'] }]
     });
-    return ok(res, withCat.toJSON());
+    return ok(res, mapServiceJson(req, withCat));
   } catch (e) {
     console.error('admin updateService', e);
     return fail(res, 500, '更新失败');
