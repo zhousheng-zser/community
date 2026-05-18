@@ -3,7 +3,7 @@ const { User, UserFollow, UserAddress, MarketApplication, MarketShop } = require
 exports.getProfile = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id, {
-            attributes: ['id', 'openid', 'nickname', 'avatar_url', 'phone', 'address', 'bank_num', 'wx_id', 'role', 'balance']
+            attributes: ['id', 'openid', 'nickname', 'avatar_url', 'phone', 'address', 'bank_num', 'wx_id', 'role', 'balance', 'points', 'invited_by']
         });
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });

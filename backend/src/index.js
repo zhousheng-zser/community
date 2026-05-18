@@ -111,6 +111,8 @@ app.use('/api/v1/chat', require('./routes/chatRoutes'));
 app.use('/api/v1/coupons', require('./routes/couponRoutes'));
 app.use('/api/v1/benefit-coin', require('./routes/benefitCoinRoutes'));
 app.use('/api/v1/promoter', require('./routes/promoterRoutes'));
+app.use('/api/v1/commission', require('./modules/commission/commission.routes'));
+app.use('/api/v1/partner', require('./modules/commission/partner.routes'));
 app.use('/api/v1/mini-programs', require('./routes/miniProgramRoutes'));
 
 require('./mountBenefitAlliance')(app);
@@ -166,3 +168,7 @@ if (hasSsl) {
 app.listen(HTTP_PORT, () => {
     console.log(`Server is running on http://localhost:${HTTP_PORT}`);
 });
+
+
+// 首页展示公开接口
+app.get('/api/v1/home-display/items', require('./controllers/adminHomeDisplayController').getPublicHomeItems);

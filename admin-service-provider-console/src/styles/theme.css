@@ -1,0 +1,67 @@
+:root {
+  --sp-primary: #0d9488;
+  --sp-primary-dark: #0f766e;
+  --sp-accent: #f59e0b;
+  --sp-aside: #0f172a;
+  --sp-aside-2: #1e293b;
+  --sp-aside-text: #94a3b8;
+  --sp-aside-active: #2dd4bf;
+  --sp-bg: #f1f5f9;
+  --sp-card: #ffffff;
+  --sp-text: #0f172a;
+  --sp-muted: #64748b;
+  --sp-border: #e2e8f0;
+  --sp-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.06);
+  --sp-radius: 12px;
+}
+
+html,
+body,
+#app {
+  font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  background: var(--sp-bg);
+  color: var(--sp-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+.sp-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 8px 4px 32px;
+  min-height: calc(100vh - 120px);
+}
+
+.sp-card {
+  background: var(--sp-card);
+  border-radius: var(--sp-radius);
+  box-shadow: var(--sp-shadow);
+  border: 1px solid var(--sp-border);
+}
+
+.sp-page-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+  color: var(--sp-text);
+}
+
+.sp-page-desc {
+  font-size: 13px;
+  color: var(--sp-muted);
+  margin: 0 0 20px;
+}
+
+/* Element Plus 微调 */
+.el-table {
+  --el-table-border-color: var(--sp-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--sp-primary);
+  --el-button-border-color: var(--sp-primary);
+  --el-button-hover-bg-color: var(--sp-primary-dark);
+  --el-button-hover-border-color: var(--sp-primary-dark);
+}

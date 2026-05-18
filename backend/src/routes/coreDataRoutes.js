@@ -10,6 +10,7 @@ router.get('/services/hot', ctrl.getHotServices);
 router.get('/services', ctrl.listServices);
 router.get('/categories/:categoryId/services', ctrl.getServicesByCategory);
 router.get('/services/:id', ctrl.getServiceDetail);
+router.get('/service-home-modules', ctrl.getServiceHomeModules);
 router.get('/service-groups/:group', ctrl.getServiceGroup);
 router.get('/workers', optionalAuth, ctrl.getWorkers);
 router.get('/workers/:id/services', ctrl.getWorkerServices);

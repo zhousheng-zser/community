@@ -69,6 +69,86 @@ async function main() {
                     { cat: "上门美瞳", title: "上门美瞳搭配服务【1小时】", price: 159, img: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=300&q=80" },
                     { cat: "上门美发", title: "上门美发造型服务【1小时】", price: 189, img: "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=300&q=80" }
                 ]
+            },
+            appliance_clean: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "油烟机清洗", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "洗衣机清洗", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "冰箱清洗", icon_url: "/img/index/menuicon4.png", sort_order: 4 },
+                    { name: "空调清洗", icon_url: "/img/index/menuicon1.png", sort_order: 5 }
+                ],
+                services: [
+                    { cat: "油烟机清洗", title: "家用油烟机深度清洗【1.5小时】", price: 168, img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&q=80" },
+                    { cat: "洗衣机清洗", title: "滚筒洗衣机拆洗消毒【2小时】", price: 198, img: "https://images.unsplash.com/photo-1626806787461-7c1cdd443952?w=300&q=80" },
+                    { cat: "冰箱清洗", title: "冰箱除味杀菌清洗【1小时】", price: 128, img: "https://images.unsplash.com/photo-1571175443880-a0d0b6c0d0e3?w=300&q=80" },
+                    { cat: "空调清洗", title: "挂式空调蒸汽清洗【1小时】", price: 118, img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=300&q=80" }
+                ]
+            },
+            pioneer_clean: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "新居开荒", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "玻璃清洁", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "地面打蜡", icon_url: "/img/index/menuicon4.png", sort_order: 4 }
+                ],
+                services: [
+                    { cat: "新居开荒", title: "新房首次开荒保洁【按平米】", price: 8, img: "https://images.unsplash.com/photo-1584622650111-993a426f6d00?w=300&q=80" },
+                    { cat: "玻璃清洁", title: "全屋玻璃内外清洁【2小时】", price: 158, img: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=300&q=80" },
+                    { cat: "地面打蜡", title: "实木地板打蜡养护【2小时】", price: 228, img: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&q=80" }
+                ]
+            },
+            mite_remove: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "床垫除螨", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "沙发除螨", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "全屋除螨", icon_url: "/img/index/menuicon4.png", sort_order: 4 }
+                ],
+                services: [
+                    { cat: "床垫除螨", title: "床垫深度除螨杀菌【1小时】", price: 188, img: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&q=80" },
+                    { cat: "沙发除螨", title: "布艺沙发除螨清洗【1.5小时】", price: 218, img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80" },
+                    { cat: "全屋除螨", title: "三房一厅全屋除螨套餐【3小时】", price: 398, img: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=300&q=80" }
+                ]
+            },
+            furniture_care: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "木地板养护", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "皮质沙发护理", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "实木家具打蜡", icon_url: "/img/index/menuicon4.png", sort_order: 4 }
+                ],
+                services: [
+                    { cat: "木地板养护", title: "实木地板清洁打蜡【2小时】", price: 268, img: "https://images.unsplash.com/photo-1503602642458-232111445639?w=300&q=80" },
+                    { cat: "皮质沙发护理", title: "真皮沙发上油保养【1小时】", price: 198, img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80" },
+                    { cat: "实木家具打蜡", title: "实木餐桌椅养护打蜡【1.5小时】", price: 228, img: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=300&q=80" }
+                ]
+            },
+            baby_home: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "月嫂陪护", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "育儿家务", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "宝宝房整理", icon_url: "/img/index/menuicon4.png", sort_order: 4 }
+                ],
+                services: [
+                    { cat: "月嫂陪护", title: "产后月嫂陪护体验【4小时】", price: 399, img: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=300&q=80" },
+                    { cat: "育儿家务", title: "育儿家庭保洁助理【3小时】", price: 159, img: "https://images.unsplash.com/photo-1491013516832-7db643ee3a67?w=300&q=80" },
+                    { cat: "宝宝房整理", title: "婴儿房收纳与安全整理【2小时】", price: 196, img: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=300&q=80" }
+                ]
+            },
+            house_repair: {
+                categories: [
+                    { name: "热门服务", icon_url: "/img/index/menuicon1.png", sort_order: 1 },
+                    { name: "防水补漏", icon_url: "/img/index/menuicon2.png", sort_order: 2 },
+                    { name: "墙面修补", icon_url: "/img/index/menuicon3.png", sort_order: 3 },
+                    { name: "门窗维修", icon_url: "/img/index/menuicon4.png", sort_order: 4 }
+                ],
+                services: [
+                    { cat: "防水补漏", title: "厨卫防水查漏修补【2小时】", price: 268, img: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?w=300&q=80" },
+                    { cat: "墙面修补", title: "墙面开裂修补粉刷【按平米】", price: 35, img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=300&q=80" },
+                    { cat: "门窗维修", title: "入户门合页更换调试【1小时】", price: 168, img: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&q=80" }
+                ]
             }
         };
 

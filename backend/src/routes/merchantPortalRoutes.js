@@ -48,7 +48,7 @@ router.post('/orders/:orderNo/delivered', (req, res, next) => {
   return ctrl.applyOrderAction(req, res, next);
 });
 router.post('/orders/:orderNo/complete-delivery', (req, res, next) => {
-  req.body = { ...(req.body || {}), action: 'delivered' };
+  req.body = { ...(req.body || {}), action: 'complete' };
   return ctrl.applyOrderAction(req, res, next);
 });
 router.get('/payments', ctrl.listPayments);

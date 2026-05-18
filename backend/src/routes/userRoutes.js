@@ -26,6 +26,22 @@ router.post('/addresses', userController.createAddress);
 router.put('/addresses/:id', userController.updateAddress);
 router.delete('/addresses/:id', userController.deleteAddress);
 
+
+// 浏览足迹
+const fpCtrl = require('../modules/user/controllers/user.controller');
+router.post('/footprints', fpCtrl.recordFootprint);
+router.post('/footprints/batch', fpCtrl.batchFootprints);
+router.get('/footprints', fpCtrl.getFootprints);
+router.delete('/footprints', fpCtrl.clearFootprints);
+
+
+// 服务/服务商收藏
+router.post('/service-favorites', fpCtrl.addServiceFav);
+router.post('/service-favorites/remove', fpCtrl.removeServiceFav);
+router.get('/service-favorites', fpCtrl.getServiceFavs);
+router.post('/service-favorites/batch', fpCtrl.batchServiceFavs);
+router.get('/service-favorites/check', fpCtrl.checkServiceFav);
+
 module.exports = router;
 
 // 邀请系统

@@ -19,6 +19,7 @@
     "migrate:sp-community": "node scripts/run-sp-community-migration.js",
     "migrate:sp-portal-accounts": "node scripts/run-service-provider-portal-accounts-migration.js",
     "migrate:market-o2o": "node scripts/run-market-o2o-migration.js",
+    "migrate:service-home": "node scripts/run-service-home-modules-migration.js",
     "test": "node scripts/e2e-cw-fullflow.js",
     "test:e2e:cw": "node scripts/e2e-cw-fullflow.js",
     "simulate:home-chain": "node scripts/simulate-home-service-chain.js",

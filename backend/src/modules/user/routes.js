@@ -11,5 +11,17 @@ router.get('/addresses', ctrl.getAddresses);
 router.post('/addresses', ctrl.addAddress);
 router.post('/addresses/:id', ctrl.updateAddress);
 router.delete('/addresses/:id', ctrl.deleteAddress);
+router.get('/invite-code', ctrl.getInviteCode);
+router.post('/bind-inviter', ctrl.bindInviter);
+router.get('/invitees', ctrl.getInvitees);
+router.post('/footprints', ctrl.recordFootprint);
+router.post('/footprints/batch', ctrl.batchFootprints);
+router.get('/footprints', ctrl.getFootprints);
+router.delete('/footprints', ctrl.clearFootprints);
+router.post('/service-favorites', ctrl.addServiceFav);
+router.post('/service-favorites/remove', ctrl.removeServiceFav);
+router.get('/service-favorites', ctrl.getServiceFavs);
+router.post('/service-favorites/batch', ctrl.batchServiceFavs);
+router.get('/service-favorites/check', ctrl.checkServiceFav);
 
 module.exports = router;

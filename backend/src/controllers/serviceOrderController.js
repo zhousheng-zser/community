@@ -8,7 +8,8 @@ const {
   WorkerProfile,
   WorkerService,
   ServiceProviderProfile,
-  ServiceOrderComplaint
+  ServiceOrderComplaint,
+  ServiceHomeModule
 } = require('../models');
 const {
   resolveProviderContext,
@@ -45,6 +46,18 @@ const GROUP_FALLBACK_ALLOW_UNPUBLISHED = new Set([
   'house_repair',
   'beauty_home'
 ]);
+
+async function allowsUnpublishedServiceGroup(gk) {
+  const k = String(gk || '').trim();
+  if (!k) return false;
+  if (GROUP_FALLBACK_ALLOW_UNPUBLISHED.has(k)) return true;
+  try {
+    const n = await ServiceHomeModule.count({ where: { group_key: k, is_active: 1 } });
+    return n > 0;
+  } catch (_) {
+    return false;
+  }
+}
 
 function parseMoneyFlexible(v, fallbackNaN = NaN) {
   if (v == null || v === '') return fallbackNaN;
@@ -142,7 +155,8 @@ exports.create = async (req, res) => {
     const pub = sj.is_published;
     const gk = body.group_key != null ? String(body.group_key).trim() : '';
     if (pub === 0 || pub === false) {
-      if (!gk || !GROUP_FALLBACK_ALLOW_UNPUBLISHED.has(gk)) {
+      const allowUnpub = await allowsUnpublishedServiceGroup(gk);
+      if (!gk || !allowUnpub) {
         return fail(res, 400, '服务未上架');
       }
     }

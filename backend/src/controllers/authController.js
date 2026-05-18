@@ -69,14 +69,18 @@ exports.login = async (req, res) => {
             { expiresIn: '7d' } // token 7天有效
         );
 
+        const _roleExtra = await getRoleExtra(user.id, user.phone);
         res.json({
             message: '登录成功',
             token: token,
-            user: {
+            user: Object.assign({
                 id: user.id,
+                openid: user.openid || '',
+                phone: user.phone || '',
                 nickname: user.nickname,
                 avatar_url: user.avatar_url,
-            }
+                role: user.role || 'user',
+            }, _roleExtra)
         });
 
     } catch (error) {
@@ -169,6 +173,42 @@ exports.adminLogin = async (req, res) => {
     }
 };
 
+
+
+/** 查询用户的技工 / 服务商 / 角色信息，合并到登录响应
+ *  phone 参数用于覆盖「同手机号多 user_id」场景（E2E 重复数据）
+ */
+async function getRoleExtra(userId, phone) {
+  const extra = {};
+  try {
+    const { WorkerApplication, ServiceProviderProfile, sequelize } = require('../models');
+    const { Op } = require('sequelize');
+
+    // Gather all user_ids that share the same phone (dedup test data)
+    let userIds = [userId];
+    if (phone && sequelize) {
+      try {
+        const { User } = require('../models');
+        if (User) {
+          const samePhone = await User.findAll({ where: { phone: String(phone) }, attributes: ['id'] });
+          userIds = [...new Set([userId, ...samePhone.map(u => u.id)])];
+        }
+      } catch (_) {}
+    }
+
+    if (WorkerApplication) {
+      const wa = await WorkerApplication.findOne({ where: { user_id: { [Op.in]: userIds }, status: 'approved' } });
+      if (wa) extra.worker_status = 'approved';
+    }
+    if (ServiceProviderProfile) {
+      const sp = await ServiceProviderProfile.findOne({ where: { user_id: { [Op.in]: userIds }, status: 'active' } });
+      if (sp) extra.service_provider_status = 'active';
+    }
+  } catch (e) {
+    console.warn('[getRoleExtra]', e.message);
+  }
+  return extra;
+}
 
 function issueUserToken(user) {
     return jwt.sign(
@@ -306,16 +346,19 @@ exports.loginPassword = async (req, res) => {
         }
 
         const token = issueUserToken(user);
+        const _roleExtra2 = await getRoleExtra(user.id, user.phone);
         return res.json({
             code: 0,
             msg: '登录成功',
             token,
-            user: {
+            user: Object.assign({
                 id: user.id,
+                openid: user.openid || '',
                 phone: user.phone || '',
                 nickname: user.nickname || '',
-                avatar_url: user.avatar_url || ''
-            },
+                avatar_url: user.avatar_url || '',
+                role: user.role || 'user',
+            }, _roleExtra2),
             data: { token }
         });
     } catch (e) {

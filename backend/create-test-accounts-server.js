@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 在服务端创建测试账号
- * 执行: ssh cw@192.168.110.50 "cd /home/cw/a/community-backend/backend && node create-test-accounts.js"
+ * 执行: ssh cw@jshsp1.eds-tech.cn "cd /home/cw/a/community-backend/backend && node create-test-accounts.js"
  */
 
 const { Sequelize } = require('sequelize');
