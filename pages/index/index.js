@@ -61,7 +61,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '肯德基',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=16&source=jutuike',
-        image_url: '/img/benefit_chain/kfc.png'
+        image_url: '/img/benefit_chain/kfc.jpg'
       },
       imgUrlFn
     ),
@@ -73,7 +73,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '星巴克',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=34&source=jutuike',
-        image_url: '/img/benefit_chain/xbk.png'
+        image_url: '/img/benefit_chain/xbk.jpg'
       },
       imgUrlFn
     ),
@@ -85,7 +85,7 @@ function defaultBenefitChainBrandList(imgUrlFn) {
         keyword: '百果园',
         miniAppId: 'wx89752980e795bfde',
         miniPath: '/pages/index/index?pub_id=462602&sid=123456&act_id=31&source=jutuike',
-        image_url: '/img/benefit_chain/bgy.png'
+        image_url: '/img/benefit_chain/bgy.jpg'
       },
       imgUrlFn
     )
@@ -184,11 +184,8 @@ Page({
     allMarketShops: [],
     marketShops: [],
     marketShopsCacheByCat: {}, // { [catName]: mappedShopList }
-    thirdPartyMiniPrograms: [
-      { name: '易达速递', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
-      { name: '啄木鸟', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' },
-      { name: '榕益收', icon: '/img/index/menuicon1.png', appId: '', path: '/pages/index/index' }
-    ]
+    /** 第三方便民小程序：仅展示中台配置了 appId 的项，无配置时不占位 */
+    thirdPartyMiniPrograms: []
   },
   onLoad: function (options) {
     const sysInfo = wx.getSystemInfoSync();
@@ -540,6 +537,10 @@ Page({
     wx.switchTab({ url: '/pages/community/community' });
   },
 
+  goHotListMore() {
+    wx.navigateTo({ url: '../community-hot-list/community-hot-list' });
+  },
+
   goServiceProviderPortal() {
     const token = wx.getStorageSync('token');
     if (!token) {
@@ -554,10 +555,7 @@ Page({
     const mp = this.data.thirdPartyMiniPrograms[idx];
     if (!mp) return;
 
-    if (!mp.appId) {
-      wx.showToast({ title: '该功能暂未开放', icon: 'none' });
-      return;
-    }
+    if (!mp.appId) return;
 
     wx.navigateToMiniProgram({
       appId: mp.appId,
@@ -716,14 +714,15 @@ Page({
     });
 
     try {
-      const hm = await util.get('core/home-modules');
-      const rows = mapRawModulesToCategoryRows((hm && hm.modules) || []);
+      const hm = await api.core.getServiceHomeModules();
+      const list = Array.isArray(hm) ? hm : (hm && hm.modules) || [];
+      const rows = mapRawModulesToCategoryRows(list);
       if (rows.length > 0) {
         categoryList = mapHomeIcon(rows);
         this.setData({ categoryList });
       }
     } catch (eHm) {
-      console.log('core/home-modules 不可用，使用本地九宫格', eHm);
+      console.log('core/service-home-modules 不可用，使用本地九宫格', eHm);
     }
 
     try {
@@ -745,16 +744,18 @@ Page({
     try {
       const res = await api.miniProgram.getMiniPrograms();
       const programs = res.list || (res.data && res.data.list) || [];
-      if (programs.length > 0) {
-        thirdPartyMiniPrograms = programs.map(p => ({
+      const mapped = programs
+        .map((p) => ({
           name: p.name,
-          icon: p.icon || '/img/index/menuicon1.png',
-          appId: p.appId,
-          path: p.path
-        }));
-      }
+          icon: imgUrl(p.icon || p.icon_url || '/img/index/menuicon1.png'),
+          appId: String(p.appId || p.app_id || '').trim(),
+          path: p.path || ''
+        }))
+        .filter((p) => p.name && p.appId);
+      thirdPartyMiniPrograms = mapped;
     } catch (e) {
-      console.log('加载第三方小程序配置失败，使用默认配置', e);
+      console.log('加载第三方小程序配置失败', e);
+      thirdPartyMiniPrograms = [];
     }
 
     if (!config.useCuratedHomeHotList) {

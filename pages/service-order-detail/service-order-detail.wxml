@@ -6,6 +6,7 @@
       <text class="title">{{order.title}}</text>
       <text class="no">单号 {{order.orderNo}}</text>
       <text class="line" wx:if="{{order.groupLabel}}">业务线：{{order.groupLabel}}</text>
+      <text class="dispatch-hint" wx:if="{{order.dispatchHint}}">{{order.dispatchHint}}</text>
     </view>
     <view class="card">
       <text class="label">金额</text>
@@ -15,8 +16,10 @@
       <text class="label">服务地址</text>
       <text class="val multiline">{{order.address}}</text>
     </view>
+    <button wx:if="{{order.pendingPay}}" class="btn primary" bindtap="payOrder">立即支付</button>
+    <button wx:if="{{!order.pendingPay}}" class="btn ghost" bindtap="goMyOrders">查看服务订单</button>
     <button wx:if="{{order.needUserConfirm}}" class="btn primary" bindtap="confirmOrderComplete">确认订单完成</button>
-    <button class="btn primary" bindtap="openChat">与服务商沟通（文字/图片）</button>
+    <button class="btn primary" wx:if="{{order.workerUserId || order.merchantUserId}}" bindtap="openChat">联系接单方（文字/图片）</button>
     <button class="btn ghost" bindtap="openComplaint">投诉 / 售后</button>
   </block>
 

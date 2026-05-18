@@ -50,6 +50,9 @@ const neighborAssistRoutes = require('../modules/neighbor-assist/routes');
 // ── 技工工作台 ───────────────────────────────────────────────────────────
 const workerRoutes = require('../modules/worker/routes');
 
+// ── 小区管家 ───────────────────────────────────────────────────────────────
+const stewardRoutes = require('../modules/steward/routes');
+
 // ── 商家后台 ─────────────────────────────────────────────────────────────
 const merchantRoutes = require('../modules/merchant/routes');
 
@@ -62,7 +65,7 @@ const serviceProviderRoutes = require('../modules/service-provider-portal/routes
 // ── 社区 ─────────────────────────────────────────────────────────────────
 const communityRoutes = require('../modules/community/routes');
 
-// ── 服务订单 ─────────────────────────────────────────────────────────────
+// ── 服务订单（线上见 src/routes/serviceOrderRoutes.js + controllers/serviceOrderController.js）
 const serviceOrderRoutes = require('../modules/service-order/routes');
 
 // ── 消息通知 ─────────────────────────────────────────────────────────────
@@ -79,8 +82,12 @@ router.use('/benefit-coin', benefitCardRoutes);
 router.use('/benefit-alliance', benefitAllianceRoutes);
 router.use('/admin', benefitAllianceAdminRoutes);
 const adminDispatchRoutes = require('../modules/service-order/adminDispatch.routes');
+// 九州派单（到家）：线上 adminRoutes 亦挂载 assign；本地用 adminDispatch 子路由
 router.use('/admin', adminDispatchRoutes);
 router.use('/coupons', couponRoutes);
+const couponCtrl = require('../modules/coupon/controllers/coupon.controller');
+const authMiddleware = require('../middlewares/authMiddleware');
+router.get('/wx/user/coupon/:id', authMiddleware, couponCtrl.getMyCouponsLegacy);
 router.use('/chat', chatRoutes);
 router.use('/commission', commissionRoutes);
 router.use('/partner', partnerRoutes);
@@ -88,6 +95,7 @@ router.use('/promoter', promoterRoutes);
 router.use('/mini-programs', miniProgramRoutes);
 router.use('/neighbor-assist', neighborAssistRoutes);
 router.use('/worker', workerRoutes);
+router.use('/steward', stewardRoutes);
 router.use('/merchant', merchantRoutes);
 router.use('/service-provider', serviceProviderRoutes);
 router.use('/service-provider-portal', serviceProviderRoutes); // 兼容旧路径

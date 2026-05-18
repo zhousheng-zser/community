@@ -361,6 +361,10 @@
       {
         "type": "folder",
         "value": "pages/push-periodic-list"
+      },
+      {
+        "type": "folder",
+        "value": "kfcdot"
       }
     ],
     "include": []

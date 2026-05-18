@@ -15,7 +15,8 @@ const MARKET_STATUS_MAP = {
 
 const SERVICE_STATUS_MAP = {
   pending_pay: { text: '待付款', class: 'primary' },
-  paid_pending_dispatch: { text: '待上门', class: 'primary' },
+  pending_worker_accept: { text: '待技工接单', class: 'primary' },
+  paid_pending_dispatch: { text: '待平台派单', class: 'primary' },
   pending_accept: { text: '待接单', class: 'primary' },
   dispatched: { text: '已派单', class: 'primary' },
   in_service: { text: '服务中', class: 'primary' },
@@ -38,7 +39,8 @@ const MARKET_TABS = [
 const SERVICE_TABS = [
   { key: 'all', label: '全部' },
   { key: 'pending_pay', label: '待付款' },
-  { key: 'paid_pending_dispatch', label: '待上门' },
+  { key: 'paid_pending_dispatch', label: '待派单' },
+  { key: 'pending_worker_accept', label: '待技工接单' },
   { key: 'pending_accept', label: '待接单' },
   { key: 'dispatched', label: '已派单' },
   { key: 'in_service', label: '服务中' },
@@ -220,14 +222,29 @@ Page({
     const statusObj = SERVICE_STATUS_MAP[status] || { text: status || '未知', class: '' };
 
     const providerName = provider.name || merchant.name || worker.name || worker.worker_name || '到家服务';
-    const workerUserId = order.worker_user_id || detail.worker_user_id || worker.user_id || null;
+    const assigned = order.assigned_worker || detail.assigned_worker || null;
+    const workerUserId =
+      (order.worker_id != null && Number(order.worker_id) > 0 ? Number(order.worker_id) : null) ||
+      (order.worker_user_id != null ? Number(order.worker_user_id) : null) ||
+      (detail.worker_user_id != null ? Number(detail.worker_user_id) : null) ||
+      (assigned && (assigned.worker_user_id != null ? Number(assigned.worker_user_id) : assigned.id)) ||
+      (worker.user_id != null ? Number(worker.user_id) : null) ||
+      null;
     const merchantUserId = order.merchant_user_id || detail.merchant_user_id || order.provider_user_id || detail.provider_user_id || provider.id || merchant.id || null;
 
-    const rawImage = service.image || service.main_image || service.cover_image || service.cover || '';
+    const rawImage =
+      service.cover_image || service.image || service.main_image || service.cover || order.image || '';
     const image = rawImage ? util.imgUrl(rawImage) : 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png';
 
     const title = order.service_title || order.title || service.title || '到家服务';
     const amount = order.amount || order.pay_amount || detail.amount || detail.pay_amount || '0.00';
+    let groupKey = order.group_key || detail.group_key || '';
+    if (!groupKey && order.remark) {
+      const m = String(order.remark).match(/\[类目:([^\]]+)\]/);
+      if (m) groupKey = m[1];
+    }
+    const meta = order.fulfillment_meta || detail.fulfillment_meta || {};
+    const dispatchMode = meta.dispatch_mode || '';
 
     const createTime = order.create_time || order.created_at || order.createdAt || detail.create_time || detail.created_at || detail.createdAt || '';
     const time = createTime ? this.formatTime(createTime) : '';
@@ -245,7 +262,10 @@ Page({
       title,
       image,
       amount: typeof amount === 'number' ? amount.toFixed(2) : String(amount),
-      time
+      time,
+      groupKey,
+      dispatchMode,
+      payStatus: order.pay_status || detail.pay_status || ''
     };
   },
 

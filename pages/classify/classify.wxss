@@ -107,6 +107,7 @@ page {
   height: 160rpx;
   border-radius: 10rpx;
   margin-right: 16rpx;
+  background: #f0f0f0;
 }
 
 .body {

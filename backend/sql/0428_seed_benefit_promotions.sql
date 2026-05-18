@@ -24,16 +24,14 @@ INSERT INTO benefit_alliance_goods (platform, title, subtitle, spread_url, image
 ('taobao', '适乐肤C乳保湿', 'CeraVe适乐肤C乳保湿身体乳液面霜敏感肌男女官方正品张凌赫同款', '￥KCg959JykFS￥/CA8888', '/uploads/benefit/taobao-5.png', 108.00, 78.00, 4.50, 'active', 'benefit_card', 5, NOW(), NOW()),
 ('taobao', '太力真空压缩袋', '太力抗菌真空收纳压缩袋被子棉被衣服羽绒旅行专用免抽气立体袋子', '￥UklH5gJyvQq￥/CA8888', '/uploads/benefit/taobao-6.png', 49.90, 29.90, 2.50, 'active', 'benefit_card', 6, NOW(), NOW());
 
--- ==================== 闪购（9条）====================
+-- ==================== 闪购（7条，已剔除错误域名 kzurllG.cn 的条目）====================
 INSERT INTO benefit_alliance_goods (platform, title, subtitle, spread_url, image_url, price, coupon_price, rebate_amount, status, scene, sort_order, created_at, updated_at) VALUES
 ('shangou', '饿了么天天领红包', '饿了么外卖红包天天领', 'https://u.ele.me/lGJublRc', '/uploads/benefit/shangou-1.png', 15.00, 0.00, 1.00, 'active', 'benefit_card', 1, NOW(), NOW()),
 ('shangou', '淘宝闪购红包', '淘宝大放水啦拉15减14', 'https://kzurlol.cn/tOAtMA', '/uploads/benefit/shangou-2.png', 15.00, 1.00, 1.50, 'active', 'benefit_card', 2, NOW(), NOW()),
-('shangou', '饿了么大额红包', '领最高15元大额红包', 'https://kzurllG.cn/toAtmH', '/uploads/benefit/shangou-3.png', 15.00, 0.00, 1.00, 'active', 'benefit_card', 3, NOW(), NOW()),
 ('shangou', '饿了么天天领红包', '饿了么天天领红包', 'https://u.ele.me/ZouiklUg', '/uploads/benefit/shangou-4.png', 10.00, 0.00, 0.80, 'active', 'benefit_card', 4, NOW(), NOW()),
 ('shangou', '饿了么天天领红包', '饿了么天天领红包', 'https://u.ele.me/jKSGHrOO', '/uploads/benefit/shangou-5.png', 10.00, 0.00, 0.80, 'active', 'benefit_card', 5, NOW(), NOW()),
 ('shangou', '饿了么消费日', '饿了么21城消费日活动', 'https://kzurlOG.cn/tOAtjX', '/uploads/benefit/shangou-6.png', 20.00, 0.00, 1.50, 'active', 'benefit_card', 6, NOW(), NOW()),
 ('shangou', '饿了么天天领红包', '每天可领。每周五五折红', 'https://u.ele.me/UkxECqd3', '/uploads/benefit/shangou-7.png', 10.00, 0.00, 0.80, 'active', 'benefit_card', 7, NOW(), NOW()),
-('shangou', '超低价爆品', '超低价爆品来袭', 'https://kzurllG.cn/toAtBn', '/uploads/benefit/shangou-8.png', 19.90, 4.90, 1.00, 'active', 'benefit_card', 8, NOW(), NOW()),
 ('shangou', '超市好价', '超市好价即刻送达', 'https://kzurlol.cn/toAtVa', '/uploads/benefit/shangou-9.png', 30.00, 15.00, 2.00, 'active', 'benefit_card', 9, NOW(), NOW());
 
 -- ==================== 社群（1条）====================

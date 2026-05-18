@@ -74,6 +74,12 @@
   color: #ccc;
   margin-left: 20rpx;
 }
+.coupon-pick {
+  flex: 1;
+  text-align: right;
+  color: #666;
+  font-size: 28rpx;
+}
 .pickup-view {
   background: #FFF8F3;
   border: 1rpx solid #FFEDDF;

@@ -65,13 +65,18 @@
 
         <view class="order-card-foot">
           <!-- 待付款 -->
-          <block wx:if="{{item.status === 'pending_payment' || item.status === 'pending_pay'}}">
+          <block wx:if="{{item.status === 'pending_payment' || item.status === 'pending_pay' || (item.status === 'pending_worker_accept' && item.payStatus === 'unpaid')}}">
             <button class="action-btn cancel" catchtap="cancelOrder" data-id="{{item.id || item.orderNo}}">取消订单</button>
-            <button class="action-btn primary" catchtap="payOrder" data-id="{{item.id || item.orderNo}}">去支付</button>
+            <button class="action-btn primary" catchtap="payOrder" data-id="{{item.id}}">去支付</button>
+          </block>
+
+          <!-- 待平台派单（已支付） -->
+          <block wx:if="{{orderType === 'service' && item.status === 'paid_pending_dispatch'}}">
+            <button class="action-btn" catchtap="goDetail" data-id="{{item.id}}" data-orderno="{{item.orderNo}}">查看进度</button>
           </block>
 
           <!-- 待接单 -->
-          <block wx:if="{{item.status === 'pending_accept' || item.status === 'pending_worker_accept'}}">
+          <block wx:if="{{item.status === 'pending_accept' || (item.status === 'pending_worker_accept' && item.payStatus !== 'unpaid')}}">
             <button class="action-btn" catchtap="contactMerchant" data-id="{{item.orderNo}}" data-shopid="{{item.shopId}}" data-orderno="{{item.orderNo}}" data-workeruid="{{item.workerUserId}}" data-merchantuid="{{item.merchantUserId}}">联系商家</button>
             <button class="action-btn default" wx:if="{{orderType === 'market'}}" catchtap="applyRefund" data-id="{{item.orderNo}}">申请退款</button>
           </block>

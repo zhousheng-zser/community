@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 
 const GROUP_LABELS = {
   tidy: '整理收纳',
@@ -23,7 +24,22 @@ function parseOrder(raw) {
         ? amt.toFixed(2)
         : String(amt)
       : '—';
-  const gk = r.group_key || r.service_group_key || r.biz_line || '';
+  let gk = r.group_key || r.service_group_key || r.biz_line || '';
+  if (!gk && r.remark) {
+    const m = String(r.remark).match(/\[类目:([^\]]+)\]/);
+    if (m) gk = m[1];
+  }
+  const meta = r.fulfillment_meta && typeof r.fulfillment_meta === 'object' ? r.fulfillment_meta : {};
+  const status = String(r.status || '');
+  const payStatus = String(r.pay_status || '');
+  const pendingPay =
+    payStatus === 'unpaid' && (status === 'pending_pay' || status === 'pending_worker_accept');
+  const dispatchHint =
+    status === 'paid_pending_dispatch'
+      ? '已支付，平台正在为您匹配同小区技工'
+      : meta.dispatch_mode === 'admin_dispatch' && status === 'pending_pay'
+        ? '支付后将由平台派单至小区技工'
+        : '';
   const merchantUid =
     r.merchant_user_id != null
       ? Number(r.merchant_user_id)
@@ -40,16 +56,28 @@ function parseOrder(raw) {
     statusText: r.status_text || r.status_label || r.status || '处理中',
     title: r.service_title || r.title || (r.service && r.service.title) || '到家服务',
     amountText,
-    address: r.address || r.service_address || '',
-    workerUserId:
-      r.worker_user_id != null
-        ? Number(r.worker_user_id)
-        : r.worker && r.worker.user_id != null
-          ? Number(r.worker.user_id)
-          : null,
+    address:
+      r.address ||
+      r.service_address ||
+      (r.address_snapshot && (r.address_snapshot.detail || r.address_snapshot.address)) ||
+      '',
+    workerUserId: (() => {
+      if (r.worker_id != null && Number(r.worker_id) > 0) return Number(r.worker_id);
+      if (r.worker_user_id != null && Number(r.worker_user_id) > 0) return Number(r.worker_user_id);
+      const aw = r.assigned_worker;
+      if (aw) {
+        const uid = aw.worker_user_id != null ? aw.worker_user_id : aw.id;
+        if (uid != null && Number(uid) > 0) return Number(uid);
+      }
+      if (r.worker && r.worker.user_id != null) return Number(r.worker.user_id);
+      return null;
+    })(),
     merchantUserId: merchantUid && merchantUid > 0 ? merchantUid : null,
     needUserConfirm,
     groupLabel: GROUP_LABELS[gk] || gk || '',
+    pendingPay,
+    dispatchHint,
+    status,
     raw: r
   };
 }
@@ -169,6 +197,38 @@ Page({
 
   onComplaintInput(e) {
     this.setData({ complaintText: e.detail.value });
+  },
+
+  goMyOrders() {
+    wx.navigateTo({ url: '/pages/market-order-list/market-order-list?type=service' });
+  },
+
+  async payOrder() {
+    const id = this._id;
+    if (!id) return;
+    wx.showLoading({ title: '支付中', mask: true });
+    try {
+      await api.serviceOrder.mockPay(id);
+      wx.hideLoading();
+      wx.showToast({ title: '支付成功', icon: 'success' });
+      this.load();
+    } catch (e) {
+      wx.hideLoading();
+      wx.showModal({
+        title: '提示',
+        content: (e && e.errmsg) || (e && e.msg) || '支付失败，是否模拟支付？',
+        success: async (res) => {
+          if (!res.confirm) return;
+          try {
+            await api.serviceOrder.mockPay(id);
+            wx.showToast({ title: '支付成功', icon: 'success' });
+            this.load();
+          } catch (e2) {
+            wx.showToast({ title: (e2 && e2.errmsg) || '支付失败', icon: 'none' });
+          }
+        }
+      });
+    }
   },
 
   async confirmOrderComplete() {

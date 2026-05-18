@@ -1,5 +1,6 @@
 const db = require('../../../models');
 const { MerchantShop, MerchantGoods, MarketShopCategory, MarketCartItem, MarketOrder, MarketOrderItem, MarketRefundOrder } = db;
+const couponService = require('../../coupon/services/coupon.service');
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
 
@@ -564,7 +565,21 @@ exports.previewOrder = async (req, res) => {
     }
 
     const deliveryFee = body.delivery_mode === 'pickup' ? 0 : 0;
-    const discountAmount = 0;
+    let discountAmount = 0;
+    const userId = getUserId(req);
+    const couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
+    if (userId && couponIssueId > 0) {
+      try {
+        const applied = await couponService.validateCouponForOrder(
+          userId,
+          couponIssueId,
+          goodsAmount
+        );
+        discountAmount = applied.discount;
+      } catch (couponErr) {
+        return fail(res, couponErr.message || '优惠券不可用', couponErr.statusCode || 400);
+      }
+    }
     const payableAmount = Number((goodsAmount + deliveryFee - discountAmount).toFixed(2));
     ok(res, {
       shop_id: shopId,
@@ -572,6 +587,7 @@ exports.previewOrder = async (req, res) => {
       delivery_fee: deliveryFee.toFixed(2),
       discount_amount: discountAmount.toFixed(2),
       payable_amount: payableAmount.toFixed(2),
+      coupon_issue_id: couponIssueId || null,
       lines
     });
   } catch (err) {
@@ -650,7 +666,17 @@ exports.createOrder = async (req, res) => {
     }
 
     const deliveryFee = deliveryMode === 'pickup' ? 0 : 0;
-    const discountAmount = 0;
+    let discountAmount = 0;
+    let couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
+    if (couponIssueId > 0) {
+      try {
+        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmount, t);
+        discountAmount = applied.discount;
+      } catch (couponErr) {
+        await t.rollback();
+        return fail(res, couponErr.message || '优惠券不可用', couponErr.statusCode || 400);
+      }
+    }
     const payableAmount = Number((goodsAmount + deliveryFee - discountAmount).toFixed(2));
     const row = await MarketOrder.create({
       order_no: orderNo,
@@ -670,6 +696,9 @@ exports.createOrder = async (req, res) => {
       expired_at: new Date(Date.now() + 30 * 60 * 1000)
     }, { transaction: t });
     await MarketOrderItem.bulkCreate(itemRows.map((it) => ({ ...it, order_id: row.id })), { transaction: t });
+    if (couponIssueId > 0) {
+      await couponService.markCouponUsed(couponIssueId, 'market', row.order_no, t);
+    }
     await t.commit();
     ok(res, {
       id: row.id,
@@ -677,10 +706,12 @@ exports.createOrder = async (req, res) => {
       order_no: row.order_no,
       order_status: row.order_status,
       pay_status: row.pay_status,
+      goods_amount: Number(row.goods_amount).toFixed(2),
+      discount_amount: Number(row.discount_amount).toFixed(2),
       payable_amount: Number(row.payable_amount).toFixed(2)
     }, '订单创建成功');
   } catch (err) {
-    await t.rollback();
+    if (t && !t.finished) await t.rollback();
     console.error('[market/orders/create]', err);
     fail(res, '创建订单失败', 500);
   }

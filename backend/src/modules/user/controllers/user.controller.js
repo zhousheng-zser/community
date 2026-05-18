@@ -1,5 +1,6 @@
-const { User } = require('../../../models');
+const { User, CommunityStewardApplication } = require('../../../models');
 const { MerchantShop } = require('../../../models');
+const couponService = require('../../coupon/services/coupon.service');
 const crypto = require('crypto');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
@@ -10,6 +11,12 @@ exports.getProfile = async (req, res) => {
   try {
     const userId = req.user && req.user.id ? Number(req.user.id) : 0;
     if (!userId) return fail(res, '未登录', 401);
+
+    try {
+      await couponService.ensureWelcomeCoupon(userId);
+    } catch (e) {
+      console.warn('[user/profile] ensureWelcomeCoupon', e.message);
+    }
 
     // 优先从本地 User 表查询
     let user = null;
@@ -71,6 +78,21 @@ exports.getProfile = async (req, res) => {
       result.merchantStatus = '';
       result.shop_id = null;
       result.shopId = null;
+    }
+
+    try {
+      if (CommunityStewardApplication) {
+        const stewardApp = await CommunityStewardApplication.findOne({ where: { user_id: userId } });
+        const st = stewardApp ? stewardApp.status : '';
+        result.steward_status = st === 'approved' ? 'approved' : (st || '');
+        result.stewardStatus = result.steward_status;
+      } else {
+        result.steward_status = '';
+        result.stewardStatus = '';
+      }
+    } catch (e) {
+      result.steward_status = '';
+      result.stewardStatus = '';
     }
 
     ok(res, result);

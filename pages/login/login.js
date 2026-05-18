@@ -1,6 +1,8 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
+const userSession = require('../../utils/userSession.js');
+const browseFootprint = require('../../utils/browseFootprint.js');
 const api = require('../../api/index.js');
 
 Page({
@@ -127,6 +129,7 @@ Page({
     wx.removeStorageSync('manual_logged_out');
     wx.setStorageSync('token', data.token);
     const u = data.user || {};
+    if (u.id != null) userSession.rememberUserId(u.id);
     app.globalData.user = rolePortals.mergePortalFlags({
       id: u.id,
       opId: u.openid,
@@ -143,12 +146,15 @@ Page({
       merchant_status: u.merchant_status != null ? u.merchant_status : u.merchantStatus,
       shop_id: u.shop_id != null ? u.shop_id : u.shopId,
       shop_status: u.shop_status != null ? u.shop_status : u.shopStatus,
+      steward_status: u.steward_status != null ? u.steward_status : u.stewardStatus,
+      service_provider_status: u.service_provider_status != null ? u.service_provider_status : u.serviceProviderStatus,
       communityId: u.community_id != null ? u.community_id : u.communityId,
       points: u.points,
       userState: 0,
       remark2: 2,
       vipFlag: 0
     }, u);
+    browseFootprint.syncLocalToServer();
     wx.showToast({ title: '登录成功' });
     setTimeout(() => {
       wx.reLaunch({ url: '/pages/index/index' });

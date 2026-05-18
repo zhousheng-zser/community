@@ -51,8 +51,50 @@ function listImageFromHome3(title, fallback) {
   return imgUrl(raw);
 }
 
+function pickLocalServiceImage(title, localConfig) {
+  if (!localConfig || !Array.isArray(localConfig.services)) return null;
+  const t = String(title || '').trim();
+  const hit = localConfig.services.find((s) => s && String(s.title).trim() === t);
+  return hit && hit.image ? hit.image : null;
+}
+
+/** 是否为本项目可稳定加载的图片地址（uploads / 包内 / 已配置域名） */
+function isReliableServiceImageUrl(url) {
+  const u = String(url || '').trim();
+  if (!u || /^data:image\/gif/i.test(u)) return false;
+  if (u.startsWith('/img/')) return true;
+  if (/\/uploads\//i.test(u)) return true;
+  if (/eds-tech\.cn/i.test(u)) return true;
+  return false;
+}
+
+/**
+ * 分类页服务卡片图：优先 service_home3（同步素材），其次本地兜底配置，再才用中台 cover（仅 uploads）
+ * 避免中台 seed 的 unsplash 外链在真机合法域名下无法显示导致「图标掉了」
+ */
+function resolveServiceListImage(title, remoteCoverUrl, localConfig) {
+  const t = String(title || '').trim();
+  const home3 = home3PathForTitle(t);
+  if (home3) return imgUrl(home3);
+
+  const fromLocal = pickLocalServiceImage(t, localConfig);
+  if (fromLocal && isReliableServiceImageUrl(fromLocal)) return fromLocal;
+
+  const remote = remoteCoverUrl != null ? String(remoteCoverUrl).trim() : '';
+  if (remote) {
+    const u = imgUrl(remote);
+    if (isReliableServiceImageUrl(u)) return u;
+  }
+
+  if (fromLocal) return fromLocal;
+  if (remote) return imgUrl(remote);
+  return '';
+}
+
 module.exports = {
   filenameForServiceTitle,
   home3PathForTitle,
-  listImageFromHome3
+  listImageFromHome3,
+  pickLocalServiceImage,
+  resolveServiceListImage
 };

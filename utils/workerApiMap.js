@@ -81,6 +81,16 @@ function pickRawAvatarPath(w) {
   return '';
 }
 
+function isBrokenImageUrl(url) {
+  if (url == null) return true;
+  const s = String(url).trim();
+  if (!s) return true;
+  if (s.startsWith('data:image/gif')) return true;
+  if (/example\.com/i.test(s)) return true;
+  if (/127\.0\.0\.1/i.test(s) && /\/uploads\//i.test(s)) return true;
+  return false;
+}
+
 function pickWorkerAvatar(w) {
   if (!w || typeof w !== 'object') {
     return workerAvatarUrl(0);
@@ -89,7 +99,7 @@ function pickWorkerAvatar(w) {
   const av = pickRawAvatarPath(w);
   if (!av) return workerAvatarUrl(stableId);
   const resolved = imgUrl(av);
-  if (!resolved || String(resolved).startsWith('data:image/gif')) {
+  if (isBrokenImageUrl(resolved)) {
     return workerAvatarUrl(stableId);
   }
   return resolved;

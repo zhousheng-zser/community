@@ -329,6 +329,10 @@ page {
   margin-bottom: 14rpx;
 }
 
+.portal-icon-wrap.steward-tone {
+  background: linear-gradient(145deg, #e8f5ef 0%, #d4ede3 100%);
+}
+
 .portal-icon-wrap.worker-tone {
   background: #e6f4ff;
 }
@@ -448,12 +452,15 @@ page {
 /* ===== 鍔犲叆鍗＄墖 ===== */
 .join-grid {
   display: flex;
+  flex-wrap: wrap;
   gap: 16rpx;
   padding: 16rpx 0 8rpx;
 }
 
 .join-item {
   flex: 1;
+  min-width: calc(50% - 12rpx);
+  box-sizing: border-box;
   background: #fff;
   border: 1rpx solid #eef5ff;
   border-radius: 16rpx;
@@ -474,6 +481,10 @@ page {
   margin: 0 auto 16rpx;
   background: #f4f8ff;
   border-radius: 24rpx;
+}
+
+.join-icon-wrap.steward-join-tone {
+  background: #fff4eb;
 }
 
 .join-icon-img {

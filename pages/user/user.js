@@ -6,6 +6,7 @@ const api = require('../../api/index.js');
 const balance = require('../../utils/balance.js');
 const localPrefs = require('../../utils/localPrefs.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
+const userSession = require('../../utils/userSession.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
 const serviceFavStore = require('../../utils/serviceFavStore.js');
 
@@ -40,11 +41,12 @@ Page({
     joinMenus: [
       { name: "技工入驻", sub: "用技能闲置赚钱", icon: "worker_join", url: "../join-worker/join-worker" },
       { name: "集市商家", sub: "附近商家入驻申请", icon: "market_merchant", url: "../join-market/join-market" },
-      { name: "服务商入驻", sub: "提供专业到家服务", icon: "service_provider", url: "../join-service/join-service" }
+      { name: "服务商入驻", sub: "提供专业到家服务", icon: "service_provider", url: "../join-service/join-service" },
+      { name: "小区管家入驻", sub: "社区便民服务管家", icon: "community_manager", iconDir: "other_services", tap: "steward" }
     ],
     serviceMenus: [
       { name: "帮助反馈", icon: "help_feedback", url: "../feedback/feedback" },
-      { name: "小区管家", icon: "community_manager", url: "../community-steward/community-steward" },
+      { name: "小区管家", icon: "community_manager", tap: "steward_menu" },
       { name: "关于我们", icon: "about_us", url: "../about/about" },
       { name: "地址管理", icon: "address_management", url: "../address/address" },
       { name: "平台客服", icon: "platform_service", url: "/package-account/pages/platform-kefu/platform-kefu" },
@@ -105,6 +107,77 @@ Page({
     } catch (e) {
       // keep existing balance
     }
+  },
+
+  async _refreshUserFromProfile() {
+    try {
+      const data = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
+        const sid = data.id != null ? String(data.id) : null;
+        if (sid != null) app.globalData.user.id = sid;
+      }
+    } catch (e) {
+      console.log('刷新用户信息失败，使用缓存', e);
+    }
+    return app.globalData.user || {};
+  },
+
+  _navigateByStewardStatus(user, options) {
+    const opts = options || {};
+    if (rolePortals.canUseStewardPortal(user)) {
+      if (opts.approvedUrl) {
+        wx.navigateTo({ url: opts.approvedUrl });
+      } else {
+        rolePortals.navigateToStewardHome();
+      }
+      return;
+    }
+    const st = user.steward_status != null ? user.steward_status : user.stewardStatus;
+    if (st === 'pending' || st === 'reviewing') {
+      wx.showToast({ title: '管家入驻审核中', icon: 'none' });
+    } else if (st === 'rejected') {
+      wx.showModal({
+        title: '入驻未通过',
+        content: '您的管家入驻申请已被驳回，可修改资料后重新提交',
+        confirmText: '重新申请',
+        success: (r) => {
+          if (r.confirm) wx.navigateTo({ url: '../join-steward/join-steward' });
+        }
+      });
+    } else {
+      wx.navigateTo({ url: '../join-steward/join-steward' });
+    }
+  },
+
+  _ensureLoginForSteward() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      setTimeout(() => wx.navigateTo({ url: '../login/login' }), 500);
+      return false;
+    }
+    return true;
+  },
+
+  goStewardJoin() {
+    if (!this._ensureLoginForSteward()) return;
+    this.goStewardPortal();
+  },
+
+  /** 其他服务 · 小区管家：非管家身份 → 入驻申请；已入驻 → 管家服务页 */
+  async goStewardMenu() {
+    if (!this._ensureLoginForSteward()) return;
+    wx.showLoading({ title: '加载中', mask: true });
+    const user = await this._refreshUserFromProfile();
+    wx.hideLoading();
+    this._navigateByStewardStatus(user, { approvedUrl: '../community-steward/community-steward' });
+  },
+
+  async goStewardPortal() {
+    wx.showLoading({ title: '加载中', mask: true });
+    const user = await this._refreshUserFromProfile();
+    wx.hideLoading();
+    this._navigateByStewardStatus(user);
   },
 
   async goWorkerPortal() {
@@ -222,9 +295,13 @@ Page({
       user,
       roleLabel,
       loggedIn,
-      footprintCount: browseFootprint.count(),
+      footprintCount: 0,
       favoriteCount: 0  // 先置 0，异步更新
     });
+
+    browseFootprint.countAsync().then((c) => {
+      if (this.data.loggedIn) this.setData({ footprintCount: c });
+    }).catch(() => {});
 
     this.getProfile();
     this.getMyCoupon();
@@ -251,6 +328,7 @@ Page({
       if (sid != null && gid != null && sid !== gid) {
         console.warn('[getProfile] 用户 id 与登录缓存不一致，以服务端资料为准', { cached: gid, profile: sid });
       }
+      if (sid != null) userSession.rememberUserId(sid);
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
         if (sid != null) app.globalData.user.id = sid;
@@ -287,6 +365,9 @@ Page({
       this.loadCommissionBalance();
       browseFootprint.syncLocalToServer();
       serviceFavStore.syncLocalToServer();
+      browseFootprint.countAsync().then((c) => {
+        this.setData({ footprintCount: c });
+      }).catch(() => {});
     }).catch(() => {
       this.setData({ balance: '0.00' });
     });
@@ -315,15 +396,30 @@ Page({
     });
   },
 
-  // 拉取优惠券数量
+  // 拉取优惠券数量（进入个人中心时确保发放新人券）
   getMyCoupon() {
-    const userId = (this.data.user || {}).id;
-    if (!userId) return;
-    util.get(`wx/user/coupon/${userId}`).then((data) => {
-      this.setData({ couponCount: Array.isArray(data) ? data.length : 0 });
-    }).catch(() => {
+    if (!wx.getStorageSync('token')) {
       this.setData({ couponCount: 0 });
-    });
+      return;
+    }
+    api.coupon.getMyCoupons({ page: 1, page_size: 50, status: 'unused' })
+      .then((res) => {
+        const list = (res && res.list) || (res && res.data && res.data.list) || [];
+        this.setData({ couponCount: Array.isArray(list) ? list.length : 0 });
+      })
+      .catch(() => {
+        const userId = (this.data.user || {}).id;
+        if (!userId) {
+          this.setData({ couponCount: 0 });
+          return;
+        }
+        util.get(`wx/user/coupon/${userId}`).then((data) => {
+          const list = Array.isArray(data) ? data : (data && data.list) || [];
+          this.setData({ couponCount: list.length });
+        }).catch(() => {
+          this.setData({ couponCount: 0 });
+        });
+      });
   },
 
   onShareAppMessage() {

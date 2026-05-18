@@ -54,6 +54,11 @@
       <text class="label">运费</text>
       <text class="val">+￥{{deliveryFee}}</text>
     </view>
+    <view class="extra-row" bindtap="pickCoupon">
+      <text class="label">优惠券</text>
+      <text class="val coupon-pick">{{couponLabel}}</text>
+      <text class="arrow">›</text>
+    </view>
     <view class="extra-row">
       <text class="label">优惠抵扣</text>
       <text class="val text-red">-￥{{discountAmount}}</text>

@@ -31,11 +31,15 @@
   line-height: 1.4;
 }
 .no,
-.line {
+.line,
+.dispatch-hint {
   display: block;
   font-size: 24rpx;
   opacity: 0.9;
   margin-top: 12rpx;
+}
+.dispatch-hint {
+  color: #fde68a;
 }
 .card {
   background: #fff;

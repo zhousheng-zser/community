@@ -102,6 +102,21 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: '预约时间文本(兼容)'
     },
+    group_key: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
+      comment: '首页分组 key，如 beauty_home'
+    },
+    community_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      comment: '下单用户小区 ID，九州派单按小区匹配技工'
+    },
+    fulfillment_meta: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: '履约元数据 JSON：dispatch_mode、direct_worker 等'
+    },
     remark: {
       type: DataTypes.STRING(255),
       allowNull: true,

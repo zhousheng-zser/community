@@ -48,7 +48,10 @@ exports.queue = async (req, res) => {
       order: [['created_at', 'DESC']],
       limit
     });
-    ok(res, { list: rows.map(mapRow) }, 'ok');
+    ok(res, {
+      service_orders: rows.map(mapRow),
+      neighbor_assist_orders: []
+    }, 'ok');
   } catch (e) {
     console.error('[admin/dispatch-queue]', e);
     fail(res, '查询失败', 500);
@@ -65,17 +68,27 @@ exports.assignWorker = async (req, res) => {
     const workerUserId = Number(body.worker_user_id || body.worker_id || 0);
     if (!workerUserId) return fail(res, '缺少 worker_user_id');
 
+    let workerAppr = null;
     if (WorkerApplication) {
-      const appr = await WorkerApplication.findOne({
+      workerAppr = await WorkerApplication.findOne({
         where: { user_id: workerUserId, status: 'approved' }
       });
-      if (!appr) return fail(res, '该用户不是已认证技工', 400);
+      if (!workerAppr) return fail(res, '该用户不是已认证技工', 400);
     }
 
     const row = await ServiceOrder.findByPk(id);
     if (!row) return fail(res, '订单不存在', 404);
     if (row.status !== 'paid_pending_dispatch') {
       return fail(res, '仅待平台派单状态的订单可指派', 400);
+    }
+    const existingWu = row.worker_user_id != null ? Number(row.worker_user_id) : 0;
+    if (existingWu > 0) return fail(res, '订单已指派技工', 400);
+
+    if (row.community_id != null && Number(row.community_id) > 0 && workerAppr) {
+      const workerComm = workerAppr.community_id != null ? Number(workerAppr.community_id) : null;
+      if (workerComm != null && workerComm !== Number(row.community_id)) {
+        return fail(res, '技工所属小区与订单不一致，无法派单', 400);
+      }
     }
 
     await row.update({

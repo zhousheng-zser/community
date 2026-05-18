@@ -2,9 +2,14 @@
  * 浏览足迹：后端优先存储 + 本地 Storage 备份
  */
 const { get, post, del } = require('../utils/util.js');
+const userSession = require('./userSession.js');
 
-const LOCAL_KEY = 'user_browse_footprint_v1';
+const LOCAL_KEY_BASE = 'user_browse_footprint_v1';
 const MAX = 50;
+
+function localKey() {
+  return userSession.scopedStorageKey(LOCAL_KEY_BASE);
+}
 
 const KIND_LABELS = {
   market_goods: '集市商品',
@@ -19,7 +24,7 @@ const KIND_LABELS = {
 
 function getLocalList() {
   try {
-    const arr = wx.getStorageSync(LOCAL_KEY);
+    const arr = wx.getStorageSync(localKey());
     return Array.isArray(arr) ? arr : [];
   } catch (e) {
     return [];
@@ -27,7 +32,7 @@ function getLocalList() {
 }
 
 function saveLocalList(arr) {
-  try { wx.setStorageSync(LOCAL_KEY, arr); } catch (e) {}
+  try { wx.setStorageSync(localKey(), arr); } catch (e) {}
 }
 
 function isLoggedIn() {
@@ -134,10 +139,16 @@ function clear() {
 }
 
 /**
- * 获取足迹数量（从本地快速返回）
+ * 获取足迹数量（从本地快速返回，仅当前用户命名空间）
  */
 function count() {
   return getLocalList().length;
+}
+
+/** 优先后端拉取数量（切换账号后「我的」页展示准确） */
+async function countAsync() {
+  const list = await getList();
+  return list.length;
 }
 
 /**
@@ -167,6 +178,7 @@ module.exports = {
   getLocalListSync,
   clear,
   count,
+  countAsync,
   open,
   syncLocalToServer
 };

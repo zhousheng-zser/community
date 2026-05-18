@@ -12,9 +12,18 @@ const getBanners = () => {
   return get('/core/banners');
 };
 
-/** 首页生活服务九宫格 + 各模块下服务清单（九州中台） GET /core/home-modules */
-const getHomeModules = () => {
-  return get('/core/home-modules');
+/** 首页九宫格模块列表（运营中台「服务管理」） GET /core/service-home-modules */
+const getServiceHomeModules = () => {
+  return get('/core/service-home-modules');
+};
+
+/** @deprecated 请用 getServiceHomeModules；保留别名避免旧调用 404 */
+const getHomeModules = getServiceHomeModules;
+
+/** 某模块下分类 Tab + 服务列表 GET /core/service-groups/:groupKey */
+const getServiceGroup = (groupKey) => {
+  const key = encodeURIComponent(String(groupKey || '').trim());
+  return get(`/core/service-groups/${key}`);
 };
 
 /**
@@ -75,7 +84,9 @@ const getServiceProviderList = (params) => {
 
 module.exports = {
   getBanners,
+  getServiceHomeModules,
   getHomeModules,
+  getServiceGroup,
   getCategories,
   getHotServices,
   getServiceList,

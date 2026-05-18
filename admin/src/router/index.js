@@ -50,6 +50,12 @@ const routes = [
                 meta: { title: '技工入驻审核', icon: 'User' }
             },
             {
+                path: 'steward-applications',
+                name: 'StewardApplications',
+                component: () => import('../views/StewardApplications.vue'),
+                meta: { title: '小区管家入驻审核', icon: 'HomeFilled' }
+            },
+            {
                 path: 'service-providers',
                 name: 'ServiceProviders',
                 component: () => import('../views/ServiceProviders.vue'),

@@ -8,7 +8,7 @@
       "keyword": "肯德基",
       "mini_app_id": "wx89752980e795bfde",
       "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=16&source=jutuike",
-      "image_url": "/img/benefit_chain/kfc.png"
+      "image_url": "/img/benefit_chain/kfc.jpg"
     },
     {
       "key": "xbk",
@@ -18,7 +18,7 @@
       "keyword": "星巴克",
       "mini_app_id": "wx89752980e795bfde",
       "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=34&source=jutuike",
-      "image_url": "/img/benefit_chain/xbk.png"
+      "image_url": "/img/benefit_chain/xbk.jpg"
     },
     {
       "key": "bgy",
@@ -28,7 +28,7 @@
       "keyword": "百果园",
       "mini_app_id": "wx89752980e795bfde",
       "mini_path": "/pages/index/index?pub_id=462602&sid=123456&act_id=31&source=jutuike",
-      "image_url": "/img/benefit_chain/bgy.png"
+      "image_url": "/img/benefit_chain/bgy.jpg"
     }
   ]
 }

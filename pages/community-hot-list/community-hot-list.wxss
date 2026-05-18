@@ -1,0 +1,88 @@
+.chl-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
+}
+
+.chl-header {
+  background: #fff;
+  padding: 32rpx 28rpx 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.chl-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.chl-sub {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+.chl-loading,
+.chl-empty {
+  padding: 100rpx 0;
+  text-align: center;
+  color: #aaa;
+  font-size: 28rpx;
+}
+
+.chl-list {
+  padding: 0 20rpx;
+}
+
+.chl-card {
+  display: flex;
+  background: #fff;
+  border-radius: 18rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.chl-cover-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.chl-cover {
+  width: 200rpx;
+  height: 150rpx;
+}
+
+.chl-rank {
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 122, 0, 0.92);
+  color: #fff;
+  font-size: 20rpx;
+}
+
+.chl-info {
+  flex: 1;
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chl-name {
+  font-size: 28rpx;
+  color: #2f2f2f;
+  line-height: 1.4;
+}
+
+.chl-price {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #f97316;
+  font-weight: 600;
+}

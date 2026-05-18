@@ -42,6 +42,10 @@
           <el-icon><User /></el-icon>
           <span>技工入驻审核</span>
         </el-menu-item>
+        <el-menu-item index="/steward-applications">
+          <el-icon><HomeFilled /></el-icon>
+          <span>小区管家入驻审核</span>
+        </el-menu-item>
         <el-menu-item index="/service-providers">
           <el-icon><Shop /></el-icon>
           <span>直约服务商管理</span>
@@ -84,7 +88,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop, Operation } from '@element-plus/icons-vue'
+import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop, Operation, HomeFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()

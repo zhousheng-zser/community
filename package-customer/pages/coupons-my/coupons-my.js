@@ -1,5 +1,3 @@
-// pages/coupons-my/coupons-my.js
-const app = getApp();
 const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
 
@@ -10,11 +8,11 @@ Page({
     activeTab: 'unused'
   },
 
-  onLoad: function (options) {
+  onLoad() {
     this.getCoupons();
   },
 
-  onPullDownRefresh: function () {
+  onPullDownRefresh() {
     this.getCoupons();
   },
 
@@ -26,59 +24,57 @@ Page({
   },
 
   async getCoupons() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
     this.setData({ loading: true });
     try {
       const params = { page: 1, page_size: 50 };
-      if (this.data.activeTab === 'unused') {
-        params.status = 'unused';
-      } else if (this.data.activeTab === 'used') {
-        params.status = 'used';
-      } else if (this.data.activeTab === 'expired') {
-        params.status = 'expired';
-      }
-      
+      if (this.data.activeTab === 'unused') params.status = 'unused';
+      else if (this.data.activeTab === 'used') params.status = 'used';
+      else if (this.data.activeTab === 'expired') params.status = 'expired';
+
       const res = await api.coupon.getMyCoupons(params);
-      const list = res.list || res.data || res || [];
-      const nowTime = new Date().getTime();
-      const coupons = list.map(v => {
+      const list = (res && res.list) || (res && res.data && res.data.list) || (Array.isArray(res) ? res : []);
+      const nowTime = Date.now();
+      const coupons = list.map((v) => {
         const endTime = v.endTime || v.end_time;
-        const time = util.formatTime(new Date(endTime)).split(" ")[0];
-        const hasEnd = nowTime > new Date(endTime).getTime();
+        let time = '';
+        let hasEnd = false;
+        if (endTime) {
+          try {
+            time = util.formatTime(new Date(endTime)).split(' ')[0];
+            hasEnd = nowTime > new Date(endTime).getTime();
+          } catch (e) {
+            time = String(endTime).slice(0, 10);
+          }
+        }
+        const threshold = v.threshold_amount != null ? Number(v.threshold_amount) : 0;
+        const money = v.couponMoney || v.coupon_money || v.discount_amount || 0;
+        let status = v.status || 'unused';
+        if (status === 'unused' && hasEnd) status = 'expired';
         return {
           ...v,
-          time: time,
-          hasEnd: hasEnd,
-          couponMoney: v.couponMoney || v.coupon_money || v.amount,
-          couponName: v.couponName || v.coupon_name || v.name,
-          status: v.status || (hasEnd ? 'expired' : 'unused')
+          time,
+          hasEnd,
+          couponMoney: money,
+          couponName: v.couponName || v.coupon_name || v.name || '优惠券',
+          thresholdText: threshold > 0 ? `满${threshold}可用` : '',
+          status
         };
       });
       this.setData({ coupons, loading: false });
       wx.stopPullDownRefresh();
     } catch (e) {
-      console.log('我的优惠券加载失败，使用模拟数据', e);
-      this.setData({ loading: false });
+      console.log('我的优惠券加载失败', e);
+      this.setData({ coupons: [], loading: false });
       wx.stopPullDownRefresh();
-      this.mockLoadCoupons();
+      wx.showToast({ title: (e && e.errmsg) || '加载失败', icon: 'none' });
     }
   },
 
-  mockLoadCoupons() {
-    const now = new Date();
-    const futureDate = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
-    const pastDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
-    
-    this.setData({
-      coupons: [
-        { id: 1, couponMoney: '10', couponName: '满50减10优惠券', time: util.formatTime(futureDate).split(" ")[0], hasEnd: false, status: 'unused' },
-        { id: 2, couponMoney: '20', couponName: '满100减20优惠券', time: util.formatTime(futureDate).split(" ")[0], hasEnd: false, status: 'unused' },
-        { id: 3, couponMoney: '50', couponName: '满200减50优惠券', time: util.formatTime(pastDate).split(" ")[0], hasEnd: true, status: 'expired' }
-      ]
-    });
-  },
-
-  useCoupon(e) {
-    const couponId = e.currentTarget.dataset.id;
-    wx.showToast({ title: '正在跳转到可用商品列表', icon: 'none' });
+  goUse() {
+    wx.switchTab({ url: '/pages/index/index' });
   }
-})
+});

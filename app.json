@@ -31,6 +31,7 @@
     "pages/recomm/recomm",
     "pages/goods-classify/goods-classify",
     "pages/tidy-service/tidy-service",
+    "pages/community-hot-list/community-hot-list",
     "pages/goods-detail/goods-detail",
     "pages/activity-list/activity-list",
     "pages/user-code/user-code",
@@ -49,6 +50,7 @@
     "pages/order-service/order-service",
     "pages/order-publish/order-publish",
     "pages/join-worker/join-worker",
+    "pages/join-steward/join-steward",
     "pages/join-service/join-service",
     "pages/join-market/join-market",
     "pages/address/address",
@@ -111,6 +113,7 @@
       "pages": [
         "pages/coupons-all/coupons-all",
         "pages/coupons-my/coupons-my",
+        "pages/coupon-select/coupon-select",
         "pages/activity/activity"
       ]
     },
@@ -123,6 +126,13 @@
         "pages/worker-order-detail/worker-order-detail",
         "pages/worker-mine/worker-mine",
         "pages/worker-services/worker-services"
+      ]
+    },
+    {
+      "root": "package-steward",
+      "name": "steward",
+      "pages": [
+        "pages/steward-home/steward-home"
       ]
     },
     {
