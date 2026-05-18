@@ -5,6 +5,7 @@ const {
   User
 } = require('../models');
 const wechat = require('../utils/wechatPayV3');
+const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -344,13 +345,7 @@ exports.payCallback = async (req, res) => {
         const order = await ServiceOrder.findOne({ where: { order_no: tx.order_no } });
         if (order && order.pay_status !== 'paid') {
           order.pay_status = 'paid';
-          if (order.assigned_worker_id) {
-            order.status = 'pending_worker_accept';
-          } else if (order.provider_user_id) {
-            order.status = 'pending_accept';
-          } else {
-            order.status = 'paid_pending_dispatch';
-          }
+          applyServiceOrderStatusAfterPayment(order);
           await order.save();
         }
       } else {
@@ -410,13 +405,7 @@ exports.payCallback = async (req, res) => {
       const order = await ServiceOrder.findOne({ where: { order_no: tx.order_no } });
       if (order && order.pay_status !== 'paid') {
         order.pay_status = 'paid';
-        if (order.assigned_worker_id) {
-          order.status = 'pending_worker_accept';
-        } else if (order.provider_user_id) {
-          order.status = 'pending_accept';
-        } else {
-          order.status = 'paid_pending_dispatch';
-        }
+        applyServiceOrderStatusAfterPayment(order);
         await order.save();
       }
     } else {

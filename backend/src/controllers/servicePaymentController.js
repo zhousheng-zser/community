@@ -5,6 +5,7 @@ const {
   User
 } = require('../models');
 const wechat = require('../utils/wechatPayV3');
+const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
 
 function ok(data) {
   return { code: 0, msg: 'ok', data };
@@ -63,14 +64,7 @@ async function virtualPaySuccessFlow(order, orderNo) {
   await tx.save();
 
   order.pay_status = 'paid';
-  // Service order state transition after payment
-  if (order.assigned_worker_id) {
-    order.status = 'pending_worker_accept';
-  } else if (order.provider_user_id) {
-    order.status = 'pending_accept';
-  } else {
-    order.status = 'paid_pending_dispatch';
-  }
+  applyServiceOrderStatusAfterPayment(order);
   await order.save();
 
   return { tx, wxPayParams: buildVirtualWxPayParams() };
@@ -310,13 +304,7 @@ exports.mockSuccess = async (req, res) => {
 
     if (order.pay_status !== 'paid') {
       order.pay_status = 'paid';
-      if (order.assigned_worker_id) {
-        order.status = 'pending_worker_accept';
-      } else if (order.provider_user_id) {
-        order.status = 'pending_accept';
-      } else {
-        order.status = 'paid_pending_dispatch';
-      }
+      applyServiceOrderStatusAfterPayment(order);
       await order.save();
     }
 

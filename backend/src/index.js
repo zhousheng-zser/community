@@ -6,6 +6,12 @@ require('dotenv').config({
 // E2E 子进程等场景：行内传入的监听端口不要被 .env 里 PORT 覆盖掉
 if (process.env.E2E_API_PORT) {
     process.env.PORT = process.env.E2E_API_PORT;
+    // .env 中 override 会固定 HTTP_PORT/HTTPS_PORT；E2E 需与 E2E_CHILD_PORT 一致
+    process.env.HTTP_PORT = process.env.E2E_API_PORT;
+    const hp = parseInt(process.env.E2E_API_PORT, 10);
+    if (Number.isFinite(hp)) {
+        process.env.HTTPS_PORT = String(hp + 100);
+    }
 }
 // E2E：强制走本地 mock 微信登录（避免无效 code 调微信接口）
 if (process.env.E2E_CLEAR_WX_SECRET === '1') {

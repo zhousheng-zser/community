@@ -17,6 +17,7 @@ const {
   findProviderOrderById,
   providerOrderInclude
 } = require('../utils/serviceProviderOrderScope');
+const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -201,8 +202,8 @@ exports.create = async (req, res) => {
       status = 'pending_worker_accept';
       fulfillment_meta = { await_user_confirm: true, direct_worker: true };
     } else {
-      /** 非直约单（含先支付后运营派单）：与直约一致，技工完工后待用户确认 */
-      fulfillment_meta = { await_user_confirm: true };
+      /** 非直约单：九州中台派同小区技工，支付后待派单 */
+      fulfillment_meta = { await_user_confirm: true, dispatch_mode: 'admin_dispatch' };
     }
 
     let provider_user_id = null;
@@ -445,15 +446,7 @@ exports.mockPay = async (req, res) => {
     if (!order) return fail(res, 404, '订单不存在');
     if (order.pay_status === 'paid') return fail(res, 400, '已支付');
     order.pay_status = 'paid';
-    if (order.status === 'pending_pay' || order.status === 'pending_worker_accept') {
-      if (order.provider_user_id) {
-        order.status = 'pending_accept';
-      } else if (order.assigned_worker_id) {
-        order.status = 'dispatched';
-      } else {
-        order.status = 'paid_pending_dispatch';
-      }
-    }
+    applyServiceOrderStatusAfterPayment(order);
     await order.save();
     try {
       await Service.increment('sales_count', { by: 1, where: { id: order.service_id } });

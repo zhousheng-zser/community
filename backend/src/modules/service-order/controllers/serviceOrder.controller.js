@@ -1,5 +1,5 @@
 const db = require('../../../models');
-const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication } = db;
+const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication, User } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
 
@@ -8,6 +8,7 @@ const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code:
 
 const STATUS_LABELS = {
   pending_pay: '待付款',
+  pending_worker_accept: '待技工接单',
   paid_pending_dispatch: '待平台派单',
   pending_accept: '待接单',
   dispatched: '已派单',
@@ -33,12 +34,44 @@ function remarkWithGroup(body) {
   return remarkFinal || null;
 }
 
-/** 支付完成后的状态：有服务商 → 待接单；已带技工账号 → 已派单；否则进管理员派单队列 */
+function parseFulfillmentMeta(raw) {
+  if (!raw) return {};
+  if (typeof raw === 'object') return raw;
+  try {
+    return JSON.parse(String(raw)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function extractGroupKey(row) {
+  if (!row) return '';
+  if (row.group_key) return String(row.group_key).trim();
+  const m = String(row.remark || '').match(/\[类目:([^\]]+)\]/);
+  return m ? m[1].trim() : '';
+}
+
+async function resolveUserCommunityId(userId, body) {
+  const fromBody = body.community_id != null ? Number(body.community_id) : NaN;
+  if (Number.isFinite(fromBody) && fromBody > 0) return fromBody;
+  if (!User || !userId) return null;
+  try {
+    const u = await User.findByPk(userId, { attributes: ['community_id', 'communityId'] });
+    const cid = u && (u.community_id != null ? u.community_id : u.communityId);
+    return cid != null && Number(cid) > 0 ? Number(cid) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/** 支付完成后的状态（与九州派单文档 §4 对齐） */
 function resolvePayNextStatus(row) {
   const prov = row.provider_id != null && Number(row.provider_id) > 0;
   const merchantUid = row.provider_user_id != null && Number(row.provider_user_id) > 0;
   if (prov || merchantUid) return 'pending_accept';
   const wu = row.worker_user_id != null ? Number(row.worker_user_id) : 0;
+  const meta = parseFulfillmentMeta(row.fulfillment_meta);
+  if (wu > 0 && meta.direct_worker) return 'pending_worker_accept';
   if (wu > 0) return 'dispatched';
   return 'paid_pending_dispatch';
 }
@@ -62,6 +95,11 @@ function normalizeServiceOrder(row) {
   if (!row) return null;
   let evidenceImages = [];
   try { evidenceImages = JSON.parse(row.evidence_images || '[]'); } catch (e) {}
+  const fulfillmentMeta = parseFulfillmentMeta(row.fulfillment_meta);
+  const groupKey = extractGroupKey(row);
+  const assignedWorkerId = row.worker_user_id != null && Number(row.worker_user_id) > 0
+    ? Number(row.worker_user_id)
+    : (row.worker_id != null && Number(row.worker_id) > 0 ? Number(row.worker_id) : null);
   return {
     id: row.id,
     order_no: row.order_no,
@@ -71,8 +109,12 @@ function normalizeServiceOrder(row) {
     service_id: row.service_id,
     service_title: row.service_title_snapshot || '',
     title: row.service_title_snapshot || '',
-    worker_id: row.worker_id,
+    group_key: groupKey,
+    community_id: row.community_id != null ? Number(row.community_id) : null,
+    fulfillment_meta: fulfillmentMeta,
+    worker_id: assignedWorkerId,
     worker_user_id: row.worker_user_id != null ? row.worker_user_id : null,
+    assigned_worker_id: assignedWorkerId,
     provider_user_id: row.provider_user_id != null ? row.provider_user_id : null,
     status: row.status,
     status_text: STATUS_LABELS[row.status] || row.status || '',
@@ -170,20 +212,42 @@ exports.create = async (req, res) => {
       total = parseMoney(body.pay_amount) || parseMoney(body.amount) || 0;
     }
 
+    const groupKey = String(body.group_key || body.groupKey || '').trim();
+    const communityId = await resolveUserCommunityId(userId, body);
+    const addrSnap = body.address_snapshot && typeof body.address_snapshot === 'object'
+      ? body.address_snapshot
+      : null;
+    const fullAddress = String(body.address || body.service_address || (addrSnap && addrSnap.detail) || '').trim();
+
+    let fulfillmentMeta = {};
+    let initialStatus = 'pending_pay';
+    if (workerUserId > 0) {
+      fulfillmentMeta = { direct_worker: true, dispatch_mode: 'direct_worker' };
+      initialStatus = 'pending_worker_accept';
+    } else if (!resolvedPid) {
+      fulfillmentMeta = {
+        dispatch_mode: 'admin_dispatch',
+        await_user_confirm: true
+      };
+    }
+
     const rowPayload = {
-      order_no: `SV${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`,
+      order_no: `SO${Date.now()}${Math.floor(Math.random() * 9000 + 1000)}`,
       user_id: userId,
       provider_id: resolvedPid,
       service_id: resolvedSid || null,
       service_title_snapshot: snapshotTitle,
-      status: 'pending_pay',
+      group_key: groupKey || null,
+      community_id: communityId,
+      fulfillment_meta: Object.keys(fulfillmentMeta).length ? JSON.stringify(fulfillmentMeta) : null,
+      status: initialStatus,
       pay_status: 'unpaid',
       pay_amount: total,
       amount: total,
-      contact_name: String(body.contact_name || body.name || '').trim() || null,
-      contact_phone: String(body.contact_phone || body.phone || '').trim() || null,
-      address: String(body.address || body.service_address || '').trim() || null,
-      service_address: String(body.service_address || body.address || '').trim() || null,
+      contact_name: String(body.contact_name || body.name || (addrSnap && addrSnap.contact) || '').trim() || null,
+      contact_phone: String(body.contact_phone || body.phone || (addrSnap && addrSnap.phone) || '').trim() || null,
+      address: fullAddress || null,
+      service_address: fullAddress || null,
       appointment_time: body.appointment_time || body.book_time || null,
       book_time: String(body.book_time || body.appointment_time || '').trim() || null,
       remark: remarkWithGroup(body)
@@ -202,6 +266,23 @@ exports.create = async (req, res) => {
   }
 };
 
+// GET /service-orders/detail?order_no=SO...
+exports.getDetailByNo = async (req, res) => {
+  try {
+    await ensureSoTables();
+    const userId = getUserId(req);
+    if (!userId) return fail(res, '未登录', 401);
+    const orderNo = String((req.query && req.query.order_no) || '').trim();
+    if (!orderNo) return fail(res, '缺少 order_no');
+    const row = await ServiceOrder.findOne({ where: { order_no: orderNo, user_id: userId } });
+    if (!row) return fail(res, '订单不存在', 404);
+    ok(res, normalizeServiceOrder(row));
+  } catch (err) {
+    console.error('[service-order/detail-by-no]', err);
+    fail(res, '获取订单详情失败', 500);
+  }
+};
+
 // GET /service-orders/:id
 exports.getDetail = async (req, res) => {
   try {
@@ -212,7 +293,7 @@ exports.getDetail = async (req, res) => {
     if (!id) return fail(res, '无效订单ID');
     const row = await ServiceOrder.findOne({ where: { id, user_id: userId } });
     if (!row) return fail(res, '订单不存在', 404);
-    ok(res, { order: normalizeServiceOrder(row) });
+    ok(res, normalizeServiceOrder(row));
   } catch (err) {
     console.error('[service-order/detail]', err);
     fail(res, '获取订单详情失败', 500);
@@ -254,7 +335,9 @@ exports.mockPay = async (req, res) => {
     if (!id) return fail(res, '无效订单ID');
     const row = await ServiceOrder.findOne({ where: { id, user_id: userId } });
     if (!row) return fail(res, '订单不存在', 404);
-    if (row.status !== 'pending_pay') return fail(res, '当前订单不可支付');
+    if (row.status !== 'pending_pay' && row.status !== 'pending_worker_accept') {
+      return fail(res, '当前订单不可支付');
+    }
     await row.update({
       status: resolvePayNextStatus(row),
       pay_status: 'paid',

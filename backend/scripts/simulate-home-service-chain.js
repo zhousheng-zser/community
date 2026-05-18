@@ -18,6 +18,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '..', '.env'), override
 
 const LABEL = process.env.E2E_COMMUNITY_LABEL || '上海合川路地铁站';
 const COMM_MAIN = parseInt(process.env.E2E_COMMUNITY_ID_MAIN || '1', 10);
+const COMM_ALT = parseInt(process.env.E2E_COMMUNITY_ID_ALT || '2', 10);
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -77,7 +78,7 @@ function getBase() {
 }
 
 async function seedMinimal(models) {
-  const { Category, Service, Good, Banner, sequelize } = models;
+  const { Category, Service, sequelize } = models;
   const t = await sequelize.transaction();
   try {
     const cat = await Category.create(
@@ -98,31 +99,6 @@ async function seedMinimal(models) {
         cover_image: 'https://example.com/chain.png',
         sales_count: 0,
         is_published: 1
-      },
-      { transaction: t }
-    );
-    await Banner.create(
-      {
-        image_url: 'https://example.com/banner-chain.png',
-        sort_order: 99,
-        link_type: 'none',
-        link_value: '',
-        scene: 'home'
-      },
-      { transaction: t }
-    );
-    await Good.create(
-      {
-        title: `${LABEL}-链路演练好物`,
-        price: 12,
-        commission: 1,
-        cover_image: 'https://example.com/g.png',
-        detail_images: [],
-        stock: 50,
-        tab_category: 'test',
-        is_featured: 0,
-        featured_sort: 99,
-        unit: '件'
       },
       { transaction: t }
     );
@@ -286,13 +262,18 @@ async function main() {
   const ts = Date.now();
   const workerLogin = await login(http, `chain_w_${ts}`, '链路演练技工');
   const workerBLogin = await login(http, `chain_w2_${ts}`, '链路演练技工B');
+  const workerCLogin = await login(http, `chain_w3_${ts}`, '链路演练技工C异地');
   const buyerLogin = await login(http, `chain_buyer_${ts}`, '链路演练用户');
   const providerLogin = await login(http, `chain_sp_${ts}`, '链路演练服务商');
 
-  await models.User.update({ community_id: COMM_MAIN }, { where: { id: [workerLogin.user.id, workerBLogin.user.id, buyerLogin.user.id, providerLogin.user.id] } });
+  await models.User.update(
+    { community_id: COMM_MAIN },
+    { where: { id: [workerLogin.user.id, workerBLogin.user.id, workerCLogin.user.id, buyerLogin.user.id, providerLogin.user.id] } }
+  );
 
   const workerHttp = axios.create({ baseURL: base, timeout: 25000, validateStatus: () => true, headers: { Authorization: `Bearer ${workerLogin.token}` } });
   const workerBHttp = axios.create({ baseURL: base, timeout: 25000, validateStatus: () => true, headers: { Authorization: `Bearer ${workerBLogin.token}` } });
+  const workerCHttp = axios.create({ baseURL: base, timeout: 25000, validateStatus: () => true, headers: { Authorization: `Bearer ${workerCLogin.token}` } });
   const buyerHttp = axios.create({ baseURL: base, timeout: 25000, validateStatus: () => true, headers: { Authorization: `Bearer ${buyerLogin.token}` } });
   const providerHttp = axios.create({ baseURL: base, timeout: 25000, validateStatus: () => true, headers: { Authorization: `Bearer ${providerLogin.token}` } });
 
@@ -303,10 +284,16 @@ async function main() {
   if (wb.applicationId && (await approveWorker(adminHttp, wb.applicationId))) ok('审核技工B');
   else fail('审核技工B', 'skip or failed', wb);
 
+  const wc = await workerApply(workerCHttp, '异地王师傅');
+  if (wc.applicationId && (await approveWorker(adminHttp, wc.applicationId))) ok('审核技工C');
+  else fail('审核技工C', 'skip or failed', wc);
+
   const wpA = await models.WorkerProfile.findOne({ where: { user_id: workerLogin.user.id } });
   const wpB = await models.WorkerProfile.findOne({ where: { user_id: workerBLogin.user.id } });
+  const wpC = await models.WorkerProfile.findOne({ where: { user_id: workerCLogin.user.id } });
   if (wpA) await wpA.update({ community_id: COMM_MAIN });
   if (wpB) await wpB.update({ community_id: COMM_MAIN });
+  if (wpC) await wpC.update({ community_id: COMM_ALT });
 
   const spa = await providerApply(providerHttp, providerLogin.user.id);
   let spAppId = spa.applicationId;
@@ -392,6 +379,34 @@ async function main() {
     ok('场景B：无直约 → 待派单 → 运营指派技工B → 履约完成', { order_id: oid, worker: workerBLogin.user.id });
   } catch (e) {
     fail('场景B：派单链路', e.message);
+  }
+
+  // ----- B2 九州派单：订单小区与技工小区不一致应拒绝 -----
+  try {
+    let r = await buyerHttp.post('/service-orders', {
+      service_id: seeded.serviceId,
+      community_id: COMM_MAIN,
+
+      address_snapshot: addr(),
+      remark: `${LABEL} 场景B2跨小区派单应失败`
+    });
+    if (r.status !== 200 || !r.data || r.data.errno !== 0) throw new Error(JSON.stringify(r.data));
+    const oid = r.data.data.id;
+    r = await buyerHttp.post(`/service-orders/${oid}/pay`);
+    if (r.status !== 200 || !r.data || r.data.errno !== 0) throw new Error('支付失败');
+    r = await adminHttp.post(`/admin/service-orders/${oid}/assign`, { worker_id: workerCLogin.user.id });
+    const denied =
+      r.status === 200 &&
+      r.data &&
+      typeof r.data.errno === 'number' &&
+      r.data.errno !== 0 &&
+      String(r.data.errmsg || '').includes('小区');
+    if (!denied) throw new Error(`应拒绝跨小区派单: ${JSON.stringify(r.data)}`);
+    const row = await models.ServiceOrder.findByPk(oid);
+    if (row.assigned_worker_id != null) throw new Error('不应写入 assigned_worker_id');
+    ok('场景B2：跨小区派单被拒绝', { order_id: oid });
+  } catch (e) {
+    fail('场景B2：跨小区派单校验', e.message);
   }
 
   // ----- C 服务商打包 -----

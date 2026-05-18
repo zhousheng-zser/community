@@ -25,7 +25,8 @@
     "simulate:home-chain": "node scripts/simulate-home-service-chain.js",
     "lint": "node scripts/node-syntax-check.js",
     "typecheck": "node -e \"console.log('[typecheck] 后端为纯 JS，未配置 tsc'); process.exit(0)\"",
-    "e2e:home": "E2E_CHILD_PORT=3099 node scripts/e2e-home-service-test.js"
+    "e2e:home": "E2E_CHILD_PORT=3099 node scripts/e2e-home-service-test.js",
+    "test:virtual-dispatch": "node scripts/virtual-service-order-dispatch-test.js"
   },
   "keywords": [],
   "author": "",

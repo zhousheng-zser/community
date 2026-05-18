@@ -13,6 +13,7 @@ router.post('/login', authController.login);
 
 // POST /api/v1/auth/login_password
 router.post('/login_password', authController.loginPassword);
+router.post('/login_sms', authController.loginSms);
 
 // POST /api/v1/auth/logout
 router.post('/logout', authMiddleware, authController.logout);
