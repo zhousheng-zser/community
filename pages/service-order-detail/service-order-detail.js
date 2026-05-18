@@ -129,6 +129,15 @@ Page({
         this.setData({ loading: false });
         return;
       }
+      const gk = (order.raw && order.raw.group_key) || '';
+      if (gk && (!order.groupLabel || order.groupLabel === gk)) {
+        try {
+          const mods = await api.core.getServiceHomeModules();
+          const arr = Array.isArray(mods) ? mods : (mods && mods.modules) || [];
+          const hit = arr.find((m) => (m.group_key || m.groupKey) === gk);
+          if (hit && hit.title) order.groupLabel = hit.title;
+        } catch (e) { /* 沿用 group_key */ }
+      }
       this._id = String(order.id);
       this.setData({ order, loading: false });
     } catch (e) {

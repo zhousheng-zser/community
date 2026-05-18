@@ -59,6 +59,26 @@ async function buildChainBrandsForDisplay(scene) {
   return out;
 }
 
+/** 小程序不可用的推广链（笔误域名、纯淘口令、空链） */
+function isInvalidSpreadUrl(platform, spreadUrl) {
+  const u = spreadUrl != null ? String(spreadUrl).trim() : '';
+  if (!u) return true;
+  if (/example\.com|127\.0\.0\.1|localhost/i.test(u)) return true;
+  if (/kzurllG\.cn/i.test(u)) return true;
+  if (platform === 'taobao' && !/^https?:\/\//i.test(u) && /^￥.+￥/.test(u)) return true;
+  if ((platform === 'jd' || platform === 'pdd') && !/^https?:\/\//i.test(u)) return true;
+  return false;
+}
+
+function filterAllianceRows(rows) {
+  return rows.filter((r) => {
+    const p = r.platform || '';
+    if (r.status && String(r.status) !== 'active') return false;
+    if (isInvalidSpreadUrl(p, r.spread_url)) return false;
+    return true;
+  });
+}
+
 // 辅助：统一成功响应
 function ok(res, data, msg = 'ok') {
   res.json({ code: 0, msg, data });
@@ -86,12 +106,14 @@ exports.getGoods = async (req, res) => {
         status: 'active',
       },
       order: [['sort_order', 'ASC'], ['id', 'DESC']],
-      limit,
+      limit: Math.min(limit + 20, 100),
       offset,
     });
 
+    const filtered = filterAllianceRows(rows).slice(0, limit);
+
     ok(res, {
-      list: rows.map((r) => ({
+      list: filtered.map((r) => ({
         id: r.id,
         title: r.title,
         subtitle: r.subtitle,
@@ -105,7 +127,7 @@ exports.getGoods = async (req, res) => {
         miniPath: r.mini_path,
         keyword: r.keyword,
       })),
-      total: count,
+      total: filtered.length,
     });
   } catch (err) {
     console.error('[getGoods]', err);

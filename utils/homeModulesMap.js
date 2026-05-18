@@ -69,17 +69,18 @@ function normalizeHomeModuleRow(m) {
   };
 }
 
-/** 首页九宫格仅展示到家服务分组，排除中台误配的 shop 等非到家 key */
-const HOME_SERVICE_GROUP_KEYS = new Set(Object.keys(HOME_CATEGORY_ICON_BY_KEY));
+/** 排除非到家类误配模块（如 shop）；中台新建的 group_key 应正常展示 */
+const HOME_SERVICE_GROUP_BLOCKLIST = new Set(['shop', 'market', 'merchant']);
 
 function mapRawModulesToCategoryRows(modules) {
   if (!Array.isArray(modules) || modules.length === 0) return [];
   return sortModulesStable(modules)
     .map(normalizeHomeModuleRow)
-    .filter((row) => row && HOME_SERVICE_GROUP_KEYS.has(row.groupKey));
+    .filter((row) => row && !HOME_SERVICE_GROUP_BLOCKLIST.has(row.groupKey));
 }
 
 module.exports = {
   mapRawModulesToCategoryRows,
-  HOME_SERVICE_GROUP_KEYS
+  HOME_CATEGORY_ICON_BY_KEY,
+  HOME_SERVICE_GROUP_BLOCKLIST
 };

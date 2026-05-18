@@ -11,6 +11,7 @@
     <el-table :data="list" border stripe v-loading="loading" style="width: 100%">
       <el-table-column prop="id" label="订单ID" width="90" />
       <el-table-column prop="order_no" label="单号" min-width="160" show-overflow-tooltip />
+      <el-table-column prop="group_key" label="模块" width="100" show-overflow-tooltip />
       <el-table-column prop="service_title" label="服务" min-width="160" show-overflow-tooltip />
       <el-table-column prop="user_id" label="用户ID" width="90" />
       <el-table-column prop="contact_name" label="联系人" width="90" />
@@ -53,12 +54,39 @@ function fmt(d) {
   return s === 'Invalid Date' ? String(d) : s
 }
 
+/** 兼容后端 Sequelize 原始行与扁平化行 */
+function normalizeRow(row) {
+  if (!row || typeof row !== 'object') return row
+  const buyer = row.buyer || {}
+  const svc = row.service || {}
+  const snap =
+    row.address_snapshot && typeof row.address_snapshot === 'object' ? row.address_snapshot : {}
+  let groupKey = row.group_key ? String(row.group_key) : ''
+  if (!groupKey && row.remark) {
+    const m = String(row.remark).match(/\[类目:([^\]]+)\]/)
+    if (m) groupKey = m[1]
+  }
+  return {
+    id: row.id,
+    order_no: row.order_no,
+    user_id: row.user_id != null ? row.user_id : buyer.id,
+    group_key: groupKey,
+    service_title: row.service_title || (svc && svc.title) || row.goods_name || '',
+    contact_name: row.contact_name || snap.contact_name || buyer.nickname || '',
+    contact_phone: row.contact_phone || snap.contact_phone || buyer.phone || '',
+    pay_amount: row.pay_amount != null ? String(row.pay_amount) : row.amount != null ? String(row.amount) : '',
+    address: row.address || snap.detail || snap.address || '',
+    created_at: row.created_at
+  }
+}
+
 async function load() {
   loading.value = true
   try {
     const res = await request.get('/admin/dispatch-queue')
     const data = res.data || {}
-    list.value = data.list || []
+    const rows = data.service_orders || data.list || []
+    list.value = Array.isArray(rows) ? rows.map(normalizeRow) : []
     list.value.forEach((row) => {
       if (!(row.id in assignInputs)) assignInputs[row.id] = ''
     })

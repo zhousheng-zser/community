@@ -276,12 +276,20 @@ const moduleIconPreview = computed(() => {
   return u || ''
 })
 
+function uploadUrlFromRes(res) {
+  if (!res || typeof res !== 'object') return null
+  if (res.errno === 0 && res.data?.url) return res.data.url
+  if ((res.code === 0 || res.code === 200) && res.data?.url) return res.data.url
+  return null
+}
+
 function onModuleIconUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    moduleForm.value.icon_url = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    moduleForm.value.icon_url = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 
@@ -299,11 +307,12 @@ const catIconPreview = computed(() => {
 })
 
 function onCatIconUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    catForm.value.icon_url = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    catForm.value.icon_url = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 
@@ -324,11 +333,12 @@ const svcCoverPreview = computed(() => {
 })
 
 function onSvcCoverUploaded(res) {
-  if (res && res.code === 0 && res.data && res.data.url) {
-    svcForm.value.cover_image = res.data.url
+  const url = uploadUrlFromRes(res)
+  if (url) {
+    svcForm.value.cover_image = url
     ElMessage.success('已上传')
   } else {
-    ElMessage.error(res?.msg || '上传失败')
+    ElMessage.error(res?.errmsg || res?.msg || '上传失败')
   }
 }
 

@@ -19,11 +19,27 @@ request.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
+function apiMessage(obj) {
+  if (!obj || typeof obj !== 'object') return ''
+  return obj.message || obj.msg || obj.errmsg || ''
+}
+
+/** 与小程序/网关常见约定一致：code 为 0 或 200 均视为成功（仅 code===200 会把 0 误判为失败 →「请求失败」） */
+function isCodeSuccess(code) {
+  return code === 200 || code === 0
+}
+
 request.interceptors.response.use(
   (response) => {
     const res = response.data
-    if (res && typeof res.code === 'number' && res.code !== 200 && res.code !== 0) {
-      return Promise.reject(new Error(res.message || res.msg || '请求失败'))
+    if (res && typeof res.code === 'number' && !isCodeSuccess(res.code)) {
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
+    }
+    if (res && typeof res.errno === 'number' && res.errno !== 0) {
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
+    }
+    if (res && typeof res.errcode === 'number' && res.errcode !== 0) {
+      return Promise.reject(new Error(apiMessage(res) || '请求失败'))
     }
     return res
   },
@@ -37,6 +53,10 @@ request.interceptors.response.use(
         data.message || data.msg || data.errmsg || data.error || ''
     } else if (typeof data === 'string' && data.length < 200) {
       serverMsg = data
+    }
+    // 后端历史占位符或乱码时避免整段只有问号
+    if (serverMsg && /^[\s\?？]+$/.test(String(serverMsg))) {
+      serverMsg = ''
     }
 
     if (status === 401) {
