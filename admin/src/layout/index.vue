@@ -18,7 +18,6 @@
             <el-icon><House /></el-icon>
             <span>首页</span>
           </template>
-                  <el-menu-item index="/service-home-manage">服务管理</el-menu-item>
         <el-menu-item index="/dashboard">工作台</el-menu-item>
           <el-menu-item index="/user-management">用户管理</el-menu-item>
           <el-menu-item index="/ops-hub">运营快捷入口</el-menu-item>

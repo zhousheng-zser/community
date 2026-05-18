@@ -37,11 +37,46 @@ function adminOperatorId(req) {
   return 0;
 }
 
+/** 中台派单台：扁平化订单行（含九宫格新建 group_key 的到家单） */
+function serializeDispatchOrder(row) {
+  const j = row.get ? row.get({ plain: true }) : row;
+  const buyer = j.buyer || {};
+  const svc = j.service || {};
+  const snap =
+    j.address_snapshot && typeof j.address_snapshot === 'object' ? j.address_snapshot : {};
+  let groupKey = j.group_key ? String(j.group_key).trim() : '';
+  if (!groupKey && j.remark) {
+    const m = String(j.remark).match(/\[类目:([^\]]+)\]/);
+    if (m) groupKey = m[1].trim();
+  }
+  const meta =
+    j.fulfillment_meta && typeof j.fulfillment_meta === 'object' ? j.fulfillment_meta : {};
+  return {
+    id: j.id,
+    order_no: j.order_no || null,
+    user_id: j.user_id != null ? j.user_id : buyer.id,
+    group_key: groupKey,
+    service_title: (svc && svc.title) || j.goods_name || '',
+    contact_name: j.contact_name || snap.contact_name || buyer.nickname || '',
+    contact_phone: j.contact_phone || snap.contact_phone || buyer.phone || '',
+    pay_amount: j.amount != null ? String(j.amount) : '',
+    address: snap.detail || snap.address || '',
+    community_id: j.community_id != null ? j.community_id : null,
+    dispatch_mode: meta.dispatch_mode || (j.provider_user_id ? 'provider' : 'admin_dispatch'),
+    created_at: j.created_at,
+    status: j.status
+  };
+}
+
 exports.dispatchQueue = async (req, res) => {
   try {
-    const [service_orders, neighbor_assist_orders] = await Promise.all([
+    const [serviceRows, neighborRows] = await Promise.all([
       ServiceOrder.findAll({
-        where: { status: 'paid_pending_dispatch', assigned_worker_id: null },
+        where: {
+          status: 'paid_pending_dispatch',
+          pay_status: 'paid',
+          assigned_worker_id: null
+        },
         order: [['created_at', 'ASC']],
         limit: 80,
         include: [
@@ -56,6 +91,8 @@ exports.dispatchQueue = async (req, res) => {
         include: [{ model: User, as: 'buyer', attributes: ['id', 'nickname', 'phone'] }]
       })
     ]);
+    const service_orders = serviceRows.map(serializeDispatchOrder);
+    const neighbor_assist_orders = neighborRows.map((r) => r.get({ plain: true }));
     return ok(res, { service_orders, neighbor_assist_orders });
   } catch (e) {
     console.error('dispatchQueue', e);

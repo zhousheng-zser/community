@@ -1,6 +1,83 @@
+const fs = require('fs');
+const path = require('path');
 const { Sequelize } = require('sequelize');
 const { BenefitAllianceGoods } = require('../../../models');
 const { Op } = Sequelize;
+
+/** 惠民卡「肯德基 / 星巴克 / 百果园」等连锁：默认读 backend/data/benefit-chain-brands.json，可被 benefit_alliance_goods.platform=chain_* 覆盖 */
+function readChainBrandSeeds() {
+  const fp = path.join(__dirname, '../../../../data/benefit-chain-brands.json');
+  try {
+    const raw = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    return Array.isArray(raw.brands) ? raw.brands : [];
+  } catch (e) {
+    console.warn('[benefitAlliance] benefit-chain-brands.json 未读或无效', e.message);
+    return [];
+  }
+}
+
+async function buildChainBrandsForDisplay(scene) {
+  const seeds = readChainBrandSeeds();
+  const out = [];
+  for (const seed of seeds) {
+    if (!seed || !seed.key) continue;
+    const platform = seed.db_platform || `chain_${seed.key}`;
+    let title = seed.title || '';
+    let subtitle = seed.subtitle || '';
+    let keyword = seed.keyword || '';
+    let miniAppId = seed.mini_app_id || '';
+    let miniPath = seed.mini_path || '';
+    let imageUrl = seed.image_url || '';
+    try {
+      const row = await BenefitAllianceGoods.findOne({
+        where: { platform, scene, status: 'active' },
+        order: [['sort_order', 'ASC'], ['id', 'DESC']]
+      });
+      if (row) {
+        title = row.title || title;
+        subtitle = row.subtitle != null ? String(row.subtitle) : subtitle;
+        keyword = row.keyword != null ? String(row.keyword) : keyword;
+        miniAppId = (row.sku_id && String(row.sku_id).trim()) || miniAppId;
+        miniPath = (row.mini_path && String(row.mini_path).trim()) || miniPath;
+        if (row.image_url && String(row.image_url).trim()) {
+          imageUrl = String(row.image_url).trim();
+        }
+      }
+    } catch (e) {
+      console.warn('[buildChainBrandsForDisplay]', platform, e.message);
+    }
+    out.push({
+      key: String(seed.key),
+      title,
+      subtitle,
+      keyword,
+      miniAppId,
+      miniPath,
+      imageUrl
+    });
+  }
+  return out;
+}
+
+/** 小程序不可用的推广链（笔误域名、纯淘口令、空链） */
+function isInvalidSpreadUrl(platform, spreadUrl) {
+  const u = spreadUrl != null ? String(spreadUrl).trim() : '';
+  if (!u) return true;
+  if (/example\.com|127\.0\.0\.1|localhost/i.test(u)) return true;
+  if (/kzurllG\.cn/i.test(u)) return true;
+  if (platform === 'taobao' && !/^https?:\/\//i.test(u) && /^￥.+￥/.test(u)) return true;
+  if ((platform === 'jd' || platform === 'pdd') && !/^https?:\/\//i.test(u)) return true;
+  return false;
+}
+
+function filterAllianceRows(rows) {
+  return rows.filter((r) => {
+    const p = r.platform || '';
+    if (r.status && String(r.status) !== 'active') return false;
+    if (isInvalidSpreadUrl(p, r.spread_url)) return false;
+    return true;
+  });
+}
 
 // 辅助：统一成功响应
 function ok(res, data, msg = 'ok') {
@@ -29,12 +106,14 @@ exports.getGoods = async (req, res) => {
         status: 'active',
       },
       order: [['sort_order', 'ASC'], ['id', 'DESC']],
-      limit,
+      limit: Math.min(limit + 20, 100),
       offset,
     });
 
+    const filtered = filterAllianceRows(rows).slice(0, limit);
+
     ok(res, {
-      list: rows.map((r) => ({
+      list: filtered.map((r) => ({
         id: r.id,
         title: r.title,
         subtitle: r.subtitle,
@@ -48,7 +127,7 @@ exports.getGoods = async (req, res) => {
         miniPath: r.mini_path,
         keyword: r.keyword,
       })),
-      total: count,
+      total: filtered.length,
     });
   } catch (err) {
     console.error('[getGoods]', err);
@@ -82,6 +161,8 @@ exports.getDisplay = async (req, res) => {
         };
       }
     }
+
+    result.chainBrands = await buildChainBrandsForDisplay(scene);
 
     ok(res, result);
   } catch (err) {

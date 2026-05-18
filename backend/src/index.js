@@ -55,6 +55,8 @@ app.use((req, res, next) => {
 // 静态文件目录映射到项目内 data/uploads/images 目录（兼容 Linux 部署）
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '..', 'data', 'uploads', 'images')));
+// 小程序分类 Tab 图标（seed 中 /img/index/menuicon*.png）；运营中台经 Vite 代理 /img 访问
+app.use('/img/index', express.static(path.join(__dirname, '..', 'static', 'img', 'index')));
 app.get('/img/placeholders/:name', (req, res) => {
     // 测试环境兜底占位图，避免前端引用历史占位路径时报 500
     const onePxPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Zx1cAAAAASUVORK5CYII=';
