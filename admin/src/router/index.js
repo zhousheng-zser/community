@@ -68,6 +68,12 @@ const routes = [
                 meta: { title: '到家服务派单台', icon: 'Operation' }
             },
             {
+                path: 'service-home-manage',
+                name: 'ServiceHomeManage',
+                component: () => import('../views/ServiceHomeManage.vue'),
+                meta: { title: '服务管理', icon: 'Grid' }
+            },
+            {
                 path: 'home-display-config',
                 name: 'HomeDisplayConfig',
                 component: () => import('../views/HomeDisplayConfig.vue'),
