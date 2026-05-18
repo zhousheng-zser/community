@@ -62,7 +62,7 @@ const serviceProviderRoutes = require('../modules/service-provider-portal/routes
 // ── 社区 ─────────────────────────────────────────────────────────────────
 const communityRoutes = require('../modules/community/routes');
 
-// ── 服务订单 ─────────────────────────────────────────────────────────────
+// ── 服务订单（线上见 src/routes/serviceOrderRoutes.js + controllers/serviceOrderController.js）
 const serviceOrderRoutes = require('../modules/service-order/routes');
 
 // ── 消息通知 ─────────────────────────────────────────────────────────────
@@ -79,6 +79,7 @@ router.use('/benefit-coin', benefitCardRoutes);
 router.use('/benefit-alliance', benefitAllianceRoutes);
 router.use('/admin', benefitAllianceAdminRoutes);
 const adminDispatchRoutes = require('../modules/service-order/adminDispatch.routes');
+// 九州派单（到家）：线上 adminRoutes 亦挂载 assign；本地用 adminDispatch 子路由
 router.use('/admin', adminDispatchRoutes);
 router.use('/coupons', couponRoutes);
 router.use('/chat', chatRoutes);

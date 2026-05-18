@@ -62,7 +62,9 @@ Page({
           const h3u = imgUrl(home3);
           imgs = [h3u, ...imgs.filter((u) => u !== h3u)];
         }
+        const apiId = res.id != null ? Number(res.id) : id;
         service = {
+          id: apiId,
           title,
           subTitle: res.sub_title || res.title || res.name || '',
           price: res.price,
@@ -77,7 +79,7 @@ Page({
 
     service = service || mockMap[id] || mockMap[1];
     const resolvedServiceId =
-      (service && service.id != null && service.id !== '')
+      (service && service.id != null && Number(service.id) > 0)
         ? Number(service.id)
         : Number(this.data.serviceId);
     this.setData({
@@ -131,6 +133,22 @@ Page({
     wx.showToast({ title: now ? '已收藏' : '已取消收藏', icon: 'none' });
   },
   orderConfrim() {
+    if (!wx.getStorageSync('token')) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再下单',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) wx.navigateTo({ url: '/pages/login/login' });
+        }
+      });
+      return;
+    }
+    const sid = Number(this.data.serviceId);
+    if (!Number.isFinite(sid) || sid <= 0) {
+      wx.showToast({ title: '服务暂不可下单，请稍后再试', icon: 'none' });
+      return;
+    }
     const svc = this.data.service || {};
     const name = svc.title || '';
     const sub = svc.subTitle || name;
@@ -143,7 +161,7 @@ Page({
       price = m ? m[0] : '0';
     }
     const image = svc.banner || '';
-    let url = `../order-confrim/order-confrim?name=${encodeURIComponent(name)}&sub=${encodeURIComponent(sub)}&price=${encodeURIComponent(price)}&image=${encodeURIComponent(image)}&serviceId=${this.data.serviceId}`;
+    let url = `../order-confrim/order-confrim?name=${encodeURIComponent(name)}&sub=${encodeURIComponent(sub)}&price=${encodeURIComponent(price)}&image=${encodeURIComponent(image)}&serviceId=${sid}`;
     if (this.data.workerId != null) {
       url += `&workerId=${this.data.workerId}`;
     }

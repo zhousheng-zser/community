@@ -1,6 +1,7 @@
 // pages/order-confrim/order-confrim.js
 const app = getApp();
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 const { fetchDefaultOrderAddressFill } = require('../../utils/defaultServiceAddress.js');
 
 Page({
@@ -140,6 +141,23 @@ Page({
     if (!serviceAddr) return wx.showToast({ title: '请选择服务地址', icon: 'none' });
     if (!contactName) return wx.showToast({ title: '请填写联系人', icon: 'none' });
     if (!contactPhone || contactPhone.length !== 11) return wx.showToast({ title: '请填写正确的联系电话', icon: 'none' });
+    if (!bundleMode) {
+      const sidCheck = Number(serviceId);
+      if (!Number.isFinite(sidCheck) || sidCheck <= 0) {
+        return wx.showToast({ title: '服务信息无效，请返回重选', icon: 'none' });
+      }
+    }
+    if (!wx.getStorageSync('token')) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再下单',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) wx.navigateTo({ url: '/pages/login/login' });
+        }
+      });
+      return;
+    }
 
     const fullAddress = [serviceAddr, doorNum].filter(Boolean).join(' ').trim() || serviceAddr;
     wx.showLoading({ title: '提交中...' });
@@ -179,8 +197,15 @@ Page({
       return;
     }
 
+    const user = app.globalData.user || {};
+    const communityId = user.community_id != null ? user.community_id : user.communityId;
     const body = {
       address: fullAddress,
+      address_snapshot: {
+        detail: fullAddress,
+        contact: contactName,
+        phone: contactPhone
+      },
       contact_name: contactName,
       contact_phone: contactPhone,
       goods_name: product.name,
@@ -189,21 +214,27 @@ Page({
       remark: this.data.remark || ''
     };
     if (userId) body.user_id = userId;
+    if (communityId != null && communityId !== '') {
+      const cid = Number(communityId);
+      if (Number.isFinite(cid) && cid > 0) body.community_id = cid;
+    }
     if (workerId) body.worker_id = Number(workerId);
-    if (serviceId) body.service_id = Number(serviceId);
+    const sid = Number(serviceId);
+    if (Number.isFinite(sid) && sid > 0) body.service_id = sid;
     if (groupKey) body.group_key = groupKey;
 
     const doneOk = (data) => {
       wx.hideLoading();
-      if (data && data.id) {
-        wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + data.id });
+      const oid = data && (data.id || data.order_id);
+      if (oid) {
+        wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + oid });
       } else {
         wx.showToast({ title: '下单成功', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 1500);
       }
     };
 
-    util.post('service-orders', body)
+    api.serviceOrder.createServiceOrder(body)
       .then((data) => doneOk(data))
       .catch((e) => {
         wx.hideLoading();

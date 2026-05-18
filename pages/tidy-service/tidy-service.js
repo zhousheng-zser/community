@@ -343,8 +343,13 @@ Page({
   goServiceDetail(e) {
     const key = this._groupKey || 'tidy';
     const sid = e.currentTarget.dataset.id;
+    const numId = Number(sid);
+    if (!Number.isFinite(numId) || numId <= 0) {
+      wx.showToast({ title: '服务加载中，请稍后再试', icon: 'none' });
+      return;
+    }
     wx.navigateTo({
-      url: `../service/service?id=${sid}&group_key=${encodeURIComponent(key)}`
+      url: `../service/service?id=${numId}&group_key=${encodeURIComponent(key)}`
     });
   }
 });
