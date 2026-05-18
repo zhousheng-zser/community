@@ -8,7 +8,8 @@ const {
   WorkerProfile,
   WorkerService,
   ServiceProviderProfile,
-  ServiceOrderComplaint
+  ServiceOrderComplaint,
+  ServiceHomeModule
 } = require('../models');
 const {
   resolveProviderContext,
@@ -16,6 +17,7 @@ const {
   findProviderOrderById,
   providerOrderInclude
 } = require('../utils/serviceProviderOrderScope');
+const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -45,6 +47,18 @@ const GROUP_FALLBACK_ALLOW_UNPUBLISHED = new Set([
   'house_repair',
   'beauty_home'
 ]);
+
+async function allowsUnpublishedServiceGroup(gk) {
+  const k = String(gk || '').trim();
+  if (!k) return false;
+  if (GROUP_FALLBACK_ALLOW_UNPUBLISHED.has(k)) return true;
+  try {
+    const n = await ServiceHomeModule.count({ where: { group_key: k, is_active: 1 } });
+    return n > 0;
+  } catch (_) {
+    return false;
+  }
+}
 
 function parseMoneyFlexible(v, fallbackNaN = NaN) {
   if (v == null || v === '') return fallbackNaN;
@@ -142,7 +156,8 @@ exports.create = async (req, res) => {
     const pub = sj.is_published;
     const gk = body.group_key != null ? String(body.group_key).trim() : '';
     if (pub === 0 || pub === false) {
-      if (!gk || !GROUP_FALLBACK_ALLOW_UNPUBLISHED.has(gk)) {
+      const allowUnpub = await allowsUnpublishedServiceGroup(gk);
+      if (!gk || !allowUnpub) {
         return fail(res, 400, '服务未上架');
       }
     }
@@ -187,8 +202,8 @@ exports.create = async (req, res) => {
       status = 'pending_worker_accept';
       fulfillment_meta = { await_user_confirm: true, direct_worker: true };
     } else {
-      /** 非直约单（含先支付后运营派单）：与直约一致，技工完工后待用户确认 */
-      fulfillment_meta = { await_user_confirm: true };
+      /** 非直约单：九州中台派同小区技工，支付后待派单 */
+      fulfillment_meta = { await_user_confirm: true, dispatch_mode: 'admin_dispatch' };
     }
 
     let provider_user_id = null;
@@ -431,15 +446,7 @@ exports.mockPay = async (req, res) => {
     if (!order) return fail(res, 404, '订单不存在');
     if (order.pay_status === 'paid') return fail(res, 400, '已支付');
     order.pay_status = 'paid';
-    if (order.status === 'pending_pay' || order.status === 'pending_worker_accept') {
-      if (order.provider_user_id) {
-        order.status = 'pending_accept';
-      } else if (order.assigned_worker_id) {
-        order.status = 'dispatched';
-      } else {
-        order.status = 'paid_pending_dispatch';
-      }
-    }
+    applyServiceOrderStatusAfterPayment(order);
     await order.save();
     try {
       await Service.increment('sales_count', { by: 1, where: { id: order.service_id } });

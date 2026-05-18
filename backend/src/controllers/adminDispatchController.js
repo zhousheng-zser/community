@@ -15,6 +15,22 @@ async function workerAssignable(workerId) {
   return !!(app && prof);
 }
 
+/** 到家派单：订单有小区时，技工须绑定且同属该小区 */
+async function workerAssignableForServiceOrderWorker(workerId, orderCommunityId) {
+  const app = await WorkerApplication.findOne({ where: { user_id: workerId, status: 'approved' } });
+  const prof = await WorkerProfile.findOne({ where: { user_id: workerId, status: 'active' } });
+  if (!app || !prof) return { ok: false, reason: '技工不可派单' };
+  if (orderCommunityId != null) {
+    if (prof.community_id == null) {
+      return { ok: false, reason: '技工未绑定服务小区' };
+    }
+    if (Number(prof.community_id) !== Number(orderCommunityId)) {
+      return { ok: false, reason: '仅能派单给订单所在小区的技工' };
+    }
+  }
+  return { ok: true };
+}
+
 function adminOperatorId(req) {
   const sub = req.admin && req.admin.sub;
   if (sub != null && String(sub).match(/^\d+$/)) return parseInt(sub, 10);
@@ -78,9 +94,10 @@ exports.assignServiceOrder = async (req, res) => {
         ? parseInt(req.body.worker_id, 10)
         : parseInt(req.body.worker_user_id, 10);
     if (!id || !worker_id) return fail(res, 400, '缺少 id 或 worker_id');
-    if (!(await workerAssignable(worker_id))) return fail(res, 400, '技工不可派单');
     const order = await ServiceOrder.findByPk(id);
     if (!order) return fail(res, 404, '订单不存在');
+    const wchk = await workerAssignableForServiceOrderWorker(worker_id, order.community_id);
+    if (!wchk.ok) return fail(res, 400, wchk.reason || '技工不可派单');
     if (order.status !== 'paid_pending_dispatch' || order.assigned_worker_id) {
       return fail(res, 400, '仅「待派单且未指派」的订单可派单');
     }

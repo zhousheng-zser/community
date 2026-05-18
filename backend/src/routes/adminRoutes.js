@@ -18,6 +18,7 @@ const adminSystemController = require('../controllers/adminSystemController');
 const adminLocalGoodsHomeController = require('../controllers/adminLocalGoodsHomeController');
 const adminAuthMiddleware = require('../middlewares/adminAuthMiddleware');
 const adminHomeDisplayController = require('../controllers/adminHomeDisplayController');
+const adminServiceHomeController = require('../controllers/adminServiceHomeController');
 
 
 router.use(adminAuthMiddleware);
@@ -132,8 +133,7 @@ router.get('/home-display/search/workers', adminHomeDisplayController.searchWork
 router.get('/home-display/search/services', adminHomeDisplayController.searchServices);
 router.get('/home-display/search/service-providers', adminHomeDisplayController.searchServiceProviders);
 
-
-const adminServiceHomeController = require('../controllers/adminServiceHomeController');
+// ---- 首页服务模块（九宫格 / 分组页）----
 router.get('/service-home/modules', adminServiceHomeController.listModules);
 router.post('/service-home/modules', adminServiceHomeController.createModule);
 router.put('/service-home/modules/:id', adminServiceHomeController.updateModule);

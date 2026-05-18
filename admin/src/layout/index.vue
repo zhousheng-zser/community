@@ -28,6 +28,8 @@
         <el-menu-item index="/service-provider-applications">服务商入驻</el-menu-item>
           <el-menu-item index="/market-applications">店铺入驻审核</el-menu-item>
           <el-menu-item index="/home-service-dispatch">九州派单（到家+帮帮）</el-menu-item>
+          <el-menu-item index="/home-display-config">首页管理</el-menu-item>
+          <el-menu-item index="/service-home-manage">服务管理</el-menu-item>
           <el-menu-item index="/community-featured">管家精选</el-menu-item>
         </el-sub-menu>
 

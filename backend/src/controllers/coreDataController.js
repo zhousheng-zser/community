@@ -13,7 +13,8 @@ const {
   WorkerService,
   ServiceOrderReview,
   MarketGood,
-  ServiceOrder
+  ServiceOrder,
+  ServiceHomeModule
 } = require('../models');
 
 const ok = (res, data) => res.json({ errno: 0, data });
@@ -35,6 +36,24 @@ const GROUP_META = {
   house_repair: { title: '房屋修缮', price_unit: '次' },
   beauty_home: { title: '上门美业', price_unit: '次' }
 };
+
+/** 小程序分组页：库内已启用模块优先，否则回退代码里预留的九大分组（未迁库时可用） */
+async function resolveServiceGroupAccess(key) {
+  const k = String(key || '').trim();
+  if (!k) return null;
+  try {
+    const mod = await ServiceHomeModule.findOne({ where: { group_key: k, is_active: 1 } });
+    if (mod) {
+      const j = mod.toJSON();
+      return { title: j.title, price_unit: j.price_unit || '次' };
+    }
+  } catch (_) { /* service_home_modules 未建表 */ }
+  if (SERVICE_GROUP_KEYS.has(k)) {
+    const m = GROUP_META[k];
+    return { title: m.title, price_unit: m.price_unit };
+  }
+  return null;
+}
 
 function firstBy(rows, key) {
   const map = {};
@@ -343,11 +362,50 @@ exports.getServiceDetail = async (req, res) => {
   }
 };
 
+exports.getServiceHomeModules = async (req, res) => {
+  try {
+    let rows = [];
+    try {
+      rows = await ServiceHomeModule.findAll({
+        where: { is_active: 1 },
+        order: [['sort_order', 'ASC'], ['id', 'ASC']],
+        attributes: ['group_key', 'title', 'icon_url', 'price_unit', 'sort_order']
+      });
+    } catch (_) {
+      rows = [];
+    }
+    if (!rows.length) {
+      const fallback = [...SERVICE_GROUP_KEYS].map((gk, i) => ({
+        group_key: gk,
+        title: GROUP_META[gk].title,
+        icon_url: null,
+        price_unit: GROUP_META[gk].price_unit,
+        sort_order: (i + 1) * 10
+      }));
+      return ok(res, fallback);
+    }
+    const data = rows.map((r) => {
+      const j = r.toJSON();
+      return {
+        group_key: j.group_key,
+        title: j.title,
+        icon_url: j.icon_url || null,
+        price_unit: j.price_unit || '次',
+        sort_order: j.sort_order != null ? j.sort_order : 0
+      };
+    });
+    return ok(res, data);
+  } catch (e) {
+    console.error('getServiceHomeModules', e);
+    return fail(res, 500, '服务异常');
+  }
+};
+
 exports.getServiceGroup = async (req, res) => {
   try {
     const key = String(req.params.group || '').trim();
-    if (!SERVICE_GROUP_KEYS.has(key)) return fail(res, 400, '无效的服务分组 key');
-    const meta = GROUP_META[key] || { title: key, price_unit: '次' };
+    const meta = await resolveServiceGroupAccess(key);
+    if (!meta) return fail(res, 400, '无效的服务分组 key');
     const categories = await Category.findAll({
       where: { group_type: key },
       order: [['sort_order', 'ASC'], ['id', 'ASC']],
