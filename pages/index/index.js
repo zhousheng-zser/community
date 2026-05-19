@@ -11,7 +11,7 @@ const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
-const { mapRawModulesToCategoryRows } = require('../../utils/homeModulesMap.js');
+const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
 
 // 首页「直约技工」本地兜底数据（后端 core/workers 不可用时的展示）
 const FALLBACK_WORKERS = FALLBACK_WORKER_ROWS.map(mapWorkerForHomeCard);
@@ -603,7 +603,17 @@ Page({
     const idx = e.currentTarget.dataset.index;
     const list = this.data.categoryList;
     if (idx == null || !list[idx]) return;
-    const updated = list.map((item, i) => i === Number(idx) ? { ...item, iconOk: false } : item);
+    const item = list[Number(idx)];
+    if (item._iconFallbackUsed) {
+      const updated = list.map((row, i) => (i === Number(idx) ? { ...row, iconOk: false } : row));
+      this.setData({ categoryList: updated });
+      return;
+    }
+    const fallback = item.iconFallback || HOME_CATEGORY_ICON_BY_KEY[item.groupKey] || '/img/index/menuicon1.png';
+    const updated = list.map((row, i) => {
+      if (i !== Number(idx)) return row;
+      return { ...row, icon: fallback, _iconFallbackUsed: true, iconOk: true };
+    });
     this.setData({ categoryList: updated });
   },
   async init() {
@@ -615,7 +625,11 @@ Page({
       { id: 'local2', imageUrl: images.bannerSale, linkType: 'none', linkValue: '' }
     ];
 
-    const mapHomeIcon = (rows) => rows.map((r) => ({ ...r, icon: imgUrl(r.icon) }));
+    const mapHomeIcon = (rows) => rows.map((r) => ({
+      ...r,
+      icon: imgUrl(r.icon),
+      iconFallback: r.iconFallback || HOME_CATEGORY_ICON_BY_KEY[r.groupKey] || '/img/index/menuicon1.png'
+    }));
     // 与「直约服务商」卡片一致的暖灰底 + 橙色系点缀（无图标时 emoji 兜底仍保持同色系）
     // groupKey 与 tidy-service 页的 key 一致，用于本小区热卖数据推导「不可提供」
     let categoryList = mapHomeIcon([

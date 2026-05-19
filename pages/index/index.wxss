@@ -9,7 +9,7 @@
 .top-wrap {
   position: relative;
   z-index: 10;
-  background: #000000;
+  background: #f97316;
   padding: 18rpx 20rpx 26rpx;
   color: #fff;
 }

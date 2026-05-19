@@ -10,7 +10,7 @@
 <view wx:for="{{coupons}}" wx:key="id" class="item yellow {{item.status!=='unused'?'grey':''}}">
   <view class="left">
     <view class="icon">券</view>
-    <text class="money">{{item.couponMoney}}</text>
+    <text class="money">¥{{item.couponMoney}}</text>
     <text class="threshold" wx:if="{{item.thresholdText}}">{{item.thresholdText}}</text>
   </view>
   <view class="right">

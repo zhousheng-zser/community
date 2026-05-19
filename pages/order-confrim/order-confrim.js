@@ -32,8 +32,41 @@ Page({
     const cached = wx.getStorageSync('checkout_selected_coupon');
     if (cached && cached.id) {
       this.setData({ selectedCoupon: cached });
-    } else if (!this.data.selectedCoupon) {
+      this._recalcPayable();
+    } else {
       this.setData({ selectedCoupon: null });
+      this._tryAutoSelectCoupon();
+    }
+  },
+
+  async _tryAutoSelectCoupon() {
+    if (!wx.getStorageSync('token')) {
+      this._recalcPayable();
+      return;
+    }
+    const amount = this._goodsAmount();
+    if (!amount || amount <= 0) {
+      this._recalcPayable();
+      return;
+    }
+    try {
+      const res = await api.coupon.getAvailableCouponsForOrder({ order_amount: amount });
+      const list = (res && res.list) || (res && res.data && res.data.list) || [];
+      if (!list.length) {
+        this._recalcPayable();
+        return;
+      }
+      const best = list[0];
+      const selected = {
+        id: best.id,
+        coupon_name: best.coupon_name || '满100减20新人券',
+        coupon_money: best.coupon_money != null ? best.coupon_money : best.discount_amount,
+        threshold_amount: best.threshold_amount != null ? best.threshold_amount : 0
+      };
+      wx.setStorageSync('checkout_selected_coupon', selected);
+      this.setData({ selectedCoupon: selected });
+    } catch (e) {
+      console.log('自动选券失败', e);
     }
     this._recalcPayable();
   },

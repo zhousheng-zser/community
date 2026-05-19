@@ -27,6 +27,10 @@ Page({
     fetchData() {
         let url = '';
         const query = {};
+        const app = getApp();
+        const user = (app.globalData && app.globalData.user) || {};
+        const communityId = user.communityId != null ? user.communityId : user.community_id;
+        if (communityId != null && communityId !== '') query.community_id = communityId;
 
         if (this.data.pageType === 'myposts') {
             url = 'posts/my/published';
@@ -42,7 +46,7 @@ Page({
         util.get(url, query)
             .then(res => {
                 // Handle array returned by backend util wrapper appropriately
-                this.setData({ posts: Array.isArray(res) ? res : (res.data || []) });
+                this.setData({ posts: Array.isArray(res) ? res : (res.list || res.data || []) });
             })
             .catch(err => {
                 console.error('加载列表失败', err);

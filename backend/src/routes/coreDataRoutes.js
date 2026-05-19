@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const optionalAuth = require('../middlewares/optionalAuthMiddleware');
 const ctrl = require('../controllers/coreDataController');
-const coreCommunities = require('../modules/core/controllers/core.controller').getCommunities;
+const coreCommunities = require('../controllers/communityListController').getCommunities;
 
 router.get('/banners', ctrl.getBanners);
 router.get('/communities', coreCommunities);

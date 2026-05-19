@@ -4,6 +4,8 @@
 
 /** 中台未配图时回退到小程序包内九宫格图标（与 pages/index 本地兜底一致） */
 const HOME_CATEGORY_ICON_BY_KEY = {
+  gfg: '/img/index/menuicon1.png',
+  ddsd: '/img/index/menuicon2.png',
   tidy: '/img/home_categories/tidy.png',
   urgent_fix: '/img/home_categories/urgent_fix.png',
   appliance_clean: '/img/home_categories/appliance_clean.png',
@@ -48,7 +50,7 @@ function normalizeHomeModuleRow(m) {
   if (!groupKey || !name) return null;
   const sortVal = m.sort != null ? m.sort : m.sort_order;
   let icon = (m.icon != null && String(m.icon).trim()) || (m.icon_url != null && String(m.icon_url).trim()) || '';
-  if (!icon) icon = HOME_CATEGORY_ICON_BY_KEY[groupKey] || '';
+  if (!icon) icon = HOME_CATEGORY_ICON_BY_KEY[groupKey] || '/img/index/menuicon1.png';
   const meta = HOME_CATEGORY_META_BY_KEY[groupKey] || {};
   const rawUrl = m.url != null ? String(m.url).trim() : '';
   const url =
@@ -59,6 +61,7 @@ function normalizeHomeModuleRow(m) {
     name,
     sort: sortVal,
     icon,
+    iconFallback: HOME_CATEGORY_ICON_BY_KEY[groupKey] || '/img/index/menuicon1.png',
     emoji: (m.emoji != null && String(m.emoji)) || meta.emoji || '📌',
     bgColor:
       (m.bg_color != null && String(m.bg_color).trim()) ||

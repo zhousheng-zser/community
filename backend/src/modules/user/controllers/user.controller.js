@@ -2,6 +2,7 @@ const { User, CommunityStewardApplication } = require('../../../models');
 const { MerchantShop } = require('../../../models');
 const couponService = require('../../coupon/services/coupon.service');
 const crypto = require('crypto');
+const { resolveUserId } = require('../../../utils/resolveUserId');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -9,7 +10,7 @@ const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code:
 // GET /user/profile
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserId(req.user && req.user.id);
     if (!userId) return fail(res, '未登录', 401);
 
     try {
@@ -104,7 +105,39 @@ exports.getProfile = async (req, res) => {
 
 // PATCH /user/profile
 exports.updateProfile = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = resolveUserId(req.user && req.user.id);
+    if (!userId) return fail(res, '未登录', 401);
+
+    const body = req.body || {};
+    const updates = {};
+    if (body.nickname != null && body.nickname !== '') updates.nickname = body.nickname;
+    if (body.avatar_url != null) updates.avatar_url = body.avatar_url;
+    if (body.avatarUrl != null) updates.avatar_url = body.avatarUrl;
+
+    const rawComm = body.community_id != null ? body.community_id : body.communityId;
+    if (rawComm != null && rawComm !== '') {
+      const cid = parseInt(rawComm, 10);
+      if (Number.isFinite(cid) && cid > 0) updates.community_id = cid;
+    }
+
+    if (!Object.keys(updates).length) return fail(res, '无有效更新字段');
+
+    const user = await User.findByPk(userId);
+    if (!user) return fail(res, '用户不存在', 404);
+    await user.update(updates);
+
+    ok(res, {
+      id: userId,
+      community_id: user.community_id,
+      communityId: user.community_id,
+      nickname: user.nickname,
+      avatar_url: user.avatar_url
+    }, '更新成功');
+  } catch (err) {
+    console.error('[user/profile PATCH]', err);
+    fail(res, '更新失败', 500);
+  }
 };
 
 // GET /user/addresses

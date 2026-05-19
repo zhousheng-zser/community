@@ -48,6 +48,11 @@ const imgUrl = (path, fallback) => {
     }
     return normalized;
   }
+  if (normalized.startsWith('/uploads/')) {
+    const segments = normalized.split('/').filter(Boolean);
+    const encoded = segments.map((seg) => encodeURIComponent(decodeURIComponent(seg))).join('/');
+    return `${base}/${encoded}`;
+  }
   return base + (normalized.startsWith('/') ? normalized : '/' + normalized);
 };
 

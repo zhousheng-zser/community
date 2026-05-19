@@ -68,16 +68,16 @@ Page({
       this.fetchAssistFeed();
       return;
     }
+    const app = getApp();
+    const user = (app.globalData && app.globalData.user) || {};
+    const communityId = user.communityId != null ? user.communityId : user.community_id;
+    const query = { category: category, page: 1, limit: 20 };
+    if (communityId != null && communityId !== '') query.community_id = communityId;
     console.log(`[社区] 正在拉取分类 [${category}] 的帖子...`);
 
-    // 使用相对路径，斜杠由 util 处理
-    util.get("/posts", {
-      category: category,
-      page: 1,
-      limit: 20
-    })
+    util.get("/posts", query)
       .then(res => {
-        const list = res.list || res;
+        const list = res.list || res.data || (Array.isArray(res) ? res : []);
         const userId = wx.getStorageSync('userId');
         const apiOrigin = config.imageBaseUrl.replace(/\/$/, ''); // 与小程序合法域名、图片域名一致
         
@@ -170,7 +170,14 @@ Page({
   },
 
   goNewPost() {
-    wx.navigateTo({ url: '../community-publish/community-publish' });
+    const tab = this.data.activeTab;
+    if (tab === '邻里互动') {
+      wx.navigateTo({ url: '../order-publish/order-publish' });
+      return;
+    }
+    wx.navigateTo({
+      url: '../community-publish/community-publish?category=' + encodeURIComponent(tab)
+    });
   },
 
   handleLocationTap() {

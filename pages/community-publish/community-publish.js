@@ -5,7 +5,14 @@ const { sensitiveCheck } = require('../../utils/sensitiveWords.js');
 Page({
     data: {
         tempImagePaths: [],
-        isSubmitting: false
+        isSubmitting: false,
+        category: '热门话题'
+    },
+
+    onLoad(options) {
+        if (options && options.category) {
+            this.setData({ category: decodeURIComponent(options.category) });
+        }
     },
 
     chooseImages() {
@@ -83,7 +90,8 @@ Page({
                 return util.post('posts', {
                     content: content,
                     location: location,
-                    images: uploadedUrls
+                    images: uploadedUrls,
+                    category: this.data.category
                 });
             })
             .then(() => {

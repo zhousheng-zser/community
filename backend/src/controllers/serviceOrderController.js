@@ -18,6 +18,7 @@ const {
   providerOrderInclude
 } = require('../utils/serviceProviderOrderScope');
 const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
+const couponService = require('../modules/coupon/services/coupon.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -188,6 +189,19 @@ exports.create = async (req, res) => {
     if (Number.isFinite(parsedGoodsPrice)) amount = parsedGoodsPrice * qSafe;
     if (!Number.isFinite(amount) || amount < 0) amount = Number(service.price) * qSafe;
 
+    const goodsAmountBeforeCoupon = amount;
+    let couponDiscount = 0;
+    let couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
+    if (couponIssueId > 0) {
+      try {
+        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmountBeforeCoupon);
+        couponDiscount = applied.discount;
+        amount = applied.payableAmount;
+      } catch (couponErr) {
+        return fail(res, couponErr.statusCode || 400, couponErr.message || '优惠券不可用');
+      }
+    }
+
     let assigned_worker_id = null;
     let status = 'pending_pay';
     let fulfillment_meta = {};
@@ -204,6 +218,11 @@ exports.create = async (req, res) => {
     } else {
       /** 非直约单：九州中台派同小区技工，支付后待派单 */
       fulfillment_meta = { await_user_confirm: true, dispatch_mode: 'admin_dispatch' };
+    }
+    if (couponIssueId > 0 && couponDiscount > 0) {
+      fulfillment_meta.coupon_issue_id = couponIssueId;
+      fulfillment_meta.coupon_discount = couponDiscount;
+      fulfillment_meta.goods_amount_before_coupon = goodsAmountBeforeCoupon;
     }
 
     let provider_user_id = null;
@@ -233,12 +252,17 @@ exports.create = async (req, res) => {
       provider_user_id,
       fulfillment_meta: Object.keys(fulfillment_meta).length ? fulfillment_meta : null
     });
+    if (couponIssueId > 0) {
+      await couponService.markCouponUsed(couponIssueId, 'service', row.order_no || row.id);
+    }
     return ok(res, {
       id: row.id,
       order_id: row.id,
       order_no: row.order_no,
       status: row.status,
-      pay_status: row.pay_status
+      pay_status: row.pay_status,
+      pay_amount: Number(row.amount || 0).toFixed(2),
+      discount_amount: couponDiscount.toFixed(2)
     });
   } catch (e) {
     console.error('serviceOrder create', e);

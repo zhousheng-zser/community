@@ -7,6 +7,7 @@ Page({
     agreed: false,
     submitting: false,
     communityList: [],
+    communityItems: [],
     communityIndex: -1,
     form: {
       realName: '',
@@ -14,6 +15,7 @@ Page({
       phone: '',
       idCard: '',
       community: '',
+      community_id: null,
       intro: '',
       idFront: ''
     }
@@ -28,26 +30,32 @@ Page({
   },
 
   fetchCommunities() {
-    const applyNames = (res) => {
+    const applyItems = (res) => {
       const list = (res && res.list) || (res && res.data && res.data.list) || (Array.isArray(res && res.data) ? res.data : []) || [];
-      const names = list.map((c) => c.name || c.community_name || c.title).filter(Boolean);
-      if (names.length > 0) {
-        this.setData({ communityList: names });
+      const items = list.map((c) => ({
+        id: c.id != null ? c.id : null,
+        name: c.name || c.community_name || c.title || ''
+      })).filter((c) => c.name);
+      if (items.length > 0) {
+        this.setData({
+          communityItems: items,
+          communityList: items.map((c) => c.name)
+        });
         return true;
       }
       return false;
     };
     util.get('geo/communities')
       .then((res) => {
-        if (!applyNames(res)) this.setData({ communityList: ['其他'] });
+        if (!applyItems(res)) this.setData({ communityList: ['其他'], communityItems: [{ id: null, name: '其他' }] });
       })
       .catch(() => {
         util.get('core/communities')
           .then((res2) => {
-            if (!applyNames(res2)) this.setData({ communityList: ['其他'] });
+            if (!applyItems(res2)) this.setData({ communityList: ['其他'], communityItems: [{ id: null, name: '其他' }] });
           })
           .catch(() => {
-            this.setData({ communityList: ['其他'] });
+            this.setData({ communityList: ['其他'], communityItems: [{ id: null, name: '其他' }] });
           });
       });
   },
@@ -66,7 +74,12 @@ Page({
 
   onCommunityChange(e) {
     const idx = e.detail.value;
-    this.setData({ communityIndex: idx, 'form.community': this.data.communityList[idx] });
+    const item = (this.data.communityItems || [])[idx] || {};
+    this.setData({
+      communityIndex: idx,
+      'form.community': item.name || this.data.communityList[idx] || '',
+      'form.community_id': item.id != null ? item.id : null
+    });
   },
 
   chooseIdCard() {
@@ -102,6 +115,7 @@ Page({
         phone: form.phone,
         gender: form.gender,
         community_name: form.community,
+        community_id: form.community_id,
         id_card: form.idCard,
         id_card_url: idCardUrl,
         intro: form.intro || ''

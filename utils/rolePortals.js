@@ -90,6 +90,7 @@ function mergePortalFlags(target, src) {
   const keys = [
     'id',
     'openid',
+    'community_id', 'communityId',
     'worker_status', 'workerStatus',
     'steward_status', 'stewardStatus',
     'merchant_status', 'merchantStatus',
