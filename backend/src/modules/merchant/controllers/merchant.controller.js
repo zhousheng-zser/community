@@ -18,8 +18,10 @@ async function ensureMerchantOrderTables() {
 
 // ===== 辅助函数 =====
 
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
+
 function getUserId(req) {
-  return req.user && req.user.id ? Number(req.user.id) : 0;
+  return resolveUserIdFromReq(req);
 }
 
 async function getShopByUser(userId) {

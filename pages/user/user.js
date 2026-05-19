@@ -278,7 +278,9 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 4 });
     }
-    const user = app.globalData.user || {};
+    const loggedIn = !!wx.getStorageSync('token');
+    const cached = loggedIn ? (app.globalData.user || {}) : {};
+    const user = loggedIn ? Object.assign({ userName: '加载中...', userMobile: '', tel: '' }, cached) : {};
 
     // 脱敏手机号
     const mobile = user.userMobile || '';
@@ -289,7 +291,6 @@ Page({
     }
 
     const roleLabel = this.computeRoleLabel(user);
-    const loggedIn = !!wx.getStorageSync('token');
 
     this.setData({
       user,

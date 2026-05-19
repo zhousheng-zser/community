@@ -1,4 +1,6 @@
 const app = getApp();
+const sessionReset = require('../../../utils/sessionReset.js');
+const userSession = require('../../../utils/userSession.js');
 Page({
   data: { maskedPhone: '' },
   onShow() {
@@ -35,7 +37,11 @@ Page({
   logout() {
     wx.showModal({ title: '退出登录', content: '确定要退出登录吗？', success(res) {
       if (res.confirm) {
+        sessionReset.clearAccountScopedStorage();
         wx.removeStorageSync('token');
+        wx.removeStorageSync('merchant_token');
+        wx.removeStorageSync('service_provider_token');
+        userSession.clearRememberedUserId();
         wx.setStorageSync('manual_logged_out', true);
         app.globalData.user = null;
         wx.reLaunch({ url: '/pages/index/index' });

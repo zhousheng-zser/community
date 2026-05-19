@@ -15,8 +15,10 @@ async function ensureMessageTables() {
   messageTablesReady = true;
 }
 
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
+
 function userId(req) {
-  return req.user && req.user.id ? Number(req.user.id) : 0;
+  return resolveUserIdFromReq(req);
 }
 
 // GET /messages/conversations

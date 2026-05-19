@@ -9,6 +9,7 @@ const NeighborAssistOrder = db.NeighborAssistOrder;
 const User = db.User;
 const WorkerApplication = db.WorkerApplication;
 const orderPoints = require('../../../services/orderPoints.service');
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 // WorkerProfile 可能由主后端提供，当前环境缺失时降级处理
 const WorkerProfile = db.WorkerProfile || null;
 
@@ -61,7 +62,7 @@ async function assertWorkerCanTakeOrder(workerUserId, order) {
 // POST /neighbor-assist/orders
 exports.create = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
 
     const {
@@ -128,7 +129,7 @@ exports.create = async (req, res) => {
 // GET /neighbor-assist/orders/my
 exports.myList = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
 
     const role = req.query.role || 'publisher';
@@ -195,7 +196,7 @@ exports.myList = async (req, res) => {
 // POST /neighbor-assist/orders/:id/pay
 exports.mockPay = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -224,7 +225,7 @@ exports.mockPay = async (req, res) => {
 // GET /neighbor-assist/orders/pool
 exports.pool = async (req, res) => {
   try {
-    const workerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录', 401);
     if (!(await assertWorker(workerId))) return fail(res, 403, '非已入驻技工', 403);
 
@@ -291,7 +292,7 @@ exports.pool = async (req, res) => {
 // GET /neighbor-assist/orders/community-pool
 exports.communityPool = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const user = await User.findByPk(userId, { attributes: ['id', 'nickname', 'avatar_url', 'phone', 'community_id'] });
     if (!user) return fail(res, 404, '用户不存在');
@@ -347,7 +348,7 @@ exports.communityPool = async (req, res) => {
 // POST /neighbor-assist/orders/:id/grab
 exports.grab = async (req, res) => {
   try {
-    const workerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -385,7 +386,7 @@ exports.grab = async (req, res) => {
 // POST /neighbor-assist/orders/:id/community-grab
 exports.communityGrab = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -424,7 +425,7 @@ exports.communityGrab = async (req, res) => {
 // POST /neighbor-assist/orders/:id/accept
 exports.accept = async (req, res) => {
   try {
-    const workerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -445,7 +446,7 @@ exports.accept = async (req, res) => {
 // POST /neighbor-assist/orders/:id/complete
 exports.complete = async (req, res) => {
   try {
-    const workerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -493,7 +494,7 @@ exports.complete = async (req, res) => {
 // POST /neighbor-assist/orders/:id/cancel
 exports.cancel = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -514,7 +515,7 @@ exports.cancel = async (req, res) => {
 // POST /neighbor-assist/orders/:id/reject
 exports.reject = async (req, res) => {
   try {
-    const workerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
@@ -537,7 +538,7 @@ exports.reject = async (req, res) => {
 // GET /neighbor-assist/orders/:id
 exports.detail = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const orderId = parseInt(req.params.id, 10);
     if (!Number.isFinite(orderId)) return fail(res, 400, '无效订单ID');
@@ -584,7 +585,7 @@ exports.detail = async (req, res) => {
 // POST /neighbor-assist/orders/:id/confirm
 exports.confirm = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, 401, '未登录', 401);
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');

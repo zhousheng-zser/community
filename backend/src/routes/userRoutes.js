@@ -35,6 +35,10 @@ router.post('/footprints/batch', fpCtrl.batchFootprints);
 router.get('/footprints', fpCtrl.getFootprints);
 router.delete('/footprints', fpCtrl.clearFootprints);
 
+// 邀请系统
+router.get('/invite-code', userController.getInviteCode);
+router.post('/bind-inviter', userController.bindInviter);
+router.get('/invitees', userController.getInvitees);
 
 // 服务/服务商收藏
 router.post('/service-favorites', fpCtrl.addServiceFav);
@@ -44,8 +48,3 @@ router.post('/service-favorites/batch', fpCtrl.batchServiceFavs);
 router.get('/service-favorites/check', fpCtrl.checkServiceFav);
 
 module.exports = router;
-
-// 邀请系统
-router.get('/invite-code', userController.getInviteCode);
-router.post('/bind-inviter', userController.bindInviter);
-router.get('/invitees', userController.getInvitees);

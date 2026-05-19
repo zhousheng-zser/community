@@ -1,5 +1,6 @@
 const { CouponTemplate, CouponIssue } = require('../../../models');
 const couponService = require('../services/coupon.service');
+const { resolveUserId, resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
 // GET /coupons/list
 exports.getCouponList = async (req, res) => {
@@ -40,7 +41,8 @@ exports.receiveCoupon = async (req, res) => {
   try {
     await couponService.ensureCouponTables();
     const { coupon_id } = req.body;
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
     if (!coupon_id) return res.status(400).json({ code: 1, msg: '需要 coupon_id' });
     const template = await CouponTemplate.findByPk(coupon_id);
     if (!template || template.status !== 'active') {
@@ -76,7 +78,7 @@ exports.receiveCoupon = async (req, res) => {
 // GET /coupons/my
 exports.getMyCoupons = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
     await couponService.ensureWelcomeCoupon(userId);
     const page = parseInt(req.query.page, 10) || 1;
@@ -114,8 +116,8 @@ exports.getMyCoupons = async (req, res) => {
 /** GET /wx/user/coupon/:id 兼容旧小程序 */
 exports.getMyCouponsLegacy = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
-    const paramId = Number(req.params.id);
+    const userId = resolveUserIdFromReq(req);
+    const paramId = resolveUserId(req.params.id);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
     if (paramId && paramId !== userId) {
       return res.status(403).json({ code: 1, msg: '无权查看' });
@@ -169,7 +171,7 @@ exports.getCouponDetail = async (req, res) => {
 // GET /coupons/available-for-order?order_amount=100
 exports.getAvailableCouponsForOrder = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
     await couponService.ensureWelcomeCoupon(userId);
     const amount = parseFloat(req.query.order_amount) || 0;

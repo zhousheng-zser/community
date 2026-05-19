@@ -1,11 +1,12 @@
 const db = require('../../../models');
 const { WorkerApplication, ServiceOrder } = db;
 const orderPoints = require('../../../services/orderPoints.service');
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
 // POST /worker/apply
 exports.apply = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) {
       return res.status(401).json({ code: 1, msg: '未登录' });
     }
@@ -67,7 +68,7 @@ exports.getApplications = async (req, res) => {
 exports.reviewApplication = async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const reviewerId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const reviewerId = resolveUserIdFromReq(req);
     const { status, reject_reason } = req.body || {};
     if (!id || !status || !['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ code: 1, msg: '参数错误' });
@@ -92,7 +93,7 @@ exports.reviewApplication = async (req, res) => {
 // GET /worker/application/me
 exports.getMyApplication = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) {
       return res.status(401).json({ code: 1, msg: '未登录' });
     }
@@ -108,7 +109,7 @@ exports.getMyApplication = async (req, res) => {
 };
 
 function getWorkerUserId(req) {
-  return req.user && req.user.id ? Number(req.user.id) : 0;
+  return resolveUserIdFromReq(req);
 }
 
 function normalizeWorkerOrder(row) {
@@ -317,7 +318,7 @@ const WorkerService = db.WorkerService;
 // GET /worker/services
 exports.getMyServices = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
@@ -350,7 +351,7 @@ exports.getMyServices = async (req, res) => {
 // POST /worker/services
 exports.createService = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
     const { name, price, desc } = req.body || {};
@@ -376,7 +377,7 @@ exports.createService = async (req, res) => {
 // PATCH /worker/services/:id
 exports.updateService = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
     const id = parseInt(req.params.id, 10);
@@ -403,7 +404,7 @@ exports.updateService = async (req, res) => {
 // POST /worker/services/:id/delete
 exports.deleteService = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
     const id = parseInt(req.params.id, 10);

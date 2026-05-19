@@ -7,7 +7,7 @@ const couponService = require('../modules/coupon/services/coupon.service');
 async function grantWelcomeCoupon(userId) {
   if (!userId) return;
   try {
-    await couponService.ensureWelcomeCoupon(Number(userId));
+    await couponService.ensureWelcomeCoupon(userId);
   } catch (e) {
     console.warn('[auth] ensureWelcomeCoupon', e.message);
   }

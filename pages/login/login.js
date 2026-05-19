@@ -4,6 +4,7 @@ const rolePortals = require('../../utils/rolePortals.js');
 const userSession = require('../../utils/userSession.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const api = require('../../api/index.js');
+const sessionReset = require('../../utils/sessionReset.js');
 
 Page({
   data: {
@@ -126,6 +127,7 @@ Page({
     this.doWechatLogin({}, '微信快捷登录失败');
   },
   handleLoginSuccess(data) {
+    sessionReset.clearAccountScopedStorage();
     wx.removeStorageSync('manual_logged_out');
     wx.setStorageSync('token', data.token);
     const u = data.user || {};

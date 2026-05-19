@@ -28,7 +28,7 @@ async function incrementUserPoints(userId, delta, transaction) {
     console.warn('[orderPoints] User 模型未加载，跳过发放积分');
     return 0;
   }
-  const uid = Number(userId);
+  const uid = userId != null && userId !== '' ? String(userId) : '';
   if (!uid) return 0;
   const opts = transaction ? { transaction } : {};
   const user = await User.findByPk(uid, opts);
@@ -44,7 +44,7 @@ async function decrementUserPointsClamped(userId, delta, transaction) {
     console.warn('[orderPoints] User 模型未加载，跳过扣减积分');
     return 0;
   }
-  const uid = Number(userId);
+  const uid = userId != null && userId !== '' ? String(userId) : '';
   if (!uid) return 0;
   const opts = transaction ? { transaction } : {};
   const user = await User.findByPk(uid, opts);
@@ -65,7 +65,7 @@ async function grantPointsOnOrderPaid(Model, row, transaction = null) {
   if (existing > 0) return 0;
   const pts = payAmountToPoints(resolveOrderPayAmount(row));
   if (pts < 1) return 0;
-  const uid = Number(row.user_id);
+  const uid = row.user_id != null && row.user_id !== '' ? String(row.user_id) : '';
   const added = await incrementUserPoints(uid, pts, transaction);
   if (added < 1) return 0;
   const opts = transaction ? { transaction } : {};
@@ -80,7 +80,7 @@ async function revokePointsOnOrderRefund(Model, row, transaction = null) {
   if (!Model || !row || row.id == null) return 0;
   const pts = Number(row.points_earned || 0);
   if (pts < 1) return 0;
-  const uid = Number(row.user_id);
+  const uid = row.user_id != null && row.user_id !== '' ? String(row.user_id) : '';
   await decrementUserPointsClamped(uid, pts, transaction);
   const opts = transaction ? { transaction } : {};
   await Model.update({ points_earned: 0 }, { where: { id: row.id }, ...opts });
