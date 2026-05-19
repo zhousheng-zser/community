@@ -8,7 +8,7 @@ const api = require('../../api/index.js');
 const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const indexHelper = require('../../utils/indexHelper.js');
-const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const { listImageFromHome3, resolveServiceListImage } = require('../../utils/serviceHome3.js');
 const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
@@ -660,15 +660,15 @@ Page({
 
     // ===== 小区热卖榜：优先 core/community/hot，回退 core/services/hot =====
     const hotRankFallback = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', '上新'];
-    const serviceImageFallbackPool = [
-      images.svcTile,
-      images.svcWall,
-      images.svcWaterproof,
-      images.svcFloor,
-      images.svcAircon,
-      images.svcWasher,
-      images.svcHood,
-      images.hotClean
+    /** 热卖榜/直约服务商兜底：须为包内路径或本机 uploads，勿用 Unsplash（真机域名未白名单会全白） */
+    const hotImageFallbackPool = [
+      images.hotClean,
+      images.hotWasher,
+      images.hotHeater,
+      images.hotHood,
+      '/img/home_categories/tidy.png',
+      '/img/home_categories/urgent_fix.png',
+      '/img/home_categories/appliance_clean.png'
     ];
     const mapHotRows = (rows) => {
       if (!Array.isArray(rows) || rows.length === 0) return null;
@@ -676,15 +676,14 @@ Page({
         const rawTitle = s.title || s.name || '';
         const title = rawTitle.replace(/【.*?】/g, '').trim();
         const it = String(s.item_type || 'service').toLowerCase();
-        const imgByTitle = listImageFromHome3(rawTitle, '');
-        const imgByCover = s.cover_image ? imgUrl(s.cover_image) : '';
-        const fallbackImage = imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean);
+        const resolved = resolveServiceListImage(rawTitle, s.cover_image, null);
+        const fallbackImage = imgUrl(hotImageFallbackPool[i % hotImageFallbackPool.length] || images.hotClean);
         return {
           id: s.id,
           itemType: it === 'shop' ? 'shop' : 'service',
           name: title || '热门项',
           price: String(s.price != null ? s.price : ''),
-          image: imgByTitle || imgByCover || fallbackImage,
+          image: resolved || fallbackImage,
           rank: s.rank != null && s.rank !== '' ? String(s.rank) : (hotRankFallback[i] || '热门')
         };
       });
@@ -708,8 +707,7 @@ Page({
       id: item.id,
       name: item.goodsTitle,
       sub: '服务' + item.id + '单',
-      // 测试期固定给可展示图片，避免后端返回坏链/空链导致卡片无图
-      image: imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean),
+      image: item.image || imgUrl(hotImageFallbackPool[i % hotImageFallbackPool.length] || images.hotClean),
       url: '../service/service?id=' + item.id
     }));
     let merchantList = mapMerchantList();
@@ -825,9 +823,10 @@ Page({
       const svcRes = await util.get('core/services/hot', { limit: 10 });
       const svcData = unwrapList(svcRes);
       if (svcData.length > 0) {
-        goods = svcData.slice(0, 4).map((s) => ({
+        goods = svcData.slice(0, 4).map((s, i) => ({
           id: s.id,
-          remarkC: s.cover_image,
+          image: resolveServiceListImage(s.title || '', s.cover_image, null)
+            || imgUrl(hotImageFallbackPool[i % hotImageFallbackPool.length] || images.hotClean),
           goodsTitle: (s.title || '').replace(/【.*?】/g, '').trim(),
           goodsSub: s.description || '',
           price: String(Number(s.price).toFixed(2))

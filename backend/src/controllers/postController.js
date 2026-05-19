@@ -108,11 +108,6 @@ exports.getPostDetail = async (req, res) => {
             return res.status(401).json({ error: '登录已失效，请重新登录', errno: 401, errmsg: '登录已失效，请重新登录' });
         }
 
-        const viewerCommunityId = await resolveViewerCommunityId(req);
-        if (!viewerCommunityId) {
-            return res.status(403).json({ error: '请先绑定所属小区' });
-        }
-
         const post = await Post.findByPk(postId, {
             include: [
                 {
@@ -136,8 +131,17 @@ exports.getPostDetail = async (req, res) => {
             ]
         });
 
+        let viewerCommunityId = await resolveViewerCommunityId(req);
+        if (!viewerCommunityId && post && post.community_id != null) {
+            const pc = parseInt(post.community_id, 10);
+            if (Number.isFinite(pc) && pc > 0) viewerCommunityId = pc;
+        }
+        if (!viewerCommunityId) {
+            return res.status(403).json({ errno: 403, error: '请先绑定所属小区', errmsg: '请先绑定所属小区' });
+        }
+
         const vis = await assertPostVisibleToViewer(post, viewerCommunityId);
-        if (!vis.ok) return res.status(vis.status).json({ error: vis.error });
+        if (!vis.ok) return res.status(vis.status).json({ errno: vis.status, error: vis.error, errmsg: vis.error });
 
         res.json({ message: '获取成功', data: post });
     } catch (error) {

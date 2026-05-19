@@ -28,6 +28,30 @@ Page({
     },
 
     loadSystemNotices() {
+        const token = wx.getStorageSync('token');
+        if (!token) {
+            this.applyLocalSystemNotices();
+            return;
+        }
+        api.message.getSystemNotices().then((res) => {
+            const list = Array.isArray(res) ? res : [];
+            if (list.length === 0) {
+                lp.seedSystemIfEmpty();
+                this.applyLocalSystemNotices();
+                return;
+            }
+            const systemNotices = list.map((x) =>
+                Object.assign({}, x, {
+                    timeLabel: x.time ? String(x.time).slice(0, 19).replace('T', ' ') : ''
+                })
+            );
+            this.setData({ systemNotices });
+        }).catch(() => {
+            this.applyLocalSystemNotices();
+        });
+    },
+
+    applyLocalSystemNotices() {
         const systemNotices = lp.getSystemNotices().map((x) =>
             Object.assign({}, x, {
                 timeLabel: x.time ? String(x.time).slice(0, 19).replace('T', ' ') : ''
@@ -44,9 +68,19 @@ Page({
 
     openSys(e) {
         const id = e.currentTarget.dataset.id;
+        const row = (this.data.systemNotices || []).find((x) => String(x.id) === String(id));
+        if (row && row.bot_type) {
+            const q = [
+                `conversationId=${id}`,
+                `peerId=0`,
+                `name=${encodeURIComponent(row.title || '系统通知')}`
+            ];
+            wx.navigateTo({ url: `/pages/chat/chat?${q.join('&')}` });
+            this.loadSystemNotices();
+            return;
+        }
         lp.markSystemRead(id);
         this.loadSystemNotices();
-        const row = (this.data.systemNotices || []).find((x) => String(x.id) === String(id));
         if (row && row.content) {
             wx.showModal({ title: row.title || '通知', content: row.content, showCancel: false });
         }

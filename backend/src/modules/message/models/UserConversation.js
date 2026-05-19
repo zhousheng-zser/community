@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     unread_count: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
     is_deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {
-    tableName: 'user_conversations',
+    tableName: 'userconversations',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
   UserConversation.associate = (models) => {
     if (models.Conversation) {
       UserConversation.belongsTo(models.Conversation, { foreignKey: 'conversation_id', as: 'conversation' });
+    }
+    if (models.User) {
+      UserConversation.belongsTo(models.User, { foreignKey: 'peer_id', as: 'peerUser', constraints: false });
     }
   };
 

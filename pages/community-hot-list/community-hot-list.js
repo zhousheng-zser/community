@@ -1,19 +1,18 @@
 const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const images = require('../../utils/images.js');
-const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
+const { resolveServiceListImage } = require('../../utils/serviceHome3.js');
 const { unwrapList, imgUrl } = util;
 
 const HOT_RANK_FALLBACK = ['NO.1', 'NO.2', 'NO.3', 'NO.4', 'NO.5', 'NO.6', 'NO.7', 'NO.8', 'NO.9', 'NO.10'];
-const SERVICE_IMAGE_FALLBACK_POOL = [
-  images.svcTile,
-  images.svcWall,
-  images.svcWaterproof,
-  images.svcFloor,
-  images.svcAircon,
-  images.svcWasher,
-  images.svcHood,
-  images.hotClean
+const HOT_IMAGE_FALLBACK_POOL = [
+  images.hotClean,
+  images.hotWasher,
+  images.hotHeater,
+  images.hotHood,
+  '/img/home_categories/tidy.png',
+  '/img/home_categories/urgent_fix.png',
+  '/img/home_categories/appliance_clean.png'
 ];
 
 function mapHotRows(rows, limit) {
@@ -23,15 +22,14 @@ function mapHotRows(rows, limit) {
     const rawTitle = s.title || s.name || '';
     const title = rawTitle.replace(/【.*?】/g, '').trim();
     const it = String(s.item_type || 'service').toLowerCase();
-    const imgByTitle = listImageFromHome3(rawTitle, '');
-    const imgByCover = s.cover_image ? imgUrl(s.cover_image) : '';
-    const fallbackImage = imgUrl(SERVICE_IMAGE_FALLBACK_POOL[i % SERVICE_IMAGE_FALLBACK_POOL.length] || images.hotClean);
+    const resolved = resolveServiceListImage(rawTitle, s.cover_image, null);
+    const fallbackImage = imgUrl(HOT_IMAGE_FALLBACK_POOL[i % HOT_IMAGE_FALLBACK_POOL.length] || images.hotClean);
     return {
       id: s.id,
       itemType: it === 'shop' ? 'shop' : 'service',
       name: title || '热门项',
       price: String(s.price != null ? s.price : ''),
-      image: imgByTitle || imgByCover || fallbackImage,
+      image: resolved || fallbackImage,
       rank: s.rank != null && s.rank !== '' ? String(s.rank) : (HOT_RANK_FALLBACK[i] || '热门')
     };
   });

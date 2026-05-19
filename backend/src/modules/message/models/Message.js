@@ -11,8 +11,14 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'messages',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: false
   });
+
+  Message.associate = (models) => {
+    if (models.User) {
+      Message.belongsTo(models.User, { foreignKey: 'sender_id', as: 'sender', constraints: false });
+    }
+  };
 
   return Message;
 };

@@ -283,7 +283,8 @@ Page({
       if (!data || typeof data !== 'object') return;
       const config = this.getPageConfig(key);
       const built = this.buildPagePayloadFromServiceGroup(data, config.priceUnit, config);
-      if (!built.services.length && !built.categories.length) {
+      // 中台仅有分类、无服务项时不要用空列表覆盖本地兜底
+      if (!built.services.length) {
         if (data.title) this.setData({ pageTitle: String(data.title), loading: false });
         return;
       }

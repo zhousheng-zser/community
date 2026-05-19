@@ -57,9 +57,13 @@ Page({
 
     goPostDetail(e) {
         const { id, index } = e.currentTarget.dataset;
-        const postId = id || (this.data.posts[index] && this.data.posts[index].id);
+        const post = this.data.posts[index] || {};
+        const postId = id || post.id;
         if (!postId) return;
-        wx.navigateTo({ url: `/package-customer/pages/post-detail/post-detail?id=${postId}` });
+        const q = [`id=${encodeURIComponent(postId)}`];
+        const cid = post.community_id;
+        if (cid != null && cid !== '') q.push(`community_id=${encodeURIComponent(cid)}`);
+        wx.navigateTo({ url: `/package-customer/pages/post-detail/post-detail?${q.join('&')}` });
     },
 
     handleLike(e) {

@@ -119,7 +119,8 @@ Page({
             .catch(err => {
                 this.setData({ isSubmitting: false });
                 wx.hideLoading();
-                wx.showToast({ title: '发布失败，请重试', icon: 'none' });
+                const msg = (err && (err.errmsg || err.msg || err.error)) || '发布失败，请重试';
+                wx.showToast({ title: msg, icon: 'none' });
                 console.error('发布失败:', err);
             });
     }

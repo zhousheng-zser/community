@@ -11,7 +11,7 @@
       <view class="time-stamp" wx:if="{{index % 5 === 0}}">{{item.created_at}}</view>
 
       <!-- 对方发的消息 (左边) -->
-      <view class="chat-row left" wx:if="{{item.sender_id != myUserId}}">
+      <view class="chat-row left" wx:if="{{!item.isMine}}">
         <image class="avatar" src="{{item.sender ? item.sender.avatar_url : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80'}}"></image>
         <view class="bubble left-bubble">
           <text wx:if="{{item.msg_type === 'text'}}">{{item.content}}</text>

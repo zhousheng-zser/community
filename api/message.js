@@ -44,10 +44,19 @@ const broadcastMessage = (data) => {
   return post('/messages/broadcast', data);
 };
 
+/**
+ * 获取系统通知列表
+ * GET /messages/system-notices
+ */
+const getSystemNotices = (params) => {
+  return get('/messages/system-notices', params);
+};
+
 module.exports = {
   getConversations,
   getConversationList: getConversations,
   getConversationMessages,
+  getSystemNotices,
   deleteConversation,
   sendMessage,
   broadcastMessage

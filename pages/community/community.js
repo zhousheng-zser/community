@@ -186,8 +186,20 @@ Page({
       });
       return;
     }
+    const app = getApp();
+    const user = (app.globalData && app.globalData.user) || {};
+    let communityId = user.communityId != null ? user.communityId : user.community_id;
+    if (communityId == null || communityId === '') {
+      try {
+        const cached = wx.getStorageSync('user_community_id');
+        if (cached != null && cached !== '') communityId = cached;
+      } catch (e) { /* ignore */ }
+    }
+    const cid = post.community_id != null ? post.community_id : communityId;
+    const q = [`id=${encodeURIComponent(post.id)}`];
+    if (cid != null && cid !== '') q.push(`community_id=${encodeURIComponent(cid)}`);
     wx.navigateTo({
-      url: `/package-customer/pages/post-detail/post-detail?id=${post.id}`
+      url: `/package-customer/pages/post-detail/post-detail?${q.join('&')}`
     });
   },
 

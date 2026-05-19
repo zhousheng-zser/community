@@ -365,6 +365,10 @@
       {
         "type": "folder",
         "value": "kfcdot"
+      },
+      {
+        "type": "folder",
+        "value": "src"
       }
     ],
     "include": []

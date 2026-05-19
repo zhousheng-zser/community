@@ -1,6 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const { sensitiveCheck } = require('../../utils/sensitiveWords.js');
+const { asId, sameId } = require('../../utils/snowflakeId.js');
 
 Page({
   data: {
@@ -28,7 +29,7 @@ Page({
     const title = options.name ? decodeURIComponent(options.name) : '会话';
     wx.setNavigationBarTitle({ title: title.length > 12 ? title.slice(0, 12) + '…' : title });
 
-    const uid = app.globalData.user && app.globalData.user.id ? parseInt(String(app.globalData.user.id), 10) : 0;
+    const uid = asId(app.globalData.user && app.globalData.user.id);
     const u = app.globalData.user || {};
     const sid = u.shop_id != null ? u.shop_id : u.shopId;
     const shopIdForApi = sid != null && sid !== '' ? sid : null;
@@ -70,6 +71,7 @@ Page({
           const row = Object.assign({}, m);
           const mt = row.msg_type || row.msgType;
           row.msg_type = mt;
+          row.isMine = sameId(row.sender_id, this.data.myUserId);
           if (mt === 'image' && row.content) {
             row.content = util.imgUrl(row.content);
           }
@@ -120,7 +122,7 @@ Page({
       msgType: 'text'
     };
     if (peerId != null && peerId !== '') {
-      payload.peerId = Number(peerId);
+      payload.peerId = asId(peerId);
     }
     if (this.data.shopIdForApi != null) {
       payload.shop_id = this.data.shopIdForApi;
@@ -131,7 +133,8 @@ Page({
       sender_id: this.data.myUserId,
       msg_type: 'text',
       content: text,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      isMine: true
     };
     this.setData(
       {
@@ -187,9 +190,9 @@ Page({
       } catch (e) {}
     }
 
-    const mine = Number(this.data.myUserId || 0);
+    const mine = asId(this.data.myUserId);
     const history = Array.isArray(this.data.history) ? this.data.history : [];
-    const peerMsg = history.find((m) => m && Number(m.sender_id) !== mine && m.sender_id != null);
+    const peerMsg = history.find((m) => m && !sameId(m.sender_id, mine) && m.sender_id != null);
     if (peerMsg) {
       this.setData({ peerId: String(peerMsg.sender_id) });
       return peerMsg.sender_id;
@@ -214,15 +217,20 @@ Page({
           .then(async (data) => {
             let path = data.url || data.path;
             if (!path) throw new Error('no url');
-            const displayUrl = util.imgUrl(path);
+            if (path.indexOf('http') === 0) {
+              try {
+                const u = new URL(path);
+                path = u.pathname;
+              } catch (e) { /* keep */ }
+            }
             const peerId = await this.ensurePeerIdForSend();
             const payload = {
               conversationId: this.data.conversationId,
-              content: displayUrl,
+              content: path,
               msgType: 'image'
             };
             if (peerId != null && peerId !== '') {
-              payload.peerId = Number(peerId);
+              payload.peerId = asId(peerId);
             }
             if (this.data.shopIdForApi != null) {
               payload.shop_id = this.data.shopIdForApi;
@@ -278,14 +286,19 @@ Page({
           .then(async (data) => {
             let path = data.url || data.path;
             if (!path) throw new Error('no url');
-            const displayUrl = util.imgUrl(path);
+            if (path.indexOf('http') === 0) {
+              try {
+                const u = new URL(path);
+                path = u.pathname;
+              } catch (e) { /* keep */ }
+            }
             const peerId = await this.ensurePeerIdForSend();
             const payload = {
               conversationId: this.data.conversationId,
-              content: displayUrl,
+              content: path,
               msgType: 'audio'
             };
-            if (peerId != null && peerId !== '') payload.peerId = Number(peerId);
+            if (peerId != null && peerId !== '') payload.peerId = asId(peerId);
             if (this.data.shopIdForApi != null) payload.shop_id = this.data.shopIdForApi;
             return util.post('messages/send', payload);
           })

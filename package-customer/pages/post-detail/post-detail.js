@@ -6,8 +6,10 @@ const { asId, sameId } = require('../../../utils/snowflakeId.js');
 Page({
   data: {
     postId: '',
+    viewerCommunityId: '',
     post: null,
     loading: true,
+    loadError: '',
     commentText: '',
     submitting: false
   },
@@ -19,7 +21,11 @@ Page({
       setTimeout(() => wx.navigateBack(), 800);
       return;
     }
-    this.setData({ postId: String(id) });
+    const cid = options.community_id || options.communityId || '';
+    this.setData({
+      postId: String(id),
+      viewerCommunityId: cid !== '' && cid != null ? String(cid) : ''
+    });
     this.loadPost();
   },
 
@@ -27,19 +33,26 @@ Page({
     this.loadPost().finally(() => wx.stopPullDownRefresh());
   },
 
-  loadPost() {
-    this.setData({ loading: true });
-    let communityId = '';
-    try {
-      communityId = wx.getStorageSync('user_community_id') || '';
-    } catch (e) { /* ignore */ }
+  /** 与 pages/community/community.js 一致：先 globalData 再 storage */
+  resolveViewerCommunityId() {
+    if (this.data.viewerCommunityId) return String(this.data.viewerCommunityId);
     const app = getApp();
     const user = (app.globalData && app.globalData.user) || {};
-    if (!communityId) {
-      communityId = user.communityId != null ? user.communityId : (user.community_id || '');
+    let communityId = user.communityId != null ? user.communityId : user.community_id;
+    if (communityId == null || communityId === '') {
+      try {
+        const cached = wx.getStorageSync('user_community_id');
+        if (cached != null && cached !== '') communityId = cached;
+      } catch (e) { /* ignore */ }
     }
+    return communityId != null && communityId !== '' ? String(communityId) : '';
+  },
+
+  loadPost() {
+    this.setData({ loading: true, loadError: '' });
+    const communityId = this.resolveViewerCommunityId();
     const query = {};
-    if (communityId !== '' && communityId != null) query.community_id = communityId;
+    if (communityId) query.community_id = communityId;
 
     return util.get(`posts/${this.data.postId}`, query)
       .then((res) => {
@@ -48,25 +61,26 @@ Page({
           throw new Error('empty');
         }
         const post = this.normalizePost(raw);
-        this.setData({ post, loading: false });
+        this.setData({ post, loading: false, loadError: '' });
         if (post.category) {
           wx.setNavigationBarTitle({ title: post.category });
         }
       })
       .catch((err) => {
-        this.setData({ loading: false, post: null });
         const errno = err && (err.errno || err.code);
-        if (errno === 401) {
-          wx.showToast({ title: '请先登录', icon: 'none' });
-        } else {
-          wx.showToast({ title: '加载失败', icon: 'none' });
-        }
+        let loadError = '加载失败，请稍后重试';
+        if (errno === 401) loadError = '请先登录后查看';
+        else if (errno === 403) loadError = '请先选择所属小区，或该帖不在当前小区';
+        const msg = (err && (err.errmsg || err.msg || err.error)) || '';
+        if (msg) loadError = msg;
+        this.setData({ loading: false, post: null, loadError });
+        wx.showToast({ title: loadError, icon: 'none' });
       });
   },
 
   normalizePost(post) {
     const app = getApp();
-    const uid = asId((app.globalData && app.globalData.user) || {}).id);
+    const uid = asId((app.globalData && app.globalData.user && app.globalData.user.id) || '');
     const apiOrigin = config.imageBaseUrl.replace(/\/$/, '');
 
     let images = post.images || [];

@@ -280,18 +280,38 @@ exports.getCategories = async (req, res) => {
   }
 };
 
+/** 热卖榜排除 E2E/地铁站等测试脏数据，优先有分类的真实服务 */
+function hotServiceListWhere(extra = {}) {
+  return {
+    ...publishedWhere(),
+    ...extra,
+    [Op.and]: [
+      { category_id: { [Op.not]: null } },
+      { title: { [Op.notLike]: '%测试%' } },
+      { title: { [Op.notLike]: '%E2E%' } },
+      { title: { [Op.notLike]: '%地铁站%' } },
+      { title: { [Op.notLike]: '%模拟%' } },
+      { title: { [Op.notLike]: '%家修急事-最快%' } }
+    ]
+  };
+}
+
 exports.getHotServices = async (req, res) => {
   try {
     let limit = parseInt(req.query.limit, 10);
     if (!Number.isFinite(limit) || limit < 1) limit = 10;
-    limit = Math.min(limit, 20);
+    limit = Math.min(limit, 80);
     const categoryId = req.query.category_id ? parseInt(req.query.category_id, 10) : null;
-    const where = { ...publishedWhere() };
+    const where = hotServiceListWhere();
     if (categoryId) where.category_id = categoryId;
     const services = await Service.findAll({
       where,
       limit,
-      order: [['sales_count', 'DESC'], ['id', 'DESC']],
+      order: [
+        [sequelize.literal("(CASE WHEN cover_image LIKE '/uploads/%' THEN 0 WHEN id >= 102 THEN 1 ELSE 2 END)"), 'ASC'],
+        ['sales_count', 'DESC'],
+        ['id', 'DESC']
+      ],
       include: [{ model: Category, as: 'category', attributes: ['name'] }]
     });
     return ok(res, services.map(normalizeServiceRow));
