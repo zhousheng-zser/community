@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require('../models');
+const { resolveUserIdFromReq } = require('../utils/resolveUserId');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -55,7 +56,8 @@ async function assertWorkerCanTakeOrder(workerUserId, order) {
 // Create order with amount
 exports.create = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const {
       assist_type,
       origin_address_snapshot,
@@ -106,7 +108,8 @@ exports.create = async (req, res) => {
 // My orders (publisher or helper role)
 exports.myList = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const role = req.query.role || 'publisher';
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     let limit = parseInt(req.query.limit != null && req.query.limit !== '' ? req.query.limit : req.query.page_size || '10', 10) || 10;
@@ -171,7 +174,8 @@ exports.myList = async (req, res) => {
 // Mock pay (publisher pays for their order)
 exports.mockPay = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findOne({ where: { id, user_id: userId } });
@@ -190,7 +194,8 @@ exports.mockPay = async (req, res) => {
 // Worker pool (技工抢单大厅 - existing, requires worker)
 exports.pool = async (req, res) => {
   try {
-    const workerId = req.user.id;
+    const workerId = resolveUserIdFromReq(req);
+    if (!workerId) return fail(res, 401, '未登录');
     if (!(await assertWorker(workerId))) return fail(res, 403, '非已入驻技工', 403);
     const prof = await WorkerProfile.findOne({ where: { user_id: workerId, status: 'active' } });
     let filterComm = prof && prof.community_id != null ? Number(prof.community_id) : null;
@@ -250,7 +255,8 @@ exports.pool = async (req, res) => {
 // Community pool - 同社区未接单的待支付订单（面向社区普通成员，非技工）
 exports.communityPool = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const user = await User.findByPk(userId, { attributes: ['id', 'nickname', 'avatar_url', 'phone', 'community_id'] });
     if (!user) return fail(res, 404, '用户不存在');
 
@@ -305,7 +311,8 @@ exports.communityPool = async (req, res) => {
 // Worker grab (技工抢单 - existing, requires worker)
 exports.grab = async (req, res) => {
   try {
-    const workerId = req.user.id;
+    const workerId = resolveUserIdFromReq(req);
+    if (!workerId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findByPk(id);
@@ -336,7 +343,8 @@ exports.grab = async (req, res) => {
 // Community grab - 社区普通成员接单（非技工，面向邻里互助）
 exports.communityGrab = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
 
@@ -369,7 +377,8 @@ exports.communityGrab = async (req, res) => {
 // Accept (接单方确认开始服务)
 exports.accept = async (req, res) => {
   try {
-    const workerId = req.user.id;
+    const workerId = resolveUserIdFromReq(req);
+    if (!workerId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findByPk(id);
@@ -389,7 +398,8 @@ exports.accept = async (req, res) => {
 // Complete - 接单方完成服务，资金到账（escrow release）
 exports.complete = async (req, res) => {
   try {
-    const workerId = req.user.id;
+    const workerId = resolveUserIdFromReq(req);
+    if (!workerId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findByPk(id);
@@ -436,7 +446,8 @@ exports.complete = async (req, res) => {
 // Publisher cancel (unpaid orders)
 exports.cancel = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findOne({ where: { id, user_id: userId } });
@@ -456,7 +467,8 @@ exports.cancel = async (req, res) => {
 // Reject (接单方拒单，订单回到待接单池)
 exports.reject = async (req, res) => {
   try {
-    const workerId = req.user.id;
+    const workerId = resolveUserIdFromReq(req);
+    if (!workerId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findByPk(id);
@@ -478,7 +490,8 @@ exports.reject = async (req, res) => {
 // Detail
 exports.detail = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const orderId = parseInt(req.params.id, 10);
     if (!Number.isFinite(orderId)) return fail(res, 400, '无效订单ID');
 
@@ -527,7 +540,8 @@ exports.detail = async (req, res) => {
 // Confirm (发布人确认订单完成)
 exports.confirm = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findOne({ where: { id, user_id: userId } });

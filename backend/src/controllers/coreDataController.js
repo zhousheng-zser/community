@@ -1,5 +1,6 @@
 const { Op, QueryTypes } = require('sequelize');
 const { toAbsoluteAssetUrl } = require('../utils/assetUrl');
+const { resolveUserId } = require('../utils/resolveUserId');
 const {
   Category,
   Service,
@@ -504,7 +505,7 @@ exports.getWorkers = async (req, res) => {
 
 exports.getWorkerDetail = async (req, res) => {
   try {
-    const workerId = Number(req.params.id);
+    const workerId = resolveUserId(req.params.id);
     if (!workerId) return fail(res, 400, '无效技工 id');
     const listable = await assertWorkerListable(workerId);
     if (!listable) return fail(res, 404, '不存在', 404);
@@ -575,7 +576,7 @@ exports.getServiceProviders = async (req, res) => {
 
 exports.getServiceProviderDetail = async (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = resolveUserId(req.params.id);
     if (!userId) return fail(res, 400, '无效 id');
     const qComm = parseCommunityQuery(req);
     const row = await ServiceProviderProfile.findOne({
@@ -612,7 +613,7 @@ exports.getServiceProviderDetail = async (req, res) => {
 
 exports.getWorkerServices = async (req, res) => {
   try {
-    const workerId = Number(req.params.id);
+    const workerId = resolveUserId(req.params.id);
     if (!workerId) return fail(res, 400, '无效技工 id');
     const listable = await assertWorkerListable(workerId);
     if (!listable) return fail(res, 404, '不存在', 404);
@@ -650,7 +651,7 @@ exports.getWorkerServices = async (req, res) => {
 
 exports.getWorkerReviews = async (req, res) => {
   try {
-    const workerId = Number(req.params.id);
+    const workerId = resolveUserId(req.params.id);
     if (!workerId) return fail(res, 400, '无效技工 id');
     const listable = await assertWorkerListable(workerId);
     if (!listable) return fail(res, 404, '不存在', 404);
@@ -690,7 +691,7 @@ exports.getWorkerReviews = async (req, res) => {
 
 exports.getServiceProviderCatalog = async (req, res) => {
   try {
-    const userId = Number(req.params.id);
+    const userId = resolveUserId(req.params.id);
     if (!userId) return fail(res, 400, '无效 id');
     const qComm = parseCommunityQuery(req);
     const row = await ServiceProviderProfile.findOne({

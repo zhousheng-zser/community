@@ -3,6 +3,7 @@ const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication, Us
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
 const couponService = require('../../coupon/services/coupon.service');
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
@@ -89,7 +90,7 @@ async function ensureSoTables() {
 }
 
 function getUserId(req) {
-  return req.user && req.user.id ? Number(req.user.id) : 0;
+  return resolveUserIdFromReq(req);
 }
 
 function normalizeServiceOrder(row) {

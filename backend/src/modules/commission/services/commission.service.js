@@ -13,9 +13,20 @@ const {
   User
 } = require('../../../models');
 const { Op } = require('sequelize');
+const { resolveUserId } = require('../../../utils/resolveUserId');
 
 const ROLE_NAMES = ['headquarters', 'promoter', 'district_partner', 'market_partner'];
 const PARTNER_ROLES = ['promoter', 'district_partner', 'market_partner'];
+
+let partnerBalanceTableReady = false;
+
+async function ensurePartnerBalanceTable() {
+  if (partnerBalanceTableReady) return;
+  if (PartnerCommissionBalance && PartnerCommissionBalance.sync) {
+    await PartnerCommissionBalance.sync();
+  }
+  partnerBalanceTableReady = true;
+}
 
 /**
  * Get all commission rate configs.
@@ -319,8 +330,20 @@ async function confirmCommission(orderId) {
  * Get a user's total commission balance across all their roles.
  */
 async function getUserBalance(userId) {
+  const uid = resolveUserId(userId);
+  if (!uid) {
+    return {
+      total_earned: 0,
+      available_amount: 0,
+      withdrawn_amount: 0,
+      pending_amount: 0,
+      frozen_amount: 0,
+      roles: []
+    };
+  }
+  await ensurePartnerBalanceTable();
   const balances = await PartnerCommissionBalance.findAll({
-    where: { user_id: userId }
+    where: { user_id: uid }
   });
 
   const summary = {

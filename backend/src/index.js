@@ -134,7 +134,7 @@ require('./mountBenefitAlliance')(app);
 // ===================
 const userController = require('./controllers/userController');
 app.get('/api/v1/acount/info', userController.getAccountInfo);
-app.get('/api/v1/wx/user/coupon/:id', userController.getUserCoupons);
+// wx/user/coupon 已在上方注册 getMyCouponsLegacy（带鉴权），勿重复注册空 stub
 
 // 本地集市商家入驻图片上传接口（统一 JSON 返回）
 const { uploadMarketImage, getImageMeta } = require('./utils/marketUpload');

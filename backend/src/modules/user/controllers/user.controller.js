@@ -1,15 +1,29 @@
-const { User, CommunityStewardApplication } = require('../../../models');
-const { MerchantShop } = require('../../../models');
+const { User, CommunityStewardApplication, MerchantShop, BrowseFootprint } = require('../../../models');
 const couponService = require('../../coupon/services/coupon.service');
 const crypto = require('crypto');
+const { resolveUserId, resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
 
+let footprintTableReady = false;
+async function ensureBrowseFootprintTable() {
+  if (footprintTableReady) return true;
+  if (!BrowseFootprint || !BrowseFootprint.sync) return false;
+  try {
+    await BrowseFootprint.sync();
+    footprintTableReady = true;
+    return true;
+  } catch (e) {
+    console.warn('[user/footprints] ensure table', e.message);
+    return false;
+  }
+}
+
 // GET /user/profile
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserId(req.user && req.user.id);
     if (!userId) return fail(res, '未登录', 401);
 
     try {
@@ -104,7 +118,39 @@ exports.getProfile = async (req, res) => {
 
 // PATCH /user/profile
 exports.updateProfile = async (req, res) => {
-  res.status(501).json({ code: 1, msg: '由主后端实现' });
+  try {
+    const userId = resolveUserId(req.user && req.user.id);
+    if (!userId) return fail(res, '未登录', 401);
+
+    const body = req.body || {};
+    const updates = {};
+    if (body.nickname != null && body.nickname !== '') updates.nickname = body.nickname;
+    if (body.avatar_url != null) updates.avatar_url = body.avatar_url;
+    if (body.avatarUrl != null) updates.avatar_url = body.avatarUrl;
+
+    const rawComm = body.community_id != null ? body.community_id : body.communityId;
+    if (rawComm != null && rawComm !== '') {
+      const cid = parseInt(rawComm, 10);
+      if (Number.isFinite(cid) && cid > 0) updates.community_id = cid;
+    }
+
+    if (!Object.keys(updates).length) return fail(res, '无有效更新字段');
+
+    const user = await User.findByPk(userId);
+    if (!user) return fail(res, '用户不存在', 404);
+    await user.update(updates);
+
+    ok(res, {
+      id: userId,
+      community_id: user.community_id,
+      communityId: user.community_id,
+      nickname: user.nickname,
+      avatar_url: user.avatar_url
+    }, '更新成功');
+  } catch (err) {
+    console.error('[user/profile PATCH]', err);
+    fail(res, '更新失败', 500);
+  }
 };
 
 // GET /user/addresses
@@ -130,7 +176,7 @@ exports.deleteAddress = async (req, res) => {
 // GET /user/invite-code
 exports.getInviteCode = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
 
     const user = await User.findByPk(userId);
@@ -167,7 +213,7 @@ exports.getInviteCode = async (req, res) => {
 // POST /user/bind-inviter
 exports.bindInviter = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
 
     const { invite_code } = req.body;
@@ -204,7 +250,7 @@ exports.bindInviter = async (req, res) => {
 // GET /user/invitees
 exports.getInvitees = async (req, res) => {
   try {
-    const userId = req.user && req.user.id ? Number(req.user.id) : 0;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
 
     const page = parseInt(req.query.page) || 1;
@@ -235,15 +281,14 @@ exports.getInvitees = async (req, res) => {
 
 // ─── 浏览足迹 ────────────────────────────────────────────────────────────────
 
-const { BrowseFootprint } = require('../../../models');
-
 // POST /user/footprints - 记录一条足迹
 exports.recordFootprint = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { kind, dedupe_key, title, cover, url } = req.body || {};
     if (!kind || !dedupe_key || !url) return fail(res, '参数不完整');
+    if (!(await ensureBrowseFootprintTable())) return ok(res, { id: null });
 
     const [row] = await BrowseFootprint.upsert({
       user_id: userId,
@@ -264,10 +309,11 @@ exports.recordFootprint = async (req, res) => {
 // POST /user/footprints/batch - 批量上传足迹（本地→后端同步）
 exports.batchFootprints = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { list } = req.body || {};
     if (!Array.isArray(list) || !list.length) return fail(res, '空列表');
+    if (!(await ensureBrowseFootprintTable())) return ok(res, { synced: 0 });
 
     const rows = list.slice(0, 50).map(item => ({
       user_id: userId,
@@ -294,8 +340,11 @@ exports.batchFootprints = async (req, res) => {
 // GET /user/footprints - 获取足迹列表
 exports.getFootprints = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
+    if (!(await ensureBrowseFootprintTable())) {
+      return ok(res, { list: [], total: 0, page: parseInt(req.query.page) || 1 });
+    }
 
     const page = parseInt(req.query.page) || 1;
     const limit = Math.min(parseInt(req.query.limit) || 50, 100);
@@ -328,8 +377,10 @@ exports.getFootprints = async (req, res) => {
 // DELETE /user/footprints - 清空足迹
 exports.clearFootprints = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
+    if (!(await ensureBrowseFootprintTable())) return ok(res, null, '已清空');
+
     await BrowseFootprint.destroy({ where: { user_id: userId } });
     ok(res, null, '已清空');
   } catch (err) {
@@ -345,7 +396,7 @@ const { ServiceFavorite } = require('../../../models');
 // POST /user/service-favorites - 添加收藏
 exports.addServiceFav = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { kind, target_id, title, cover, price, url } = req.body || {};
     if (!kind || !target_id || !url) return fail(res, '参数不完整');
@@ -370,7 +421,7 @@ exports.addServiceFav = async (req, res) => {
 // DELETE /user/service-favorites - 取消收藏
 exports.removeServiceFav = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { kind, target_id } = req.body || {};
     if (!kind || !target_id) return fail(res, '参数不完整');
@@ -388,7 +439,7 @@ exports.removeServiceFav = async (req, res) => {
 // GET /user/service-favorites - 获取列表
 exports.getServiceFavs = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
 
     const kind = req.query.kind || null;
@@ -428,7 +479,7 @@ exports.getServiceFavs = async (req, res) => {
 // POST /user/service-favorites/batch - 批量同步（本地→后端）
 exports.batchServiceFavs = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { list } = req.body || {};
     if (!Array.isArray(list) || !list.length) return fail(res, '空列表');
@@ -458,7 +509,7 @@ exports.batchServiceFavs = async (req, res) => {
 // GET /user/service-favorites/check - 检查是否已收藏
 exports.checkServiceFav = async (req, res) => {
   try {
-    const userId = req.user && req.user.id;
+    const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
     const { kind, target_id } = req.query;
     if (!kind || !target_id) return fail(res, '参数不完整');

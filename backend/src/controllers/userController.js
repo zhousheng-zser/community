@@ -5,7 +5,7 @@ const {
     ServiceProviderApplication, ServiceProviderProfile,
     CommunityStewardApplication
 } = require('../models');
-const { resolveUserId } = require('../utils/resolveUserId');
+const { resolveUserId, resolveUserIdFromReq } = require('../utils/resolveUserId');
 
 exports.getProfile = async (req, res) => {
     try {
@@ -189,7 +189,7 @@ exports.getUserCoupons = async (req, res) => {
 // 获取我的关注列表 GET /api/v1/user/follows
 exports.getFollows = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = resolveUserIdFromReq(req);
         const list = await UserFollow.findAll({
             where: { user_id: userId },
             include: [{ model: User, as: 'followUser', attributes: ['id', 'nickname', 'avatar_url'] }]
@@ -430,7 +430,10 @@ function generateInviteCode() {
  */
 exports.getInviteCode = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) {
+      return res.status(401).json({ code: 401, msg: '未登录', data: null });
+    }
     const user = await User.findByPk(userId, {
       attributes: ['id', 'nickname', 'avatar_url', 'invite_code', 'invited_by']
     });
@@ -483,7 +486,7 @@ exports.getInviteCode = async (req, res) => {
  */
 exports.bindInviter = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
     const { invite_code } = req.body;
     if (!invite_code || typeof invite_code !== 'string') {
       return res.status(400).json({ code: 400, msg: '缺少邀请码', data: null });
@@ -532,7 +535,7 @@ exports.bindInviter = async (req, res) => {
  */
 exports.getInvitees = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = resolveUserIdFromReq(req);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 50);
     const offset = (page - 1) * limit;
