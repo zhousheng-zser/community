@@ -12,6 +12,8 @@ const { listImageFromHome3, resolveServiceListImage } = require('../../utils/ser
 const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
 const {
   getActiveCommunityId,
+  isManualLocationPick,
+  applyPortalCommunityFromLocation,
   fetchWorkerRows,
   fetchServiceProviderRows,
   mapServiceProviderForHomeCard
@@ -242,7 +244,35 @@ Page({
       });
     }
     this._maybeRefreshMarketAfterAddressChange();
+    if (isManualLocationPick()) {
+      try {
+        const text =
+          wx.getStorageSync('portal_last_location_text') ||
+          wx.getStorageSync('market_location_label') ||
+          '';
+        if (text) this._applyPortalCommunityFromLocation({ name: text, label: text }, { manual: true });
+      } catch (e) {
+        /* ignore */
+      }
+    } else if (getActiveCommunityId(app) == null) {
+      try {
+        const locLabel = wx.getStorageSync('market_location_label');
+        if (locLabel) this._applyPortalCommunityFromLocation({ label: locLabel }, { manual: false });
+      } catch (e) {
+        /* ignore */
+      }
+    }
     this.refreshPortalListsForCommunity();
+  },
+
+  /**
+   * 地图选点 / 地址吸附 → 直约小区；主动选点且不在运营范围时清空直约列表
+   * @returns {boolean} 是否匹配到运营站点
+   */
+  _applyPortalCommunityFromLocation(loc, options) {
+    const matched = applyPortalCommunityFromLocation(loc, options);
+    this.refreshPortalListsForCommunity();
+    return matched;
   },
 
   /** 按当前小区刷新「直约技工」「直约服务商」（与查看全部页同源） */
@@ -414,6 +444,7 @@ Page({
           if (snapLabel) {
             util.setMarketLocationLabel(snapLabel);
             this.setData({ currentCity: snapLabel });
+            this._applyPortalCommunityFromLocation({ label: snapLabel }, { manual: false });
           } else {
             util.removeMarketLocationLabel();
             this.setData({ currentCity: '已定位' });
@@ -429,6 +460,10 @@ Page({
               util.setMarketLocationLabel(fallback.label);
               if (fallback.id != null) util.setMarketSnapInfo(fallback.id, fallback.dKm);
               this.setData({ currentCity: fallback.label });
+              this._applyPortalCommunityFromLocation(
+                { label: fallback.label, address: fallback.label },
+                { manual: false }
+              );
               resolve({ hasCoords: true });
               return;
             }
@@ -507,10 +542,14 @@ Page({
         this.setData({ marketShopsCacheByCat: {} });
         const city = res.address ? res.address.replace(/省.*/, '').replace(/市.*/, '').slice(0, 4) : (res.name ? res.name.slice(0, 4) : '已定位');
         this.setData({ currentCity: city || '已定位' });
-        wx.showToast({
-          title: res.name ? "已定位到" + res.name : "定位已更新",
-          icon: "none"
-        });
+        const syncedCommunity = this._applyPortalCommunityFromLocation(
+          { name: res.name, address: res.address },
+          { manual: true }
+        );
+        let toastTitle = res.name ? '已定位到' + res.name : '定位已更新';
+        if (syncedCommunity) toastTitle = '已切换到合川路服务站';
+        else if (isManualLocationPick()) toastTitle = '当前区域暂无直约服务';
+        wx.showToast({ title: toastTitle, icon: 'none' });
         const cat = this.data.activeMarketCat;
         this.switchMarketCategory({ currentTarget: { dataset: { code: cat } } }, true);
         this.refreshLocalGoodsModulesForLocation();

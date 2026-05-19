@@ -776,6 +776,8 @@ const clearMarketLocationCache = () => {
   removeMarketUserCoords();
   removeMarketSnapInfo();
   removeMarketLocationLabel();
+  wx.removeStorageSync('portal_location_community_id');
+  wx.removeStorageSync('portal_last_location_text');
 };
 
 /** 设置集市快照信息 */
