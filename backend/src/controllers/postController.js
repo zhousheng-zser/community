@@ -46,6 +46,11 @@ exports.getPosts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
 
+        const hasAuthHeader = !!(req.headers.authorization && req.headers.authorization.startsWith('Bearer '));
+        if (hasAuthHeader && !req.user) {
+            return res.status(401).json({ error: '登录已失效，请重新登录', errno: 401, errmsg: '登录已失效，请重新登录' });
+        }
+
         const communityId = await resolveViewerCommunityId(req);
         if (!communityId) {
             return res.json(postsResponse({ count: 0, rows: [] }, page, limit));
@@ -87,6 +92,57 @@ exports.getPosts = async (req, res) => {
     } catch (error) {
         console.error('获取帖子失败:', error);
         res.status(500).json({ error: '获取帖子失败' });
+    }
+};
+
+// 1.0 帖子详情
+exports.getPostDetail = async (req, res) => {
+    try {
+        const postId = parseInt(req.params.postId, 10);
+        if (!Number.isFinite(postId) || postId <= 0) {
+            return res.status(400).json({ error: '无效帖子 id' });
+        }
+
+        const hasAuthHeader = !!(req.headers.authorization && req.headers.authorization.startsWith('Bearer '));
+        if (hasAuthHeader && !req.user) {
+            return res.status(401).json({ error: '登录已失效，请重新登录', errno: 401, errmsg: '登录已失效，请重新登录' });
+        }
+
+        const viewerCommunityId = await resolveViewerCommunityId(req);
+        if (!viewerCommunityId) {
+            return res.status(403).json({ error: '请先绑定所属小区' });
+        }
+
+        const post = await Post.findByPk(postId, {
+            include: [
+                {
+                    model: User,
+                    as: 'author',
+                    attributes: ['id', 'nickname', 'avatar_url', 'bg_image']
+                },
+                {
+                    model: Comment,
+                    as: 'comments',
+                    include: [
+                        { model: User, as: 'author', attributes: ['id', 'nickname', 'avatar_url'] },
+                        { model: User, as: 'replyToUser', attributes: ['id', 'nickname'] }
+                    ]
+                },
+                {
+                    model: Like,
+                    as: 'likes',
+                    include: [{ model: User, as: 'user', attributes: ['id', 'nickname'] }]
+                }
+            ]
+        });
+
+        const vis = await assertPostVisibleToViewer(post, viewerCommunityId);
+        if (!vis.ok) return res.status(vis.status).json({ error: vis.error });
+
+        res.json({ message: '获取成功', data: post });
+    } catch (error) {
+        console.error('获取帖子详情失败:', error);
+        res.status(500).json({ error: '获取帖子详情失败' });
     }
 };
 

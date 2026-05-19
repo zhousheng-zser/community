@@ -1,0 +1,70 @@
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
+
+  <block wx:elif="{{post}}">
+    <view class="post-card">
+      <view class="user-row">
+        <image class="avatar" src="{{post.author.avatar_url}}" mode="aspectFill"></image>
+        <view class="user-meta">
+          <text class="name">{{post.author.nickname}}</text>
+          <text class="time">{{post.createdAt}}</text>
+        </view>
+        <text class="category-tag" wx:if="{{post.category}}">{{post.category}}</text>
+      </view>
+
+      <view class="post-content" wx:if="{{post.content}}">
+        <text class="content-text">{{post.content}}</text>
+      </view>
+
+      <view class="location" wx:if="{{post.location}}">📍 {{post.location}}</view>
+
+      <view class="image-gallery" wx:if="{{post.images && post.images.length}}">
+        <image
+          wx:for="{{post.images}}"
+          wx:key="*this"
+          class="post-image {{post.images.length === 1 ? 'single' : ''}}"
+          src="{{item}}"
+          mode="aspectFill"
+          bindtap="previewImage"
+          data-index="{{index}}"
+        ></image>
+      </view>
+
+      <view class="stats-row">
+        <text>{{post.likes_count || 0}} 赞</text>
+        <text>{{post.comments.length || 0}} 评论</text>
+      </view>
+    </view>
+
+    <view class="comment-section">
+      <view class="section-title">评论</view>
+      <view wx:if="{{!post.comments || !post.comments.length}}" class="empty-comment">暂无评论，来说两句吧</view>
+      <view class="comment-item" wx:for="{{post.comments}}" wx:key="id">
+        <image class="c-avatar" src="{{item.avatar || post.author.avatar_url}}" mode="aspectFill"></image>
+        <view class="c-body">
+          <text class="c-name">{{item.authorName}}</text>
+          <text class="c-text">{{item.content}}</text>
+          <text class="c-time">{{item.createdAt}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="loading-tip">帖子不存在或无权查看</view>
+
+  <view class="bottom-bar" wx:if="{{post}}">
+    <view class="like-btn {{post.isLiked ? 'active' : ''}}" bindtap="handleLike">
+      <text>{{post.isLiked ? '❤️' : '♡'}}</text>
+      <text>赞</text>
+    </view>
+    <input
+      class="comment-input"
+      placeholder="写评论..."
+      value="{{commentText}}"
+      bindinput="onCommentInput"
+      confirm-type="send"
+      bindconfirm="submitComment"
+    />
+    <view class="send-btn {{commentText ? 'active' : ''}}" bindtap="submitComment">发送</view>
+  </view>
+</view>

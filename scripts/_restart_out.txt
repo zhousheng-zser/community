@@ -1,0 +1,13 @@
+{"errno":500,"errmsg":"服务异常"}
+0|communit | [5/18/2026, 10:26:28 PM] GET /api/v1/core/service-groups/gfg
+
+/root/.pm2/logs/community-benefit-api-error.log last 8 lines:
+0|communit |     sqlState: '42S02',
+0|communit |     sqlMessage: "Table 'community_db.Categories' doesn't exist",
+0|communit |     sql: "SELECT `id`, `name`, `icon_url`, `sort_order` FROM `Categories` AS `Category` WHERE `Category`.`group_type` = 'gfg' ORDER BY `Category`.`sort_order` ASC, `Category`.`id` ASC;",
+0|communit |     parameters: undefined
+0|communit |   },
+0|communit |   sql: "SELECT `id`, `name`, `icon_url`, `sort_order` FROM `Categories` AS `Category` WHERE `Category`.`group_type` = 'gfg' ORDER BY `Category`.`sort_order` ASC, `Category`.`id` ASC;",
+0|communit |   parameters: {}
+0|communit | }
+

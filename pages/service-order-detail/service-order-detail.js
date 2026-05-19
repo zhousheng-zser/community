@@ -1,6 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
+const { asId } = require('../../utils/snowflakeId.js');
 
 const GROUP_LABELS = {
   tidy: '整理收纳',
@@ -149,9 +150,9 @@ Page({
   async openChat() {
     const { order } = this.data;
     const orderNo = order.orderNo;
-    const workerUid = order.workerUserId;
-    const merchantUid = order.merchantUserId;
-    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
+    const workerUid = asId(order.workerUserId);
+    const merchantUid = asId(order.merchantUserId);
+    const me = asId(app.globalData.user && app.globalData.user.id);
     if (!orderNo) {
       wx.showToast({ title: '缺少订单号', icon: 'none' });
       return;
@@ -160,7 +161,7 @@ Page({
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
-    if ((!workerUid || workerUid <= 0) && (!merchantUid || merchantUid <= 0)) {
+    if (!workerUid && !merchantUid) {
       wx.showToast({ title: '暂无接单方，请稍后再试', icon: 'none' });
       return;
     }

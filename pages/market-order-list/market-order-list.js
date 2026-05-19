@@ -2,6 +2,7 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 const config = require('../../utils/config.js');
+const { asId } = require('../../utils/snowflakeId.js');
 
 const MARKET_STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
@@ -519,9 +520,9 @@ Page({
     const orderNo = e.currentTarget.dataset.orderno;
     const workerUidStr = e.currentTarget.dataset.workeruid;
     const merchantUidStr = e.currentTarget.dataset.merchantuid;
-    const workerUid = workerUidStr ? Number(workerUidStr) : 0;
-    const merchantUid = merchantUidStr ? Number(merchantUidStr) : 0;
-    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
+    const workerUid = asId(workerUidStr);
+    const merchantUid = asId(merchantUidStr);
+    const me = asId(app.globalData.user && app.globalData.user.id);
 
     if (!orderNo) {
       wx.showToast({ title: '缺少订单号', icon: 'none' });
@@ -531,7 +532,7 @@ Page({
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
-    if ((!workerUid || workerUid <= 0) && (!merchantUid || merchantUid <= 0)) {
+    if (!workerUid && !merchantUid) {
       wx.showToast({ title: '暂无接单方，请稍后再试', icon: 'none' });
       return;
     }

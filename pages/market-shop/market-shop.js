@@ -1,6 +1,7 @@
 const util = require('../../utils/util.js');
 const { imgUrl, pickMarketShopAvatarPath, flattenMarketShopPayload } = util;
 const browseFootprint = require('../../utils/browseFootprint.js');
+const checkoutStorage = require('../../utils/checkoutStorage.js');
 
 Page({
   data: {
@@ -484,10 +485,12 @@ Page({
     });
 
     // 存入本地缓存，供确认订单页面读取
-    wx.setStorageSync('local_checkout_goods', cartItems);
-    wx.setStorageSync('local_checkout_totle', this.data.totalAmount);
-    wx.setStorageSync('local_checkout_shop_id', this.data.currentShopId || (this.data.shop && this.data.shop.id));
-    wx.setStorageSync('local_checkout_shop_name', (this.data.shop && this.data.shop.name) || '');
+    checkoutStorage.saveCheckout({
+      goods: cartItems,
+      total: this.data.totalAmount,
+      shopId: this.data.currentShopId || (this.data.shop && this.data.shop.id),
+      shopName: (this.data.shop && this.data.shop.name) || ''
+    });
     
     // 跳转到结算页
     wx.navigateTo({ url: '../goods-confrim/goods-confrim?from=local' });

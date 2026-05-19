@@ -3,7 +3,7 @@
 
 <view class="my-posts-page" style="padding-top: {{navTopPadding - 20}}px;">
   <view class="post-list" wx:if="{{posts.length > 0}}">
-    <view class="post-card" wx:for="{{posts}}" wx:key="id">
+    <view class="post-card" wx:for="{{posts}}" wx:key="id" bindtap="goPostDetail" data-id="{{item.id}}" data-index="{{index}}">
       <view class="user-row">
         <view class="left">
           <image class="avatar" src="{{item.author ? item.author.avatar_url : 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80'}}" mode="aspectFill"></image>
@@ -24,10 +24,10 @@
       <view class="meta-row">
         <text class="read">阅读 {{item.id * 7 + 12}}</text>
         <view class="right">
-          <view class="meta" bindtap="handleComment" data-id="{{item.id}}" data-index="{{index}}">
+          <view class="meta" catchtap="handleComment" data-id="{{item.id}}" data-index="{{index}}">
             💬 {{item.comments ? item.comments.length : 0}}
           </view>
-          <view class="meta" bindtap="handleLike" data-id="{{item.id}}" data-index="{{index}}">
+          <view class="meta" catchtap="handleLike" data-id="{{item.id}}" data-index="{{index}}">
             ♡ {{item.likes ? item.likes.length : 0}}
           </view>
         </view>

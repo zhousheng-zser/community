@@ -97,11 +97,19 @@ Page({
             .then(() => {
                 wx.hideLoading();
                 wx.showToast({ title: '发布成功', icon: 'success' });
+                const app = getApp();
+                if (app.globalData) {
+                    app.globalData.communityTargetTab = this.data.category;
+                }
                 // 发送事件通知社区列表页面刷新
                 const pages = getCurrentPages();
                 const prevPage = pages[pages.length - 2];
                 if (prevPage && prevPage.route === 'pages/community/community') {
-                    prevPage.fetchPosts();
+                    if (typeof prevPage.ensureCommunityContext === 'function') {
+                        prevPage.ensureCommunityContext().then(() => prevPage.fetchPosts());
+                    } else {
+                        prevPage.fetchPosts();
+                    }
                 }
 
                 setTimeout(() => {

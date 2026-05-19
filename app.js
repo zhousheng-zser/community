@@ -61,6 +61,10 @@ App({
           remark2: 2,
           vipFlag: 0
         }, u);
+        const cid = u.community_id != null ? u.community_id : u.communityId;
+        if (cid != null && cid !== '') {
+          try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+        }
         if (callback) callback();
       }).catch(() => {
         // token 失效或异常，清除后重新走静默登录

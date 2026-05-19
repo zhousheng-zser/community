@@ -21,16 +21,39 @@
           <el-table-column prop="group_key" label="group_key" min-width="120" show-overflow-tooltip />
           <el-table-column prop="title" label="标题" min-width="100" />
           <el-table-column prop="price_unit" label="计价单位" width="90" />
-          <el-table-column prop="icon_url" label="图标URL" min-width="160" show-overflow-tooltip />
+          <el-table-column label="图标" width="90">
+            <template #default="{ row }">
+              <el-image
+                v-if="row.icon_url"
+                :src="row.icon_url"
+                style="width:44px;height:44px;border-radius:6px;"
+                fit="contain"
+                :preview-src-list="[row.icon_url]"
+              />
+              <span v-else style="color:#bbb;font-size:12px;">未设置</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="icon_url" label="图标路径" min-width="160" show-overflow-tooltip />
           <el-table-column prop="sort_order" label="排序" width="80" />
           <el-table-column label="启用" width="80">
             <template #default="{ row }">
               <el-tag :type="row.is_active ? 'success' : 'info'">{{ row.is_active ? '是' : '否' }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="160" fixed="right">
+          <el-table-column label="操作" width="220" fixed="right">
             <template #default="{ row }">
               <el-button type="primary" link @click="openModuleDialog(row)">编辑</el-button>
+              <el-upload
+                style="display:inline-block;margin:0 4px;"
+                :action="uploadAction"
+                name="file"
+                :show-file-list="false"
+                accept="image/jpeg,image/png,image/webp"
+                :on-success="(res) => onQuickIconUploaded(res, row)"
+                :on-error="onUploadErr"
+              >
+                <el-button type="success" link>换图标</el-button>
+              </el-upload>
               <el-button type="danger" link @click="removeModule(row)">删除</el-button>
             </template>
           </el-table-column>
@@ -290,6 +313,24 @@ function onModuleIconUploaded(res) {
     ElMessage.success('已上传')
   } else {
     ElMessage.error(res?.errmsg || res?.msg || '上传失败')
+  }
+}
+
+async function onQuickIconUploaded(res, row) {
+  const url = uploadUrlFromRes(res)
+  if (!url) { ElMessage.error(res?.errmsg || res?.msg || '上传失败'); return }
+  try {
+    await request.put(`/admin/service-home/modules/${row.id}`, {
+      title: row.title,
+      price_unit: row.price_unit,
+      icon_url: url,
+      sort_order: row.sort_order,
+      is_active: row.is_active
+    })
+    ElMessage.success('图标已更新')
+    await loadModules()
+  } catch (e) {
+    ElMessage.error(e.message || '保存失败')
   }
 }
 

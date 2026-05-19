@@ -1,0 +1,30 @@
+=== 120 → 本地 ===
+  OK pull backend/src/routes/adminRoutes.js (10530 bytes)
+=== 本地 → 120 ===
+  OK upload admin/src/views/ServiceHomeManage.vue
+  OK upload admin/src/views/ServiceDispatch.vue
+  OK upload admin/src/utils/request.js
+  OK upload backend/src/controllers/adminServiceHomeController.js
+  OK upload backend/src/controllers/coreDataController.js
+  OK upload backend/src/controllers/adminDispatchController.js
+  OK upload backend/src/controllers/serviceOrderController.js
+  OK upload backend/src/controllers/workerPortalController.js
+  OK upload backend/src/modules/benefit-card/controllers/benefitAlliance.controller.js
+  OK upload backend/src/models/serviceHomeModule.js
+  OK upload backend/src/models/category.js
+  OK upload backend/src/models/service.js
+  OK upload backend/src/models/user.js
+  OK upload backend/src/routes/adminServiceHome.routes.js
+  OK upload backend/src/routes/coreDataRoutes.js
+  OK upload backend/sql/cleanup_invalid_benefit_goods.sql
+  OK upload doc/服务管理_后台接口与设计.md
+adminRoutes: adminRoutes ok
+pm2:
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [ecosystem.benefit.pm2](ids: [ 0 ])
+[PM2] [ecosystem.benefit.pm2](0) ✓
+┌────┬──────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name                     │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼──────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼────
+
+上传 17 个文件

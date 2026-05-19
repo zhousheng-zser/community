@@ -1,0 +1,12 @@
+import paramiko, sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+c = paramiko.SSHClient()
+c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+c.connect('120.27.239.244', 22, 'root', 'cW123456', timeout=20, look_for_keys=False, allow_agent=False)
+_, o, _ = c.exec_command('grep -A2 "getCommunities\\|geo/communities" /root/community-backend/backend/nohup.out | tail -20', timeout=15)
+print(o.read().decode())
+_, o2, _ = c.exec_command('curl -s http://127.0.0.1:3002/api/v1/core/communities', timeout=10)
+print('core:', o2.read().decode()[:300])
+_, o3, _ = c.exec_command('MYSQL_PWD=CommunityPwd123! mysql -uroot community_db -N -e "SELECT id,name FROM communities LIMIT 5"', timeout=10)
+print('db:', o3.read().decode())
+c.close()

@@ -1,0 +1,11 @@
+import paramiko, sys, io, time
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+c = paramiko.SSHClient()
+c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+c.connect('8.140.204.254', 22, 'root', 'edS904062', timeout=10, look_for_keys=False, allow_agent=False)
+stdin, stdout, stderr = c.exec_command('fuser -k 3002/tcp 2>/dev/null; sleep 2; cd /root/community-backend/backend && nohup node src/index.js > /tmp/cb.log 2>&1 &', timeout=15)
+print('started')
+time.sleep(4)
+stdin, stdout, stderr = c.exec_command('ss -tlnp | grep 3002; tail -5 /tmp/cb.log', timeout=10)
+print(stdout.read().decode())
+c.close()

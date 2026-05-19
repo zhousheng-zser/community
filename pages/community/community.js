@@ -3,6 +3,7 @@ const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const { imgUrl } = util;
 const lp = require('../../utils/localPrefs.js');
+const { asId, sameId } = require('../../utils/snowflakeId.js');
 
 Page({
   data: {
@@ -33,7 +34,7 @@ Page({
       this.setData({ activeTab: decodeURIComponent(options.tab) });
     }
     this.syncAnnounceRead();
-    this.fetchPosts();
+    this.ensureCommunityContext().then(() => this.fetchPosts());
   },
   syncAnnounceRead() {
     const readMap = lp.getAnnounceReadIds();
@@ -58,7 +59,30 @@ Page({
       app.globalData.communityTargetTab = '';
     }
     this.syncAnnounceRead();
-    this.fetchPosts(); // Handle returning from details/publish views
+    this.ensureCommunityContext().then(() => this.fetchPosts());
+  },
+  /** 确保 globalData 有 communityId，避免冷启动时列表误为空 */
+  ensureCommunityContext() {
+    const app = getApp();
+    const user = (app.globalData && app.globalData.user) || {};
+    const hasComm = user.communityId != null && user.communityId !== ''
+      || user.community_id != null && user.community_id !== '';
+    if (hasComm) return Promise.resolve();
+    let token = '';
+    try { token = wx.getStorageSync('token') || ''; } catch (e) { /* ignore */ }
+    if (!token) return Promise.resolve();
+    return util.get('/user/profile').then((data) => {
+      const u = data || {};
+      const cid = u.community_id != null ? u.community_id : u.communityId;
+      if (cid != null && cid !== '') {
+        try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+        app.globalData.user = Object.assign({}, app.globalData.user || {}, {
+          id: u.id != null ? u.id : (app.globalData.user && app.globalData.user.id),
+          communityId: cid,
+          community_id: cid
+        });
+      }
+    }).catch(() => {});
   },
   fetchPosts() {
     const category = this.data.activeTab;
@@ -70,15 +94,24 @@ Page({
     }
     const app = getApp();
     const user = (app.globalData && app.globalData.user) || {};
-    const communityId = user.communityId != null ? user.communityId : user.community_id;
+    let communityId = user.communityId != null ? user.communityId : user.community_id;
+    if (communityId == null || communityId === '') {
+      try {
+        const cached = wx.getStorageSync('user_community_id');
+        if (cached != null && cached !== '') communityId = cached;
+      } catch (e) { /* ignore */ }
+    }
     const query = { category: category, page: 1, limit: 20 };
     if (communityId != null && communityId !== '') query.community_id = communityId;
-    console.log(`[社区] 正在拉取分类 [${category}] 的帖子...`);
+    console.log(`[社区] 正在拉取分类 [${category}] 的帖子...`, query);
 
     util.get("/posts", query)
       .then(res => {
-        const list = res.list || res.data || (Array.isArray(res) ? res : []);
-        const userId = wx.getStorageSync('userId');
+        const list = Array.isArray(res)
+          ? res
+          : (res && (res.list || (Array.isArray(res.data) ? res.data : null))) || [];
+        const user = (app.globalData && app.globalData.user) || {};
+        const userId = asId(user.id);
         const apiOrigin = config.imageBaseUrl.replace(/\/$/, ''); // 与小程序合法域名、图片域名一致
         
         const processedPosts = (Array.isArray(list) ? list : []).map(post => {
@@ -101,7 +134,7 @@ Page({
                     avatar_url: avatar
                 },
                 images: images,
-                isLiked: post.likes ? post.likes.some(l => l.user_id === userId) : false,
+                isLiked: post.likes ? post.likes.some((l) => sameId(l.user_id, userId)) : false,
                 createdAt: util.formatTime(new Date(post.createdAt))
             };
         });
@@ -114,7 +147,12 @@ Page({
       })
       .catch(err => {
         console.error("加载社区失败", err);
-        wx.showToast({ title: '加载失败', icon: 'none' });
+        const errno = err && (err.errno || err.code);
+        if (errno === 401) {
+          wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' });
+        } else {
+          wx.showToast({ title: '加载失败', icon: 'none' });
+        }
         if (this.data.activeTab === '邻里互动') {
           this.fetchAssistFeed();
         }
@@ -148,11 +186,8 @@ Page({
       });
       return;
     }
-    wx.showModal({
-      title: '帖子详情',
-      content: post.content || '',
-      showCancel: false,
-      confirmText: '知道了'
+    wx.navigateTo({
+      url: `/package-customer/pages/post-detail/post-detail?id=${post.id}`
     });
   },
 

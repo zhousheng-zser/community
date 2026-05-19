@@ -1,0 +1,53 @@
+=== mysql -uroot -pCommunityPwd123! community_db -e "SHOW TABLES
+Tables_in_community_db (%benefit%)
+benefit_alliance_config
+benefit_alliance_goods
+benefit_coin_exchanges
+benefit_coin_goods
+jd_benefit_goods
+pdd_benefit_goods
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "SELECT plat
+platform	c	act
+meituan	6	6
+shangou	6	6
+tuixiao	2	2
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "SELECT id, 
+id	platform	LEFT(title,30)	LEFT(spread_url,55)	status
+1	meituan	美团甄选好店	http://dpurl.cn/DycykESZ	active
+2	meituan	美团机票特惠	http://dpurl.cn/nkQlRnRz	active
+3	meituan	美团品质会场	http://dpurl.cn/RXUTCGHZ	active
+4	meituan	美团试吃官	https://wxaurl.cn/AKZYGLOERtr	active
+5	meituan	美团超市便利	http://dpurl.cn/DG2hQsWZ	active
+6	meituan	美团外卖品质	http://dpurl.cn/HSMbb7YZ	active
+8	shangou	饿了么天天领红包	https://u.ele.me/lGJublRc	active
+9	shangou	淘宝闪购红包	https://kzurlol.cn/tOAtMA	active
+11	shangou	饿了么天天领红包	https://u.ele.me/ZouiklUg	active
+12	shangou	饿了么天天领红包	https://u.ele.me/jKSGHrOO	active
+14	shangou	饿了么天天领红包	https://u.ele.me/UkxECqd3	active
+16	shangou	超市好价	https://kzurlol.cn/toAtVa	active
+24	tuixiao	一元外卖	https://wxaurl.cn/AKZYGLOERtr	active
+25	tuixiao	夏日山海	http://dpurl.cn/lhWBRoYZ	active
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "SELECT COUN
+COUNT(*)
+8
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "SELECT id, 
+id	sku_id	LEFT(spread_url,50)	status
+1	c14OhB8	https://u.jd.com/c14OhB8	1
+2	c14zUDW	https://u.jd.com/c14zUDW	1
+3	c64wRk8	https://u.jd.com/c64wRk8	1
+4	cG4nIbb	https://u.jd.com/cG4nIbb	1
+5	cG4vgVg	https://u.jd.com/cG4vgVg	1
+6	cO4Gh0k	https://u.jd.com/cO4Gh0k	1
+7	cg409N9	https://u.jd.com/cg409N9	1
+8	cg4pcQF	https://u.jd.com/cg4pcQF	1
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "SELECT COUN
+COUNT(*)
+8
+
+=== mysql -uroot -pCommunityPwd123! community_db -e "
+DELETE FRO

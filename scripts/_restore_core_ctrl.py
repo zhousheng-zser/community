@@ -1,0 +1,15 @@
+import paramiko, os, sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+c = paramiko.SSHClient()
+c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+c.connect('120.27.239.244', 22, 'root', 'cW123456', timeout=20, look_for_keys=False, allow_agent=False)
+_, o, _ = c.exec_command('cd /root/community-backend && git show HEAD:backend/src/modules/core/controllers/core.controller.js', timeout=20)
+content = o.read().decode('utf-8', 'replace')
+local = os.path.join('backend', 'src', 'modules', 'core', 'controllers', 'core.controller.js')
+open(local, 'w', encoding='utf-8').write(content)
+print('saved', len(content), 'bytes')
+# restore on server too
+sftp = c.open_sftp()
+sftp.put(local, '/root/community-backend/backend/src/modules/core/controllers/core.controller.js')
+sftp.close()
+c.close()

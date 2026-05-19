@@ -1,5 +1,6 @@
 const util = require('../../utils/util.js');
 const app = getApp();
+const checkoutStorage = require('../../utils/checkoutStorage.js');
 
 Page({
   data: {
@@ -45,9 +46,10 @@ Page({
 
     // 来源: market-shop 店铺购物车 (local)
     if (from === 'local') {
-      const localItems = wx.getStorageSync('local_checkout_goods') || [];
-      const shopId = wx.getStorageSync('local_checkout_shop_id');
-      const shopName = wx.getStorageSync('local_checkout_shop_name') || '';
+      const local = checkoutStorage.loadCheckout();
+      const localItems = local.goods || [];
+      const shopId = local.shopId;
+      const shopName = local.shopName || '';
       // 将 local 格式转为标准格式
       items = localItems.map((it, idx) => ({
         goodsId: it.goodsId,
@@ -242,10 +244,7 @@ Page({
         wx.removeStorageSync(`cart_${this.data.shopId}`);
       }
       if (this.data.fromUrl === 'local') {
-        wx.removeStorageSync('local_checkout_goods');
-        wx.removeStorageSync('local_checkout_totle');
-        wx.removeStorageSync('local_checkout_shop_id');
-        wx.removeStorageSync('local_checkout_shop_name');
+        checkoutStorage.clearCheckout();
       }
       wx.removeStorageSync('temp_checkout_items');
 
