@@ -88,10 +88,34 @@ Page({
   },
 
   computeRoleLabel(user) {
-    const roleMap = { admin: '管理员', promoter: '推客', district_partner: '区县合伙人', market_partner: '市场合伙人', user: '普通用户', worker: '技工', merchant: '服务商' };
-    const roles = rolePortals.normalizeRoles(user);
-    if (roles.length <= 1) return roleMap[roles[0]] || '普通用户';
-    return roles.map((r) => roleMap[r] || r).join('·');
+    if (!user) return '普通用户';
+    const roleMap = {
+      admin: '管理员',
+      promoter: '推客',
+      district_partner: '区县合伙人',
+      market_partner: '市场合伙人',
+      user: '普通用户',
+      worker: '技工',
+      merchant: '集市商家',
+      service_provider: '服务商',
+      steward: '小区管家'
+    };
+    const order = ['admin', 'promoter', 'district_partner', 'market_partner', 'steward', 'service_provider', 'merchant', 'worker'];
+    const active = new Set();
+
+    rolePortals.normalizeRoles(user).forEach((r) => {
+      if (r && r !== 'user') active.add(r);
+    });
+    if (rolePortals.canUseStewardPortal(user)) active.add('steward');
+    if (rolePortals.canUseServiceProviderPortal(user)) active.add('service_provider');
+    if (rolePortals.canUseMarketPortal(user)) active.add('merchant');
+    if (rolePortals.canUseWorkerPortal(user)) active.add('worker');
+
+    if (active.size === 0) return '普通用户';
+    return order
+      .filter((r) => active.has(r))
+      .map((r) => roleMap[r] || r)
+      .join('·');
   },
 
   toggleWorkbench() {
@@ -342,6 +366,7 @@ Page({
         if (avatar != null) app.globalData.user.userPhoto = avatar;
         if (mobile != null) app.globalData.user.userMobile = mobile;
         if (data.points != null) app.globalData.user.points = Number(data.points);
+        if (data.balance != null) app.globalData.user.balance = Number(data.balance);
       }
       const user = app.globalData.user || {};
       const newStatus = user.worker_status || user.workerStatus || '';

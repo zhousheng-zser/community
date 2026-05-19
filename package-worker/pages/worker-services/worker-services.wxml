@@ -21,6 +21,14 @@
       <text class="form-label">简介</text>
       <textarea class="form-textarea" placeholder="简单描述服务内容" value="{{form.desc}}" data-key="desc" bindinput="onInput" />
     </view>
+    <view class="form-row">
+      <text class="form-label">服务图片</text>
+      <view class="cover-row">
+        <image wx:if="{{form.cover_image}}" class="cover-preview" src="{{form.cover_image}}" mode="aspectFill" />
+        <view class="cover-add" bindtap="chooseCover">{{form.cover_image ? '更换图片' : '+ 上传图片'}}</view>
+        <text wx:if="{{form.cover_image}}" class="cover-remove" bindtap="removeCover">删除</text>
+      </view>
+    </view>
     <view class="form-actions">
       <view class="btn-save" bindtap="saveForm">保存</view>
     </view>
@@ -28,6 +36,7 @@
 
   <view class="service-list" wx:if="{{list.length > 0}}">
     <view class="service-item" wx:for="{{list}}" wx:key="id">
+      <image wx:if="{{item.cover_image}}" class="service-thumb" src="{{item.cover_image}}" mode="aspectFill" />
       <view class="service-info">
         <text class="service-name">{{item.name}}</text>
         <text class="service-price" wx:if="{{item.price}}">{{item.price}}</text>

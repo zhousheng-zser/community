@@ -641,7 +641,7 @@
     </view>
     <scroll-view class="worker-scroll" scroll-x="{{true}}">
       <view class="worker-row">
-        <navigator class="worker-item worker-item--rich" wx:for="{{workerList}}" wx:key="id" url="../worker-detail/worker-detail?id={{item.id}}">
+        <navigator class="worker-item worker-item--rich" wx:for="{{workerList}}" wx:key="id" url="../worker-detail/worker-detail?id={{item.idStr}}">
           <image class="worker-av" src="{{item.avatar}}" mode="aspectFill"></image>
           <view class="worker-text">
             <view class="worker-name-row">

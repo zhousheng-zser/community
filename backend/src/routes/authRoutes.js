@@ -8,7 +8,7 @@ router.post('/sms/send', authController.sendSmsCode);
 router.post('/register', authController.register);
 router.post('/password_reset', authController.passwordReset);
 
-// POST /api/v1/auth/login — 微信已注册直接登录
+// POST /api/v1/auth/login — 微信快捷登录（未注册则自动创建并绑定）
 router.post('/login', authController.login);
 
 // POST /api/v1/auth/login_sms — 手机号 + 验证码
@@ -17,6 +17,9 @@ router.post('/login_sms', authController.loginSms);
 // POST /api/v1/auth/login_password — 手机号 + 密码
 router.post('/login_password', authController.loginPassword);
 router.post('/login_sms', authController.loginSms);
+
+// POST /api/v1/auth/verify-wechat — 校验 token 与当前微信 openid 一致
+router.post('/verify-wechat', authMiddleware, authController.verifyWechat);
 
 // POST /api/v1/auth/logout
 router.post('/logout', authMiddleware, authController.logout);

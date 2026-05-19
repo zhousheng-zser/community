@@ -3,6 +3,7 @@ const util = require('../../../utils/util.js');
 const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
 const workerOrderUi = require('../../utils/workerOrderUi.js');
+const workerCtx = require('../../utils/workerContext.js');
 const api = require('../../../api/index.js');
 const balance = require('../../../utils/balance.js');
 
@@ -24,19 +25,22 @@ Page({
     statsLoading: false,
     greeting: '你好',
     displayName: '师傅',
+    workerName: '',
+    workerIndustry: '',
+    workerSubtitle: '',
     userPhoto: DEF_AVATAR,
     balanceText: '',
     loggedIn: false
   },
 
   onShow() {
-    this.refresh();
+    this.loadWorkerIdentity();
     this.loadStats();
     this.loadBalance();
   },
 
   onPullDownRefresh() {
-    this.refresh();
+    this.loadWorkerIdentity();
     this.loadStats();
     this.loadBalance();
     wx.stopPullDownRefresh();
@@ -59,16 +63,90 @@ Page({
     }
   },
 
-  refresh() {
+  async loadWorkerIdentity() {
+    const token = wx.getStorageSync('token');
     const user = app.globalData.user || {};
-    const workerOk = true;
+    if (!token) {
+      this.setData({
+        workerOk: false,
+        loggedIn: false,
+        displayName: '师傅',
+        workerName: '',
+        workerIndustry: '',
+        workerSubtitle: '完成入驻即可接单赚钱',
+        userPhoto: DEF_AVATAR,
+        bannerText: ''
+      });
+      return;
+    }
+
+    let workerOk = rp.canUseWorkerPortal(user);
+    let workerName = '';
+    let workerIndustry = '';
+    let userPhoto = user.userPhoto || DEF_AVATAR;
+
+    try {
+      const profileRes = await api.user.getUserProfile();
+      if (app.globalData.user) {
+        app.globalData.user = rp.mergePortalFlags(app.globalData.user, profileRes);
+      }
+      if (profileRes.worker_status === 'approved') workerOk = true;
+      if (profileRes.worker_profile_id) {
+        workerCtx.syncBoundProfile(app, { id: profileRes.worker_profile_id });
+      }
+    } catch (e) {}
+
+    try {
+      const appRes = await api.worker.getWorkerApplication();
+      const appData = workerCtx.normalizeApplicationPayload(appRes);
+      if (appData && appData.status === 'approved') workerOk = true;
+      workerCtx.syncBoundProfile(app, {
+        id: (app.globalData.user || {}).worker_profile_id,
+        name: appData.name,
+        industry: appData.industry
+      });
+    } catch (e) {}
+
+    const uid = (app.globalData.user && app.globalData.user.id) || user.id;
+    if (uid) {
+      try {
+        const cid = user.communityId || user.community_id || wx.getStorageSync('community_id');
+        const detailRes = await api.core.getWorkerDetail(uid, cid ? { community_id: cid } : undefined);
+        const detail = workerCtx.normalizeWorkerDetailPayload(detailRes);
+        if (detail && (detail.real_name || detail.name)) {
+          workerCtx.syncBoundProfile(app, {
+            id: detail.profile_id || detail.worker_profile_id || (app.globalData.user || {}).worker_profile_id,
+            real_name: detail.real_name || detail.name,
+            industry: detail.industry || detail.skill
+          });
+          if (detail.avatar_url || detail.avatar) {
+            userPhoto = detail.avatar_url || detail.avatar || userPhoto;
+          }
+        }
+      } catch (e) {}
+    }
+
+    const bound = workerCtx.getBoundProfile(app);
+    workerName = bound.realName || '';
+    workerIndustry = bound.industry || '';
+    const communityName = wx.getStorageSync('community_name') || '';
+    const subtitleParts = [workerName, workerIndustry, communityName].filter(Boolean);
+    const workerSubtitle = subtitleParts.length
+      ? subtitleParts.join(' · ')
+      : (workerOk ? '今日也要好好服务邻居' : '完成入驻即可接单赚钱');
+
     this.setData({
       workerOk,
-      bannerText: '欢迎使用技工工作台，可在「订单」中处理派单',
+      loggedIn: true,
+      displayName: workerName || user.userName || '师傅',
+      workerName,
+      workerIndustry,
+      workerSubtitle,
+      userPhoto,
       greeting: getGreeting(),
-      displayName: user.userName || '师傅',
-      userPhoto: user.userPhoto || DEF_AVATAR,
-      loggedIn: !!wx.getStorageSync('token')
+      bannerText: workerOk
+        ? (workerName ? `当前技工身份：${workerName}` : '欢迎使用技工工作台，可在「订单」中处理派单')
+        : '完成技工入驻审核后可接单'
     });
   },
 

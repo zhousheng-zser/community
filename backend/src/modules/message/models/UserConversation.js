@@ -7,6 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     conversation_id: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false },
     peer_id: { type: DataTypes.BIGINT.UNSIGNED, allowNull: false, defaultValue: 0 },
     bot_type: { type: DataTypes.STRING(32), allowNull: true },
+    order_id: { type: DataTypes.BIGINT.UNSIGNED, allowNull: true },
+    order_no: { type: DataTypes.STRING(64), allowNull: true },
     unread_count: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, defaultValue: 0 },
     is_deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
   }, {

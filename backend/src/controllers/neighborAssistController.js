@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require('../models');
 const { resolveUserIdFromReq } = require('../utils/resolveUserId');
+const commissionService = require('../modules/commission/services/commission.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -333,6 +334,12 @@ exports.grab = async (req, res) => {
     const fresh = await NeighborAssistOrder.findByPk(id, {
       include: [{ model: User, as: 'buyer', attributes: ['id', 'nickname', 'phone'] }]
     });
+    try {
+      const messageCtrl = require('../modules/message/controllers/message.controller');
+      await messageCtrl.seedNeighborAssistGrabMessage(id, workerId);
+    } catch (chatErr) {
+      console.warn('neighborAssist grab chat seed', chatErr.message);
+    }
     return ok(res, { id: fresh.id, status: fresh.status, status_text: NEIGHBOR_ORDER_STATUS_TEXT[fresh.status] || fresh.status, assigned_worker_id: fresh.assigned_worker_id, grab: true });
   } catch (e) {
     console.error('neighborAssist grab', e);
@@ -367,6 +374,12 @@ exports.communityGrab = async (req, res) => {
     const fresh = await NeighborAssistOrder.findByPk(id, {
       include: [{ model: User, as: 'buyer', attributes: ['id', 'nickname', 'phone'] }]
     });
+    try {
+      const messageCtrl = require('../modules/message/controllers/message.controller');
+      await messageCtrl.seedNeighborAssistGrabMessage(id, userId);
+    } catch (chatErr) {
+      console.warn('neighborAssist communityGrab chat seed', chatErr.message);
+    }
     return ok(res, { id: fresh.id, status: fresh.status, status_text: NEIGHBOR_ORDER_STATUS_TEXT[fresh.status] || fresh.status, assigned_worker_id: fresh.assigned_worker_id, grab: true });
   } catch (e) {
     console.error('neighborAssist communityGrab', e);
@@ -395,7 +408,7 @@ exports.accept = async (req, res) => {
   }
 };
 
-// Complete - 接单方完成服务，资金到账（escrow release）
+// Complete - 接单方完成服务，收入计入可提现佣金余额
 exports.complete = async (req, res) => {
   try {
     const workerId = resolveUserIdFromReq(req);
@@ -409,17 +422,14 @@ exports.complete = async (req, res) => {
 
     const t = await NeighborAssistOrder.sequelize.transaction();
     try {
-      // 资金划转：发布人扣减 balance，接单人获得 balance
       const amountNum = Number(order.amount || 0);
-      if (amountNum > 0) {
-        const publisher = await User.findByPk(order.user_id, { transaction: t });
-        if (publisher && publisher.balance != null) {
-          await publisher.decrement('balance', { by: amountNum, transaction: t });
-        }
-        const helper = await User.findByPk(order.assigned_worker_id, { transaction: t });
-        if (helper && helper.balance != null) {
-          await helper.increment('balance', { by: amountNum, transaction: t });
-        }
+      if (amountNum > 0 && order.assigned_worker_id) {
+        await commissionService.creditAvailableBalance(
+          order.assigned_worker_id,
+          'neighbor_assist',
+          amountNum,
+          t
+        );
       }
 
       order.status = 'completed';

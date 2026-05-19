@@ -9,7 +9,8 @@ const {
   WorkerService,
   ServiceProviderProfile,
   ServiceOrderComplaint,
-  ServiceHomeModule
+  ServiceHomeModule,
+  ServiceItem
 } = require('../models');
 const {
   resolveProviderContext,
@@ -19,6 +20,9 @@ const {
 } = require('../utils/serviceProviderOrderScope');
 const { applyServiceOrderStatusAfterPayment } = require('../utils/serviceOrderPaidTransition');
 const couponService = require('../modules/coupon/services/coupon.service');
+const { resolveUserId, resolveUserIdFromReq } = require('../utils/resolveUserId');
+const { resolveServiceProviderProfile } = require('../utils/resolveServiceProviderProfile');
+const commissionService = require('../modules/commission/services/commission.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -207,7 +211,8 @@ exports.create = async (req, res) => {
     let fulfillment_meta = {};
 
     if (worker_id != null && worker_id !== '') {
-      const wid = parseInt(worker_id, 10);
+      const wid = resolveUserId(worker_id);
+      if (!wid) return fail(res, 400, '无效技工 id');
       const chk = await assertWorkerForCommunity(wid, commId);
       if (!chk.ok) return fail(res, 400, chk.reason || '技工不可用');
       const sells = await assertWorkerSellsService(wid, Number(service_id));
@@ -287,9 +292,7 @@ exports.createBundle = async (req, res) => {
     if (!provider_id || !Array.isArray(items) || items.length === 0) {
       return fail(res, 400, '缺少 provider_id 或 items');
     }
-    const prof = await ServiceProviderProfile.findOne({
-      where: { user_id: parseInt(provider_id, 10), status: 'active' }
-    });
+    const prof = await resolveServiceProviderProfile(provider_id);
     if (!prof) return fail(res, 404, '服务商不存在');
 
     let commId = community_id != null ? parseInt(community_id, 10) : null;
@@ -298,7 +301,8 @@ exports.createBundle = async (req, res) => {
       commId = u && u.community_id != null ? Number(u.community_id) : null;
     }
     const pj = prof.toJSON ? prof.toJSON() : prof;
-    if (pj.community_id != null && commId != null) {
+    // 直约打包单：仅当服务商显式配置 community_id 且用户也绑定了小区时才校验，避免跨区用户无法下单
+    if (pj.community_id != null && commId != null && Number(pj.community_id) > 0 && Number(commId) > 0) {
       if (Number(pj.community_id) !== Number(commId)) {
         return fail(res, 400, '服务商不接该小区');
       }
@@ -308,10 +312,23 @@ exports.createBundle = async (req, res) => {
     let total = 0;
     for (const it of items) {
       const sid = parseInt(it.service_id, 10);
-      const svc = await Service.findByPk(sid);
-      if (!svc) return fail(res, 400, `服务不存在: ${sid}`);
-      const sj = svc.toJSON();
-      if (sj.is_published === 0 || sj.is_published === false) return fail(res, 400, '含未上架服务');
+      // SP portal saves services to service_items; try that first
+      let sj = null;
+      if (ServiceItem) {
+        try {
+          const si = await ServiceItem.findByPk(sid);
+          if (si) sj = si.toJSON ? si.toJSON() : si;
+        } catch (_) {}
+      }
+      if (!sj) {
+        const svc = await Service.findByPk(sid);
+        if (!svc) return fail(res, 400, `服务不存在: ${sid}`);
+        sj = svc.toJSON ? svc.toJSON() : svc;
+      }
+      const onSale = sj.status === 'on_sale' || sj.is_published === 1 || sj.is_published === true;
+      const offSale = sj.is_published === 0 || sj.is_published === false
+        || (sj.status && sj.status !== 'on_sale' && sj.is_published == null);
+      if (!onSale && offSale) return fail(res, 400, '含未上架服务');
       const q = it.qty != null ? parseInt(it.qty, 10) : 1;
       const qSafe = Number.isFinite(q) && q > 0 ? q : 1;
       const lineAmt = Number(sj.price) * qSafe;
@@ -320,7 +337,7 @@ exports.createBundle = async (req, res) => {
         service_id: sid,
         group_key: it.group_key || null,
         qty: qSafe,
-        title: it.title || sj.title,
+        title: it.title || sj.title || sj.name,
         unit_price: sj.price
       });
     }
@@ -332,6 +349,7 @@ exports.createBundle = async (req, res) => {
       service_id: first.service_id,
       group_key: first.group_key || null,
       amount: total,
+      pay_amount: total,
       address_snapshot: {
         detail: address || '',
         contact_name: contact_name || '',
@@ -340,7 +358,8 @@ exports.createBundle = async (req, res) => {
       remark: remark || null,
       status: 'pending_pay',
       pay_status: 'unpaid',
-      provider_user_id: prof.user_id || parseInt(provider_id, 10),
+      provider_id: prof.id,
+      provider_user_id: prof.user_id,
       order_no: genOrderNo(),
       contact_name: contact_name || null,
       contact_phone: contact_phone || null,
@@ -428,6 +447,36 @@ exports.confirmComplete = async (req, res) => {
     if (order.status !== 'pending_user_confirm') return fail(res, 400, '当前状态不可确认');
     order.status = 'completed';
     await order.save();
+
+    // 结算服务商可提现余额
+    const spUserId = order.provider_user_id || null;
+    const amt = Number(order.pay_amount || order.amount || 0);
+    if (amt > 0) {
+      try {
+        // 更新 service_provider_profiles.balance（前端余额展示依赖此字段）
+        if (order.provider_id) {
+          await ServiceProviderProfile.increment('balance', {
+            by: amt,
+            where: { id: order.provider_id }
+          });
+        } else if (spUserId) {
+          await ServiceProviderProfile.increment('balance', {
+            by: amt,
+            where: { user_id: String(spUserId) }
+          });
+        }
+      } catch (e) {
+        console.error('confirmComplete SP balance increment', e);
+      }
+      if (spUserId) {
+        try {
+          await commissionService.creditAvailableBalance(spUserId, 'service_provider', amt);
+        } catch (e) {
+          console.error('confirmComplete creditAvailableBalance', e);
+        }
+      }
+    }
+
     return ok(res, { id: order.id, status: order.status, status_text: SERVICE_ORDER_STATUS_TEXT.completed });
   } catch (e) {
     console.error('serviceOrder confirmComplete', e);

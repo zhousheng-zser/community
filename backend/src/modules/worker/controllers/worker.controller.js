@@ -1,5 +1,5 @@
 const db = require('../../../models');
-const { WorkerApplication, ServiceOrder } = db;
+const { WorkerApplication, ServiceOrder, WorkerService, Service } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
@@ -312,8 +312,32 @@ exports.completeOrder = async (req, res) => {
 
 // ===== 技工服务管理 =====
 
-const db = require('../../../models');
-const WorkerService = db.WorkerService;
+function parseWorkerPrice(raw) {
+  if (raw == null || raw === '') return 0;
+  const n = parseFloat(String(raw).replace(/[^\d.]/g, ''));
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
+function normalizeWorkerServiceRow(link) {
+  const j = link.toJSON ? link.toJSON() : link;
+  const svc = j.service || {};
+  return {
+    id: j.id,
+    service_id: j.service_id,
+    name: svc.title || '',
+    price: svc.price != null ? String(svc.price) : '',
+    desc: svc.description || '',
+    cover_image: svc.cover_image || '',
+    enabled: j.enabled
+  };
+}
+
+async function findWorkerServiceLink(userId, linkId) {
+  return WorkerService.findOne({
+    where: { id: linkId, worker_user_id: userId },
+    include: [{ model: Service, as: 'service', required: false }]
+  });
+}
 
 // GET /worker/services
 exports.getMyServices = async (req, res) => {
@@ -327,8 +351,9 @@ exports.getMyServices = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await WorkerService.findAndCountAll({
-      where: { user_id: userId },
-      order: [['created_at', 'DESC']],
+      where: { worker_user_id: userId },
+      include: [{ model: Service, as: 'service', required: false }],
+      order: [['sort_order', 'ASC'], ['created_at', 'DESC']],
       limit,
       offset
     });
@@ -336,7 +361,7 @@ exports.getMyServices = async (req, res) => {
     return res.json({
       code: 0,
       data: {
-        list: rows,
+        list: rows.map(normalizeWorkerServiceRow),
         total: count,
         page,
         limit
@@ -348,29 +373,40 @@ exports.getMyServices = async (req, res) => {
   }
 };
 
-// POST /worker/services
+// POST /worker/services — 创建平台服务并关联到技工
 exports.createService = async (req, res) => {
   try {
     const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
-    const { name, price, desc } = req.body || {};
+    const { name, price, desc, cover_image } = req.body || {};
     if (!name || !String(name).trim()) {
       return res.status(400).json({ code: 1, msg: '服务名称不能为空' });
     }
 
-    const row = await WorkerService.create({
-      user_id: userId,
-      name: String(name).trim(),
-      price: price != null ? String(price) : null,
-      desc: desc || null,
-      status: 'active'
+    const title = String(name).trim();
+    const priceNum = parseWorkerPrice(price);
+    const description = desc ? String(desc).trim() : '';
+    const cover = cover_image ? String(cover_image).trim() : '';
+
+    const svc = await Service.create({
+      title,
+      description,
+      price: priceNum,
+      cover_image: cover,
+      is_published: 1
     });
 
-    return res.json({ code: 0, msg: '创建成功', data: row });
+    const link = await WorkerService.create({
+      worker_user_id: userId,
+      service_id: svc.id,
+      enabled: 1
+    });
+
+    return res.json({ code: 0, msg: '创建成功', data: normalizeWorkerServiceRow({ ...link.toJSON(), service: svc }) });
   } catch (err) {
     console.error('[worker/services/create] error:', err);
-    return res.status(500).json({ code: 1, msg: '创建失败' });
+    return res.status(500).json({ code: 1, msg: err.message || '创建失败' });
   }
 };
 
@@ -383,18 +419,24 @@ exports.updateService = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     if (!id) return res.status(400).json({ code: 1, msg: '无效服务ID' });
 
-    const row = await WorkerService.findOne({ where: { id, user_id: userId } });
+    const row = await findWorkerServiceLink(userId, id);
     if (!row) return res.status(404).json({ code: 1, msg: '服务不存在' });
 
-    const { name, price, desc, status } = req.body || {};
-    const updateData = {};
-    if (name !== undefined) updateData.name = String(name).trim();
-    if (price !== undefined) updateData.price = price != null ? String(price) : null;
-    if (desc !== undefined) updateData.desc = desc || null;
-    if (status !== undefined) updateData.status = status;
+    const { name, price, desc, cover_image } = req.body || {};
 
-    await row.update(updateData);
-    return res.json({ code: 0, msg: '更新成功', data: row });
+    if (row.service_id && Service) {
+      const svcUpdate = {};
+      if (name !== undefined) svcUpdate.title = String(name).trim();
+      if (price !== undefined) svcUpdate.price = parseWorkerPrice(price);
+      if (desc !== undefined) svcUpdate.description = desc || '';
+      if (cover_image !== undefined) svcUpdate.cover_image = cover_image || '';
+      if (Object.keys(svcUpdate).length) {
+        await Service.update(svcUpdate, { where: { id: row.service_id } });
+      }
+    }
+
+    const refreshed = await findWorkerServiceLink(userId, id);
+    return res.json({ code: 0, msg: '更新成功', data: normalizeWorkerServiceRow(refreshed) });
   } catch (err) {
     console.error('[worker/services/update] error:', err);
     return res.status(500).json({ code: 1, msg: '更新失败' });
@@ -410,10 +452,19 @@ exports.deleteService = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     if (!id) return res.status(400).json({ code: 1, msg: '无效服务ID' });
 
-    const row = await WorkerService.findOne({ where: { id, user_id: userId } });
+    const row = await findWorkerServiceLink(userId, id);
     if (!row) return res.status(404).json({ code: 1, msg: '服务不存在' });
 
+    const sid = row.service_id;
     await row.destroy();
+    if (sid && Service) {
+      const others = await WorkerService.count({ where: { service_id: sid } });
+      if (others === 0) {
+        try {
+          await Service.update({ is_published: 0 }, { where: { id: sid } });
+        } catch (e) { /* ignore */ }
+      }
+    }
     return res.json({ code: 0, msg: '删除成功' });
   } catch (err) {
     console.error('[worker/services/delete] error:', err);

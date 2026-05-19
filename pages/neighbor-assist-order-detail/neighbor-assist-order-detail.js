@@ -302,18 +302,24 @@ Page({
     const peerUid = asId(order.peerUserId);
     if (!me || !peerUid) return;
     try {
-      await util.post('messages/order-conversation/ensure', {
+      const ensureRes = await util.post('messages/order-conversation/ensure', {
         channel: 'neighbor_assist',
         order_id: Number(id),
         order_no: String(order.orderNo || id)
       });
+      const cid = ensureRes.conversation_id || ensureRes.conversationId;
       const now = new Date();
       const timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       await util.post('messages/send', {
+        conversationId: cid,
         peerId: peerUid,
+        channel: 'neighbor_assist',
+        order_id: Number(id),
+        order_no: String(order.orderNo || id),
         content: `【系统消息】接单邻居已于 ${timeStr} 到场打卡，开始为您提供服务。`,
         msgType: 'text'
       });
+      wx.setStorageSync('message_list_dirty', Date.now());
     } catch (e) {
       console.log('发送打卡系统消息失败', e);
     }

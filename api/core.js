@@ -70,8 +70,8 @@ const getWorkerList = (params) => {
  * 获取技工详情
  * GET /core/workers/:id
  */
-const getWorkerDetail = (id) => {
-  return get(`/core/workers/${id}`);
+const getWorkerDetail = (id, params) => {
+  return get(`/core/workers/${id}`, params);
 };
 
 /**

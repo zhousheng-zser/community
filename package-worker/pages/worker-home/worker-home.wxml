@@ -4,7 +4,7 @@
       <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
       <view class="hero-text">
         <text class="hero-greet">{{greeting}}，{{displayName}}</text>
-        <text class="portal-sub hero-sub">{{workerOk ? '今日也要好好服务邻居' : '完成入驻即可接单赚钱'}}</text>
+        <text class="portal-sub hero-sub">{{workerSubtitle}}</text>
       </view>
     </view>
     <text class="portal-title hero-title">技工工作台</text>

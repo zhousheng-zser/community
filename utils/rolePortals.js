@@ -92,11 +92,13 @@ function mergePortalFlags(target, src) {
     'openid',
     'community_id', 'communityId',
     'worker_status', 'workerStatus',
+    'worker_profile_id', 'workerProfileId',
     'steward_status', 'stewardStatus',
     'merchant_status', 'merchantStatus',
     'service_provider_status', 'serviceProviderStatus',
     'shop_status', 'shopStatus',
     'shop_id', 'shopId',
+    'service_provider_profile_id', 'serviceProviderProfileId',
     'roles', 'role'
   ];
   keys.forEach((k) => {

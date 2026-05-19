@@ -5,6 +5,7 @@ const { listImageFromHome3 } = require('../../utils/serviceHome3.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
 const { pickWorkerAvatar, genderToLabel, FALLBACK_WORKER_ROWS, FALLBACK_WORKER_GOODS } = require('../../utils/workerApiMap.js');
+const { getActiveCommunityId, fetchWorkerRows, workerCommunityQuery } = require('../../utils/communityPortal.js');
 
 const mockWorkers = FALLBACK_WORKER_ROWS.map(w => ({
   id: w.id,
@@ -39,16 +40,27 @@ Page({
   async onLoad(options) {
     const sys = wx.getSystemInfoSync();
     this.setData({ navTopPadding: (sys.statusBarHeight || 20) + 6 });
-    const id = Number((options && options.id) || 1) || 1;
+    const raw = options && options.id != null && options.id !== '' ? String(options.id) : '';
+    const id = raw || '1';
     await this.loadData(id);
   },
   async loadData(id) {
-    const worker = await this.loadWorker(id);
-    let goods = getMockGoods(id);
+    const workerId = String(id);
+    const communityId = getActiveCommunityId(getApp());
+    const commQ = workerCommunityQuery(communityId);
+    const worker = await this.loadWorker(workerId);
+    const isRealWorker = worker && String(worker.id || '').length > 10;
+    let goods = [];
     let reviews = [];
     let hasRealServices = false;
+    if (!isRealWorker) {
+      goods = getMockGoods(id);
+    }
+    if (!communityId && isRealWorker) {
+      wx.showToast({ title: '请先绑定小区', icon: 'none' });
+    }
     try {
-      const svcRes = await util.get(`core/workers/${id}/services`, { page: 1, limit: 30 });
+      const svcRes = await util.get(`core/workers/${workerId}/services`, { page: 1, limit: 30, ...commQ });
       const arr = unwrapList(svcRes);
       if (Array.isArray(arr) && arr.length > 0) {
         hasRealServices = true;
@@ -73,10 +85,10 @@ Page({
     } catch (e) {
       console.log('core/workers/:id/services 未就绪', e);
     }
-    // 若后端无数据，尝试从本地存储读取该技工自行上架的服务
-    if (!hasRealServices) {
+    // 若后端无数据，尝试从本地存储读取该技工自行上架的服务（仅真实账号）
+    if (!hasRealServices && isRealWorker) {
       try {
-        const localKey = 'worker_services_' + id;
+        const localKey = 'worker_services_' + workerId;
         const localList = wx.getStorageSync(localKey) || [];
         if (Array.isArray(localList) && localList.length > 0) {
           goods = localList.map((s) => {
@@ -95,7 +107,7 @@ Page({
     }
 
     try {
-      const revRes = await util.get(`core/workers/${id}/reviews`, { page: 1, limit: 20 });
+      const revRes = await util.get(`core/workers/${workerId}/reviews`, { page: 1, limit: 20, ...commQ });
       const rarr = unwrapList(revRes);
       reviews = (Array.isArray(rarr) ? rarr : []).map((r) => ({
         id: r.id,
@@ -127,41 +139,49 @@ Page({
     } catch (e) {}
   },
   async loadWorker(id) {
-    try {
-      const w = await util.get(`core/workers/${id}`);
-      const normalized = this.normalizeWorker(w);
-      if (normalized) return normalized;
-    } catch (e) {}
+    const workerId = String(id);
+    const communityId = getActiveCommunityId(getApp());
+    const commQ = workerCommunityQuery(communityId);
+    const isSnowflakeId = workerId.length > 10;
 
-    try {
-      const app = getApp();
-      const communityId = (app.globalData.user || {}).communityId;
-      const params = { page: 1, limit: 50 };
-      if (communityId != null && communityId !== '') {
-        params.community_id = communityId;
-      }
-      let list = await util.get('core/workers', params);
-      let arr = unwrapList(list);
-      // 若带 community_id 过滤后未找到，尝试不带过滤拉取全部技工
-      if (!arr.find((x) => Number(x.id) === Number(id)) && params.community_id != null) {
-        console.log('[worker-detail] 带 community_id 未找到，尝试全量拉取');
-        list = await util.get('core/workers', { page: 1, limit: 50 });
-        arr = unwrapList(list);
-      }
-      const found = arr.find((x) => Number(x.id) === Number(id));
-      const normalized = this.normalizeWorker(found);
-      if (normalized) return normalized;
-    } catch (e) {}
+    if (communityId != null) {
+      try {
+        const w = await util.get(`core/workers/${workerId}`, commQ);
+        const normalized = this.normalizeWorker(w);
+        if (normalized) return normalized;
+      } catch (e) {}
 
-    return mockWorkers.find((w) => w.id === id) || mockWorkers[0] || {
-      id,
+      try {
+        const rows = await fetchWorkerRows(communityId, { page: 1, limit: 50 });
+        const found = rows.find((x) => String(x.id) === workerId);
+        const normalized = this.normalizeWorker(found);
+        if (normalized) return normalized;
+      } catch (e) {}
+    }
+
+    if (isSnowflakeId) {
+      return {
+        id: workerId,
+        name: '技工',
+        gender: '',
+        region: '',
+        serviceCount: 0,
+        exp: 0,
+        desc: communityId == null ? '请先绑定小区后查看' : '该技工不在当前小区',
+        avatar: workerAvatarUrl(workerId),
+        tags: []
+      };
+    }
+
+    return mockWorkers.find((w) => String(w.id) === workerId) || mockWorkers[0] || {
+      id: workerId,
       name: "技工",
       gender: "",
       region: "",
       serviceCount: 0,
       exp: 0,
       desc: "",
-      avatar: workerAvatarUrl(id),
+      avatar: workerAvatarUrl(workerId),
       tags: []
     };
   },
@@ -175,7 +195,7 @@ Page({
       '到家服务';
     const rawDesc = w.desc || w.resume || w.introduction || w.bio || w.intro || '';
     return {
-      id: w.id,
+      id: w.id != null ? String(w.id) : '',
       name: w.name || w.real_name || w.nickname || '技工',
       gender: genderToLabel(w.gender),
       region: w.region || w.city || w.hometown || '',
@@ -196,11 +216,11 @@ Page({
     wx.switchTab({ url: "/pages/index/index" });
   },
   goBuy(e) {
-    const sid = Number(e.currentTarget.dataset.id || 0);
+    const sid = e.currentTarget.dataset.id;
     const wid = this.data.worker && this.data.worker.id;
-    if (!sid) return wx.showToast({ title: '服务无效', icon: 'none' });
-    let url = `../service/service?id=${sid}`;
-    if (wid) url += `&worker_id=${wid}`;
+    if (sid == null || sid === '') return wx.showToast({ title: '服务无效', icon: 'none' });
+    let url = `../service/service?id=${encodeURIComponent(String(sid))}`;
+    if (wid) url += `&worker_id=${encodeURIComponent(String(wid))}`;
     wx.navigateTo({ url });
   }
 });

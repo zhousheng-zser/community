@@ -45,6 +45,22 @@ const sendSmsCode = (data) => {
 };
 
 /**
+ * 校验当前微信与 token 用户一致
+ * POST /auth/verify-wechat
+ */
+const verifyWechat = (data) => {
+  return post('/auth/verify-wechat', data);
+};
+
+/**
+ * 退出登录
+ * POST /auth/logout
+ */
+const logout = () => {
+  return post('/auth/logout', {});
+};
+
+/**
  * 管理员登录
  * POST /auth/admin/login
  */
@@ -78,6 +94,8 @@ const workerLogin = (data) => {
 
 module.exports = {
   wechatLogin,
+  verifyWechat,
+  logout,
   accountLogin,
   smsLogin,
   register,

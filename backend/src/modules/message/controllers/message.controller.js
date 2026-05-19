@@ -7,10 +7,40 @@ const fail = (res, msg, status = 400, code = 1) =>
   res.status(status).json({ errcode: code, code, errno: code, msg, errmsg: msg });
 
 const SYSTEM_BOT_TYPES = ['event', 'logistics', 'notices', 'service'];
+const ORDER_SCOPED_CHANNELS = new Set([
+  'neighbor_assist',
+  'shop_buyer',
+  'shop_rider',
+  'worker_customer',
+  'merchant_customer'
+]);
 let messageTablesReady = false;
+
+async function ensureMessageColumns() {
+  if (!sequelize || !sequelize.getQueryInterface) return;
+  const qi = sequelize.getQueryInterface();
+  try {
+    const desc = await qi.describeTable('userconversations');
+    if (!desc.order_id) {
+      await qi.addColumn('userconversations', 'order_id', {
+        type: require('sequelize').DataTypes.BIGINT.UNSIGNED,
+        allowNull: true
+      });
+    }
+    if (!desc.order_no) {
+      await qi.addColumn('userconversations', 'order_no', {
+        type: require('sequelize').DataTypes.STRING(64),
+        allowNull: true
+      });
+    }
+  } catch (e) {
+    console.warn('[messages] ensureMessageColumns', e.message);
+  }
+}
 
 async function ensureMessageTables() {
   if (messageTablesReady) return;
+  await ensureMessageColumns();
   await Promise.all([
     Conversation && Conversation.sync ? Conversation.sync() : Promise.resolve(),
     UserConversation && UserConversation.sync ? UserConversation.sync() : Promise.resolve(),
@@ -52,6 +82,9 @@ function formatConvRow(row) {
     neighbor_assist: '邻里帮沟通'
   };
   let title = plain.title;
+  if (!title && plain.bot_type === 'neighbor_assist' && (plain.order_no || orderNo)) {
+    title = `邻里帮 ${plain.order_no || orderNo}`;
+  }
   if (!title && plain.bot_type) title = botNames[plain.bot_type] || '系统通知';
   if (!title && peerUser && peerUser.nickname) title = peerUser.nickname;
   if (!title) title = '会话';
@@ -60,9 +93,68 @@ function formatConvRow(row) {
     conversation: conv,
     peerUser,
     title,
+    order_id: plain.order_id != null ? plain.order_id : null,
     order_no: plain.order_no || orderNo,
     unread_count: plain.unread_count || 0
   });
+}
+
+function orderScopeFromBody(body, channel) {
+  const scope = {};
+  if (!ORDER_SCOPED_CHANNELS.has(channel)) return scope;
+  const orderIdNum = body && body.order_id != null ? Number(body.order_id) : 0;
+  const orderNo = body && body.order_no != null ? String(body.order_no).trim() : '';
+  if (Number.isFinite(orderIdNum) && orderIdNum > 0) scope.order_id = orderIdNum;
+  else if (orderNo) scope.order_no = orderNo;
+  return scope;
+}
+
+async function ensureUserOrderMapping({ me, peerId, channel, orderId, orderNo, preview, transaction }) {
+  const scope = {};
+  if (orderId != null && Number(orderId) > 0) scope.order_id = Number(orderId);
+  if (orderNo) scope.order_no = String(orderNo);
+
+  const lookupWhere = Object.assign({ user_id: me, peer_id: peerId, bot_type: channel }, scope);
+  let mapping = await UserConversation.findOne({ where: lookupWhere, transaction });
+  let conversationId = mapping && mapping.conversation_id;
+
+  if (!conversationId) {
+    const conv = await Conversation.create({ type: 'private', last_message_preview: preview }, { transaction });
+    conversationId = conv.id;
+    await UserConversation.create(
+      Object.assign(
+        {
+          user_id: me,
+          peer_id: peerId,
+          conversation_id: conversationId,
+          bot_type: channel,
+          unread_count: 0,
+          is_deleted: false
+        },
+        scope
+      ),
+      { transaction }
+    );
+    const reverseWhere = Object.assign({ user_id: peerId, peer_id: me, bot_type: channel }, scope);
+    await UserConversation.findOrCreate({
+      where: reverseWhere,
+      defaults: Object.assign(
+        { conversation_id: conversationId, unread_count: 0, is_deleted: false },
+        scope
+      ),
+      transaction
+    });
+  } else {
+    await Conversation.update(
+      { last_message_preview: preview, updated_at: new Date() },
+      { where: { id: conversationId }, transaction }
+    );
+    await UserConversation.update(
+      { is_deleted: false },
+      { where: { user_id: me, conversation_id: conversationId }, transaction }
+    );
+  }
+  return conversationId;
 }
 
 async function resolvePeerForSend(senderId, body, transaction) {
@@ -220,24 +312,48 @@ exports.sendMessage = async (req, res) => {
 
     const preview = previewText(content, msgType);
     let conversationId = reqConvId > 0 ? reqConvId : 0;
+    const channel = String(body.channel || body.bot_type || '').trim();
+    const scope = orderScopeFromBody(body, channel);
 
-    let senderUc = await UserConversation.findOne({
-      where: { user_id: senderId, peer_id: peerId },
-      transaction: t
-    });
-    if (!conversationId && senderUc) conversationId = senderUc.conversation_id;
+    let senderUc = null;
+    if (conversationId) {
+      senderUc = await UserConversation.findOne({
+        where: { user_id: senderId, conversation_id: conversationId },
+        transaction: t
+      });
+    } else {
+      const where = Object.assign({ user_id: senderId, peer_id: peerId }, scope);
+      if (channel) where.bot_type = channel;
+      senderUc = await UserConversation.findOne({ where, transaction: t });
+      if (senderUc) conversationId = senderUc.conversation_id;
+    }
 
     if (!conversationId) {
       const conv = await Conversation.create({ type: 'private', last_message_preview: preview }, { transaction: t });
       conversationId = conv.id;
       await UserConversation.create(
-        { user_id: senderId, peer_id: peerId, conversation_id: conversationId, unread_count: 0, is_deleted: false },
+        Object.assign(
+          {
+            user_id: senderId,
+            peer_id: peerId,
+            conversation_id: conversationId,
+            bot_type: channel || null,
+            unread_count: 0,
+            is_deleted: false
+          },
+          scope
+        ),
         { transaction: t }
       );
       if (peerId !== senderId) {
+        const reverseWhere = Object.assign({ user_id: peerId, peer_id: senderId }, scope);
+        if (channel) reverseWhere.bot_type = channel;
         await UserConversation.findOrCreate({
-          where: { user_id: peerId, peer_id: senderId },
-          defaults: { conversation_id: conversationId, unread_count: 0, is_deleted: false },
+          where: reverseWhere,
+          defaults: Object.assign(
+            { conversation_id: conversationId, unread_count: 0, is_deleted: false, bot_type: channel || null },
+            scope
+          ),
           transaction: t
         });
       }
@@ -391,52 +507,102 @@ exports.ensureOrderConversation = async (req, res) => {
       return fail(res, '缺少会话对端');
     }
 
+    let orderIdForScope = body.order_id != null ? Number(body.order_id) : 0;
     const preview = orderNo ? `订单沟通 ${orderNo}` : '订单沟通';
-    let mapping = await UserConversation.findOne({
-      where: { user_id: me, peer_id: peerId, bot_type: channel },
+    const conversationId = await ensureUserOrderMapping({
+      me,
+      peerId,
+      channel,
+      orderId: orderIdForScope > 0 ? orderIdForScope : null,
+      orderNo: orderNo || (orderIdForScope > 0 ? String(orderIdForScope) : ''),
+      preview,
       transaction: t
     });
-    let conversationId = mapping && mapping.conversation_id;
-
-    if (!conversationId) {
-      const conv = await Conversation.create({ type: 'private', last_message_preview: preview }, { transaction: t });
-      conversationId = conv.id;
-      await UserConversation.create(
-        {
-          user_id: me,
-          peer_id: peerId,
-          conversation_id: conversationId,
-          bot_type: channel,
-          unread_count: 0,
-          is_deleted: false
-        },
-        { transaction: t }
-      );
-      const [reverse] = await UserConversation.findOrCreate({
-        where: { user_id: peerId, peer_id: me, bot_type: channel },
-        defaults: { conversation_id: conversationId, unread_count: 0, is_deleted: false },
-        transaction: t
-      });
-      if (reverse && reverse.conversation_id !== conversationId) {
-        await reverse.update({ conversation_id: conversationId, is_deleted: false }, { transaction: t });
-      }
-    } else {
-      await Conversation.update(
-        { last_message_preview: preview, updated_at: new Date() },
-        { where: { id: conversationId }, transaction: t }
-      );
-      await UserConversation.update(
-        { is_deleted: false },
-        { where: { user_id: me, conversation_id: conversationId }, transaction: t }
-      );
-    }
 
     await t.commit();
-    ok(res, { conversation_id: conversationId, channel, order_no: orderNo, peer_id: peerId });
+    ok(res, {
+      conversation_id: conversationId,
+      channel,
+      order_no: orderNo || (orderIdForScope > 0 ? String(orderIdForScope) : ''),
+      order_id: orderIdForScope > 0 ? orderIdForScope : null,
+      peer_id: peerId
+    });
   } catch (e) {
     await t.rollback();
     console.error('ensureOrderConversation error', e);
     fail(res, '建立会话失败', 500, 500);
+  }
+};
+
+exports.ensureNeighborAssistConversation = async (orderId) => {
+  await ensureMessageTables();
+  const orderIdNum = Number(orderId);
+  if (!orderIdNum || !NeighborAssistOrder) return null;
+  const ordRow = await NeighborAssistOrder.findByPk(orderIdNum);
+  if (!ordRow || ordRow.assigned_worker_id == null) return null;
+  const publisherId = String(ordRow.user_id);
+  const helperId = String(ordRow.assigned_worker_id);
+  const orderNo = String(orderIdNum);
+  const preview = `订单沟通 ${orderNo}`;
+  const t = await sequelize.transaction();
+  try {
+    let convId = null;
+    for (const me of [publisherId, helperId]) {
+      const peerId = me === publisherId ? helperId : publisherId;
+      convId = await ensureUserOrderMapping({
+        me,
+        peerId,
+        channel: 'neighbor_assist',
+        orderId: orderIdNum,
+        orderNo,
+        preview,
+        transaction: t
+      });
+    }
+    await t.commit();
+    return convId;
+  } catch (e) {
+    await t.rollback();
+    console.error('ensureNeighborAssistConversation error', e);
+    return null;
+  }
+};
+
+exports.seedNeighborAssistGrabMessage = async (orderId, grabberUserId) => {
+  const convId = await exports.ensureNeighborAssistConversation(orderId);
+  if (!convId || !NeighborAssistOrder) return null;
+  const ordRow = await NeighborAssistOrder.findByPk(Number(orderId));
+  if (!ordRow) return null;
+  const publisherId = String(ordRow.user_id);
+  const content = '对方已接单，可以开始沟通了';
+  const preview = previewText(content, 'text');
+  const t = await sequelize.transaction();
+  try {
+    await Message.create(
+      { conversation_id: convId, sender_id: 0, msg_type: 'text', content },
+      { transaction: t }
+    );
+    await Conversation.update(
+      { last_message_preview: preview, updated_at: new Date() },
+      { where: { id: convId }, transaction: t }
+    );
+    if (grabberUserId && String(grabberUserId) !== publisherId) {
+      await UserConversation.increment('unread_count', {
+        by: 1,
+        where: { user_id: publisherId, conversation_id: convId },
+        transaction: t
+      });
+    }
+    await UserConversation.update(
+      { is_deleted: false },
+      { where: { conversation_id: convId }, transaction: t }
+    );
+    await t.commit();
+    return convId;
+  } catch (e) {
+    await t.rollback();
+    console.error('seedNeighborAssistGrabMessage error', e);
+    return null;
   }
 };
 

@@ -2,6 +2,7 @@
 const util = require('utils/util.js');
 const rolePortals = require('utils/rolePortals.js');
 const userSession = require('utils/userSession.js');
+const sessionReset = require('utils/sessionReset.js');
 const env = require('utils/env.js');
 App({
   onLaunch: function (query) {
@@ -24,6 +25,68 @@ App({
     user: null,
     communityTargetTab: ''
   },
+  _applyProfileFromApi(u, callback) {
+    if (!u) {
+      if (callback) callback();
+      return;
+    }
+    if (u.id != null) userSession.rememberUserId(u.id);
+    this.globalData.user = rolePortals.mergePortalFlags({
+      id: u.id,
+      opId: u.openid,
+      userName: u.nickname || '微信用户',
+      userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
+      userMobile: u.phone || '13800000000',
+      userAddress: u.address || '',
+      userBankNum: u.bank_num || '',
+      userWxId: u.wx_id || '',
+      role: u.role || 'user',
+      roles: u.roles,
+      worker_status: u.worker_status != null ? u.worker_status : u.workerStatus,
+      merchant_status: u.merchant_status != null ? u.merchant_status : u.merchantStatus,
+      shop_id: u.shop_id != null ? u.shop_id : u.shopId,
+      shop_status: u.shop_status != null ? u.shop_status : u.shopStatus,
+      communityId: u.community_id != null ? u.community_id : u.communityId,
+      points: u.points,
+      userState: 0,
+      remark2: 2,
+      vipFlag: 0
+    }, u);
+    const cid = u.community_id != null ? u.community_id : u.communityId;
+    if (cid != null && cid !== '') {
+      try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+    }
+    if (callback) callback();
+  },
+  _fetchAndApplyProfile(callback) {
+    util.get('/user/profile').then((data) => {
+      this._applyProfileFromApi(data, callback);
+    }).catch(() => {
+      sessionReset.clearAllUserSession();
+      this.globalData.user = null;
+      if (callback) callback();
+    });
+  },
+  _silentWechatLogin(code, parentOpenid, callback, showLoading) {
+    if (showLoading) {
+      wx.showLoading({ title: '正在登录' });
+    }
+    const payload = { code };
+    if (parentOpenid) payload.inviter_openid = String(parentOpenid).trim();
+    util.post('auth/login', payload).then((data) => {
+      if (showLoading) wx.hideLoading();
+      wx.removeStorageSync('manual_logged_out');
+      wx.setStorageSync('token', data.token);
+      this._applyProfileFromApi(data.user, callback);
+    }).catch((err) => {
+      if (showLoading) wx.hideLoading();
+      console.error('登录对接失败:', err);
+      if (showLoading) {
+        wx.showToast({ title: '登录失败', icon: 'none' });
+      }
+      if (callback) callback();
+    });
+  },
   // 核心登录保存函数
   save(parentOpenid, callback) {
     if (wx.getStorageSync('manual_logged_out')) {
@@ -31,101 +94,31 @@ App({
       return;
     }
 
-    if (wx.getStorageSync('token')) {
-      if (this.globalData.user) {
-        if (callback) { callback(); }
-        return;
-      }
-      // 冷启动有 token 无 user 时，拉取当前 token 的用户信息，而不该走静默登录覆盖它
-      util.get('/user/profile').then(data => {
-        const u = data;
-        if (u.id != null) userSession.rememberUserId(u.id);
-        this.globalData.user = rolePortals.mergePortalFlags({
-          id: u.id,
-          opId: u.openid,
-          userName: u.nickname || '微信用户',
-          userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
-          userMobile: u.phone || '13800000000',
-          userAddress: u.address || '',
-          userBankNum: u.bank_num || '',
-          userWxId: u.wx_id || '',
-          role: u.role || 'user',
-          roles: u.roles,
-          worker_status: u.worker_status != null ? u.worker_status : u.workerStatus,
-          merchant_status: u.merchant_status != null ? u.merchant_status : u.merchantStatus,
-          shop_id: u.shop_id != null ? u.shop_id : u.shopId,
-          shop_status: u.shop_status != null ? u.shop_status : u.shopStatus,
-          communityId: u.community_id != null ? u.community_id : u.communityId,
-          points: u.points,
-          userState: 0,
-          remark2: 2,
-          vipFlag: 0
-        }, u);
-        const cid = u.community_id != null ? u.community_id : u.communityId;
-        if (cid != null && cid !== '') {
-          try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
-        }
-        if (callback) callback();
-      }).catch(() => {
-        // token 失效或异常，清除后重新走静默登录
-        wx.removeStorageSync('token');
-        this.save(parentOpenid, callback);
-      });
-      return;
-    }
-
-    wx.showLoading({
-      title: '正在登录'
-    });
-
-    // 1. 调用微信登录获取临时 code
     wx.login({
-      success: res => {
-        if (res.code) {
-          // 2. 将 code 发给后端换取 Token 和用户信息（可选：分享场景带来的上级 openid，后端若支持则用于邀请绑定）
-          const payload = { code: res.code };
-          if (parentOpenid) payload.inviter_openid = String(parentOpenid).trim();
-          util.post("auth/login", payload).then((data) => {
-            wx.hideLoading();
-            // 保存 Token 到本地，供之后的所有请求鉴权使用
-            wx.setStorageSync('token', data.token);
-
-            // 3. 将后端返回的字段映射到小程序全局数据中
-            const u = data.user;
-            if (u && u.id != null) userSession.rememberUserId(u.id);
-            this.globalData.user = rolePortals.mergePortalFlags({
-              id: u.id,
-              opId: u.openid,
-              userName: u.nickname || '微信用户',
-              userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
-              userMobile: u.phone || '13800000000',
-              userAddress: u.address || '',
-              userBankNum: u.bank_num || '',
-              userWxId: u.wx_id || '',
-              role: u.role || 'user',
-              roles: u.roles,
-              worker_status: u.worker_status != null ? u.worker_status : u.workerStatus,
-              merchant_status: u.merchant_status != null ? u.merchant_status : u.merchantStatus,
-              shop_id: u.shop_id != null ? u.shop_id : u.shopId,
-              shop_status: u.shop_status != null ? u.shop_status : u.shopStatus,
-              communityId: u.community_id != null ? u.community_id : u.communityId,
-              points: u.points,
-              userState: 0,
-              remark2: 2,
-              vipFlag: 0
-            }, u);
-
-            // 4. 执行回调（比如页面刷新数据）
-            if (callback) { callback() }
-          }).catch(err => {
-            wx.hideLoading();
-            console.error('登录对接失败:', err);
-            wx.showToast({ title: '登录失败', icon: 'none' });
-          });
+      success: (res) => {
+        if (!res.code) {
+          if (callback) callback();
+          return;
         }
+
+        const token = wx.getStorageSync('token');
+        if (token) {
+          util.post('auth/verify-wechat', { code: res.code }).then(() => {
+            wx.removeStorageSync('manual_logged_out');
+            this._fetchAndApplyProfile(callback);
+          }).catch((err) => {
+            console.warn('[save] 当前微信与登录 token 不一致，清除旧会话', err);
+            sessionReset.clearAllUserSession();
+            this.globalData.user = null;
+            this._silentWechatLogin(res.code, parentOpenid, callback, false);
+          });
+          return;
+        }
+
+        this._silentWechatLogin(res.code, parentOpenid, callback, true);
       },
       fail: () => {
-        wx.hideLoading();
+        if (callback) callback();
       }
     });
   },

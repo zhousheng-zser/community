@@ -888,14 +888,46 @@ exports.getBalance = async (req, res) => {
     const profile = await getProfileByUser(userId);
     if (!profile) return fail(res, '暂无服务商信息', 404);
 
-    const totalIncome = await ServiceOrder.sum('pay_amount', {
-      where: { provider_id: profile.id, status: 'completed' }
-    }) || 0;
+    const { Op, literal } = require('sequelize');
+    const whereBase = {
+      status: 'completed',
+      [Op.or]: [
+        { provider_id: profile.id },
+        { provider_user_id: String(userId) }
+      ]
+    };
+
+    // Use COALESCE to handle orders where only amount is set
+    const db = require('../../../models');
+    const [[{ total }]] = await db.sequelize.query(
+      `SELECT COALESCE(SUM(COALESCE(pay_amount, amount)), 0) AS total
+       FROM service_orders
+       WHERE status = 'completed'
+         AND (provider_id = :pid OR provider_user_id = :uid)`,
+      { replacements: { pid: profile.id, uid: String(userId) }, type: db.sequelize.QueryTypes.SELECT, raw: true }
+    ).catch(() => [[{ total: 0 }]]);
+
+    const totalIncome = Number(total) || 0;
+
+    // Also check PartnerCommissionBalance for 'service_provider' role (credited by confirmComplete)
+    let commBalance = 0;
+    try {
+      const { PartnerCommissionBalance } = require('../../../models');
+      if (PartnerCommissionBalance) {
+        const cb = await PartnerCommissionBalance.findOne({
+          where: { user_id: String(userId), role: 'service_provider' }
+        });
+        if (cb) commBalance = Number(cb.available_amount || 0);
+      }
+    } catch (_) {}
+
+    const withdrawable = commBalance > 0 ? commBalance : totalIncome;
 
     ok(res, {
-      balance: Number(totalIncome).toFixed(2),
-      total_income: Number(totalIncome).toFixed(2),
-      withdrawable: Number(totalIncome).toFixed(2)
+      balance: withdrawable.toFixed(2),
+      total_income: totalIncome.toFixed(2),
+      withdrawable: withdrawable.toFixed(2),
+      provider_balance: withdrawable.toFixed(2)
     });
   } catch (err) {
     console.error('[sp/balance]', err);

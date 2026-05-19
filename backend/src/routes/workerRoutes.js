@@ -16,4 +16,11 @@ router.post('/service-orders/:id/evidence', authMiddleware, workerPortalControll
 router.post('/service-orders/:id/addon-request', authMiddleware, workerPortalController.addonRequest);
 router.post('/service-orders/:id/complete', authMiddleware, workerPortalController.complete);
 
+// 技工服务管理（我的服务）
+const workerCtrl = require('../modules/worker/controllers/worker.controller');
+router.get('/services', authMiddleware, workerCtrl.getMyServices);
+router.post('/services', authMiddleware, workerCtrl.createService);
+router.patch('/services/:id', authMiddleware, workerCtrl.updateService);
+router.post('/services/:id/delete', authMiddleware, workerCtrl.deleteService);
+
 module.exports = router;

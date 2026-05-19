@@ -50,7 +50,7 @@ function jsonErr(res, status, msg) {
   return res.status(status).json({ code: status, msg, message: msg, data: null, token: null });
 }
 
-/** POST /api/v1/auth/login — 微信已注册则登录，未注册则失败 */
+/** POST /api/v1/auth/login — 微信快捷登录：已注册则登录，未注册则自动创建并绑定 */
 exports.login = async (req, res) => {
   try {
     const { code, nickname, avatar_url } = req.body || {};
@@ -59,13 +59,17 @@ exports.login = async (req, res) => {
     }
 
     const openid = await resolveOpenidFromCode(code);
-    const user = await User.findOne({ where: { openid } });
+    const defaultNickname = nickname || `微信用户${String(openid).slice(-4)}`;
+    const [user, created] = await User.findOrCreate({
+      where: { openid },
+      defaults: {
+        nickname: defaultNickname,
+        avatar_url: avatar_url || '',
+        role: 'user'
+      }
+    });
 
-    if (!user) {
-      return jsonErr(res, 404, '该微信尚未注册，请先完成手机号注册并绑定微信');
-    }
-
-    if (nickname || avatar_url) {
+    if (!created && (nickname || avatar_url)) {
       if (nickname) user.nickname = nickname;
       if (avatar_url) user.avatar_url = avatar_url;
       await user.save();
@@ -73,7 +77,12 @@ exports.login = async (req, res) => {
 
     const token = issueUserToken(user);
     await grantWelcomeCoupon(user.id);
-    return jsonOk(res, { msg: '登录成功', token, user: formatUserPayload(user) });
+    return jsonOk(res, {
+      msg: created ? '注册成功' : '登录成功',
+      token,
+      user: formatUserPayload(user),
+      data: { token, is_new_user: created }
+    });
   } catch (error) {
     if (error.status === 400) {
       return res.status(400).json({ code: 400, error: error.message, details: error.details });
@@ -239,6 +248,38 @@ exports.passwordReset = async (req, res) => {
   } catch (e) {
     console.error('passwordReset error:', e);
     return jsonErr(res, 500, '重置失败');
+  }
+};
+
+/** POST /api/v1/auth/verify-wechat — 校验当前微信 openid 与 token 用户一致 */
+exports.verifyWechat = async (req, res) => {
+  try {
+    const { code } = req.body || {};
+    if (!code) {
+      return jsonErr(res, 400, '缺少 code 参数');
+    }
+    const { resolveUserId } = require('../utils/resolveUserId');
+    const userId = resolveUserId(req.user && req.user.id);
+    if (!userId) {
+      return jsonErr(res, 401, '未登录');
+    }
+
+    const wxOpenid = await resolveOpenidFromCode(code);
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return jsonErr(res, 401, '用户不存在');
+    }
+    if (!user.openid || String(user.openid) !== String(wxOpenid)) {
+      return jsonErr(res, 401, '当前微信与登录账号不一致，请重新登录');
+    }
+
+    return jsonOk(res, { msg: 'ok', user: formatUserPayload(user) });
+  } catch (error) {
+    if (error.status === 400) {
+      return jsonErr(res, 400, error.message);
+    }
+    console.error('verifyWechat error:', error);
+    return jsonErr(res, 500, '校验失败');
   }
 };
 

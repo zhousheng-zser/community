@@ -1,9 +1,7 @@
 const util = require('../../utils/util.js');
-const { unwrapList } = util;
-const { mapWorkerForClassifyCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
+const { mapWorkerForClassifyCard } = require('../../utils/workerApiMap.js');
 const { workerAvatarUrl } = require('../../utils/workerAvatars.js');
-
-const MOCK_WORKER_ROWS = FALLBACK_WORKER_ROWS;
+const { getActiveCommunityId, fetchWorkerRows } = require('../../utils/communityPortal.js');
 
 Page({
   data: {
@@ -18,7 +16,8 @@ Page({
       "除螨服务", "开荒保洁", "深度保洁", "家居养护", "整理收纳",
       "助老护老", "闲置二手", "上门回收", "便民服务", "房屋装修"
     ],
-    workers: MOCK_WORKER_ROWS.map(mapWorkerForClassifyCard)
+    workers: [],
+    loading: true
   },
   onLoad() {
     const sys = wx.getSystemInfoSync();
@@ -27,31 +26,22 @@ Page({
     });
     this.loadWorkers();
   },
+  onShow() {
+    this.loadWorkers();
+  },
   async loadWorkers() {
-    const app = getApp();
-    const communityId = (app.globalData.user || {}).communityId;
-    const params = { page: 1, limit: 50 };
-    if (communityId != null && communityId !== '') {
-      params.community_id = communityId;
-    }
+    this.setData({ loading: true });
+    const communityId = getActiveCommunityId(getApp());
     try {
-      let res = await util.get('core/workers', params);
-      let rows = unwrapList(res);
-      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工
-      if (rows.length === 0 && params.community_id != null) {
-        console.log('[classify] core/workers 带 community_id 返回空，尝试全量拉取');
-        res = await util.get('core/workers', { page: 1, limit: 50 });
-        rows = unwrapList(res);
-      }
-      if (rows.length > 0) {
-        this.setData({ workers: rows.map(mapWorkerForClassifyCard) });
-      } else {
-        console.log('[classify] core/workers 返回空列表，保留本地数据');
-        // 保留已有本地数据，不覆盖为空
-      }
+      const rows = await fetchWorkerRows(communityId, { page: 1, limit: 50 });
+      this.setData({
+        workers: rows.map(mapWorkerForClassifyCard),
+        loading: false
+      });
     } catch (e) {
-      console.log('[classify] core/workers 请求失败，保留本地数据', e);
-      // 保留已有本地数据，不覆盖为空
+      console.log('[classify] core/workers 请求失败', e);
+      this.setData({ workers: [], loading: false });
+      wx.showToast({ title: (e && e.errmsg) || '加载失败', icon: 'none' });
     }
   },
   goBack() {
@@ -67,7 +57,7 @@ Page({
   },
   goWorkerDetail(e) {
     wx.navigateTo({
-      url: "../worker-detail/worker-detail?id=" + e.currentTarget.dataset.id
+      url: '../worker-detail/worker-detail?id=' + encodeURIComponent(String(e.currentTarget.dataset.id || ''))
     });
   },
 

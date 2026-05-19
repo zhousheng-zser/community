@@ -134,8 +134,10 @@ function mapWorkerForHomeCard(w) {
     w.main_skill ||
     (Array.isArray(w.tags) && w.tags.length ? w.tags[0] : '') ||
     '到家服务';
+  const idStr = w.id != null ? String(w.id) : '';
   return {
-    id: w.id,
+    id: idStr,
+    idStr,
     name: w.name || w.real_name || w.nickname || '技工',
     orders: ordersText,
     avatar: pickWorkerAvatar(w),
@@ -147,8 +149,10 @@ function mapWorkerForHomeCard(w) {
 
 /** 分类页「全部技工」列表卡片 */
 function mapWorkerForClassifyCard(w) {
+  const idStr = w.id != null ? String(w.id) : '';
   return {
-    id: w.id,
+    id: idStr,
+    idStr,
     name: w.name || w.real_name || w.nickname || '技工',
     region: w.region || w.city || w.hometown || '',
     gender: w.gender || '',

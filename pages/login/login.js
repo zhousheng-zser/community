@@ -93,20 +93,7 @@ Page({
           this.handleLoginSuccess(data);
         }).catch(err => {
           wx.hideLoading();
-          if (err && err.code === 404) {
-            wx.showModal({
-              title: '提示',
-              content: '该微信尚未注册，请先注册',
-              confirmText: '去注册',
-              success: (res) => {
-                if (res.confirm) {
-                  wx.navigateTo({ url: '/pages/register/register' });
-                }
-              }
-            });
-          } else {
-            wx.showToast({ title: this.getErrorMessage(err, failFallbackMsg), icon: 'none' });
-          }
+          wx.showToast({ title: this.getErrorMessage(err, failFallbackMsg), icon: 'none' });
         });
       },
       fail: () => {
@@ -127,7 +114,7 @@ Page({
     this.doWechatLogin({}, '微信快捷登录失败');
   },
   handleLoginSuccess(data) {
-    sessionReset.clearAccountScopedStorage();
+    sessionReset.clearAllUserSession();
     wx.removeStorageSync('manual_logged_out');
     wx.setStorageSync('token', data.token);
     const u = data.user || {};
@@ -157,7 +144,8 @@ Page({
       vipFlag: 0
     }, u);
     browseFootprint.syncLocalToServer();
-    wx.showToast({ title: '登录成功' });
+    const isNewUser = !!(data && (data.is_new_user || data.isNewUser));
+    wx.showToast({ title: isNewUser ? '注册成功' : '登录成功' });
     setTimeout(() => {
       wx.reLaunch({ url: '/pages/index/index' });
     }, 1500);

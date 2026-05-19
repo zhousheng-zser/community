@@ -124,6 +124,7 @@ Page({
     if (peerId != null && peerId !== '') {
       payload.peerId = asId(peerId);
     }
+    Object.assign(payload, this._orderSendMeta());
     if (this.data.shopIdForApi != null) {
       payload.shop_id = this.data.shopIdForApi;
     }
@@ -147,6 +148,7 @@ Page({
     util
       .post('messages/send', payload)
       .then(() => {
+        wx.setStorageSync('message_list_dirty', Date.now());
         this.fetchHistory();
       })
       .catch((err) => {
@@ -161,6 +163,14 @@ Page({
           this.setData({ history: filtered });
         }
       });
+  },
+
+  _orderSendMeta() {
+    const meta = {};
+    if (this.data.orderId) meta.order_id = Number(this.data.orderId);
+    if (this.data.orderNo) meta.order_no = this.data.orderNo;
+    if (this.data.orderScene) meta.channel = this.data.orderScene;
+    return meta;
   },
 
   async ensurePeerIdForSend() {
@@ -235,10 +245,12 @@ Page({
             if (this.data.shopIdForApi != null) {
               payload.shop_id = this.data.shopIdForApi;
             }
+            Object.assign(payload, this._orderSendMeta());
             return util.post('messages/send', payload);
           })
           .then(() => {
             wx.hideLoading();
+            wx.setStorageSync('message_list_dirty', Date.now());
             this.fetchHistory();
           })
           .catch(() => {
@@ -300,10 +312,12 @@ Page({
             };
             if (peerId != null && peerId !== '') payload.peerId = asId(peerId);
             if (this.data.shopIdForApi != null) payload.shop_id = this.data.shopIdForApi;
+            Object.assign(payload, this._orderSendMeta());
             return util.post('messages/send', payload);
           })
           .then(() => {
             wx.hideLoading();
+            wx.setStorageSync('message_list_dirty', Date.now());
             this.fetchHistory();
           })
           .catch(() => {

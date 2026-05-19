@@ -80,6 +80,10 @@ Page({
     // Fallback: check local role
     if (hasRole || user.service_provider_status) {
       try { await api.serviceProvider.exchangeServiceProviderToken(); } catch (e) {}
+      const fallbackId = user.service_provider_profile_id || user.serviceProviderProfileId;
+      if (fallbackId) {
+        spCtx.syncBoundProfile(app, { id: fallbackId, shop_name: user.sp_shop_name || user.shop_name || '' });
+      }
       this.setData({
         spOk: true,
         displayName: user.userName || '服务商',
@@ -146,9 +150,10 @@ Page({
   goServiceShelfDown() { wx.navigateTo({ url: '/package-service-provider/pages/sp-services/sp-services?mode=down' }); },
   goShop() {
     const profile = spCtx.getBoundProfile(app);
-    const pid = profile && (profile.id || profile.profile_id);
-    if (!pid) { wx.showToast({ title: '暂未绑定门店', icon: 'none' }); return; }
-    wx.navigateTo({ url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(pid))}` });
+    const user = (app.globalData && app.globalData.user) || {};
+    const shopRef = user.sp_user_id || profile.userId || profile.profileId || profile.id || profile.profile_id;
+    if (!shopRef) { wx.showToast({ title: '暂未绑定门店', icon: 'none' }); return; }
+    wx.navigateTo({ url: `/pages/service-provider-shop/service-provider-shop?provider_id=${encodeURIComponent(String(shopRef))}` });
   },
   goAccount() { wx.navigateTo({ url: '/pages/account/account' }); },
   backUser() { rp.backToUserTab(); }

@@ -9,12 +9,15 @@ const { unwrapList, imgUrl } = util;
 const images = require('../../utils/images.js');
 const indexHelper = require('../../utils/indexHelper.js');
 const { listImageFromHome3, resolveServiceListImage } = require('../../utils/serviceHome3.js');
-const { mapWorkerForHomeCard, FALLBACK_WORKER_ROWS } = require('../../utils/workerApiMap.js');
+const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
+const {
+  getActiveCommunityId,
+  fetchWorkerRows,
+  fetchServiceProviderRows,
+  mapServiceProviderForHomeCard
+} = require('../../utils/communityPortal.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
-
-// 首页「直约技工」本地兜底数据（后端 core/workers 不可用时的展示）
-const FALLBACK_WORKERS = FALLBACK_WORKER_ROWS.map(mapWorkerForHomeCard);
 
 /** 惠民卡 · 肯德基/星巴克/百果园：与「京东联盟」区块同一套字段（头图 + 精选网格 + GO） */
 function mapChainBrandToAllianceSection(raw, imgUrlFn) {
@@ -239,34 +242,27 @@ Page({
       });
     }
     this._maybeRefreshMarketAfterAddressChange();
-    this.refreshWorkerListForCommunity();
+    this.refreshPortalListsForCommunity();
   },
 
-  /** 用户资料中的 communityId（或定位选择绑定的小区）变化后，刷新「直约技工」列表 */
-  async refreshWorkerListForCommunity() {
-    const app = getApp();
-    const communityId = (app.globalData.user || {}).communityId;
-    const wq = { page: 1, limit: 20 };
-    if (communityId != null && communityId !== '') {
-      wq.community_id = communityId;
+  /** 按当前小区刷新「直约技工」「直约服务商」（与查看全部页同源） */
+  async refreshPortalListsForCommunity() {
+    const communityId = getActiveCommunityId(getApp());
+    try {
+      const rows = await fetchWorkerRows(communityId, { page: 1, limit: 50 });
+      this.setData({ workerList: rows.slice(0, 8).map(mapWorkerForHomeCard) });
+    } catch (e) {
+      console.log('[index] 刷新技工列表失败', e);
+      this.setData({ workerList: [] });
     }
     try {
-      let wData = await api.core.getWorkerList(wq);
-      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工
-      if ((!wData || wData.length === 0) && wq.community_id != null) {
-        console.log('[refreshWorkerList] 带 community_id 返回空，尝试全量拉取');
-        wData = await api.core.getWorkerList({ page: 1, limit: 20 });
-      }
-      if (wData && wData.length > 0) {
-        const workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
-        this.setData({ workerList });
-      } else {
-        console.log('[refreshWorkerList] core/workers 返回空列表，使用本地兜底');
-        this.setData({ workerList: FALLBACK_WORKERS });
-      }
+      const plist = await fetchServiceProviderRows(communityId, { limit: 8 });
+      this.setData({
+        merchantList: plist.slice(0, 8).map((p) => mapServiceProviderForHomeCard(p, imgUrl))
+      });
     } catch (e) {
-      console.log('core/workers 刷新失败，使用本地兜底', e);
-      this.setData({ workerList: FALLBACK_WORKERS });
+      console.log('[index] 刷新服务商列表失败', e);
+      this.setData({ merchantList: [] });
     }
   },
   /** 地址页保存/编辑/删除/设默认后，清空本地集市缓存并重拉当前分类店铺 */
@@ -618,7 +614,7 @@ Page({
   },
   async init() {
     const { id, userFlag, userMobile } = app.globalData.user || {};
-    const communityId = (app.globalData.user || {}).communityId;
+    const communityId = getActiveCommunityId(app);
     // 假数据填充，方便本地预览首页布局；有接口时由 core/banners 覆盖
     let banner = [
       { id: 'local1', imageUrl: images.bannerHome, linkType: 'none', linkValue: '' },
@@ -710,7 +706,7 @@ Page({
       image: item.image || imgUrl(hotImageFallbackPool[i % hotImageFallbackPool.length] || images.hotClean),
       url: '../service/service?id=' + item.id
     }));
-    let merchantList = mapMerchantList();
+    let merchantList = [];
     let workerList = [];
     let marketList = [
       { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
@@ -833,31 +829,13 @@ Page({
         }));
       }
     } catch (e) { }
-    merchantList = mapMerchantList();
-
-    // ===== 从数据库获取直约技工（按当前用户绑定小区过滤，与入驻小区一致）=====
+    // ===== 直约技工（按小区，与 classify 页一致）=====
     try {
-      const wq = { page: 1, limit: 20 };
-      if (communityId != null && communityId !== '') {
-        wq.community_id = communityId;
-      }
-      let wRes = await util.get('core/workers', wq);
-      let wData = unwrapList(wRes);
-      // 若带 community_id 过滤后为空，尝试不带过滤拉取全部技工（避免小区无入驻时列表空白）
-      if (wData.length === 0 && wq.community_id != null) {
-        console.log('[index] core/workers 带 community_id 返回空，尝试全量拉取');
-        wRes = await util.get('core/workers', { page: 1, limit: 20 });
-        wData = unwrapList(wRes);
-      }
-      if (wData.length > 0) {
-        workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
-      } else {
-        console.log('[index] core/workers 返回空列表，使用本地兜底');
-        workerList = FALLBACK_WORKERS;
-      }
+      const wData = await fetchWorkerRows(communityId, { page: 1, limit: 50 });
+      workerList = wData.slice(0, 8).map(mapWorkerForHomeCard);
     } catch (e) {
-      console.log('[index] core/workers 请求失败，使用本地兜底', e);
-      workerList = FALLBACK_WORKERS;
+      console.log('[index] core/workers 请求失败', e);
+      workerList = [];
     }
 
     // ===== 从数据库获取管家精选商品（建议按小区配置，传 community_id）=====
@@ -1215,29 +1193,11 @@ Page({
     } catch (e) { console.warn('[惠民卡] tuixiao 加载失败', e); }
 
     try {
-      const pq = { limit: 8 };
-      if (communityId != null && communityId !== '') pq.community_id = communityId;
-      const pr = await util.get('core/service-providers', pq);
-      const plist = unwrapList(pr);
-      if (plist.length > 0) {
-        merchantList = plist.slice(0, 8).map((p, i) => {
-          const pid = p.id != null ? p.id : p.provider_id;
-          // 优先用后端返回的真实封面图，回退到本地图库
-          const realCover = p.cover_image || p.shop_front_url || p.avatar_url || p.avatar || '';
-          const image = realCover
-            ? imgUrl(realCover)
-            : imgUrl(serviceImageFallbackPool[i % serviceImageFallbackPool.length] || images.hotClean);
-          return {
-            id: pid,
-            name: p.name || p.shop_name || p.display_name || '服务商',
-            sub: p.subtitle || p.tagline || (p.service_count != null ? `服务${p.service_count}单` : '直约到家'),
-            image,
-            url: '../service-provider-shop/service-provider-shop?provider_id=' + encodeURIComponent(pid)
-          };
-        });
-      }
+      const plist = await fetchServiceProviderRows(communityId, { limit: 8 });
+      merchantList = plist.slice(0, 8).map((p) => mapServiceProviderForHomeCard(p, imgUrl));
     } catch (eSp) {
       console.log('core/service-providers 不可用', eSp);
+      merchantList = [];
     }
 
     let assistMarqueeList = [];

@@ -20,7 +20,9 @@ function pickProfileId(payload) {
     payload.profile_id != null ? payload.profile_id
       : payload.profileId != null ? payload.profileId
         : payload.sp_profile_id != null ? payload.sp_profile_id
-          : null
+          : payload.service_provider_profile_id != null ? payload.service_provider_profile_id
+            : payload.id != null ? payload.id
+              : null
   );
 }
 
@@ -41,11 +43,11 @@ function getBoundProfile(app) {
     try {
       const cacheId = toProfileId(wx.getStorageSync(STORAGE_KEYS.profileId));
       const cacheName = String(wx.getStorageSync(STORAGE_KEYS.shopName) || '').trim();
-      if (cacheId != null) return { profileId: cacheId, shopName: cacheName || '' };
+      if (cacheId != null) return { profileId: cacheId, id: cacheId, shopName: cacheName || '' };
     } catch (e) {}
-    return { profileId: null, shopName: shopName || '' };
+    return { profileId: null, id: null, shopName: shopName || '' };
   }
-  return { profileId: pid, shopName: shopName || '' };
+  return { profileId: pid, id: pid, shopName: shopName || '' };
 }
 
 /** 从接口响应同步 profile 上下文到全局与本地缓存 */
@@ -54,10 +56,15 @@ function syncBoundProfile(app, payload) {
   const profileId = pickProfileId(payload);
   const shopName = pickShopName(payload);
   if (profileId == null) return { profileId: null, shopName: shopName || '' };
-  if (a && a.globalData && a.globalData.user) {
+    if (a && a.globalData && a.globalData.user) {
     a.globalData.user.profile_id = profileId;
     a.globalData.user.profileId = profileId;
     a.globalData.user.sp_profile_id = profileId;
+    a.globalData.user.service_provider_profile_id = profileId;
+    const uid = payload.user_id != null ? payload.user_id : payload.userId;
+    if (uid != null && uid !== '') {
+      a.globalData.user.sp_user_id = String(uid);
+    }
     if (shopName) {
       a.globalData.user.sp_shop_name = shopName;
     }

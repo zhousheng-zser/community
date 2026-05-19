@@ -21,19 +21,34 @@ Page({
         this.loadSystemNotices();
     },
 
+    onPullDownRefresh() {
+        Promise.all([
+            this.fetchConversations(true),
+            this.loadSystemNotices(true)
+        ]).finally(() => {
+            wx.stopPullDownRefresh();
+        });
+    },
+
+    formatTimeLabel(raw) {
+        if (!raw) return '';
+        const s = String(raw).replace('T', ' ').slice(0, 16);
+        return s;
+    },
+
     switchTab(e) {
         const tab = e.currentTarget.dataset.tab;
         this.setData({ activeTab: tab });
         if (tab === 'sys') this.loadSystemNotices();
     },
 
-    loadSystemNotices() {
+    loadSystemNotices(silent) {
         const token = wx.getStorageSync('token');
         if (!token) {
             this.applyLocalSystemNotices();
-            return;
+            return Promise.resolve();
         }
-        api.message.getSystemNotices().then((res) => {
+        return api.message.getSystemNotices().then((res) => {
             const list = Array.isArray(res) ? res : [];
             if (list.length === 0) {
                 lp.seedSystemIfEmpty();
@@ -87,7 +102,7 @@ Page({
     },
 
     // 获取消息列表（商家端带 shop_id 时只拉取该店关联的订单会话）
-    fetchConversations() {
+    fetchConversations(silent) {
         const u = app.globalData.user || {};
         const q = {};
         if (u.shop_id != null && u.shop_id !== '') {
@@ -95,18 +110,22 @@ Page({
         } else if (u.shopId != null && u.shopId !== '') {
             q.shop_id = u.shopId;
         }
-        api.message.getConversationList(q).then(res => {
+        return api.message.getConversationList(q).then(res => {
             const list = Array.isArray(res) ? res : [];
-            const formattedList = list.map(item => ({
-                ...item,
-                isTouchMove: false
-            }));
+            const formattedList = list.map(item => {
+                const conv = item.conversation || {};
+                return Object.assign({}, item, {
+                    isTouchMove: false,
+                    timeLabel: this.formatTimeLabel(conv.updated_at || item.updated_at)
+                });
+            });
             this.setData({
                 conversations: formattedList
             });
+            try { wx.removeStorageSync('message_list_dirty'); } catch (e) { /* ignore */ }
         }).catch(err => {
             console.error(err);
-            wx.showToast({ title: '加载消息失败', icon: 'none' });
+            if (!silent) wx.showToast({ title: '加载消息失败', icon: 'none' });
         });
     },
 
@@ -207,6 +226,10 @@ Page({
         ];
         if (item.order_no) {
             q.push(`orderNo=${encodeURIComponent(item.order_no)}`);
+        }
+        if (item.bot_type === 'neighbor_assist' && item.order_id) {
+            q.push(`orderId=${encodeURIComponent(item.order_id)}`);
+            q.push('orderScene=neighbor_assist');
         }
         wx.navigateTo({
             url: `/pages/chat/chat?${q.join('&')}`

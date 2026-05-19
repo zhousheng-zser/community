@@ -1,7 +1,8 @@
-/** 切换账号时清理非用户隔离的本地缓存，避免串号 */
+/** 切换账号时清理本地缓存，避免串号 */
 const checkoutStorage = require('./checkoutStorage.js');
+const userSession = require('./userSession.js');
 
-const KEYS = [
+const SCOPED_KEYS = [
   'checkout_selected_coupon',
   'merchant_token',
   'service_provider_token',
@@ -9,11 +10,28 @@ const KEYS = [
   'sp_bundle_checkout'
 ];
 
+const USER_SESSION_KEYS = [
+  'token',
+  'user',
+  'user_community_id',
+  'community_id',
+  'address_list'
+];
+
 function clearAccountScopedStorage() {
-  KEYS.forEach((key) => {
+  SCOPED_KEYS.forEach((key) => {
     try { wx.removeStorageSync(key); } catch (e) { /* ignore */ }
   });
   checkoutStorage.clearCheckout();
 }
 
-module.exports = { clearAccountScopedStorage };
+/** 清除登录态与用户相关缓存（换微信 / 会话失效时） */
+function clearAllUserSession() {
+  clearAccountScopedStorage();
+  USER_SESSION_KEYS.forEach((key) => {
+    try { wx.removeStorageSync(key); } catch (e) { /* ignore */ }
+  });
+  userSession.clearRememberedUserId();
+}
+
+module.exports = { clearAccountScopedStorage, clearAllUserSession };

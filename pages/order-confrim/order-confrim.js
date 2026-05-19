@@ -258,12 +258,14 @@ Page({
     const userId = (app.globalData.user || {}).id;
 
     if (bundleMode) {
+      const user = app.globalData.user || {};
+      const communityId = user.community_id != null ? user.community_id : user.communityId;
       const body = {
         address: fullAddress,
         contact_name: contactName,
         contact_phone: contactPhone,
         remark: this.data.remark || '',
-        provider_id: Number(spProviderId),
+        provider_id: String(spProviderId),
         items: (bundleLines || []).map((it) => ({
           service_id: Number(it.service_id),
           group_key: it.group_key || '',
@@ -272,6 +274,10 @@ Page({
         }))
       };
       if (userId) body.user_id = userId;
+      if (communityId != null && communityId !== '') {
+        const cid = Number(communityId);
+        if (Number.isFinite(cid) && cid > 0) body.community_id = cid;
+      }
       util
         .post('service-orders/bundle', body)
         .then((data) => {
@@ -284,9 +290,10 @@ Page({
             setTimeout(() => wx.navigateBack(), 1500);
           }
         })
-        .catch(() => {
+        .catch((err) => {
           wx.hideLoading();
-          wx.showToast({ title: '下单失败或服务未上线', icon: 'none' });
+          const msg = (err && (err.errmsg || err.msg || err.message)) || '下单失败或服务未上线';
+          wx.showToast({ title: msg, icon: 'none' });
         });
       return;
     }
@@ -312,7 +319,7 @@ Page({
       const cid = Number(communityId);
       if (Number.isFinite(cid) && cid > 0) body.community_id = cid;
     }
-    if (workerId) body.worker_id = Number(workerId);
+    if (workerId) body.worker_id = String(workerId);
     const sid = Number(serviceId);
     if (Number.isFinite(sid) && sid > 0) body.service_id = sid;
     if (groupKey) body.group_key = groupKey;

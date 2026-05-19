@@ -24,12 +24,12 @@ Page({
     const id = Number(options.id || 1);
     const workerId =
       options.worker_id != null && options.worker_id !== ''
-        ? Number(options.worker_id)
+        ? String(options.worker_id)
         : null;
     const groupKey = options.group_key ? decodeURIComponent(options.group_key) : '';
     this.setData({
       serviceId: id,
-      workerId: Number.isFinite(workerId) ? workerId : null,
+      workerId: workerId || null,
       groupKey
     });
 

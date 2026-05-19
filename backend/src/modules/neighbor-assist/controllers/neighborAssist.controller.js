@@ -9,6 +9,7 @@ const NeighborAssistOrder = db.NeighborAssistOrder;
 const User = db.User;
 const WorkerApplication = db.WorkerApplication;
 const orderPoints = require('../../../services/orderPoints.service');
+const commissionService = require('../../commission/services/commission.service');
 const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 // WorkerProfile 可能由主后端提供，当前环境缺失时降级处理
 const WorkerProfile = db.WorkerProfile || null;
@@ -458,15 +459,13 @@ exports.complete = async (req, res) => {
     const t = await db.sequelize.transaction();
     try {
       const amountNum = Number(order.amount || 0);
-      if (amountNum > 0) {
-        const publisher = await User.findByPk(order.user_id, { transaction: t });
-        if (publisher && publisher.balance != null) {
-          await publisher.decrement('balance', { by: amountNum, transaction: t });
-        }
-        const helper = await User.findByPk(order.assigned_worker_id, { transaction: t });
-        if (helper && helper.balance != null) {
-          await helper.increment('balance', { by: amountNum, transaction: t });
-        }
+      if (amountNum > 0 && order.assigned_worker_id) {
+        await commissionService.creditAvailableBalance(
+          order.assigned_worker_id,
+          'neighbor_assist',
+          amountNum,
+          t
+        );
       }
 
       order.status = 'completed';

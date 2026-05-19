@@ -65,6 +65,9 @@ exports.getProfile = async (req, res) => {
         const serviceProviderStatus = latestServiceProviderApplication
             ? latestServiceProviderApplication.status
             : null;
+        if (serviceProviderStatus === 'approved' && !roles.includes('service_provider')) {
+            roles.push('service_provider');
+        }
 
         let workerProfileId = null;
         if (workerStatus === 'approved') {
@@ -96,10 +99,14 @@ exports.getProfile = async (req, res) => {
                 stewardStatus = stewardApp ? stewardApp.status : null;
             } catch (e) { /* ignore */ }
         }
+        if (stewardStatus === 'approved' && !roles.includes('steward')) {
+            roles.push('steward');
+        }
 
         res.json({
             ...profile,
             role: roles.join(','),
+            roles,
             communityId: profile.community_id != null ? profile.community_id : null,
             merchant_status: merchantStatus,
             shop_status: merchantStatus,

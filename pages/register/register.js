@@ -1,6 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 const rolePortals = require('../../utils/rolePortals.js');
+const sessionReset = require('../../utils/sessionReset.js');
 
 Page({
   data: {
@@ -111,7 +112,8 @@ Page({
         }).then(data => {
           wx.hideLoading();
           wx.showToast({ title: '注册成功' });
-          // 注册成功后拿到了 Token 进入登录态
+          sessionReset.clearAllUserSession();
+          wx.removeStorageSync('manual_logged_out');
           wx.setStorageSync('token', data.token || data.data?.token);
           setTimeout(() => {
             wx.reLaunch({ url: '/pages/index/index' });

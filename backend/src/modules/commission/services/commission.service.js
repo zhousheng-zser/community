@@ -327,6 +327,41 @@ async function confirmCommission(orderId) {
 }
 
 /**
+ * Credit available balance for a user role (e.g. neighbor assist helper income).
+ */
+async function creditAvailableBalance(userId, role, amount, transaction) {
+  const uid = resolveUserId(userId);
+  const amt = Number(amount);
+  if (!uid || !role || !(amt > 0)) return null;
+
+  await ensurePartnerBalanceTable();
+
+  let balance = await PartnerCommissionBalance.findOne({
+    where: { user_id: uid, role },
+    transaction
+  });
+
+  if (!balance) {
+    balance = await PartnerCommissionBalance.create({
+      user_id: uid,
+      role,
+      total_earned: amt,
+      available_amount: amt,
+      withdrawn_amount: 0,
+      pending_amount: 0,
+      frozen_amount: 0
+    }, { transaction });
+  } else {
+    await balance.increment({
+      available_amount: amt,
+      total_earned: amt
+    }, { transaction });
+  }
+
+  return balance;
+}
+
+/**
  * Get a user's total commission balance across all their roles.
  */
 async function getUserBalance(userId) {
@@ -414,6 +449,7 @@ module.exports = {
   distributeCommission,
   revertCommission,
   confirmCommission,
+  creditAvailableBalance,
   getUserBalance,
   assignPromoterRole
 };

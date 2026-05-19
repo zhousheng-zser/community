@@ -2,7 +2,7 @@
   <view class="wm-profile worker-gradient">
     <image class="wm-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
     <text class="wm-name">{{displayName}}</text>
-    <text class="wm-sub">技工端 · 与用户端同一账号</text>
+    <text class="wm-sub">{{workerSubtitle}}</text>
   </view>
 
   <view class="portal-card wm-switch-card">

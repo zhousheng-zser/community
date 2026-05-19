@@ -20,7 +20,7 @@
           <view class="info-box">
             <view class="top-row">
               <text class="name">{{item.title || (item.bot_type === 'logistics' ? '订单物流通知' : (item.bot_type === 'event' ? '活动优惠' : (item.bot_type === 'notices' ? '系统公告' : (item.bot_type ? '系统通知' : (item.peerUser ? item.peerUser.nickname : (item.peer_id == 0 ? '系统消息' : '未知'))))))}}</text>
-              <text class="time">{{item.conversation.updated_at}}</text>
+              <text class="time">{{item.timeLabel || item.conversation.updated_at}}</text>
             </view>
             <view class="bottom-row">
               <text class="preview">{{item.conversation.last_message_preview}}</text>
