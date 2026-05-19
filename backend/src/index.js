@@ -55,8 +55,6 @@ app.use((req, res, next) => {
 // 静态文件目录映射到项目内 data/uploads/images 目录（兼容 Linux 部署）
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '..', 'data', 'uploads', 'images')));
-// 小程序分类 Tab 图标（seed 中 /img/index/menuicon*.png）；运营中台经 Vite 代理 /img 访问
-app.use('/img/index', express.static(path.join(__dirname, '..', 'static', 'img', 'index')));
 app.get('/img/placeholders/:name', (req, res) => {
     // 测试环境兜底占位图，避免前端引用历史占位路径时报 500
     const onePxPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7Zx1cAAAAASUVORK5CYII=';
@@ -88,6 +86,7 @@ app.use('/api/v1/neighbor-assist', require('./routes/neighborAssistRoutes'));
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/messages', require('./routes/messageRoutes'));
 app.use('/api/v1/worker', require('./routes/workerRoutes'));
+app.use('/api/v1/steward', require('./modules/steward/routes'));
 
 const workerPortalLoginController = require('./controllers/workerPortalLoginController');
 const merchantPortalController = require('./controllers/merchantPortalController');
@@ -118,6 +117,9 @@ app.use('/api/v1/local-goods-home', require('./routes/localGoodsHomeRoutes'));
 // New modules: chat, coupons, benefit-coin, promoter, mini-programs
 app.use('/api/v1/chat', require('./routes/chatRoutes'));
 app.use('/api/v1/coupons', require('./routes/couponRoutes'));
+const couponCtrl = require('./modules/coupon/controllers/coupon.controller');
+const authMiddleware = require('./middlewares/authMiddleware');
+app.get('/api/v1/wx/user/coupon/:id', authMiddleware, couponCtrl.getMyCouponsLegacy);
 app.use('/api/v1/benefit-coin', require('./routes/benefitCoinRoutes'));
 app.use('/api/v1/promoter', require('./routes/promoterRoutes'));
 app.use('/api/v1/commission', require('./modules/commission/commission.routes'));

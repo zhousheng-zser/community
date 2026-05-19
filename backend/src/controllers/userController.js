@@ -2,7 +2,8 @@ const {
     User, UserFollow, UserAddress,
     MarketApplication, MarketShop,
     WorkerApplication, WorkerProfile,
-    ServiceProviderApplication, ServiceProviderProfile
+    ServiceProviderApplication, ServiceProviderProfile,
+    CommunityStewardApplication
 } = require('../models');
 const { resolveUserId } = require('../utils/resolveUserId');
 
@@ -85,9 +86,21 @@ exports.getProfile = async (req, res) => {
             serviceProviderProfileId = sp ? sp.id : null;
         }
 
+        let stewardStatus = null;
+        if (CommunityStewardApplication) {
+            try {
+                const stewardApp = await CommunityStewardApplication.findOne({
+                    where: { user_id: userId },
+                    attributes: ['status']
+                });
+                stewardStatus = stewardApp ? stewardApp.status : null;
+            } catch (e) { /* ignore */ }
+        }
+
         res.json({
             ...profile,
             role: roles.join(','),
+            communityId: profile.community_id != null ? profile.community_id : null,
             merchant_status: merchantStatus,
             shop_status: merchantStatus,
             shop_id: shopId,
@@ -99,7 +112,9 @@ exports.getProfile = async (req, res) => {
             service_provider_application_id: latestServiceProviderApplication
                 ? latestServiceProviderApplication.id
                 : null,
-            service_provider_profile_id: serviceProviderProfileId
+            service_provider_profile_id: serviceProviderProfileId,
+            steward_status: stewardStatus === 'approved' ? 'approved' : (stewardStatus || ''),
+            stewardStatus: stewardStatus === 'approved' ? 'approved' : (stewardStatus || '')
         });
     } catch (error) {
         console.error('Get Profile Error:', error);
@@ -109,8 +124,12 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { nickname, phone, address, bank_num, wx_id } = req.body;
-        const user = await User.findByPk(req.user.id);
+        const userId = resolveUserId(req.user && req.user.id);
+        if (!userId) return res.status(401).json({ error: '未登录' });
+
+        const body = req.body || {};
+        const { nickname, phone, address, bank_num, wx_id } = body;
+        const user = await User.findByPk(userId);
 
         if (!user) {
             return res.status(404).json({ error: '用户不存在' });
@@ -121,6 +140,12 @@ exports.updateProfile = async (req, res) => {
         if (address) user.address = address;
         if (bank_num) user.bank_num = bank_num;
         if (wx_id) user.wx_id = wx_id;
+
+        const rawComm = body.community_id != null ? body.community_id : body.communityId;
+        if (rawComm != null && rawComm !== '') {
+            const cid = parseInt(rawComm, 10);
+            if (Number.isFinite(cid) && cid > 0) user.community_id = cid;
+        }
 
         if (req.file) {
             const baseUrl = req.protocol + '://' + req.get('host');
@@ -140,7 +165,9 @@ exports.updateProfile = async (req, res) => {
                 bank_num: user.bank_num,
                 wx_id: user.wx_id,
                 role: user.role,
-                balance: user.balance
+                balance: user.balance,
+                community_id: user.community_id,
+                communityId: user.community_id
             }
         });
     } catch (error) {

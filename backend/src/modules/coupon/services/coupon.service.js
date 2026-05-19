@@ -1,7 +1,9 @@
+const { Op } = require('sequelize');
 const db = require('../../../models');
 const { CouponTemplate, CouponIssue } = db;
 
-const WELCOME_TEMPLATE_CODE = 'WELCOME_100_10';
+const WELCOME_TEMPLATE_CODE = 'WELCOME_100_20';
+const LEGACY_WELCOME_CODES = ['WELCOME_100_10', 'WELCOME_100_20'];
 
 let tablesReady = false;
 
@@ -22,9 +24,9 @@ async function getOrCreateWelcomeTemplate(transaction) {
     const nextYear = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
     tpl = await CouponTemplate.create({
       code: WELCOME_TEMPLATE_CODE,
-      name: '满100减10新人券',
+      name: '满100减20新人券',
       type: 'amount',
-      discount_amount: 10,
+      discount_amount: 20,
       threshold_amount: 100,
       total_count: 0,
       issued_count: 0,
@@ -36,11 +38,22 @@ async function getOrCreateWelcomeTemplate(transaction) {
   return tpl;
 }
 
-/** 新用户首次进入时发放默认满100减10券（每用户一张） */
+/** 新用户首次进入时发放默认满100减20券（每用户一张） */
 async function ensureWelcomeCoupon(userId) {
   if (!userId || !CouponTemplate || !CouponIssue) return null;
   await ensureCouponTables();
   const tpl = await getOrCreateWelcomeTemplate();
+  // 兼容旧模板编码：已有任意新人券则不再重复发放
+  const legacyTpls = await CouponTemplate.findAll({
+    where: { code: LEGACY_WELCOME_CODES }
+  });
+  const legacyIds = legacyTpls.map((t) => t.id);
+  if (legacyIds.length) {
+    const existingAny = await CouponIssue.findOne({
+      where: { user_id: userId, template_id: { [Op.in]: legacyIds } }
+    });
+    if (existingAny) return existingAny;
+  }
   const existing = await CouponIssue.findOne({
     where: { user_id: userId, template_id: tpl.id }
   });

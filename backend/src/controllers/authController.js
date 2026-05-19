@@ -2,6 +2,16 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { resolveOpenidFromCode } = require('../utils/wxOpenid');
 const { verifyPassword, verifySmsCode, applyPasswordFields } = require('../utils/authPassword');
+const couponService = require('../modules/coupon/services/coupon.service');
+
+async function grantWelcomeCoupon(userId) {
+  if (!userId) return;
+  try {
+    await couponService.ensureWelcomeCoupon(Number(userId));
+  } catch (e) {
+    console.warn('[auth] ensureWelcomeCoupon', e.message);
+  }
+}
 
 function issueUserToken(user) {
   return jwt.sign(
@@ -62,6 +72,7 @@ exports.login = async (req, res) => {
     }
 
     const token = issueUserToken(user);
+    await grantWelcomeCoupon(user.id);
     return jsonOk(res, { msg: '登录成功', token, user: formatUserPayload(user) });
   } catch (error) {
     if (error.status === 400) {
@@ -90,6 +101,7 @@ exports.loginSms = async (req, res) => {
     }
 
     const token = issueUserToken(user);
+    await grantWelcomeCoupon(user.id);
     return jsonOk(res, { msg: '登录成功', token, user: formatUserPayload(user) });
   } catch (e) {
     console.error('loginSms error:', e);
@@ -111,6 +123,7 @@ exports.loginPassword = async (req, res) => {
     }
 
     const token = issueUserToken(user);
+    await grantWelcomeCoupon(user.id);
     return jsonOk(res, { msg: '登录成功', token, user: formatUserPayload(user) });
   } catch (e) {
     console.error('loginPassword error:', e);
@@ -166,6 +179,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     const token = issueUserToken(user);
+    await grantWelcomeCoupon(user.id);
     return jsonOk(res, {
       msg: '注册成功',
       token,

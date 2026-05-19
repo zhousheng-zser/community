@@ -13,6 +13,7 @@ router.get('/profile', userController.getProfile);
 // 更新个人资料 (支持上传头像)
 // 'avatar' 是前端上传文件的字段名
 router.post('/profile', upload.single('avatar'), userController.updateProfile);
+router.patch('/profile', userController.updateProfile);
 
 // 兼容性的旧路径接口 (前端中有些地方调用的是 api/user_info/update)
 router.post('/api/user_info/update', userController.updateProfile);

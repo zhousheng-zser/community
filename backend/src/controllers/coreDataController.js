@@ -92,7 +92,7 @@ function normalizeServiceRow(s, req) {
     id: j.id,
     title: j.title,
     price: Number.isFinite(price) ? Math.round(price * 100) / 100 : j.price,
-    cover_image: req ? toAbsoluteAssetUrl(req, cover) : cover,
+    cover_image: cover,
     sales_count: j.sales_count != null ? Number(j.sales_count) : 0,
     category: cat.name ? { name: cat.name } : null
   };
@@ -392,7 +392,7 @@ exports.getServiceHomeModules = async (req, res) => {
       return {
         group_key: j.group_key,
         title: j.title,
-        icon_url: toAbsoluteAssetUrl(req, icon) || icon,
+        icon_url: icon,
         price_unit: j.price_unit || '次',
         sort_order: j.sort_order != null ? j.sort_order : 0
       };
@@ -428,7 +428,7 @@ exports.getServiceGroup = async (req, res) => {
       const icon = x.icon_url || null;
       return {
         name: x.name,
-        icon_url: toAbsoluteAssetUrl(req, icon) || icon,
+        icon_url: icon,
         sort_order: x.sort_order != null ? x.sort_order : 0
       };
     });

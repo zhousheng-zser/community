@@ -4,8 +4,10 @@ const postController = require('../controllers/postController');
 const authMiddleware = require('../middlewares/authMiddleware');
 const upload = require('../utils/upload');
 
-// 获取社区列表 (可以开放，也可以加 authMiddleware 强制登录后看)
-router.get('/', postController.getPosts);
+const optionalAuth = require('../middlewares/optionalAuthMiddleware');
+
+// 获取帖子列表：登录后按所属小区隔离；未登录或未绑定小区返回空列表
+router.get('/', optionalAuth, postController.getPosts);
 
 // 下面的接口都需要登录鉴权
 router.use(authMiddleware);

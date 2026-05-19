@@ -1,14 +1,2 @@
-const express = require('express');
-const router = express.Router();
-const authMiddleware = require('../middlewares/authMiddleware');
-const couponController = require('../controllers/couponController');
-
-router.use(authMiddleware);
-
-router.get('/list', couponController.getCouponList);
-router.post('/receive', couponController.receiveCoupon);
-router.get('/my', couponController.getMyCoupons);
-router.get('/available-for-order', couponController.getAvailableCouponsForOrder);
-router.get('/:couponId', couponController.getCouponDetail);
-
-module.exports = router;
+/** 兼容 index.js 挂载路径，实际逻辑在 modules/coupon */
+module.exports = require('../modules/coupon/routes');
