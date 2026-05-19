@@ -5,7 +5,7 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
-BASE = 'https://120.27.239.244:3001/api/v1'
+BASE = 'https://jshsp1.eds-tech.cn/api/v1'
 
 def req(method, path, body=None, token=None):
     headers = {'Content-Type': 'application/json'}

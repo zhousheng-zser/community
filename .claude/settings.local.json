@@ -48,9 +48,9 @@
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"D:\\\\CODE\\\\project\\\\community\\\\check_miniprogram.ps1\")",
       "Bash(Get-ChildItem -Path \"D:\\\\CODE\\\\project\\\\community\\\\pages\" -Filter \"neighbor*\" -Recurse)",
       "Bash(Select-Object FullName)",
-      "Bash(curl -s -X GET \"https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/feed?limit=5\" -H \"Authorization: Bearer test\")",
-      "Bash(curl -s -m 5 https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/feed?limit=5 -w \"\\\\nHTTP_CODE:%{http_code}\")",
-      "Bash(curl -s -m 10 \"https://jshsp1.eds-tech.cn:3001/api/v1/neighbor-assist/orders/pool?limit=3\")"
+      "Bash(curl -s -X GET \"https://jshsp1.eds-tech.cn/api/v1/neighbor-assist/orders/feed?limit=5\" -H \"Authorization: Bearer test\")",
+      "Bash(curl -s -m 5 https://jshsp1.eds-tech.cn/api/v1/neighbor-assist/orders/feed?limit=5 -w \"\\\\nHTTP_CODE:%{http_code}\")",
+      "Bash(curl -s -m 10 \"https://jshsp1.eds-tech.cn/api/v1/neighbor-assist/orders/pool?limit=3\")"
     ]
   }
 }

@@ -4,7 +4,7 @@
  * Tests: Auth, Neighbor Assist, Market Shopping, Service Orders, Messages, User Profile
  */
 const http = require('http');
-const BASE = 'http://jshsp1.eds-tech.cn:3001';
+const BASE = 'https://jshsp1.eds-tech.cn';
 const R = { pass: 0, fail: 0, warn: 0, errors: [] };
 
 function api(method, path, body, token) {

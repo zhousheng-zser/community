@@ -73,7 +73,7 @@ async function main() {
 main().catch((err) => {
   console.error('连接失败:', err.message);
   console.log('\n请确认:');
-  console.log('  1. MySQL 服务器 jshsp1.eds-tech.cn:3306 可访问');
+  console.log('  1. MySQL 服务器 jshsp1.eds-tech.cn 可访问');
   console.log('  2. 密码正确');
   console.log('  3. 数据库 community_db 存在\n');
   process.exit(1);

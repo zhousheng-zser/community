@@ -3,7 +3,7 @@ import json, ssl, urllib.request
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
-BASE = 'https://120.27.239.244:3001/api/v1'
+BASE = 'https://jshsp1.eds-tech.cn/api/v1'
 
 def login_profile(phone):
     req = urllib.request.Request(BASE + '/auth/login_sms', json.dumps({'phone': phone, 'code': '024680'}).encode(), {'Content-Type': 'application/json'}, method='POST')

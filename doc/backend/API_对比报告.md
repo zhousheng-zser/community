@@ -2,7 +2,7 @@
 
 > **生成时间**: 2026-04-24  
 > **对比范围**: 前端 API 定义 vs 后端 API 文档  
-> **测试环境**: http://jshsp1.eds-tech.cn:3001
+> **测试环境**: https://jshsp1.eds-tech.cn
 
 ---
 

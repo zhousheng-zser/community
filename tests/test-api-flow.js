@@ -1,6 +1,6 @@
 const http = require('http');
 
-const BASE_URL = 'http://jshsp1.eds-tech.cn:3001';
+const BASE_URL = 'https://jshsp1.eds-tech.cn';
 const API = `${BASE_URL}/api/v1`;
 const results = [];
 
