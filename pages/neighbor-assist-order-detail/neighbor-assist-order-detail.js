@@ -1,5 +1,6 @@
 const util = require('../../utils/util.js');
 const naUi = require('../../utils/neighborAssistUi.js');
+const { asId, sameId } = require('../../utils/snowflakeId.js');
 
 function maskPhone(p) {
   if (!p || String(p).length < 11) return p || '';
@@ -9,7 +10,7 @@ function maskPhone(p) {
 
 function parseDetail(raw, myUserId) {
   const r = raw && raw.order ? raw.order : raw;
-  const uid = myUserId ? Number(myUserId) : 0;
+  const uid = asId(myUserId);
   const id = r.id;
   const orderNo = r.order_no || r.orderNo || String(id);
   const status = r.status || r.order_status || '';
@@ -42,23 +43,23 @@ function parseDetail(raw, myUserId) {
   const pub = r.publisher || r.publisher_user || {};
   const hel = r.helper || r.assignee || r.worker || r.assigned_worker || {};
   const publisherUid =
-    r.user_id != null ? Number(r.user_id) : pub && pub.id != null ? Number(pub.id) : null;
+    r.user_id != null ? asId(r.user_id) : pub && pub.id != null ? asId(pub.id) : '';
   let helperUid =
     r.assigned_worker_id != null
-      ? Number(r.assigned_worker_id)
+      ? asId(r.assigned_worker_id)
       : hel && hel.id != null
-        ? Number(hel.id)
-        : null;
+        ? asId(hel.id)
+        : '';
 
   let myRole = r.my_role || '';
   if (!myRole && uid) {
-    if (publisherUid != null && uid === publisherUid) myRole = 'publisher';
-    else if (helperUid != null && uid === helperUid) myRole = 'helper';
+    if (publisherUid && sameId(uid, publisherUid)) myRole = 'publisher';
+    else if (helperUid && sameId(uid, helperUid)) myRole = 'helper';
   }
 
   let peerUserId = null;
-  if (myRole === 'publisher' && helperUid != null && helperUid > 0) peerUserId = helperUid;
-  else if (myRole === 'helper' && publisherUid != null && publisherUid > 0) peerUserId = publisherUid;
+  if (myRole === 'publisher' && helperUid) peerUserId = helperUid;
+  else if (myRole === 'helper' && publisherUid) peerUserId = publisherUid;
   let peerPhoneRaw = '';
   let peerName = '';
   if (myRole === 'publisher') {
@@ -149,7 +150,7 @@ Page({
 
   applyFromRaw(raw) {
     const app = getApp();
-    const uid = app.globalData.user && app.globalData.user.id ? parseInt(String(app.globalData.user.id), 10) : 0;
+    const uid = asId(app.globalData.user && app.globalData.user.id);
     const order = parseDetail(raw || {}, uid);
     const bucket = naUi.inferBucket(raw || {});
     const myRole = order.myRole || '';
@@ -296,9 +297,9 @@ Page({
 
   async sendCheckInMessageToChat() {
     const app = getApp();
-    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
+    const me = asId(app.globalData.user && app.globalData.user.id);
     const { order, id } = this.data;
-    const peerUid = order.peerUserId != null ? Number(order.peerUserId) : 0;
+    const peerUid = asId(order.peerUserId);
     if (!me || !peerUid) return;
     try {
       await util.post('messages/order-conversation/ensure', {
@@ -471,13 +472,13 @@ Page({
 
   async openChat() {
     const app = getApp();
-    const me = app.globalData.user && app.globalData.user.id ? Number(app.globalData.user.id) : 0;
+    const me = asId(app.globalData.user && app.globalData.user.id);
     const { order, id, isMock } = this.data;
     if (isMock) {
       wx.showToast({ title: '演示：无会话', icon: 'none' });
       return;
     }
-    const peerUid = order.peerUserId != null ? Number(order.peerUserId) : 0;
+    const peerUid = asId(order.peerUserId);
     if (!peerUid) {
       wx.showToast({ title: '接单后才可与对方沟通', icon: 'none' });
       return;

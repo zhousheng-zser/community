@@ -1,11 +1,17 @@
 const { PromoterWithdrawal, CommissionDistribution, PartnerCommissionBalance, User } = require('../../../models');
 const commissionService = require('../../commission/services/commission.service');
 const { Op } = require('sequelize');
+const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
+
+function uidFromReq(req) {
+  return resolveUserIdFromReq(req);
+}
 
 // GET /promoter/commission - Get commission info (backward compatible, uses new balance tables)
 exports.getCommission = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = uidFromReq(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
         const summary = await commissionService.getUserBalance(userId);
 
         res.json({ code: 0, msg: 'ok', data: {
@@ -26,7 +32,8 @@ exports.getCommission = async (req, res) => {
 // GET /promoter/orders - Get promoter orders (uses new commission_distributions table)
 exports.getOrders = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = uidFromReq(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const status = req.query.status;
@@ -58,7 +65,8 @@ exports.getOrders = async (req, res) => {
 // GET /promoter/income-records - Get income records (uses new tables)
 exports.getIncomeRecords = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = uidFromReq(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.page_size) || 20;
         const offset = (page - 1) * pageSize;
@@ -96,7 +104,8 @@ exports.getIncomeRecords = async (req, res) => {
 // POST /promoter/withdraw - Withdraw (uses new balance tables)
 exports.withdraw = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const userId = uidFromReq(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
         const { amount } = req.body;
 
         if (!amount || Number(amount) <= 0) return res.status(400).json({ code: 1, msg: '提现金额需大于0' });
@@ -138,7 +147,8 @@ exports.withdraw = async (req, res) => {
 exports.getShareLink = async (req, res) => {
     try {
         const { goods_id } = req.query;
-        const userId = req.user.id;
+        const userId = uidFromReq(req);
+        if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
 
         const user = await User.findByPk(userId, { attributes: ['id', 'openid'] });
 

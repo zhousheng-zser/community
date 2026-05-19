@@ -6,6 +6,20 @@ const { resolveUserId, resolveUserIdFromReq } = require('../../../utils/resolveU
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
 
+let footprintTableReady = false;
+async function ensureBrowseFootprintTable() {
+  if (footprintTableReady) return true;
+  if (!BrowseFootprint || !BrowseFootprint.sync) return false;
+  try {
+    await BrowseFootprint.sync();
+    footprintTableReady = true;
+    return true;
+  } catch (e) {
+    console.warn('[user/footprints] ensure table', e.message);
+    return false;
+  }
+}
+
 // GET /user/profile
 exports.getProfile = async (req, res) => {
   try {
@@ -274,6 +288,7 @@ exports.recordFootprint = async (req, res) => {
     if (!userId) return fail(res, '未登录', 401);
     const { kind, dedupe_key, title, cover, url } = req.body || {};
     if (!kind || !dedupe_key || !url) return fail(res, '参数不完整');
+    if (!(await ensureBrowseFootprintTable())) return ok(res, { id: null });
 
     const [row] = await BrowseFootprint.upsert({
       user_id: userId,
@@ -298,6 +313,7 @@ exports.batchFootprints = async (req, res) => {
     if (!userId) return fail(res, '未登录', 401);
     const { list } = req.body || {};
     if (!Array.isArray(list) || !list.length) return fail(res, '空列表');
+    if (!(await ensureBrowseFootprintTable())) return ok(res, { synced: 0 });
 
     const rows = list.slice(0, 50).map(item => ({
       user_id: userId,
@@ -326,6 +342,9 @@ exports.getFootprints = async (req, res) => {
   try {
     const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
+    if (!(await ensureBrowseFootprintTable())) {
+      return ok(res, { list: [], total: 0, page: parseInt(req.query.page) || 1 });
+    }
 
     const page = parseInt(req.query.page) || 1;
     const limit = Math.min(parseInt(req.query.limit) || 50, 100);
@@ -360,6 +379,8 @@ exports.clearFootprints = async (req, res) => {
   try {
     const userId = resolveUserIdFromReq(req);
     if (!userId) return fail(res, '未登录', 401);
+    if (!(await ensureBrowseFootprintTable())) return ok(res, null, '已清空');
+
     await BrowseFootprint.destroy({ where: { user_id: userId } });
     ok(res, null, '已清空');
   } catch (err) {

@@ -114,7 +114,8 @@
         "pages/coupons-all/coupons-all",
         "pages/coupons-my/coupons-my",
         "pages/coupon-select/coupon-select",
-        "pages/activity/activity"
+        "pages/activity/activity",
+        "pages/post-detail/post-detail"
       ]
     },
     {

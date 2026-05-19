@@ -1,0 +1,2 @@
+Field	Type	Null	Key	Default	Extra
+assigned_worker_id	bigint	YES		NULL	

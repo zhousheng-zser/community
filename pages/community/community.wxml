@@ -78,11 +78,11 @@
       <view class="meta-row">
         <text class="read">阅读 {{item.id * 7 + 12}}</text>
         <view class="right">
-          <view class="meta" bindtap="handleComment" data-id="{{item.id}}" data-index="{{index}}">
+          <view class="meta" catchtap="handleComment" data-id="{{item.id}}" data-index="{{index}}">
             <text class="meta-icon">💬</text>
             <text>{{item.comments ? item.comments.length : 0}}</text>
           </view>
-          <view class="meta" bindtap="handleLike" data-id="{{item.id}}" data-index="{{index}}">
+          <view class="meta" catchtap="handleLike" data-id="{{item.id}}" data-index="{{index}}">
             <text class="meta-icon">{{item.isLiked ? '❤️' : '♡'}}</text>
             <text>{{item.likes ? item.likes.length : 0}}</text>
           </view>

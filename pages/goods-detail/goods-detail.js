@@ -2,6 +2,7 @@ const util = require('../../utils/util.js');
 const config = require('../../utils/config.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
+const userSession = require('../../utils/userSession.js');
 
 Page({
   data: {
@@ -233,7 +234,8 @@ Page({
   },
 
   getCartStorageKey() {
-    return `cart_${this.data.goods.shopId}`;
+    const shopId = this.data.goods && this.data.goods.shopId;
+    return userSession.scopedStorageKey(`cart_${shopId || 'default'}`);
   },
 
   syncCartFromStorage() {

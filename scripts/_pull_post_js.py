@@ -1,0 +1,10 @@
+import paramiko, sys
+sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+c = paramiko.SSHClient()
+c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+c.connect('120.27.239.244', 22, 'root', 'cW123456', timeout=20, look_for_keys=False, allow_agent=False)
+_, o, _ = c.exec_command('cat /root/community-backend/backend/src/models/post.js', timeout=15)
+content = o.read().decode('utf-8', 'replace')
+print(content[:2000])
+open('backend/src/models/post.js', 'w', encoding='utf-8').write(content)
+c.close()

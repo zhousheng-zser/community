@@ -1,5 +1,6 @@
 // pages/my-posts/my-posts.js
 const util = require('../../utils/util.js');
+const { asId } = require('../../utils/snowflakeId.js');
 
 Page({
     data: {
@@ -54,6 +55,13 @@ Page({
             });
     },
 
+    goPostDetail(e) {
+        const { id, index } = e.currentTarget.dataset;
+        const postId = id || (this.data.posts[index] && this.data.posts[index].id);
+        if (!postId) return;
+        wx.navigateTo({ url: `/package-customer/pages/post-detail/post-detail?id=${postId}` });
+    },
+
     handleLike(e) {
         const { id, index } = e.currentTarget.dataset;
         util.post(`posts/${id}/like`)
@@ -63,7 +71,8 @@ Page({
                 if (!posts[index].likes) posts[index].likes = [];
 
                 if (res.status === 'liked') {
-                    posts[index].likes.push({ id: wx.getStorageSync('userId') || 'mock' });
+                    const uid = asId((getApp().globalData.user || {}).id);
+                    posts[index].likes.push({ user_id: uid || 'mock' });
                 } else {
                     posts[index].likes.pop(); // Simplest optimistic pop
                 }
