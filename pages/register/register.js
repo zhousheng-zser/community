@@ -114,6 +114,7 @@ Page({
           wx.showToast({ title: '注册成功' });
           sessionReset.clearAllUserSession();
           wx.removeStorageSync('manual_logged_out');
+          wx.setStorageSync('login_channel', 'wechat');
           wx.setStorageSync('token', data.token || data.data?.token);
           setTimeout(() => {
             wx.reLaunch({ url: '/pages/index/index' });

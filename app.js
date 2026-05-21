@@ -76,6 +76,7 @@ App({
     util.post('auth/login', payload).then((data) => {
       if (showLoading) wx.hideLoading();
       wx.removeStorageSync('manual_logged_out');
+      wx.setStorageSync('login_channel', 'wechat');
       wx.setStorageSync('token', data.token);
       this._applyProfileFromApi(data.user, callback);
     }).catch((err) => {
@@ -94,6 +95,14 @@ App({
       return;
     }
 
+    const token = wx.getStorageSync('token');
+    const channel = wx.getStorageSync('login_channel');
+    // 手机号/密码登录不要求与当前微信 openid 一致，避免 verify 失败后静默切回微信账号
+    if (token && (channel === 'sms' || channel === 'password')) {
+      this._fetchAndApplyProfile(callback);
+      return;
+    }
+
     wx.login({
       success: (res) => {
         if (!res.code) {
@@ -101,7 +110,6 @@ App({
           return;
         }
 
-        const token = wx.getStorageSync('token');
         if (token) {
           util.post('auth/verify-wechat', { code: res.code }).then(() => {
             wx.removeStorageSync('manual_logged_out');

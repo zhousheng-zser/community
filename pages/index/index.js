@@ -223,6 +223,8 @@ Page({
       that.init().catch((err) => {
         console.error('[index] init 失败', err);
       });
+    // 节流时间戳：初始化为 0 表示从未刷新，onShow 时按冷却判断是否需要重拉
+    this._lastPortalRefreshTime = 0;
     runInit();
     app.save(parentOpId, runInit);
   },
@@ -242,7 +244,14 @@ Page({
       });
     }
     this._maybeRefreshMarketAfterAddressChange();
-    this.refreshPortalListsForCommunity();
+    // 节流：30 秒内切换 Tab 不重复刷新，避免图片因 setData 重渲染而闪白
+    const PORTAL_REFRESH_COOLDOWN_MS = 30 * 1000;
+    const now = Date.now();
+    const last = this._lastPortalRefreshTime || 0;
+    if (now - last > PORTAL_REFRESH_COOLDOWN_MS) {
+      this._lastPortalRefreshTime = now;
+      this.refreshPortalListsForCommunity();
+    }
   },
 
   /** 按当前小区刷新「直约技工」「直约服务商」（与查看全部页同源） */
@@ -252,8 +261,8 @@ Page({
       const rows = await fetchWorkerRows(communityId, { page: 1, limit: 50 });
       this.setData({ workerList: rows.slice(0, 8).map(mapWorkerForHomeCard) });
     } catch (e) {
+      // 失败时保留上次数据，不清空 workerList，避免触发不必要的重渲染导致图片闪白
       console.log('[index] 刷新技工列表失败', e);
-      this.setData({ workerList: [] });
     }
     try {
       const plist = await fetchServiceProviderRows(communityId, { limit: 8 });
@@ -261,8 +270,8 @@ Page({
         merchantList: plist.slice(0, 8).map((p) => mapServiceProviderForHomeCard(p, imgUrl))
       });
     } catch (e) {
+      // 失败时保留上次数据，不清空 merchantList，避免触发不必要的重渲染导致图片闪白
       console.log('[index] 刷新服务商列表失败', e);
-      this.setData({ merchantList: [] });
     }
   },
   /** 地址页保存/编辑/删除/设默认后，清空本地集市缓存并重拉当前分类店铺 */
@@ -708,11 +717,17 @@ Page({
     }));
     let merchantList = [];
     let workerList = [];
-    let marketList = [
-      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: images.goodsSkincare1 },
-      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: images.goodsSkincare2 },
-      { id: 2003, name: "当地特产一键速达", price: "99", image: images.goodsLocal }
+    // 管家精选兜底图全部使用包内本地路径，避免网络图片在 init() 被二次调用时产生闪白
+    const marketListFallback = [
+      { id: 2001, name: "映萃美活研奇肌霜", price: "469", image: '/img/home_service_photos/daily_clean.png' },
+      { id: 2002, name: "映萃美活肤洁颜粉", price: "235", image: '/img/home_service_photos/washer.png' },
+      { id: 2003, name: "当地特产一键速达", price: "99", image: '/img/home_service_photos/hood.png' }
     ];
+    // 如果已有真实数据（非兜底占位），则保留，防止 app.save 回调二次触发 init() 时覆盖已加载的商品图
+    const existingMarketList = this.data.marketList || [];
+    const hasFetchedMarketList = existingMarketList.length > 0 &&
+      !existingMarketList.every(item => item.id === 2001 || item.id === 2002 || item.id === 2003);
+    let marketList = hasFetchedMarketList ? existingMarketList : marketListFallback;
 
     let thirdPartyMiniPrograms = this.data.thirdPartyMiniPrograms;
     // 打包/弱网/未配置 request 合法域名时，上面多个 await 会长时间卡住；先同步铺底再拉接口

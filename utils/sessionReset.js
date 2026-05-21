@@ -12,6 +12,7 @@ const SCOPED_KEYS = [
 
 const USER_SESSION_KEYS = [
   'token',
+  'login_channel',
   'user',
   'user_community_id',
   'community_id',

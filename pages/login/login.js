@@ -74,7 +74,7 @@ Page({
 
     loginPromise.then(data => {
       wx.hideLoading();
-      this.handleLoginSuccess(data);
+      this.handleLoginSuccess(data, loginType);
     }).catch(err => {
       wx.hideLoading();
       wx.showToast({ title: this.getErrorMessage(err, '登录失败'), icon: 'none' });
@@ -90,7 +90,7 @@ Page({
         }
         api.auth.wechatLogin(Object.assign({ code: res.code }, extraPayload)).then(data => {
           wx.hideLoading();
-          this.handleLoginSuccess(data);
+          this.handleLoginSuccess(data, 'wechat');
         }).catch(err => {
           wx.hideLoading();
           wx.showToast({ title: this.getErrorMessage(err, failFallbackMsg), icon: 'none' });
@@ -113,9 +113,11 @@ Page({
     wx.showLoading({ title: '快捷登录中' });
     this.doWechatLogin({}, '微信快捷登录失败');
   },
-  handleLoginSuccess(data) {
+  handleLoginSuccess(data, channel) {
     sessionReset.clearAllUserSession();
     wx.removeStorageSync('manual_logged_out');
+    const loginChannel = channel === 'sms' || channel === 'password' || channel === 'wechat' ? channel : 'wechat';
+    wx.setStorageSync('login_channel', loginChannel);
     wx.setStorageSync('token', data.token);
     const u = data.user || {};
     if (u.id != null) userSession.rememberUserId(u.id);
