@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false
     },
     community_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true
     },
     origin_address_snapshot: {
@@ -44,8 +44,16 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'unpaid'
     },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    contact_phone: {
+      type: DataTypes.STRING(30),
+      allowNull: true
+    },
     assigned_worker_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true
     },
     dispatch_at: {
@@ -53,7 +61,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     dispatch_by: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true
     },
     check_in_at: {

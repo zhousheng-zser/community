@@ -4,6 +4,7 @@
 
 const { Op } = require('sequelize');
 const db = require('../../../models');
+const { parseNeighborAppointmentTime } = require('../../../utils/parseNeighborAppointmentTime');
 
 const NeighborAssistOrder = db.NeighborAssistOrder;
 const User = db.User;
@@ -79,8 +80,9 @@ exports.create = async (req, res) => {
       contact_phone
     } = req.body;
 
-    if (!assist_type) {
-      return fail(res, 400, '缺少 assist_type');
+    const assistType = String(assist_type || '').trim();
+    if (!assistType || assistType.length > 32) {
+      return fail(res, 400, '请选择或填写服务类型');
     }
 
     let commId = community_id != null ? parseInt(community_id, 10) : null;
@@ -92,25 +94,36 @@ exports.create = async (req, res) => {
       return fail(res, 400, '请先在「我的」绑定小区后再发布');
     }
 
-    // 支持前端传 reward_amount 或 amount
     const orderAmount = (reward_amount != null ? reward_amount : amount) != null
       ? String(reward_amount != null ? reward_amount : amount) : null;
 
-    const finalRemark = remark || content || null;
+    const phone = contact_phone != null ? String(contact_phone).trim() : '';
+    const bodyContent = content != null ? String(content).trim() : '';
+    let finalRemark = remark != null ? String(remark).trim() : '';
+    if (bodyContent && !finalRemark.includes(bodyContent)) {
+      finalRemark = finalRemark ? `${bodyContent}\n${finalRemark}` : bodyContent;
+    }
+    if (phone) {
+      finalRemark = finalRemark ? `${finalRemark}\n联系电话：${phone}` : `联系电话：${phone}`;
+    }
+
+    const appt = parseNeighborAppointmentTime(appointment_time);
 
     if (!NeighborAssistOrder) {
       return fail(res, 500, 'NeighborAssistOrder 模型未加载');
     }
 
     const row = await NeighborAssistOrder.create({
-      assist_type: String(assist_type),
+      assist_type: assistType,
       user_id: userId,
       community_id: commId,
       origin_address_snapshot: origin_address_snapshot || { address: '', detail: '' },
       destination_address_snapshot: destination_address_snapshot || { address: '', detail: '' },
       amount: orderAmount,
-      appointment_time: appointment_time || null,
-      remark: finalRemark,
+      appointment_time: appt,
+      content: bodyContent || finalRemark || null,
+      remark: finalRemark || bodyContent || null,
+      contact_phone: phone || null,
       status: 'pending_pay',
       pay_status: 'unpaid'
     });

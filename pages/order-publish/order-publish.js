@@ -27,6 +27,24 @@ function buildTimeRanges() {
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
+/** 将 picker 中文时间转为 ISO，后端亦可再解析 */
+function formatAppointmentIso(timeStr) {
+  if (!timeStr) return null;
+  const m = String(timeStr).trim().match(/(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日\s*(\d{1,2}):(\d{2})/);
+  if (!m) return timeStr;
+  const d = new Date(
+    parseInt(m[1], 10),
+    parseInt(m[2], 10) - 1,
+    parseInt(m[3], 10),
+    parseInt(m[4], 10),
+    parseInt(m[5], 10),
+    0
+  );
+  if (Number.isNaN(d.getTime())) return null;
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:00`;
+}
+
 function getDaysInMonth(year, month) {
   return new Date(year, month, 0).getDate();
 }
@@ -266,7 +284,7 @@ Page({
         assist_type: activeCategory,
         origin_address_snapshot: { address: form.address, detail: form.address },
         destination_address_snapshot: { address: form.address, detail: form.address },
-        appointment_time: form.time || null,
+        appointment_time: formatAppointmentIso(form.time) || form.time || null,
         content: form.content,
         remark,
         community_id: communityId,
@@ -292,10 +310,8 @@ Page({
     } catch (err) {
       wx.hideLoading();
       console.error('发布失败:', err);
-      wx.showToast({
-        title: (err && err.errmsg) || (err && err.message) || '发布失败，请重试',
-        icon: 'none'
-      });
+      const msg = (err && err.errmsg) || (err && err.message) || '发布失败，请重试';
+      wx.showToast({ title: msg, icon: 'none', duration: msg.length > 12 ? 2800 : 2000 });
       this.setData({ submitting: false });
     }
   },

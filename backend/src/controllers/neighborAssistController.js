@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require('../models');
 const { resolveUserIdFromReq } = require('../utils/resolveUserId');
+const { parseNeighborAppointmentTime } = require('../utils/parseNeighborAppointmentTime');
 const commissionService = require('../modules/commission/services/commission.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
@@ -54,6 +55,13 @@ async function assertWorkerCanTakeOrder(workerUserId, order) {
   return { ok: true };
 }
 
+function normalizeAssistType(raw) {
+  const t = String(raw || '').trim();
+  if (!t || t.length > 32) return null;
+  if (ASSIST_TYPES.has(t)) return t;
+  return t;
+}
+
 // Create order with amount
 exports.create = async (req, res) => {
   try {
@@ -67,42 +75,73 @@ exports.create = async (req, res) => {
       appointment_time,
       remark,
       amount,
-      reward_amount
+      reward_amount,
+      content,
+      contact_phone
     } = req.body;
-    if (!assist_type || !ASSIST_TYPES.has(String(assist_type))) {
-      return fail(res, 400, '无效 assist_type');
-    }
-    if (!origin_address_snapshot || typeof origin_address_snapshot !== 'object') {
-      return fail(res, 400, '缺少 origin_address_snapshot');
-    }
-    if (!destination_address_snapshot || typeof destination_address_snapshot !== 'object') {
-      return fail(res, 400, '缺少 destination_address_snapshot');
-    }
+
+    const assistType = normalizeAssistType(assist_type);
+    if (!assistType) return fail(res, 400, '请选择或填写服务类型');
+
+    const origin = origin_address_snapshot && typeof origin_address_snapshot === 'object'
+      ? origin_address_snapshot
+      : { address: '', detail: '' };
+    const dest = destination_address_snapshot && typeof destination_address_snapshot === 'object'
+      ? destination_address_snapshot
+      : { address: '', detail: '' };
+
     let commId = community_id != null ? parseInt(community_id, 10) : null;
     if (!commId) {
       const u = await User.findByPk(userId, { attributes: ['community_id'] });
       commId = u && u.community_id != null ? Number(u.community_id) : null;
     }
-    // 支持前端传 reward_amount 或 amount
+    if (!commId || !Number.isFinite(commId) || commId <= 0) {
+      return fail(res, 400, '请先在「我的」绑定小区后再发布');
+    }
+
     const orderAmount = (reward_amount != null ? reward_amount : amount) != null
       ? String(reward_amount != null ? reward_amount : amount) : null;
+    const phone = contact_phone != null ? String(contact_phone).trim() : '';
+    const bodyContent = content != null ? String(content).trim() : '';
+    let finalRemark = remark != null ? String(remark).trim() : '';
+    if (bodyContent && !finalRemark.includes(bodyContent)) {
+      finalRemark = finalRemark ? `${bodyContent}\n${finalRemark}` : bodyContent;
+    }
+    if (phone) {
+      finalRemark = finalRemark ? `${finalRemark}\n联系电话：${phone}` : `联系电话：${phone}`;
+    }
+
+    const appt = parseNeighborAppointmentTime(appointment_time);
+
+    if (!NeighborAssistOrder) return fail(res, 500, 'NeighborAssistOrder 模型未加载');
+
     const row = await NeighborAssistOrder.create({
-      assist_type: String(assist_type),
+      assist_type: assistType,
       user_id: userId,
       community_id: commId,
-      origin_address_snapshot,
-      destination_address_snapshot,
+      origin_address_snapshot: origin,
+      destination_address_snapshot: dest,
       amount: orderAmount,
-      appointment_time: appointment_time || null,
-      content: req.body.content || remark || null,
-      remark: remark || null,
+      appointment_time: appt,
+      content: bodyContent || finalRemark || null,
+      remark: finalRemark || bodyContent || null,
+      contact_phone: phone || null,
       status: 'pending_pay',
       pay_status: 'unpaid'
     });
-    return ok(res, { id: row.id, order_id: row.id, status: row.status, assist_type: row.assist_type, assist_type_label: ASSIST_TYPE_LABELS[row.assist_type] || row.assist_type, amount: orderAmount });
+    return ok(res, {
+      id: row.id,
+      order_id: row.id,
+      status: row.status,
+      assist_type: row.assist_type,
+      assist_type_label: ASSIST_TYPE_LABELS[row.assist_type] || row.assist_type,
+      amount: orderAmount,
+      reward_amount: orderAmount
+    });
   } catch (e) {
     console.error('neighborAssist create', e);
-    return fail(res, 500, '创建失败');
+    const hint = e && e.parent && e.parent.sqlMessage ? e.parent.sqlMessage : (e && e.message);
+    return fail(res, 500, hint && String(hint).length < 120 ? `创建失败：${hint}` : '创建失败');
   }
 };
 
