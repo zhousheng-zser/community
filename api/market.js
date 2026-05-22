@@ -124,6 +124,9 @@ const getOrderDetail = (orderNo) => {
   return get(`/market/orders/${orderNo}`);
 };
 
+/** 配送进度 GET /market/orders/:orderNo/delivery/track */
+const getDeliveryTrack = (orderNo) => get(`/market/orders/${orderNo}/delivery/track`);
+
 /**
  * 取消订单
  * POST /market/orders/:orderNo/cancel
@@ -169,7 +172,15 @@ const confirmReceipt = (orderNo) => {
  * POST /market/orders/:orderNo/refund
  */
 const applyRefund = (orderNo, data) => {
-  return post(`/market/orders/${orderNo}/refund`, data);
+  let no = orderNo;
+  let body = data;
+  if (orderNo && typeof orderNo === 'object') {
+    body = orderNo;
+    no = body.order_no || body.orderNo || '';
+  }
+  no = String(no || '').trim();
+  if (!no) return Promise.reject({ errmsg: '订单号无效' });
+  return post(`/market/orders/${encodeURIComponent(no)}/refund`, body || {});
 };
 
 /**
@@ -247,5 +258,6 @@ module.exports = {
   deleteOrder,
   buyAgain,
   getShopContact,
-  getOrderLogistics
+  getOrderLogistics,
+  getDeliveryTrack
 };

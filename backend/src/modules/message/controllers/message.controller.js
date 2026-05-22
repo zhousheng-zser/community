@@ -568,6 +568,46 @@ exports.ensureNeighborAssistConversation = async (orderId) => {
   }
 };
 
+exports.seedNeighborAssistCheckInMessage = async (orderId, helperUserId) => {
+  const convId = await exports.ensureNeighborAssistConversation(orderId);
+  if (!convId || !NeighborAssistOrder) return null;
+  const ordRow = await NeighborAssistOrder.findByPk(Number(orderId));
+  if (!ordRow) return null;
+  const publisherId = String(ordRow.user_id);
+  const now = new Date();
+  const timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const content = `【系统消息】接单邻居已于 ${timeStr} 到场打卡，开始为您提供服务。`;
+  const preview = previewText(content, 'text');
+  const t = await sequelize.transaction();
+  try {
+    await Message.create(
+      { conversation_id: convId, sender_id: 0, msg_type: 'text', content },
+      { transaction: t }
+    );
+    await Conversation.update(
+      { last_message_preview: preview, updated_at: new Date() },
+      { where: { id: convId }, transaction: t }
+    );
+    if (helperUserId && String(helperUserId) !== publisherId) {
+      await UserConversation.increment('unread_count', {
+        by: 1,
+        where: { user_id: publisherId, conversation_id: convId },
+        transaction: t
+      });
+    }
+    await UserConversation.update(
+      { is_deleted: false },
+      { where: { conversation_id: convId }, transaction: t }
+    );
+    await t.commit();
+    return convId;
+  } catch (e) {
+    await t.rollback();
+    console.error('seedNeighborAssistCheckInMessage error', e);
+    return null;
+  }
+};
+
 exports.seedNeighborAssistGrabMessage = async (orderId, grabberUserId) => {
   const convId = await exports.ensureNeighborAssistConversation(orderId);
   if (!convId || !NeighborAssistOrder) return null;

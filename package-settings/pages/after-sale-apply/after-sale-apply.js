@@ -72,6 +72,11 @@ Page({
   async submitRefund() {
     const { orderNo, goodsId, refundType, refundReason, refundAmount, description, images, submitting } = this.data;
     if (submitting) return;
+    const no = String(orderNo || '').trim();
+    if (!no) {
+      wx.showToast({ title: '订单号无效', icon: 'none' });
+      return;
+    }
     if (!refundReason.trim()) {
       wx.showToast({ title: '请填写退款原因', icon: 'none' });
       return;
@@ -84,8 +89,7 @@ Page({
         const uploadRes = await util.uploadFile(img);
         imageUrls.push(uploadRes.url);
       }
-      await api.market.applyRefund({
-        order_no: orderNo,
+      await api.market.applyRefund(no, {
         goods_id: goodsId || null,
         refund_type: refundType,
         reason: refundReason,

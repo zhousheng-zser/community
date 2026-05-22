@@ -1,6 +1,9 @@
 <view class="sp-mine-page">
   <view class="sp-profile">
-    <image class="sp-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+    <view class="sp-avatar-wrap" bindtap="onEditAvatar">
+      <image class="sp-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <text class="sp-avatar-badge">换头像</text>
+    </view>
     <text class="sp-name">{{displayName}}</text>
     <text class="sp-sub">服务商端 · 与用户端同一账号</text>
     <view class="sp-balance-box">

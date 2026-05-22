@@ -32,6 +32,27 @@ page {
   font-weight: 600;
 }
 
+.cover-pick {
+  width: 100%;
+  height: 280rpx;
+  border-radius: 16rpx;
+  background: #f0ebe3;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-pick-img {
+  width: 100%;
+  height: 100%;
+}
+
+.cover-pick-tip {
+  font-size: 28rpx;
+  color: #a8a29e;
+}
+
 .field-input {
   width: 100%;
   box-sizing: border-box;

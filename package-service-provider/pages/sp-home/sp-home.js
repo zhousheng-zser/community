@@ -4,6 +4,8 @@ const rp = require('../../../utils/rolePortals.js');
 const api = require('../../../api/index.js');
 const spCtx = require('../../utils/spContext.js');
 const balance = require('../../../utils/balance.js');
+const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
+const portalHandlers = createPortalCoverHandlers('service_provider');
 
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -23,6 +25,7 @@ Page({
     displayName: '服务商',
     shopName: '',
     userPhoto: DEF_AVATAR,
+    coverImage: '',
     balanceText: '0.00',
     stats: {
       pendingOrders: 0,
@@ -32,6 +35,9 @@ Page({
     },
     loading: false
   },
+
+  onEditAvatar: portalHandlers.onEditAvatar,
+  onEditCover: portalHandlers.onEditCover,
 
   onShow() {
     this.checkSPStatus();
@@ -73,6 +79,7 @@ Page({
         });
         this.loadBalance();
         this.loadStats();
+        await portalHandlers.loadPortalCoverImages.call(this, 'service_provider', true);
         return;
       }
     } catch (e) {}
@@ -93,6 +100,7 @@ Page({
       });
       this.loadBalance();
       this.loadStats();
+      await portalHandlers.loadPortalCoverImages.call(this, 'service_provider', true);
     } else {
       this.setData({ spOk: false, greeting: getGreeting(), displayName: user.userName || '用户' });
     }

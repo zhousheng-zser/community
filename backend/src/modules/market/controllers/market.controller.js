@@ -248,7 +248,10 @@ exports.getShopDetail = async (req, res) => {
     ok(res, {
       id: shop.id,
       name: shop.name,
-      logo: shop.logo,
+      logo: shop.logo || shop.logo_url || '',
+      logo_url: shop.logo_url || shop.logo || '',
+      cover_url: shop.cover_url || shop.cover || '',
+      cover: shop.cover_url || shop.cover || '',
       contact_name: shop.contact_name,
       contact_phone: shop.contact_phone,
       address: shop.address,
@@ -623,7 +626,19 @@ exports.createOrder = async (req, res) => {
     const addressObj = (body.address && typeof body.address === 'object') ? body.address : {};
     const receiverName = String(body.receiver_name || addressObj.receiver_name || addressObj.name || '').trim() || null;
     const receiverPhone = String(body.receiver_phone || addressObj.receiver_phone || addressObj.phone || '').trim() || null;
-    const receiverAddress = String(body.receiver_address || addressObj.receiver_address || addressObj.address || body.address || '').trim() || null;
+    let receiverAddress = String(
+      body.receiver_address || addressObj.receiver_address || addressObj.address || ''
+    ).trim();
+    if (!receiverAddress && addressObj.detail) {
+      receiverAddress = [addressObj.province, addressObj.city, addressObj.district, addressObj.detail]
+        .filter(Boolean)
+        .join('');
+    }
+    receiverAddress = receiverAddress || null;
+    const receiverLat = addressObj.latitude != null ? Number(addressObj.latitude)
+      : (body.receiver_latitude != null ? Number(body.receiver_latitude) : null);
+    const receiverLng = addressObj.longitude != null ? Number(addressObj.longitude)
+      : (body.receiver_longitude != null ? Number(body.receiver_longitude) : null);
     if (deliveryMode === 'express' && (!receiverPhone || !receiverAddress)) {
       await t.rollback();
       return fail(res, '配送订单请填写收货电话和地址');
@@ -693,6 +708,8 @@ exports.createOrder = async (req, res) => {
       receiver_name: receiverName,
       receiver_phone: receiverPhone,
       receiver_address: receiverAddress,
+      receiver_latitude: Number.isFinite(receiverLat) ? receiverLat : null,
+      receiver_longitude: Number.isFinite(receiverLng) ? receiverLng : null,
       remark: String(body.remark || '').trim() || null,
       expired_at: new Date(Date.now() + 30 * 60 * 1000)
     }, { transaction: t });
@@ -815,7 +832,15 @@ exports.getOrderDetail = async (req, res) => {
         unit_price_snapshot: Number(it.unit_price_snapshot).toFixed(2),
         quantity: it.quantity
       })),
-      fulfillment_events: []
+      fulfillment_events: [],
+      delivery: await (async () => {
+        try {
+          const deliverySvc = require('../../../services/marketDelivery.service');
+          return await deliverySvc.getDeliveryView(orderNo);
+        } catch (e) {
+          return { has_delivery: false, timeline: [] };
+        }
+      })()
     });
   } catch (err) {
     console.error('[market/orders/detail]', err);
@@ -923,12 +948,16 @@ exports.getLogistics = async (req, res) => {
     const orderNo = String(req.params.orderNo || '').trim();
     const row = await MarketOrder.findOne({ where: { order_no: orderNo, user_id: userId } });
     if (!row) return fail(res, '订单不存在', 404);
+    const delivery = require('../../../services/marketDelivery.service');
+    const view = await delivery.getDeliveryView(orderNo);
+    const brand = view.brand || (view.provider_name || '配送');
     ok(res, {
       order_no: orderNo,
-      company: '社区配送',
-      tracking_no: `LOCAL-${orderNo}`,
+      company: view.has_delivery ? brand : '社区配送',
+      tracking_no: view.external_order_no || `LOCAL-${orderNo}`,
       status: row.order_status,
-      timeline: []
+      delivery: view,
+      timeline: view.timeline || []
     });
   } catch (err) {
     console.error('[market/orders/logistics]', err);

@@ -40,7 +40,7 @@ const config = {
      * benefitAlliancePreferLocal：true 时优先用 utils/benefitAllianceLocal.js（与 流量联盟/*.md 一致），
      * 有本地商品列表则不再请求 benefit/display 与 jd|pdd/benefit/goods 覆盖对应块。
      */
-    benefitAlliancePreferLocal: false,
+    benefitAlliancePreferLocal: true,
 
     benefitAlliance: {
         jdUnionAppId: 'wx91d27dbf599dff74',

@@ -1,5 +1,7 @@
+const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
 const mshop = require('../../utils/merchantShopContext.js');
+const portalEdit = require('../../../utils/portalAvatarEdit.js');
 
 function firstNonEmpty() {
   for (let i = 0; i < arguments.length; i += 1) {
@@ -30,7 +32,8 @@ Page({
     description: '',
     descLen: 0,
     communityId: '',
-    rawShopId: ''
+    rawShopId: '',
+    coverImage: ''
   },
 
   onShow() {
@@ -66,6 +69,7 @@ Page({
         shop.village_id,
         shop.villageId
       );
+      const cover = firstNonEmpty(shop.cover_url, shop.coverUrl, shop.cover, shop.cover_image);
       this.setData({
         loading: false,
         contactName,
@@ -73,7 +77,8 @@ Page({
         description,
         descLen: description.length,
         communityId,
-        rawShopId: firstNonEmpty(shop.id, shop.shop_id, shop.shopId)
+        rawShopId: firstNonEmpty(shop.id, shop.shop_id, shop.shopId),
+        coverImage: cover ? util.imgUrl(cover, cover) : ''
       });
       mshop.syncBoundShop(getApp(), shop);
     } catch (e) {
@@ -99,6 +104,17 @@ Page({
   onCommunityInput(e) {
     const communityId = ((e.detail && e.detail.value) || '').replace(/\D/g, '');
     this.setData({ communityId });
+  },
+
+  async onChooseCover() {
+    try {
+      const path = await portalEdit.chooseUploadAndGetPath();
+      await api.merchant.updateShop({ cover_url: path });
+      this.setData({ coverImage: util.imgUrl(path, path) });
+      wx.showToast({ title: '封面已更新', icon: 'success' });
+    } catch (e) {
+      if (e && e.errmsg) wx.showToast({ title: e.errmsg, icon: 'none' });
+    }
   },
 
   async save() {

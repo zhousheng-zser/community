@@ -372,6 +372,19 @@ page {
   margin-bottom: 24rpx;
 }
 
+.serve-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.serve-item-tag {
+  font-size: 22rpx;
+  color: #16a34a;
+  font-weight: 600;
+}
+
 .serve-item-title {
   font-size: 28rpx;
   font-weight: 600;

@@ -300,27 +300,26 @@ Page({
     });
   },
 
+  chooseDelivery(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.navigateTo({
+      url: `/package-merchant/pages/merchant-delivery-choose/merchant-delivery-choose?orderNo=${encodeURIComponent(orderNo)}`
+    });
+  },
+
+  viewDeliveryProgress(e) {
+    const orderNo = e.currentTarget.dataset.no;
+    if (!orderNo) return;
+    wx.navigateTo({
+      url: `/pages/market-order-detail/market-order-detail?orderNo=${encodeURIComponent(orderNo)}&from=merchant`
+    });
+  },
+
   startDelivery(e) {
     const orderNo = e.currentTarget.dataset.no;
     if (!orderNo) return;
-    wx.showModal({
-      title: '开始配送',
-      content: '确认开始配送吗？',
-      success: async (res) => {
-        if (res.confirm) {
-          try {
-            wx.showLoading({ title: '处理中', mask: true });
-            await api.merchant.startDelivery(orderNo, { note: '商家已开始配送' });
-            wx.hideLoading();
-            wx.showToast({ title: '已开始配送', icon: 'success' });
-            this.load();
-          } catch (err) {
-            wx.hideLoading();
-            wx.showToast({ title: (err && err.errmsg) || '操作失败', icon: 'none' });
-          }
-        }
-      }
-    });
+    this.chooseDelivery(e);
   },
 
   completeDelivery(e) {

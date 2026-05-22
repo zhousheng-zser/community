@@ -13,6 +13,14 @@ const getMyPartnerInfo = () => {
 };
 
 /**
+ * 获取合伙人申请状态
+ * GET /partner/application/me
+ */
+const getApplicationMe = () => {
+  return get('/partner/application/me');
+};
+
+/**
  * 获取我的下线列表
  * GET /partner/my-downlines
  */
@@ -38,6 +46,7 @@ const refreshChain = () => {
 
 module.exports = {
   getMyPartnerInfo,
+  getApplicationMe,
   getMyDownlines,
   applyPartner,
   refreshChain

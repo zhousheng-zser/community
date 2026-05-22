@@ -26,6 +26,12 @@ Page({
     remark: '',
     submitting: false
   },
+  formatAddress(addr) {
+    if (!addr || typeof addr !== 'object') return '';
+    const direct = addr.receiver_address || addr.address;
+    if (direct) return String(direct).trim();
+    return [addr.province, addr.city, addr.district, addr.detail].filter(Boolean).join('');
+  },
   pickFirstNumber() {
     for (let i = 0; i < arguments.length; i++) {
       const v = arguments[i];
@@ -205,10 +211,16 @@ Page({
     wx.showLoading({ title: '正在提交...' });
 
     // 组装提交报文
+    const addr = this.data.address;
     const payload = {
       shop_id: this.data.shopId,
       delivery_mode: this.data.deliveryType,
-      address: this.data.deliveryType === 'express' ? this.data.address : null,
+      address: this.data.deliveryType === 'express' ? addr : null,
+      receiver_name: addr && (addr.name || addr.receiver_name),
+      receiver_phone: addr && (addr.phone || addr.receiver_phone),
+      receiver_address: this.data.deliveryType === 'express' ? this.formatAddress(addr) : '',
+      receiver_latitude: addr && (addr.latitude != null ? addr.latitude : addr.lat),
+      receiver_longitude: addr && (addr.longitude != null ? addr.longitude : addr.lng),
       remark: this.data.remark,
       items: this.data.items.map(it => ({
         goods_id: it.goodsId,
@@ -232,12 +244,16 @@ Page({
       if (!orderNo) throw new Error('创建订单失败，未返回单号');
       wx.removeStorageSync('checkout_selected_coupon');
 
-      // 因为联调阶段，可以通过 mock-success 接口直接模拟支付成功
-      // 先获取支付参数 (仅作展示或将来真实调用wx.requestPayment)
-      await util.post('market/payments/create', { order_no: orderNo }).catch(()=>{});
-      
-      // 模拟支付成功
-      await util.post('market/payments/mock-success', { order_no: orderNo });
+      // 联调：create 在无微信配置时会虚拟记已支付；失败再试 mock-success
+      try {
+        await util.post('market/payments/create', { order_no: orderNo });
+      } catch (payErr) {
+        try {
+          await util.post('market/payments/mock-success', { order_no: orderNo });
+        } catch (mockErr) {
+          console.warn('[goods-confrim] pay skipped', payErr, mockErr);
+        }
+      }
 
       // 提交成功，清理购物车
       if (this.data.fromUrl === 'cart') {
@@ -259,7 +275,9 @@ Page({
     } catch (e) {
       wx.hideLoading();
       this.setData({ submitting: false });
-      wx.showToast({ title: '系统错误，请重试', icon: 'none' });
+      console.error('[goods-confrim] submitOrder', e);
+      const msg = (e && (e.errmsg || e.msg || e.message)) || '提交失败，请重试';
+      wx.showToast({ title: msg, icon: 'none', duration: 2500 });
     }
   }
 });

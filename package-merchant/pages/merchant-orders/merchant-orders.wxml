@@ -76,6 +76,7 @@
               <view class="m-order-meta-col">
                 <text class="m-order-time">{{item.timeDisplay}}</text>
                 <text class="m-order-buyer" wx:if="{{item.buyerHint}}">收货人 {{item.buyerHint}}</text>
+                <text class="m-order-carrier" wx:if="{{item.carrierLabel}}">{{item.carrierLabel}}</text>
               </view>
               <view class="m-order-action">
                 <text>查看详情</text>
@@ -104,8 +105,9 @@
               <view class="m-act m-act--ghost" data-no="{{item.orderNo}}" bindtap="openRiderLocation" wx:if="{{item.bucket === 'shipping'}}">骑手位置</view>
               <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="acceptOrder" wx:if="{{item.orderStatus === 'pending_accept'}}">接单</view>
               <view class="m-act m-act--danger" data-no="{{item.orderNo}}" bindtap="rejectOrder" wx:if="{{item.orderStatus === 'pending_accept'}}">不接单</view>
-              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="startDelivery" wx:if="{{item.orderStatus === 'pending_service'}}">开始配送</view>
-              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="completeDelivery" wx:if="{{item.orderStatus === 'pending_receipt'}}">上门配送完成</view>
+              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="chooseDelivery" wx:if="{{item.orderStatus === 'pending_service' && !item.deliveryCarrier}}">选择配送</view>
+              <view class="m-act m-act--ghost" data-no="{{item.orderNo}}" bindtap="viewDeliveryProgress" wx:if="{{item.deliveryCarrier}}">配送进度</view>
+              <view class="m-act m-act--primary" data-no="{{item.orderNo}}" bindtap="completeDelivery" wx:if="{{item.orderStatus === 'pending_receipt' && item.deliveryCarrier === 'self'}}">确认送达</view>
               <view class="m-act m-act--warn" data-no="{{item.orderNo}}" data-refundid="{{item.refundId}}" bindtap="handleRefund" wx:if="{{item.bucket === 'after_sale'}}">处理售后</view>
               <view class="m-act m-act--danger" data-no="{{item.orderNo}}" bindtap="cancelOrder" wx:if="{{item.bucket === 'unpaid'}}">取消订单</view>
             </view>

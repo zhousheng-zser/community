@@ -2,7 +2,7 @@
  * 核心数据模块 API
  * 对应后端文档：三、核心数据模块
  */
-const { get } = require('../utils/util.js');
+const { get, post } = require('../utils/util.js');
 
 /**
  * 获取轮播图
@@ -82,6 +82,12 @@ const getServiceProviderList = (params) => {
   return get('/core/service-providers', params);
 };
 
+/** 可绑定小区列表 GET /core/communities */
+const getCommunities = () => get('/core/communities');
+
+/** 坐标/选点解析小区 POST /core/communities/resolve */
+const resolveCommunity = (data) => post('/core/communities/resolve', data);
+
 module.exports = {
   getBanners,
   getServiceHomeModules,
@@ -93,5 +99,7 @@ module.exports = {
   getServiceDetail,
   getWorkerList,
   getWorkerDetail,
-  getServiceProviderList
+  getServiceProviderList,
+  getCommunities,
+  resolveCommunity
 };

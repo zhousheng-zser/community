@@ -9,6 +9,8 @@ const browseFootprint = require('../../utils/browseFootprint.js');
 const userSession = require('../../utils/userSession.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
 const serviceFavStore = require('../../utils/serviceFavStore.js');
+const { getBoundCommunityId } = require('../../utils/communityPortal.js');
+const communityBind = require('../../utils/communityBind.js');
 
 Page({
   data: {
@@ -16,6 +18,7 @@ Page({
     user: {},
     loggedIn: false,
     roleLabel: '普通用户',
+    boundCommunityName: '',
     couponCount: 0,
     footprintCount: 0,
     favoriteCount: 0,
@@ -321,7 +324,8 @@ Page({
       roleLabel,
       loggedIn,
       footprintCount: 0,
-      favoriteCount: 0  // 先置 0，异步更新
+      favoriteCount: 0,
+      boundCommunityName: loggedIn ? (communityBind.getBoundCommunityName() || '未绑定') : ''
     });
 
     browseFootprint.countAsync().then((c) => {
@@ -357,7 +361,11 @@ Page({
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
         if (sid != null) app.globalData.user.id = sid;
-        if (cid != null) app.globalData.user.communityId = cid;
+        if (cid != null) {
+        app.globalData.user.communityId = cid;
+        app.globalData.user.community_id = cid;
+        try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+      }
         // 同步头像、昵称等用户信息
         const nickname = data.nickname || data.userName || data.name;
         const avatar = data.avatar_url || data.avatarUrl || data.avatar || data.userPhoto;
@@ -388,6 +396,7 @@ Page({
         user,
         roleLabel: this.computeRoleLabel(user)
       });
+      this._syncBoundCommunityDisplay(user);
       this.loadCommissionBalance();
       browseFootprint.syncLocalToServer();
       serviceFavStore.syncLocalToServer();
@@ -451,6 +460,22 @@ Page({
   onShareAppMessage() {
     const openid = (app.globalData.user || {}).opId || '';
     return app.onShare(openid, {});
+  },
+
+  goBindCommunity() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      setTimeout(() => wx.navigateTo({ url: '../login/login' }), 500);
+      return;
+    }
+    wx.navigateTo({ url: '../bind-community/bind-community' });
+  },
+
+  _syncBoundCommunityDisplay(user) {
+    const cid = getBoundCommunityId(getApp());
+    let name = communityBind.getBoundCommunityName();
+    if (!name && cid) name = `小区#${cid}`;
+    this.setData({ boundCommunityName: name || '未绑定' });
   },
 
   goAddress() {

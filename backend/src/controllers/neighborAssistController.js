@@ -387,6 +387,59 @@ exports.communityGrab = async (req, res) => {
   }
 };
 
+// POST /neighbor-assist/orders/:id/check-in — 接单方上门定位打卡
+exports.checkIn = async (req, res) => {
+  try {
+    const helperId = resolveUserIdFromReq(req);
+    if (!helperId) return fail(res, 401, '未登录');
+    const id = parseInt(req.params.id, 10);
+    if (!id) return fail(res, 400, '无效订单 id');
+    const body = req.body || {};
+    const latitude = body.latitude != null ? Number(body.latitude) : null;
+    const longitude = body.longitude != null ? Number(body.longitude) : null;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return fail(res, 400, '缺少有效 latitude / longitude');
+    }
+
+    const order = await NeighborAssistOrder.findByPk(id);
+    if (!order) return fail(res, 404, '订单不存在', 404);
+    if (order.assigned_worker_id !== helperId) return fail(res, 403, '无权限操作该订单', 403);
+    if (order.pay_status !== 'paid') return fail(res, 400, '订单未支付');
+    if (!['dispatched', 'in_service'].includes(String(order.status))) {
+      return fail(res, 400, '当前状态不可打卡');
+    }
+
+    const checkInAt = order.check_in_at || new Date();
+    await order.update({
+      status: 'in_service',
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    });
+
+    try {
+      const messageCtrl = require('../modules/message/controllers/message.controller');
+      if (messageCtrl.seedNeighborAssistCheckInMessage) {
+        await messageCtrl.seedNeighborAssistCheckInMessage(id, helperId);
+      }
+    } catch (chatErr) {
+      console.warn('neighborAssist checkIn chat seed', chatErr.message);
+    }
+
+    return ok(res, {
+      id: order.id,
+      status: 'in_service',
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT.in_service,
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    });
+  } catch (e) {
+    console.error('neighborAssist checkIn', e);
+    return fail(res, 500, '打卡失败');
+  }
+};
+
 // Accept (接单方确认开始服务)
 exports.accept = async (req, res) => {
   try {
@@ -418,7 +471,8 @@ exports.complete = async (req, res) => {
     const order = await NeighborAssistOrder.findByPk(id);
     if (!order) return fail(res, 404, '订单不存在', 404);
     if (order.assigned_worker_id !== workerId) return fail(res, 403, '无权限操作该订单', 403);
-    if (order.status !== 'in_service' && order.status !== 'dispatched') return fail(res, 400, '当前状态不可完成');
+    if (order.status !== 'in_service') return fail(res, 400, '当前状态不可完成');
+    if (!order.check_in_at) return fail(res, 400, '请先完成上门打卡');
 
     const t = await NeighborAssistOrder.sequelize.transaction();
     try {

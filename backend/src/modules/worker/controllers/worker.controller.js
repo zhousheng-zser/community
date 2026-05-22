@@ -1,7 +1,8 @@
 const db = require('../../../models');
-const { WorkerApplication, ServiceOrder, WorkerService, Service } = db;
+const { WorkerApplication, ServiceOrder, WorkerService, Service, WorkerProfile, User } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
+const { ensureWorkerVisibleInCommunity, DEFAULT_COMMUNITY_ID } = require('../../../services/workerVisibility.service');
 
 // POST /worker/apply
 exports.apply = async (req, res) => {
@@ -83,6 +84,9 @@ exports.reviewApplication = async (req, res) => {
       reviewed_by: reviewerId,
       reviewed_at: new Date()
     });
+    if (status === 'approved') {
+      await ensureWorkerVisibleInCommunity(record.user_id, DEFAULT_COMMUNITY_ID);
+    }
     return res.json({ code: 0, msg: '审核完成', data: { id, status } });
   } catch (err) {
     console.error('[worker/applications/review] error:', err);
@@ -469,5 +473,100 @@ exports.deleteService = async (req, res) => {
   } catch (err) {
     console.error('[worker/services/delete] error:', err);
     return res.status(500).json({ code: 1, msg: '删除失败' });
+  }
+};
+
+// GET /worker/profile/me — 工作台头像与封面
+exports.getMyProfile = async (req, res) => {
+  try {
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    let avatarUrl = '';
+    if (User) {
+      const user = await User.findByPk(userId, { attributes: ['id', 'avatar_url', 'nickname'] });
+      avatarUrl = (user && user.avatar_url) || '';
+    }
+
+    const approvedApp = await WorkerApplication.findOne({
+      where: { user_id: userId, status: 'approved' },
+      order: [['updated_at', 'DESC']]
+    });
+
+    let workPhotoUrl = (approvedApp && approvedApp.work_photo_url) || '';
+    if (WorkerProfile) {
+      const prof = await WorkerProfile.findOne({
+        where: { user_id: userId, status: 'active' },
+        order: [['updated_at', 'DESC']]
+      });
+      if (prof && prof.work_photo_url) workPhotoUrl = prof.work_photo_url;
+    }
+
+    return res.json({
+      code: 0,
+      data: {
+        avatar_url: avatarUrl,
+        work_photo_url: workPhotoUrl
+      }
+    });
+  } catch (err) {
+    console.error('[worker/profile/me] error:', err);
+    return res.status(500).json({ code: 1, msg: '获取资料失败' });
+  }
+};
+
+// PATCH /worker/profile/me — 更新头像 / 工作台封面（工作生活照）
+exports.updateMyProfile = async (req, res) => {
+  try {
+    const userId = resolveUserIdFromReq(req);
+    if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
+
+    const body = req.body || {};
+    if (body.avatar_url !== undefined && User) {
+      const user = await User.findByPk(userId);
+      if (user) {
+        user.avatar_url = body.avatar_url ? String(body.avatar_url).trim() : '';
+        await user.save();
+      }
+    }
+
+    if (body.work_photo_url !== undefined) {
+      const photo = body.work_photo_url ? String(body.work_photo_url).trim() : '';
+      if (WorkerProfile) {
+        let prof = await WorkerProfile.findOne({
+          where: { user_id: userId, status: 'active' },
+          order: [['updated_at', 'DESC']]
+        });
+        if (!prof) {
+          const approvedApp = await WorkerApplication.findOne({
+            where: { user_id: userId, status: 'approved' },
+            order: [['updated_at', 'DESC']]
+          });
+          if (approvedApp) {
+            prof = await WorkerProfile.create({
+              user_id: userId,
+              community_id: approvedApp.community_id || null,
+              real_name: approvedApp.name || '',
+              industry: approvedApp.industry || '',
+              city: approvedApp.city || '',
+              resume: approvedApp.resume || '',
+              work_photo_url: photo,
+              status: 'active'
+            });
+          }
+        } else {
+          await prof.update({ work_photo_url: photo });
+        }
+      }
+      await WorkerApplication.update(
+        { work_photo_url: photo },
+        { where: { user_id: userId, status: 'approved' } }
+      );
+    }
+
+    return exports.getMyProfile(req, res);
+  } catch (err) {
+    console.error('[worker/profile/me] update error:', err);
+    return res.status(500).json({ code: 1, msg: '更新失败' });
   }
 };

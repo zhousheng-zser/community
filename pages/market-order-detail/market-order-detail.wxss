@@ -33,6 +33,75 @@
   display: flex;
   flex-direction: column;
 }
+.delivery-card .delivery-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.delivery-brand {
+  font-size: 24rpx;
+  color: #ff7a00;
+  font-weight: 600;
+}
+.delivery-status-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+.delivery-status {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #111;
+}
+.delivery-mock {
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 12rpx;
+  padding: 2rpx 10rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+}
+.delivery-meta {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+.track-list {
+  margin-top: 20rpx;
+  border-left: 4rpx solid #ffe0c2;
+  padding-left: 24rpx;
+}
+.track-item {
+  position: relative;
+  padding-bottom: 24rpx;
+}
+.track-dot {
+  position: absolute;
+  left: -32rpx;
+  top: 8rpx;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #ff7a00;
+}
+.track-title {
+  font-size: 26rpx;
+  color: #333;
+  display: block;
+}
+.track-time {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+}
+.track-note {
+  font-size: 22rpx;
+  color: #888;
+  display: block;
+}
+
 .log-desc {
   font-size: 28rpx;
   color: #2b77ff;

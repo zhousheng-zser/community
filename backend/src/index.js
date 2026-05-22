@@ -101,6 +101,8 @@ app.use('/api/v1/service-provider-portal/workers', require('./routes/serviceProv
 app.use('/api/v1/service-provider-portal/finance', require('./routes/serviceProviderFinanceRoutes'));
 app.use('/api/v1/market/merchant', merchantPortalRoutes);
 app.use('/api/v1/market/shop', merchantPortalRoutes);
+// 商家订单/配送（modules/merchant）；254 线上由 merchantPortalRoutes 一并提供
+app.use('/api/v1/market/merchant', require('./modules/merchant/routes'));
 app.use('/api/v1/market/merchant/customers', require('./routes/merchantCustomerRoutes'));
 app.use('/api/v1/market/merchant/marketing', require('./routes/merchantMarketingRoutes'));
 app.use('/api/v1/market/merchant/refunds', require('./routes/merchantRefundRoutes'));

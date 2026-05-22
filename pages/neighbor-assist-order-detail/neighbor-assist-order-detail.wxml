@@ -128,15 +128,28 @@
           <text class="sheet-sub">接单方</text>
         </view>
         <view class="sheet-body">
-          <text class="serve-hint">到达服务地点附近后请先打卡，完成后提交「服务完成」等待发布人确认。</text>
+          <text class="serve-hint">到达服务地点附近后请先完成上门定位打卡，再提交「服务完成」等待发布人确认。</text>
           <view class="serve-item">
-            <text class="serve-item-title">📍 到场打卡</text>
+            <view class="serve-item-head">
+              <text class="serve-item-title">上门定位打卡</text>
+              <text class="serve-item-tag" wx:if="{{checkInDisplay}}">已打卡</text>
+            </view>
             <text class="serve-item-desc" wx:if="{{checkInDisplay}}">{{checkInDisplay}}</text>
-            <button class="sheet-btn block primary" bindtap="checkIn" disabled="{{checking}}" loading="{{checking}}">
-              {{checking ? '定位中…' : '到场打卡'}}
+            <button class="sheet-btn block primary" bindtap="checkIn" disabled="{{checking || !!checkInDisplay}}" loading="{{checking}}">
+              {{checking ? '定位中…' : (checkInDisplay ? '已完成打卡' : '上门定位打卡')}}
             </button>
           </view>
           <button class="sheet-btn block ghost" bindtap="completeService" disabled="{{!canCompleteService}}" wx:if="{{bucket === 'in_service'}}">✅ 提交服务完成</button>
+        </view>
+      </view>
+
+      <!-- 发布人：服务进度 -->
+      <view class="sheet-section" wx:if="{{myRole === 'publisher' && checkInDisplay && bucket === 'in_service'}}">
+        <view class="sheet-head">
+          <text class="sheet-title">服务进度</text>
+        </view>
+        <view class="sheet-body">
+          <text class="serve-hint">接单邻居 {{checkInDisplay}}，正在为您服务。</text>
         </view>
       </view>
 

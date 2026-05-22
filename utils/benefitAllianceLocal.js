@@ -26,9 +26,9 @@ const PDD_ITEMS = [
 ];
 
 const JD_HERO_TITLE = '惠民卡 · 京东联盟';
-const JD_HERO_SUB = '京挑客推广链与 u.jd.com 短链一致（流量联盟/京东联盟.md）';
+const JD_HERO_SUB = '领券购物 · 分享返佣';
 const PDD_HERO_TITLE = '惠民卡 · 拼多多';
-const PDD_HERO_SUB = '多多进宝券后价与 p.pinduoduo 推广链一致（流量联盟/拼多多.md）';
+const PDD_HERO_SUB = '多多进宝 · 券后价更省';
 
 function mapJdGoods() {
   return JD_ITEMS.map((x, idx) => ({

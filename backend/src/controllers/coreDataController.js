@@ -3,6 +3,10 @@ const { toAbsoluteAssetUrl } = require('../utils/assetUrl');
 const { resolveUserId } = require('../utils/resolveUserId');
 const { resolveServiceProviderProfile } = require('../utils/resolveServiceProviderProfile');
 const {
+  ensureWorkerVisibleInCommunity,
+  getHomeDisplayWorkerUserIds
+} = require('../services/workerVisibility.service');
+const {
   Category,
   Service,
   Banner,
@@ -117,7 +121,6 @@ function buildWorkerCard(user, profile, approvedApp, dispatchCount, extra = {}) 
   const resume = (profile && profile.resume) || (approvedApp && approvedApp.resume) || '';
   const workPhoto = (profile && profile.work_photo_url) || (approvedApp && approvedApp.work_photo_url) || '';
   const count = Number(extra.service_count != null ? extra.service_count : dispatchCount || 0);
-  const avatar = (profile && profile.work_photo_url) || user.avatar_url || workPhoto || '';
   const g = mapGender((profile && profile.gender) || extra.gender);
   return {
     id: user.id,
@@ -125,7 +128,9 @@ function buildWorkerCard(user, profile, approvedApp, dispatchCount, extra = {}) 
     real_name: realName,
     nickname: user.nickname || realName,
     avatar: user.avatar_url || '',
-    avatar_url: user.avatar_url || avatar || '',
+    avatar_url: user.avatar_url || '',
+    cover_image: workPhoto || '',
+    work_photo_url: workPhoto || '',
     skill: industry,
     industry,
     region: city,
@@ -478,7 +483,15 @@ exports.getWorkers = async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     let pageSize = parseInt(req.query.page_size, 10) || parseInt(req.query.limit, 10) || 20;
     pageSize = Math.min(Math.max(pageSize, 1), 50);
-    const eligibleIds = await getListableWorkerUserIdsForCommunity(communityId);
+    let eligibleIds = await getListableWorkerUserIdsForCommunity(communityId);
+    const homeIds = await getHomeDisplayWorkerUserIds(communityId);
+    const eligibleSet = new Set(eligibleIds.map((id) => String(id)));
+    for (const uid of homeIds) {
+      if (!eligibleSet.has(String(uid))) {
+        await ensureWorkerVisibleInCommunity(uid, communityId);
+      }
+    }
+    eligibleIds = await getListableWorkerUserIdsForCommunity(communityId);
     if (eligibleIds.length === 0) return ok(res, { list: [], total: 0, page, page_size: pageSize });
 
     const whereUser = { id: { [Op.in]: eligibleIds } };

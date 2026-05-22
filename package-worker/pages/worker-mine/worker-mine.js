@@ -2,6 +2,8 @@ const app = getApp();
 const rp = require('../../../utils/rolePortals.js');
 const workerCtx = require('../../utils/workerContext.js');
 const api = require('../../../api/index.js');
+const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
+const portalHandlers = createPortalCoverHandlers('worker');
 
 const STORAGE_ACCEPT = 'worker_accept_orders';
 const DEF_AVATAR =
@@ -17,6 +19,8 @@ Page({
     workerSubtitle: '',
     userPhoto: DEF_AVATAR
   },
+
+  onEditAvatar: portalHandlers.onEditAvatar,
 
   onShow() {
     this.loadWorkerIdentity();

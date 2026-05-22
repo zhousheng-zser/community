@@ -56,6 +56,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    check_in_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    check_in_lat: {
+      type: DataTypes.DECIMAL(10, 6),
+      allowNull: true
+    },
+    check_in_lng: {
+      type: DataTypes.DECIMAL(10, 6),
+      allowNull: true
+    },
     completed_at: {
       type: DataTypes.DATE,
       allowNull: true

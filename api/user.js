@@ -20,6 +20,17 @@ const updateUserProfile = (data) => {
   return post('/user/profile', data);
 };
 
+/** 更新头像等字段（JSON，无文件上传）；PATCH 不可用时回退 POST */
+const updateProfileFields = (data) => {
+  return patch('/user/profile', data).catch((err) => {
+    const code = err && (err.errno || err.statusCode);
+    if (code === 404 || code === 405) {
+      return post('/user/profile', data);
+    }
+    return Promise.reject(err);
+  });
+};
+
 /**
  * 获取用户地址列表
  * GET /user/addresses
@@ -76,6 +87,7 @@ const getInvitees = (params) => {
 module.exports = {
   getUserProfile,
   updateUserProfile,
+  updateProfileFields,
   getAddressList,
   addAddress,
   updateAddress,

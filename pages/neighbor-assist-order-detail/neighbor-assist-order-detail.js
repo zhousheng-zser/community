@@ -2,6 +2,14 @@ const util = require('../../utils/util.js');
 const naUi = require('../../utils/neighborAssistUi.js');
 const { asId, sameId } = require('../../utils/snowflakeId.js');
 
+function formatCheckInTime(v) {
+  if (!v) return '';
+  const d = v instanceof Date ? v : new Date(v);
+  if (Number.isNaN(d.getTime())) return String(v);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 function maskPhone(p) {
   if (!p || String(p).length < 11) return p || '';
   const s = String(p);
@@ -97,7 +105,7 @@ function parseDetail(raw, myUserId) {
     publisherUserId: publisherUid,
     helperUserId: helperUid,
     peerUserId,
-    check_in_at: r.check_in_at || r.check_in_time,
+    check_in_at: formatCheckInTime(r.check_in_at || r.check_in_time),
     payStatus: r.pay_status || r.payStatus || 'unpaid',
     reviewed: !!(r.reviewed || r.has_review)
   };
@@ -157,7 +165,7 @@ Page({
     const peerLabel = myRole === 'publisher' ? '接单邻居' : myRole === 'helper' ? '发布人' : '对方';
     const showServeBlock = myRole === 'helper' && bucket === 'in_service';
     const canAcceptOrder = !myRole && bucket === 'pending_accept';
-    const checkInDisplay = order.check_in_at ? `已打卡 ${order.check_in_at}` : '';
+    const checkInDisplay = order.check_in_at ? `已于 ${order.check_in_at} 上门打卡` : '';
     const canCompleteService = myRole === 'helper' && bucket === 'in_service' && !!checkInDisplay;
 
     // 支付相关
@@ -267,7 +275,8 @@ Page({
     }
     try {
       await util.post(path, body || {});
-      wx.showToast({ title: '已提交', icon: 'success' });
+      const isCheckIn = path && path.includes('/check-in');
+      wx.showToast({ title: isCheckIn ? '打卡成功' : '已提交', icon: 'success' });
       await this.load();
       // 打卡成功后同步发送系统消息到聊天
       if (path && path.includes('/check-in')) {

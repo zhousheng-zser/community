@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middlewares/authMiddleware');
 const ctrl = require('./controllers/market.controller');
+const deliveryCtrl = require('./controllers/marketDelivery.controller');
 
 // 6.1 商家入驻
 router.post('/apply', authMiddleware, ctrl.apply);
@@ -34,6 +35,9 @@ router.post('/orders/:orderNo/cancel', authMiddleware, ctrl.cancelOrder);
 router.delete('/orders/:orderNo', authMiddleware, ctrl.deleteOrder);
 router.post('/orders/:orderNo/buy-again', authMiddleware, ctrl.buyAgain);
 router.get('/orders/:orderNo/logistics', authMiddleware, ctrl.getLogistics);
+router.get('/orders/:orderNo/delivery/track', authMiddleware, deliveryCtrl.buyerTrack);
+router.post('/delivery/webhook/meituan', deliveryCtrl.webhookMeituan);
+router.post('/delivery/webhook/eleme', deliveryCtrl.webhookEleme);
 
 // 6.5 支付
 router.post('/payments/create', authMiddleware, ctrl.createPayment);

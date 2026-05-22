@@ -1,25 +1,20 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const { getActiveCommunityId, ensureCommunityForPublish } = require('../../utils/communityPortal.js');
 
-// 同步发布到社区邻里互动
-function syncToCommunityPost(content, category, address, price, imageUrls) {
+function syncToCommunityPost(content, category, address, price, communityId, imageUrls) {
   const priceText = price && parseFloat(price) > 0 ? ` 悬赏¥${parseFloat(price).toFixed(2)}` : '';
   const postContent = `[${category}]${priceText}\n${content}\n📍${address}`;
   const postData = {
     content: postContent,
     category: '邻里互动',
-    location: address
+    location: address,
+    community_id: communityId
   };
-  if (imageUrls && imageUrls.length > 0) {
-    postData.images = imageUrls;
-  }
-  // 异步发布，不阻塞主流程
-  util.post('posts', postData).catch(() => {
-    // 静默失败，不影响订单发布结果
-  });
+  if (imageUrls && imageUrls.length > 0) postData.images = imageUrls;
+  util.post('posts', postData).catch(() => {});
 }
 
-// 生成年月日时范围
 function buildTimeRanges() {
   const now = new Date();
   const years = [], months = [], days = [], hours = [];
@@ -41,20 +36,13 @@ Page({
     activeMainTab: '邻里帮帮',
     categories: ['代取', '接送小孩', '陪诊', '陪读', '代扔垃圾', '宠物喂养', '跑腿', '其他'],
     activeCategory: '代取',
-
-    // 邻里帮帮表单
     helperForm: { pickup: '', delivery: '', remark: '', price: '', contactPhone: '' },
-
-    // 一键发布表单
     form: { address: '', time: '', content: '', images: [], price: '', contactPhone: '' },
     agreed: false,
     submitting: false,
     canSubmit: false,
-
-    // 时间 picker
     timeRanges: [[], [], [], []],
-    timeIndexes: [0, 0, 0, 8], // 默认 8:00
-
+    timeIndexes: [0, 0, 0, 8],
     recentList: []
   },
 
@@ -64,20 +52,16 @@ Page({
     const monthIdx = now.getMonth();
     const dayCount = getDaysInMonth(now.getFullYear(), now.getMonth() + 1);
     ranges[2] = Array.from({ length: dayCount }, (_, i) => pad(i + 1) + '日');
-
     const updates = {
       timeRanges: ranges,
       timeIndexes: [0, monthIdx, now.getDate() - 1, 8]
     };
-
-    // 支持从外部传入默认 tab 和分类
     if (options.tab === '邻里帮帮' || options.tab === '一键发布') {
       updates.activeMainTab = options.tab;
     }
     if (options.category && this.data.categories.includes(options.category)) {
       updates.activeCategory = options.category;
     }
-
     this.setData(updates);
     this.loadRecentList();
   },
@@ -90,27 +74,21 @@ Page({
     this.setData({ activeCategory: e.currentTarget.dataset.cat });
   },
 
-  /* ===== 邻里帮帮地址输入 ===== */
   onHelperInput(e) {
     const field = e.currentTarget.dataset.field;
     let val = e.detail.value;
-    if (field === 'contactPhone') {
-      val = String(val).replace(/\D/g, '').slice(0, 11);
-    }
+    if (field === 'contactPhone') val = String(val).replace(/\D/g, '').slice(0, 11);
     this.setData({ [`helperForm.${field}`]: val });
   },
 
-  /* ===== 一键发布地址输入 ===== */
   onAddressInput(e) {
     this.setData({ 'form.address': e.detail.value });
     this.updateCanSubmit();
   },
 
-  /* ===== 从地图选择地址 ===== */
   chooseAddrFromBook(e) {
     const field = e.currentTarget.dataset.field;
     const self = this;
-
     function doChooseLocation() {
       wx.chooseLocation({
         success(res) {
@@ -136,7 +114,6 @@ Page({
         }
       });
     }
-
     wx.getSetting({
       success(res) {
         if (res.authSetting['scope.userLocation'] === false) {
@@ -155,14 +132,11 @@ Page({
     });
   },
 
-  /* ===== 时间 Picker ===== */
   onTimeColumnChange(e) {
     const col = e.detail.column;
     const val = e.detail.value;
     const indexes = [...this.data.timeIndexes];
     indexes[col] = val;
-
-    // 当年份或月份改变时，重新计算当月天数
     if (col === 0 || col === 1) {
       const now = new Date();
       const year = now.getFullYear() + indexes[0];
@@ -170,7 +144,6 @@ Page({
       const dayCount = getDaysInMonth(year, month);
       const ranges = [...this.data.timeRanges];
       ranges[2] = Array.from({ length: dayCount }, (_, i) => pad(i + 1) + '日');
-      // 保证日期不越界
       if (indexes[2] >= dayCount) indexes[2] = dayCount - 1;
       this.setData({ timeRanges: ranges, timeIndexes: indexes });
     } else {
@@ -198,13 +171,10 @@ Page({
   },
 
   onContactPhoneInput(e) {
-    const val = e.detail.value;
-    // 只保留数字
-    const digits = String(val).replace(/\D/g, '').slice(0, 11);
+    const digits = String(e.detail.value).replace(/\D/g, '').slice(0, 11);
     this.setData({ 'form.contactPhone': digits });
   },
 
-  /* ===== 一键发布 ===== */
   onContentInput(e) {
     this.setData({ 'form.content': e.detail.value });
     this.updateCanSubmit();
@@ -213,9 +183,10 @@ Page({
   addImage() {
     const remain = 3 - this.data.form.images.length;
     wx.chooseMedia({
-      count: remain, mediaType: ['image'],
+      count: remain,
+      mediaType: ['image'],
       success: (res) => {
-        const imgs = this.data.form.images.concat(res.tempFiles.map(f => f.tempFilePath));
+        const imgs = this.data.form.images.concat(res.tempFiles.map((f) => f.tempFilePath));
         this.setData({ 'form.images': imgs });
       }
     });
@@ -237,9 +208,30 @@ Page({
     this.setData({ canSubmit: !!(form.content && form.address && agreed) });
   },
 
-  /**
-   * 一键发布订单（简化版）
-   */
+  async doAssistPay(orderRes, pickup, delivery, remark, rewardAmount, communityId) {
+    const orderId = orderRes && (orderRes.id || orderRes.order_id);
+    if (!orderId) {
+      wx.showToast({ title: '订单创建异常', icon: 'none' });
+      return;
+    }
+    const content = remark || `${pickup} → ${delivery}`;
+    try {
+      await util.post(`neighbor-assist/orders/${orderId}/pay`);
+      wx.showToast({ title: '发布成功', icon: 'success' });
+      syncToCommunityPost(content, this.data.activeCategory, pickup + ' → ' + delivery, rewardAmount, communityId);
+      setTimeout(() => {
+        wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
+      }, 800);
+    } catch (payErr) {
+      console.warn('支付失败，订单已创建:', payErr);
+      wx.showToast({ title: '订单已创建，请前往支付', icon: 'none', duration: 2000 });
+      setTimeout(() => {
+        wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
+      }, 2200);
+    }
+  },
+
+  /** 一键发布：与邻里帮帮同链路（建单 → 支付 → 详情） */
   async submitPublish() {
     const { form, activeCategory, agreed, submitting } = this.data;
     if (submitting) return;
@@ -251,130 +243,122 @@ Page({
       wx.showToast({ title: '请填写完整信息', icon: 'none' });
       return;
     }
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
+
+    let communityId;
+    try {
+      communityId = await ensureCommunityForPublish(app);
+    } catch (e) {
+      return;
+    }
 
     this.setData({ submitting: true });
+    wx.showLoading({ title: '发布中...' });
+    const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
+    const contactPhone = form.contactPhone || '';
+    const remark = [form.content, form.time ? `预约：${form.time}` : ''].filter(Boolean).join('\n');
 
     try {
-      const rewardAmount = form.price && parseFloat(form.price) > 0 ? parseFloat(form.price) : null;
-      const contactPhone = form.contactPhone || '';
-
-      // 创建订单
       const orderRes = await util.post('neighbor-assist/orders', {
         assist_type: activeCategory,
         origin_address_snapshot: { address: form.address, detail: form.address },
         destination_address_snapshot: { address: form.address, detail: form.address },
         appointment_time: form.time || null,
         content: form.content,
-        remark: form.content,
-        community_id: 1,
+        remark,
+        community_id: communityId,
         reward_amount: rewardAmount,
         contact_phone: contactPhone
       });
-
-      const orderId = orderRes && (orderRes.id || orderRes.order_id);
-
-      if (orderId) {
-        // 尝试支付
-        try {
-          await util.post(`neighbor-assist/orders/${orderId}/pay`);
-          wx.showToast({ title: '发布成功', icon: 'success' });
-        } catch (payErr) {
-          console.warn('支付失败但订单已创建:', payErr);
-          wx.showToast({ title: '发布成功，请支付（详情）', icon: 'none' });
-        }
-
-        this.setData({ form: { address: '', time: '', content: '', images: [], price: '', contactPhone: '' }, agreed: false, canSubmit: false, submitting: false });
-        this.loadRecentList();
-      } else {
-        throw new Error('订单创建未返回 ID');
-      }
+      wx.hideLoading();
+      await this.doAssistPay(
+        orderRes || {},
+        form.address,
+        form.address,
+        remark,
+        rewardAmount,
+        communityId
+      );
+      this.setData({
+        form: { address: '', time: '', content: '', images: [], price: '', contactPhone: '' },
+        agreed: false,
+        canSubmit: false,
+        submitting: false
+      });
+      this.loadRecentList();
     } catch (err) {
+      wx.hideLoading();
       console.error('发布失败:', err);
-      wx.showToast({ title: '发布失败，请重试', icon: 'none' });
+      wx.showToast({
+        title: (err && err.errmsg) || (err && err.message) || '发布失败，请重试',
+        icon: 'none'
+      });
       this.setData({ submitting: false });
     }
   },
 
-  /* ===== 邻里帮帮提交 ===== */
   async submitHelper() {
     const { pickup, delivery, remark, price } = this.data.helperForm;
-    if (!pickup || !delivery) return wx.showToast({ title: '请填写取送地址', icon: 'none' });
+    if (!pickup || !delivery) {
+      wx.showToast({ title: '请填写取送地址', icon: 'none' });
+      return;
+    }
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      return;
+    }
 
-    // 将中文分类直接作为 assist_type
+    let communityId;
+    try {
+      communityId = await ensureCommunityForPublish(app);
+    } catch (e) {
+      return;
+    }
+
     const assistType = this.data.activeCategory;
     const rewardAmount = price && parseFloat(price) > 0 ? parseFloat(price) : null;
     const contactPhone = this.data.helperForm.contactPhone || '';
+    const content = remark || `${pickup} → ${delivery}`;
 
     wx.showLoading({ title: '发布中...' });
     try {
       const res = await util.post('neighbor-assist/orders', {
         assist_type: assistType,
-        content: remark || `${pickup} → ${delivery}`,
-        community_id: 1,
-        origin_address_snapshot: {
-          address: pickup,
-          detail: pickup
-        },
-        destination_address_snapshot: {
-          address: delivery,
-          detail: delivery
-        },
-        remark: remark || `${pickup} → ${delivery}`,
+        content,
+        community_id: communityId,
+        origin_address_snapshot: { address: pickup, detail: pickup },
+        destination_address_snapshot: { address: delivery, detail: delivery },
+        remark: content,
         reward_amount: rewardAmount,
         contact_phone: contactPhone
       });
       wx.hideLoading();
-
-      // 支付流程：先支付再同步
-      await this.doAssistPay(res || {}, pickup, delivery, remark, rewardAmount);
+      this.setData({ helperForm: { pickup: '', delivery: '', remark: '', price: '', contactPhone: '' } });
+      await this.doAssistPay(res || {}, pickup, delivery, content, rewardAmount, communityId);
+      this.loadRecentList();
     } catch (err) {
       wx.hideLoading();
-      const msg = (err && err.errmsg) || '发布失败，请重试';
-      console.error('发布失败:', err);
-      wx.showToast({ title: msg, icon: 'none' });
-    }
-  },
-
-  /**
-   * 邻帮订单支付流程（简化版）
-   * 创建订单后直接处理支付，支付成功或失败都返回成功提示
-   */
-  async doAssistPay(orderRes, pickup, delivery, remark, rewardAmount) {
-    const orderId = orderRes && (orderRes.id || orderRes.order_id);
-    if (!orderId) {
-      wx.showToast({ title: '订单创建成功，请手动支付', icon: 'none', duration: 2000 });
-      return;
-    }
-    try {
-      // 尝试支付（开发环境可能失败）
-      await util.post(`neighbor-assist/orders/${orderId}/pay`);
-      wx.showToast({ title: '发布成功', icon: 'success' });
-      this.setData({ helperForm: { pickup: '', delivery: '', remark: '', price: '', contactPhone: '' } });
-      // 导航到订单详情
-      setTimeout(() => {
-        wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
-      }, 800);
-    } catch (payErr) {
-      console.warn('支付失败（开发环境常见问题），但订单已创建:', payErr);
-      wx.showToast({ title: '订单已创建，请前往支付', icon: 'none', duration: 2000 });
-      // 支付失败不影响订单创建，允许用户在详情页手动支付
-      setTimeout(() => {
-        wx.navigateTo({ url: `/pages/neighbor-assist-order-detail/neighbor-assist-order-detail?id=${orderId}` });
-      }, 2200);
+      wx.showToast({ title: (err && err.errmsg) || '发布失败，请重试', icon: 'none' });
     }
   },
 
   loadRecentList() {
-    util.get('neighbor-assist/orders/recent', { limit: 6 })
-      .then(data => {
-        const list = (Array.isArray(data) ? data : []).map(item => ({
-          id: item.id, content: item.content || item.title || '邻里帮帮任务'
+    if (!wx.getStorageSync('token')) {
+      this.setData({ recentList: [] });
+      return;
+    }
+    util.get('neighbor-assist/orders/my', { role: 'publisher', limit: 6, page: 1 })
+      .then((data) => {
+        const raw = (data && data.list) || (Array.isArray(data) ? data : []);
+        const list = raw.map((item) => ({
+          id: item.id,
+          content: item.remark || item.content || item.assist_type_label || '邻里任务'
         }));
         this.setData({ recentList: list });
       })
-      .catch((err) => {
-        console.warn('加载最近列表失败:', err);
-        this.setData({ recentList: [] });
-      });
+      .catch(() => this.setData({ recentList: [] }));
   }
 });

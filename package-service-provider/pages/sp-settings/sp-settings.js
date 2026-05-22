@@ -1,5 +1,7 @@
+const util = require('../../../utils/util.js');
 const api = require('../../../api/index.js');
 const spCtx = require('../../utils/spContext.js');
+const portalEdit = require('../../../utils/portalAvatarEdit.js');
 
 Page({
   data: {
@@ -8,7 +10,8 @@ Page({
     shopName: '',
     contactName: '',
     contactPhone: '',
-    descLen: 0
+    descLen: 0,
+    coverImage: ''
   },
 
   onShow() {
@@ -21,12 +24,14 @@ Page({
       const res = await api.serviceProvider.getProfile();
       const profile = spCtx.normalizeProfilePayload(res);
       spCtx.syncBoundProfile(getApp(), profile);
+      const cover = profile.shop_front_url || profile.logo || '';
       this.setData({
         loading: false,
         shopName: profile.shop_name || '',
         contactName: profile.contact_name || '',
-        contactPhone: profile.phone || '',
-        descLen: 0
+        contactPhone: profile.phone || profile.contact_phone || '',
+        descLen: 0,
+        coverImage: cover ? util.imgUrl(cover, cover) : ''
       });
     } catch (e) {
       this.setData({ loading: false });
@@ -39,6 +44,17 @@ Page({
   onPhoneInput(e) {
     const v = ((e.detail && e.detail.value) || '').replace(/\D/g, '').slice(0, 11);
     this.setData({ contactPhone: v });
+  },
+
+  async onChooseCover() {
+    try {
+      const path = await portalEdit.chooseUploadAndGetPath();
+      await api.serviceProvider.updateProfile({ logo: path, shop_front_url: path });
+      this.setData({ coverImage: util.imgUrl(path, path) });
+      wx.showToast({ title: '封面已更新', icon: 'success' });
+    } catch (e) {
+      if (e && e.errmsg) wx.showToast({ title: e.errmsg, icon: 'none' });
+    }
   },
 
   async save() {

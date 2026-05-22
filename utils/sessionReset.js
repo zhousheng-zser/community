@@ -13,6 +13,7 @@ const SCOPED_KEYS = [
 const USER_SESSION_KEYS = [
   'token',
   'user',
+  'login_via_phone',
   'user_community_id',
   'community_id',
   'address_list'

@@ -1,13 +1,20 @@
 <view class="portal-page">
   <view class="portal-top merchant-gradient sph-hero">
     <view class="sph-row">
-      <image class="sph-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="hero-avatar-wrap" bindtap="onEditAvatar">
+        <image class="sph-avatar hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+        <text class="avatar-edit-badge">换头像</text>
+      </view>
       <view class="sph-text">
         <text class="sph-greet">{{greeting}}，{{displayName}}</text>
         <text class="portal-sub sph-sub">{{shopName ? shopName + ' · 直约到家服务' : '直约到家 · 服务项目与订单'}}</text>
       </view>
     </view>
     <text class="portal-title sph-title">服务商工作台</text>
+    <view class="hero-cover-strip" wx:if="{{spOk}}" bindtap="onEditCover">
+      <image class="hero-cover-img" src="{{coverImage || userPhoto}}" mode="aspectFill"></image>
+      <text class="cover-edit-badge">换门店封面</text>
+    </view>
   </view>
 
   <view class="portal-banner {{spOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">

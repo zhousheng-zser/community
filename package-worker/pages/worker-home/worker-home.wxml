@@ -1,13 +1,20 @@
 <view class="portal-page">
   <view class="portal-top worker-gradient hero-worker">
     <view class="hero-row">
-      <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="hero-avatar-wrap" bindtap="onEditAvatar">
+        <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+        <text class="avatar-edit-badge">换头像</text>
+      </view>
       <view class="hero-text">
         <text class="hero-greet">{{greeting}}，{{displayName}}</text>
         <text class="portal-sub hero-sub">{{workerSubtitle}}</text>
       </view>
     </view>
     <text class="portal-title hero-title">技工工作台</text>
+    <view class="hero-cover-strip" wx:if="{{workerOk}}" bindtap="onEditCover">
+      <image class="hero-cover-img" src="{{coverImage || userPhoto}}" mode="aspectFill"></image>
+      <text class="cover-edit-badge">换封面</text>
+    </view>
   </view>
 
   <view class="portal-banner {{workerOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">

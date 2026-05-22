@@ -36,7 +36,7 @@ App({
       opId: u.openid,
       userName: u.nickname || '微信用户',
       userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
-      userMobile: u.phone || '13800000000',
+      userMobile: u.phone || '',
       userAddress: u.address || '',
       userBankNum: u.bank_num || '',
       userWxId: u.wx_id || '',
@@ -105,9 +105,19 @@ App({
         if (token) {
           util.post('auth/verify-wechat', { code: res.code }).then(() => {
             wx.removeStorageSync('manual_logged_out');
+            wx.removeStorageSync('login_via_phone');
             this._fetchAndApplyProfile(callback);
           }).catch((err) => {
-            console.warn('[save] 当前微信与登录 token 不一致，清除旧会话', err);
+            const msg = (err && (err.errmsg || err.msg || err.message)) || '';
+            const viaPhone = !!wx.getStorageSync('login_via_phone');
+            // 手机号/密码登录不要求与本机微信 openid 一致，勿被静默微信登录覆盖成另一账号
+            if (viaPhone || /微信与登录账号不一致/.test(msg)) {
+              console.warn('[save] verify-wechat 跳过，按 token 拉 profile', msg);
+              wx.removeStorageSync('login_via_phone');
+              this._fetchAndApplyProfile(callback);
+              return;
+            }
+            console.warn('[save] verify-wechat 失败，尝试微信静默登录', err);
             sessionReset.clearAllUserSession();
             this.globalData.user = null;
             this._silentWechatLogin(res.code, parentOpenid, callback, false);

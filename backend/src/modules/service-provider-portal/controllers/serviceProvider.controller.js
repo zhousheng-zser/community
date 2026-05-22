@@ -7,8 +7,26 @@ const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
 const fail = (res, msg, statusCode = 400) => res.status(statusCode).json({ code: 1, msg });
 let spTablesReady = false;
 
+async function ensureSpShopFrontColumn() {
+  if (!ServiceProviderProfile || !ServiceProviderProfile.sequelize) return;
+  const qi = ServiceProviderProfile.sequelize.getQueryInterface();
+  try {
+    const desc = await qi.describeTable('service_provider_profiles');
+    if (desc && !desc.shop_front_url) {
+      await qi.addColumn('service_provider_profiles', 'shop_front_url', {
+        type: ServiceProviderProfile.sequelize.Sequelize.STRING(500),
+        allowNull: true,
+        comment: '门店封面/门头照'
+      });
+    }
+  } catch (e) {
+    console.warn('[sp] ensure shop_front_url column:', e.message || e);
+  }
+}
+
 async function ensureSpTables() {
   if (spTablesReady) return;
+  await ensureSpShopFrontColumn();
   await Promise.all([
     ServiceProviderProfile && ServiceProviderProfile.sync ? ServiceProviderProfile.sync() : Promise.resolve(),
     ServiceItem && ServiceItem.sync ? ServiceItem.sync() : Promise.resolve(),
@@ -48,6 +66,7 @@ function normalizeProfile(row) {
     description: row.description,
     category: row.category,
     logo: row.logo,
+    shop_front_url: row.shop_front_url || row.logo || '',
     status: row.status,
     reject_reason: row.reject_reason,
     created_at: row.created_at,
@@ -168,8 +187,8 @@ exports.updateProfile = async (req, res) => {
     const profile = await getProfileByUser(userId);
     if (!profile) return fail(res, '暂无服务商信息', 404);
     const body = req.body || {};
-    const allowed = ['shop_name', 'logo', 'contact_name', 'contact_phone', 'address',
-      'latitude', 'longitude', 'business_hours', 'description', 'category'];
+    const allowed = ['shop_name', 'logo', 'shop_front_url', 'contact_name', 'contact_phone',
+      'address', 'latitude', 'longitude', 'business_hours', 'description', 'category'];
     const updateData = {};
     allowed.forEach((k) => {
       if (body[k] !== undefined) updateData[k] = body[k];

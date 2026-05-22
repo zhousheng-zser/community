@@ -88,6 +88,9 @@ exports.create = async (req, res) => {
       const u = await User.findByPk(userId, { attributes: ['community_id'] });
       commId = u && u.community_id != null ? Number(u.community_id) : null;
     }
+    if (!commId || !Number.isFinite(commId) || commId <= 0) {
+      return fail(res, 400, '请先在「我的」绑定小区后再发布');
+    }
 
     // 支持前端传 reward_amount 或 amount
     const orderAmount = (reward_amount != null ? reward_amount : amount) != null
@@ -423,6 +426,59 @@ exports.communityGrab = async (req, res) => {
   }
 };
 
+// POST /neighbor-assist/orders/:id/check-in
+exports.checkIn = async (req, res) => {
+  try {
+    const helperId = resolveUserIdFromReq(req);
+    if (!helperId) return fail(res, 401, '未登录', 401);
+    const id = parseInt(req.params.id, 10);
+    if (!id) return fail(res, 400, '无效订单 id');
+    const body = req.body || {};
+    const latitude = body.latitude != null ? Number(body.latitude) : null;
+    const longitude = body.longitude != null ? Number(body.longitude) : null;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return fail(res, 400, '缺少有效 latitude / longitude');
+    }
+
+    const order = await NeighborAssistOrder.findByPk(id);
+    if (!order) return fail(res, 404, '订单不存在', 404);
+    if (order.assigned_worker_id !== helperId) return fail(res, 403, '无权限操作该订单', 403);
+    if (order.pay_status !== 'paid') return fail(res, 400, '订单未支付');
+    if (!['dispatched', 'in_service'].includes(String(order.status))) {
+      return fail(res, 400, '当前状态不可打卡');
+    }
+
+    const checkInAt = order.check_in_at || new Date();
+    await order.update({
+      status: 'in_service',
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    });
+
+    try {
+      const messageCtrl = require('../../message/controllers/message.controller');
+      if (messageCtrl.seedNeighborAssistCheckInMessage) {
+        await messageCtrl.seedNeighborAssistCheckInMessage(id, helperId);
+      }
+    } catch (chatErr) {
+      console.warn('neighborAssist checkIn chat seed', chatErr.message);
+    }
+
+    return ok(res, {
+      id: order.id,
+      status: 'in_service',
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT.in_service,
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    }, '打卡成功');
+  } catch (e) {
+    console.error('neighborAssist checkIn', e);
+    return fail(res, 500, '打卡失败', 500);
+  }
+};
+
 // POST /neighbor-assist/orders/:id/accept
 exports.accept = async (req, res) => {
   try {
@@ -454,7 +510,8 @@ exports.complete = async (req, res) => {
     const order = await NeighborAssistOrder.findByPk(id);
     if (!order) return fail(res, 404, '订单不存在', 404);
     if (order.assigned_worker_id !== workerId) return fail(res, 403, '无权限操作该订单', 403);
-    if (order.status !== 'in_service' && order.status !== 'dispatched') return fail(res, 400, '当前状态不可完成');
+    if (order.status !== 'in_service') return fail(res, 400, '当前状态不可完成');
+    if (!order.check_in_at) return fail(res, 400, '请先完成上门打卡');
 
     const t = await db.sequelize.transaction();
     try {

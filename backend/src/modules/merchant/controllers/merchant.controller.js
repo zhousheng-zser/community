@@ -34,11 +34,16 @@ async function getShopByUser(userId) {
 
 function normalizeShop(row) {
   if (!row) return null;
+  const logo = row.logo || row.logo_url || '';
+  const cover = row.cover_url || row.cover || '';
   return {
     id: row.id,
     user_id: row.user_id,
     name: row.name,
-    logo: row.logo,
+    logo,
+    logo_url: logo,
+    cover_url: cover,
+    cover,
     contact_name: row.contact_name,
     contact_phone: row.contact_phone,
     address: row.address,
@@ -140,12 +145,17 @@ exports.updateShop = async (req, res) => {
     if (!shop) return fail(res, '暂无店铺信息', 404);
 
     const body = req.body || {};
-    const allowed = ['name', 'logo', 'contact_name', 'contact_phone', 'address',
+    if (body.logo_url !== undefined && body.logo === undefined) body.logo = body.logo_url;
+    if (body.logo !== undefined && body.logo_url === undefined) body.logo_url = body.logo;
+    if (body.cover_url !== undefined && body.cover === undefined) body.cover = body.cover_url;
+    if (body.cover !== undefined && body.cover_url === undefined) body.cover_url = body.cover;
+    const allowed = ['name', 'logo', 'logo_url', 'cover_url', 'cover', 'contact_name', 'contact_phone', 'address',
       'latitude', 'longitude', 'business_hours', 'description', 'category'];
     const updateData = {};
     allowed.forEach((k) => {
       if (body[k] !== undefined) updateData[k] = body[k];
     });
+    if (updateData.logo_url && !updateData.logo) updateData.logo = updateData.logo_url;
 
     await shop.update(updateData);
     ok(res, normalizeShop(shop), '更新成功');
@@ -472,6 +482,9 @@ exports.getOrders = async (req, res) => {
         receiver_phone: row.receiver_phone,
         receiver_address: row.receiver_address,
         remark: row.remark,
+        delivery_mode: row.delivery_mode,
+        delivery_carrier: row.delivery_carrier,
+        delivery_job_status: row.delivery_job_status,
         created_at: row.created_at,
         items: items.map((it) => ({
           goods_id: it.goods_id,
@@ -518,9 +531,21 @@ exports.getOrderDetail = async (req, res) => {
         receiver_phone: row.receiver_phone,
         receiver_address: row.receiver_address,
         remark: row.remark,
+        delivery_mode: row.delivery_mode,
+        delivery_carrier: row.delivery_carrier,
+        delivery_job_status: row.delivery_job_status,
+        delivery_external_no: row.delivery_external_no,
         created_at: row.created_at,
         updated_at: row.updated_at
       },
+      delivery: await (async () => {
+        try {
+          const deliverySvc = require('../../../services/marketDelivery.service');
+          return await deliverySvc.getDeliveryView(orderNo);
+        } catch (e) {
+          return { has_delivery: false, timeline: [] };
+        }
+      })(),
       items: items.map((it) => ({
         goods_id: it.goods_id,
         goods_name: it.goods_name_snapshot,
@@ -575,13 +600,26 @@ exports.orderAction = async (req, res) => {
       }).catch(() => {});
     } else if (action === 'dispatch') {
       if (row.order_status !== 'pending_service') return fail(res, '当前状态不可发货');
-      await row.update({ order_status: 'pending_receipt', delivered_at: new Date() });
+      if (row.delivery_carrier && row.delivery_carrier !== 'self') {
+        return fail(res, '已使用三方配送，请在配送进度中查看状态');
+      }
+      const deliverySvc = require('../../../services/marketDelivery.service');
+      if (!row.delivery_carrier) {
+        await deliverySvc.launchDelivery(row, shop, 'self');
+      } else {
+        await row.update({ order_status: 'pending_receipt', delivered_at: new Date() });
+      }
     } else if (action === 'complete_delivery') {
       if (!['pending_receipt', 'pending_service'].includes(String(row.order_status))) return fail(res, '当前状态不可完成配送');
       await row.update({ order_status: 'completed', completed_at: new Date() });
     } else if (action === 'delivered') {
       if (!['pending_receipt', 'pending_service'].includes(String(row.order_status))) return fail(res, '当前状态不可标记送达');
-      await row.update({ order_status: 'pending_receipt', delivered_at: new Date() });
+      const deliverySvc = require('../../../services/marketDelivery.service');
+      if (row.delivery_carrier === 'self' || !row.delivery_carrier) {
+        await deliverySvc.completeSelfDelivery(orderNo);
+      } else {
+        await row.update({ order_status: 'pending_receipt', delivered_at: new Date() });
+      }
     } else {
       return fail(res, '不支持的操作');
     }
