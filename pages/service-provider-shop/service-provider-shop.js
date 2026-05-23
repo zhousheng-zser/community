@@ -3,6 +3,7 @@ const { unwrapList } = util;
 const app = getApp();
 const browseFootprint = require('../../utils/browseFootprint.js');
 const serviceFavStore = require('../../utils/serviceFavStore.js');
+const serviceCart = require('../../utils/serviceCartHelper.js');
 
 function moneyText(v) {
   if (v == null || v === '') return '0';
@@ -122,6 +123,9 @@ Page({
     providerPhone: '',
     groups: [],
     cart: {},
+    cartItemIds: {},
+    cartCount: 0,
+    useRemoteCart: false,
     totalText: '0',
     favorited: false
   },
@@ -143,6 +147,7 @@ Page({
   onShow() {
     if (this.data.providerId) {
       this.setData({ favorited: serviceFavStore.has('service_provider', this.data.providerId) });
+      this.syncCartFromApi();
     }
   },
 
@@ -204,6 +209,7 @@ Page({
       } catch (e) { }
       this.setData({ favorited: serviceFavStore.has('service_provider', this.data.providerId) });
       this._recalcTotal();
+      this.syncCartFromApi();
     } catch (e) {
       this.setData({ loading: false });
       wx.showToast({ title: (e && e.errmsg) || '加载失败', icon: 'none' });
@@ -243,6 +249,49 @@ Page({
     return `${gk}:${sid}`;
   },
 
+  async syncCartFromApi() {
+    const pid = this.data.providerId;
+    if (!pid || !wx.getStorageSync('token')) return;
+    try {
+      const res = await util.get('service-cart', { provider_id: pid });
+      const payload = res && res.data != null ? res.data : res;
+      const list = Array.isArray(payload.list) ? payload.list : [];
+      const cart = {};
+      const cartItemIds = {};
+      list.forEach((it) => {
+        const gk = it.group_key || 'default';
+        const key = this.cartKey(gk, it.service_id);
+        cart[key] = Number(it.quantity || 0);
+        if (it.id) cartItemIds[key] = it.id;
+      });
+      this.setData({ cart, cartItemIds, useRemoteCart: true });
+      this._recalcTotal();
+    } catch (e) {
+      this.setData({ useRemoteCart: false });
+    }
+  },
+
+  async ensureRemoteLine(gk, sid, quantity) {
+    const pid = this.data.providerId;
+    const key = this.cartKey(gk, sid);
+    const itemId = this.data.cartItemIds[key];
+    if (itemId) {
+      await util.put(`service-cart/items/${itemId}`, { quantity });
+      return;
+    }
+    const created = await util.post('service-cart/items', {
+      provider_id: pid,
+      service_id: sid,
+      group_key: gk || 'default',
+      quantity
+    });
+    const data = created && created.data != null ? created.data : created;
+    const newId = data && (data.id || data.item_id);
+    if (newId) {
+      this.setData({ cartItemIds: { ...this.data.cartItemIds, [key]: newId } });
+    }
+  },
+
   incLine(e) {
     const gk = e.currentTarget.dataset.gk;
     const sid = e.currentTarget.dataset.sid;
@@ -251,6 +300,9 @@ Page({
       wx.showToast({ title: '当前小区暂不支持该服务', icon: 'none' });
       return;
     }
+    if (!wx.getStorageSync('token')) {
+      if (!serviceCart.ensureLogin()) return;
+    }
     const key = this.cartKey(gk, sid);
     const cart = Object.assign({}, this.data.cart);
     const n = (cart[key] || 0) + 1;
@@ -258,6 +310,14 @@ Page({
     cart[key] = n;
     this.setData({ cart });
     this._recalcTotal();
+    if (wx.getStorageSync('token')) {
+      this.ensureRemoteLine(gk, sid, n)
+        .then(() => {
+          this.setData({ useRemoteCart: true });
+          serviceCart.markCartDirty();
+        })
+        .catch(() => this.setData({ useRemoteCart: false }));
+    }
   },
 
   decLine(e) {
@@ -270,26 +330,72 @@ Page({
     else cart[key] = n;
     this.setData({ cart });
     this._recalcTotal();
+    if (wx.getStorageSync('token')) {
+      const itemId = this.data.cartItemIds[key];
+      const run = itemId
+        ? (n <= 0 ? util.del(`service-cart/items/${itemId}`) : util.put(`service-cart/items/${itemId}`, { quantity: n }))
+        : this.syncCartFromApi();
+      Promise.resolve(run)
+        .then(() => {
+          if (n <= 0 && itemId) {
+            const next = { ...this.data.cartItemIds };
+            delete next[key];
+            this.setData({ cartItemIds: next });
+          }
+          serviceCart.markCartDirty();
+          this.setData({ useRemoteCart: true });
+        })
+        .catch(() => this.setData({ useRemoteCart: false }));
+    }
   },
 
   _recalcTotal() {
     const { groups, cart } = this.data;
     let sum = 0;
+    let count = 0;
     (groups || []).forEach((grp) => {
       (grp.items || []).forEach((line) => {
         const q = cart[line.cartKey] || 0;
         if (q > 0) {
           sum += Number(line.price || 0) * q;
+          count += q;
         }
       });
     });
-    this.setData({ totalText: moneyText(sum) });
+    this.setData({ totalText: moneyText(sum), cartCount: count });
   },
 
   callProvider() {
     const phone = this.data.providerPhone;
     if (!phone) return;
     wx.makePhoneCall({ phoneNumber: phone });
+  },
+
+  async goAddToGlobalCart() {
+    if (this.data.cartCount === 0) {
+      wx.showToast({ title: '请选择服务', icon: 'none' });
+      return;
+    }
+    if (!serviceCart.ensureLogin()) return;
+    wx.showLoading({ title: '加入中', mask: true });
+    try {
+      const { groups, cart } = this.data;
+      for (const grp of groups || []) {
+        for (const line of grp.items || []) {
+          const q = cart[line.cartKey] || 0;
+          if (q > 0 && !line.unsupported) {
+            await this.ensureRemoteLine(grp.group_key, line.service_id, q);
+          }
+        }
+      }
+      await this.syncCartFromApi();
+      serviceCart.markCartDirty();
+      wx.hideLoading();
+      wx.showToast({ title: '已加入购物车', icon: 'success' });
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: (e && (e.msg || e.errmsg)) || '加入失败', icon: 'none' });
+    }
   },
 
   checkout() {

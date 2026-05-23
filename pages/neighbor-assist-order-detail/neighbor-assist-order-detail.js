@@ -81,6 +81,20 @@ function parseDetail(raw, myUserId) {
     peerPhoneRaw = contactPhone || pub.phone || pub.mobile || r.publisher_phone || '';
     peerName = pub.nickname || pub.name || '发布人';
   }
+  const proofRaw = r.completion_proof_images || r.completionProofImages || [];
+  let proofList = [];
+  if (Array.isArray(proofRaw)) proofList = proofRaw;
+  else if (typeof proofRaw === 'string') {
+    try {
+      const parsed = JSON.parse(proofRaw);
+      if (Array.isArray(parsed)) proofList = parsed;
+    } catch (e) { /* ignore */ }
+  }
+  const completionProofImages = proofList
+    .map((u) => (u != null ? String(u).trim() : ''))
+    .filter(Boolean)
+    .map((u) => (u.startsWith('http') || u.startsWith('/') ? util.imgUrl(u, u) : u));
+
   return {
     id,
     orderNo,
@@ -107,7 +121,8 @@ function parseDetail(raw, myUserId) {
     peerUserId,
     check_in_at: formatCheckInTime(r.check_in_at || r.check_in_time),
     payStatus: r.pay_status || r.payStatus || 'unpaid',
-    reviewed: !!(r.reviewed || r.has_review)
+    reviewed: !!(r.reviewed || r.has_review),
+    completionProofImages
   };
 }
 
@@ -133,7 +148,12 @@ Page({
     canPay: false,
     canCancel: false,
     showFundsReceived: false,
-    canCommunityGrab: false
+    canCommunityGrab: false,
+    proofUrls: [],
+    completionProofImages: [],
+    showProofUpload: false,
+    showProofForPublisher: false,
+    completing: false
   },
 
   onLoad(options) {
@@ -166,7 +186,13 @@ Page({
     const showServeBlock = myRole === 'helper' && bucket === 'in_service';
     const canAcceptOrder = !myRole && bucket === 'pending_accept';
     const checkInDisplay = order.check_in_at ? `已于 ${order.check_in_at} 上门打卡` : '';
-    const canCompleteService = myRole === 'helper' && bucket === 'in_service' && !!checkInDisplay;
+    const completionProofImages = order.completionProofImages || [];
+    const showProofUpload = myRole === 'helper' && bucket === 'in_service' && !!checkInDisplay;
+    const showProofForPublisher =
+      myRole === 'publisher' &&
+      completionProofImages.length > 0 &&
+      (bucket === 'pending_confirm' || bucket === 'completed');
+    const canCompleteService = showProofUpload;
 
     // 支付相关
     const isPendingPay = bucket === 'pending_pay';
@@ -185,6 +211,10 @@ Page({
       showServeBlock,
       checkInDisplay,
       canCompleteService: !!canCompleteService,
+      proofUrls: showProofUpload ? (this.data.proofUrls || []) : [],
+      completionProofImages,
+      showProofUpload: !!showProofUpload,
+      showProofForPublisher: !!showProofForPublisher,
       reviewed: !!order.reviewed,
       canAcceptOrder: !!canAcceptOrder,
       canPay,
@@ -296,8 +326,8 @@ Page({
         return;
       }
       if (path && path.includes('/complete') && (errno === 501 || errno === 404 || errno === 'ECONNREFUSED')) {
-        wx.showToast({ title: '已完成', icon: 'success' });
-        this.setData({ bucket: 'completed', showFundsReceived: true });
+        wx.showToast({ title: '已提交，待发布人确认', icon: 'success' });
+        this.setData({ bucket: 'pending_confirm', showProofUpload: false });
         return;
       }
       wx.showToast({ title: errmsg, icon: 'none' });
@@ -424,12 +454,116 @@ Page({
     });
   },
 
+  chooseProofPhoto() {
+    const remain = 6 - (this.data.proofUrls || []).length;
+    if (remain <= 0) {
+      wx.showToast({ title: '最多上传 6 张', icon: 'none' });
+      return;
+    }
+    wx.chooseImage({
+      count: remain,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (res) => {
+        const paths = res.tempFilePaths || [];
+        if (!paths.length) return;
+        if (this.data.isMock) {
+          const next = (this.data.proofUrls || []).concat(paths);
+          this.setData({ proofUrls: next });
+          wx.showToast({ title: '演示：照片仅本地预览', icon: 'none' });
+          return;
+        }
+        wx.showLoading({ title: '上传中', mask: true });
+        const uploaded = [];
+        try {
+          for (let i = 0; i < paths.length; i++) {
+            const up = await util.uploadFile('upload', paths[i], 'file');
+            const url =
+              typeof up === 'string'
+                ? up
+                : (up && (up.url || up.path || up.file_url)) || '';
+            if (url) uploaded.push(util.imgUrl(url, url));
+          }
+          if (!uploaded.length) {
+            wx.showToast({ title: '上传失败', icon: 'none' });
+            return;
+          }
+          this.setData({ proofUrls: (this.data.proofUrls || []).concat(uploaded) });
+        } catch (e) {
+          wx.showToast({ title: '上传失败', icon: 'none' });
+        } finally {
+          wx.hideLoading();
+        }
+      }
+    });
+  },
+
+  removeProofPhoto(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const list = (this.data.proofUrls || []).slice();
+    if (index < 0 || index >= list.length) return;
+    list.splice(index, 1);
+    this.setData({ proofUrls: list });
+  },
+
+  previewProofPhoto(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const kind = e.currentTarget.dataset.kind || 'upload';
+    const urls = kind === 'server' ? this.data.completionProofImages : this.data.proofUrls;
+    if (!urls || !urls.length) return;
+    const cur = urls[index];
+    if (!cur) return;
+    wx.previewImage({ current: cur, urls });
+  },
+
+  async _collectProofUrlsForSubmit() {
+    const urls = [];
+    for (const u of this.data.proofUrls || []) {
+      if (!u) continue;
+      if (String(u).startsWith('http') || String(u).startsWith('/')) {
+        urls.push(u);
+        continue;
+      }
+      if (this.data.isMock) continue;
+      try {
+        const up = await util.uploadFile('upload', u, 'file');
+        const url =
+          typeof up === 'string'
+            ? up
+            : (up && (up.url || up.path || up.file_url)) || '';
+        if (url) urls.push(util.imgUrl(url, url));
+      } catch (e) {
+        return null;
+      }
+    }
+    return urls;
+  },
+
   completeService() {
+    if (!(this.data.proofUrls || []).length) {
+      wx.showToast({ title: '请先上传服务完成凭证', icon: 'none' });
+      return;
+    }
     wx.showModal({
       title: '确认完成服务',
-      content: '完成后资金将转移到您的账户',
-      success: (r) => {
-        if (r.confirm) this.postAction(`neighbor-assist/orders/${this.data.id}/complete`, {});
+      content: '提交后发布人将查看凭证并确认，确认后悬赏到账',
+      success: async (r) => {
+        if (!r.confirm) return;
+        if (this.data.completing) return;
+        this.setData({ completing: true });
+        try {
+          const proofImages = await this._collectProofUrlsForSubmit();
+          if (!proofImages || !proofImages.length) {
+            wx.showToast({ title: '请先上传服务完成凭证', icon: 'none' });
+            return;
+          }
+          await this.postAction(`neighbor-assist/orders/${this.data.id}/complete`, {
+            proof_images: proofImages
+          });
+          this.setData({ proofUrls: [] });
+        } finally {
+          this.setData({ completing: false });
+        }
       }
     });
   },

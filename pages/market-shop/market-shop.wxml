@@ -158,8 +158,11 @@
       <text class="money empty" wx:else>未选购商品</text>
       <text class="desc">另需配送费￥0 | 支持自取</text>
     </view>
-    <view class="settle {{cartCount > 0 ? 'active' : ''}}" bindtap="goSettle">
-      {{cartCount > 0 ? '去结算' : '￥0 起送'}}
+    <view class="bar-actions">
+      <view class="add-cart-btn {{cartCount > 0 ? 'active' : ''}}" bindtap="goAddToGlobalCart">加入购物车</view>
+      <view class="settle {{cartCount > 0 ? 'active' : ''}}" bindtap="goSettle">
+        {{cartCount > 0 ? '去结算' : '￥0 起送'}}
+      </view>
     </view>
   </view>
   </block>

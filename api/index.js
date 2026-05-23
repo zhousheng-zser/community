@@ -9,6 +9,7 @@ const order = require('./order.js');
 const serviceOrder = require('./serviceOrder.js');
 const neighborAssist = require('./neighborAssist.js');
 const market = require('./market.js');
+const serviceCart = require('./serviceCart.js');
 const worker = require('./worker.js');
 const serviceProvider = require('./serviceProvider.js');
 const merchant = require('./merchant.js');
@@ -30,6 +31,7 @@ module.exports = {
   serviceOrder,
   neighborAssist,
   market,
+  serviceCart,
   worker,
   serviceProvider,
   merchant,

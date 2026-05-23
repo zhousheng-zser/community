@@ -82,6 +82,7 @@ app.use('/api/v1/posts', postRoutes);
 app.use('/api/v1/core', coreDataRoutes);
 app.use('/api/v1/geo', require('./routes/geoRoutes'));
 app.use('/api/v1/service-orders', require('./routes/serviceOrderRoutes'));
+app.use('/api/v1/service-cart', require('./routes/serviceCartRoutes'));
 app.use('/api/v1/neighbor-assist', require('./routes/neighborAssistRoutes'));
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/messages', require('./routes/messageRoutes'));

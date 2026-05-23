@@ -106,6 +106,7 @@ router.use('/service-provider-portal', serviceProviderRoutes); // 兼容旧路�
 router.use('/community', communityRoutes);
 router.use('/service-order', serviceOrderRoutes);
 router.use('/service-orders', serviceOrderRoutes); // 兼容前端复数路径
+router.use('/service-cart', require('./serviceCartRoutes'));
 router.use('/message', messageRoutes);
 router.use('/messages', messageRoutes); // 兼容前端复数路径
 

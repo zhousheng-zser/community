@@ -76,6 +76,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 6),
       allowNull: true
     },
+    completion_proof_images: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
     completed_at: {
       type: DataTypes.DATE,
       allowNull: true

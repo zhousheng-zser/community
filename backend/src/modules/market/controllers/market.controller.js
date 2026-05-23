@@ -414,6 +414,64 @@ exports.getShopContact = async (req, res) => {
   }
 };
 
+function mapCartGoods(g) {
+  if (!g) return null;
+  const onSale = g.status === 'on_sale' && g.is_published !== false && g.is_published !== 0;
+  return {
+    id: g.id,
+    name: g.name,
+    title: g.title || g.name,
+    image: g.main_image,
+    main_image: g.main_image,
+    price: String(g.price),
+    stock: g.stock,
+    status: g.status,
+    is_published: g.is_published,
+    invalid: !onSale || Number(g.stock) <= 0
+  };
+}
+
+function mapCartRow(r, goodsMap, shopMap) {
+  const g = goodsMap.get(Number(r.goods_id));
+  const shop = shopMap.get(Number(r.shop_id));
+  const goods = mapCartGoods(g);
+  const price = goods ? Number(goods.price) || 0 : 0;
+  const qty = Number(r.quantity) || 0;
+  return {
+    id: r.id,
+    shop_id: r.shop_id,
+    shop_name: shop ? shop.name : '',
+    goods_id: r.goods_id,
+    quantity: qty,
+    subtotal: (price * qty).toFixed(2),
+    invalid: !goods || goods.invalid,
+    goods
+  };
+}
+
+// GET /market/cart/summary
+exports.getCartSummary = async (req, res) => {
+  try {
+    await ensureMarketTables();
+    const userId = getUserId(req);
+    if (!userId) return fail(res, '未登录', 401);
+    const rows = await MarketCartItem.findAll({
+      where: { user_id: userId },
+      attributes: ['quantity', 'shop_id']
+    });
+    const itemCount = rows.reduce((s, r) => s + Number(r.quantity || 0), 0);
+    const shopIds = [...new Set(rows.map((r) => Number(r.shop_id)).filter(Boolean))];
+    ok(res, {
+      item_count: itemCount,
+      sku_count: rows.length,
+      shop_count: shopIds.length
+    });
+  } catch (err) {
+    console.error('[market/cart/summary]', err);
+    fail(res, '获取购物车数量失败', 500);
+  }
+};
+
 // GET /market/cart
 exports.getCart = async (req, res) => {
   try {
@@ -425,29 +483,50 @@ exports.getCart = async (req, res) => {
     if (shopId) where.shop_id = shopId;
     const rows = await MarketCartItem.findAll({ where, order: [['created_at', 'DESC']] });
     const goodsIds = [...new Set(rows.map((r) => Number(r.goods_id)).filter(Boolean))];
-    const goodsRows = goodsIds.length ? await MerchantGoods.findAll({ where: { id: goodsIds } }) : [];
+    const shopIds = [...new Set(rows.map((r) => Number(r.shop_id)).filter(Boolean))];
+    const [goodsRows, shopRows] = await Promise.all([
+      goodsIds.length ? MerchantGoods.findAll({ where: { id: goodsIds } }) : [],
+      shopIds.length ? MerchantShop.findAll({ where: { id: shopIds } }) : []
+    ]);
     const goodsMap = new Map(goodsRows.map((g) => [Number(g.id), g]));
+    const shopMap = new Map(shopRows.map((s) => [Number(s.id), s]));
+    const list = rows.map((r) => mapCartRow(r, goodsMap, shopMap));
+
+    const itemCount = list.reduce((s, it) => s + Number(it.quantity || 0), 0);
+    let groups = null;
+    if (!shopId) {
+      const byShop = new Map();
+      list.forEach((item) => {
+        const sid = Number(item.shop_id);
+        if (!byShop.has(sid)) {
+          const shop = shopMap.get(sid);
+          byShop.set(sid, {
+            shop_id: sid,
+            shop_name: shop ? shop.name : (item.shop_name || '店铺'),
+            shop_logo: shop && (shop.logo || shop.cover_image) ? (shop.logo || shop.cover_image) : '',
+            items: [],
+            subtotal: '0.00',
+            item_count: 0
+          });
+        }
+        const g = byShop.get(sid);
+        g.items.push(item);
+        if (!item.invalid) {
+          g.item_count += Number(item.quantity || 0);
+          g.subtotal = (Number(g.subtotal) + Number(item.subtotal || 0)).toFixed(2);
+        }
+      });
+      groups = Array.from(byShop.values());
+    }
+
     ok(res, {
-      list: rows.map((r) => {
-        const g = goodsMap.get(Number(r.goods_id));
-        return {
-          id: r.id,
-          shop_id: r.shop_id,
-          goods_id: r.goods_id,
-          quantity: r.quantity,
-          goods: g ? {
-            id: g.id,
-            name: g.name,
-            title: g.title || g.name,
-            image: g.main_image,
-            main_image: g.main_image,
-            price: String(g.price),
-            stock: g.stock,
-            status: g.status,
-            is_published: g.is_published
-          } : null
-        };
-      })
+      list,
+      groups,
+      summary: {
+        item_count: itemCount,
+        sku_count: list.length,
+        shop_count: shopId ? 1 : shopIds.length
+      }
     });
   } catch (err) {
     console.error('[market/cart/get]', err);
@@ -529,8 +608,8 @@ exports.clearCart = async (req, res) => {
     const shopId = Number(req.query.shop_id || req.query.shopId || 0);
     const where = { user_id: userId };
     if (shopId) where.shop_id = shopId;
-    await MarketCartItem.destroy({ where });
-    ok(res, { cleared: true }, '已清空购物车');
+    const deleted = await MarketCartItem.destroy({ where });
+    ok(res, { cleared: true, deleted_count: deleted, shop_id: shopId || null }, shopId ? '已清空该店购物车' : '已清空全部购物车');
   } catch (err) {
     console.error('[market/cart/clear]', err);
     fail(res, '清空购物车失败', 500);

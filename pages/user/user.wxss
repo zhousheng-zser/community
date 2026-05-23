@@ -177,6 +177,19 @@ page {
   height: 40rpx;
 }
 
+.hstat-icon-wrap--cart {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+}
+
+.hstat-icon-img--cart {
+  width: 30rpx;
+  height: 30rpx;
+}
+
 .hstat-num {
   color: #fff;
   font-size: 30rpx;

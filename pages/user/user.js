@@ -11,6 +11,8 @@ const favoritesStore = require('../../utils/favoritesStore.js');
 const serviceFavStore = require('../../utils/serviceFavStore.js');
 const { getBoundCommunityId } = require('../../utils/communityPortal.js');
 const communityBind = require('../../utils/communityBind.js');
+const marketCart = require('../../utils/marketCartHelper.js');
+const serviceCart = require('../../utils/serviceCartHelper.js');
 
 Page({
   data: {
@@ -22,6 +24,7 @@ Page({
     couponCount: 0,
     footprintCount: 0,
     favoriteCount: 0,
+    cartCount: 0,
     workbenchCollapsed: true,
     orderMenus: [
       { name: "服务订单", icon: "service_order", url: "../market-order-list/market-order-list?type=service" },
@@ -325,6 +328,7 @@ Page({
       loggedIn,
       footprintCount: 0,
       favoriteCount: 0,
+      cartCount: 0,
       boundCommunityName: loggedIn ? (communityBind.getBoundCommunityName() || '未绑定') : ''
     });
 
@@ -335,6 +339,31 @@ Page({
     this.getProfile();
     this.getMyCoupon();
     this.loadFavoriteCount();
+    this.loadCartCount();
+  },
+
+  async loadCartCount() {
+    if (!this.data.loggedIn) {
+      this.setData({ cartCount: 0 });
+      return;
+    }
+    const [marketCount, serviceCount] = await Promise.all([
+      marketCart.fetchCartItemCount(),
+      serviceCart.fetchCartItemCount()
+    ]);
+    this.setData({ cartCount: marketCount + serviceCount });
+    try {
+      const app = getApp();
+      if (app && app.globalData) app.globalData.cartRevision = app.globalData.cartRevision || 0;
+    } catch (e) { /* ignore */ }
+  },
+
+  goCart() {
+    if (!this.data.loggedIn) {
+      wx.navigateTo({ url: '../login/login' });
+      return;
+    }
+    wx.navigateTo({ url: '../goods-cart/goods-cart' });
   },
 
   async loadFavoriteCount() {

@@ -51,6 +51,14 @@
         <text class="hstat-num">{{footprintCount}}</text>
         <text class="hstat-label">足迹</text>
       </navigator>
+      <view class="hstat-divider"></view>
+      <view class="hstat" bindtap="goCart">
+        <view class="hstat-icon-wrap hstat-icon-wrap--cart">
+          <image class="hstat-icon-img hstat-icon-img--cart" src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+        </view>
+        <text class="hstat-num">{{cartCount}}</text>
+        <text class="hstat-label">购物车</text>
+      </view>
     </view>
   </view>
 

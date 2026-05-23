@@ -18,6 +18,7 @@ router.get('/goods/:goodsId', ctrl.getGoodsDetail);
 router.get('/shops/:shopId/contact', ctrl.getShopContact);
 
 // 6.3 购物车
+router.get('/cart/summary', authMiddleware, ctrl.getCartSummary);
 router.get('/cart', authMiddleware, ctrl.getCart);
 router.post('/cart/items', authMiddleware, ctrl.addCartItem);
 router.put('/cart/items/:itemId', authMiddleware, ctrl.updateCartItem);

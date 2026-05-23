@@ -53,7 +53,15 @@ const getGoodsDetail = (goodsId) => {
 };
 
 /**
- * 获取购物车 (需传 shop_id)
+ * 购物车数量汇总
+ * GET /market/cart/summary
+ */
+const getCartSummary = () => {
+  return get('/market/cart/summary');
+};
+
+/**
+ * 获取购物车 (shop_id 可选，不传则返回全店分组)
  * GET /market/cart?shop_id=xxx
  */
 const getCart = (shopId) => {
@@ -88,8 +96,8 @@ const deleteCartItem = (itemId) => {
  * 清空购物车
  * DELETE /market/cart
  */
-const clearCart = () => {
-  return del('/market/cart');
+const clearCart = (shopId) => {
+  return del('/market/cart', shopId ? { shop_id: shopId } : null);
 };
 
 /**
@@ -238,6 +246,7 @@ module.exports = {
   getShopDetail,
   getShopGoods,
   getGoodsDetail,
+  getCartSummary,
   getCart,
   addToCart,
   updateCartItem,

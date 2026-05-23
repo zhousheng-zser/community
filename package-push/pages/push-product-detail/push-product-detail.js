@@ -1,5 +1,7 @@
 const util = require('../../../utils/util.js');
 const config = require('../../../utils/config.js');
+const checkoutStorage = require('../../../utils/checkoutStorage.js');
+const marketCartHelper = require('../../../utils/marketCartHelper.js');
 
 const MARKET_PRODUCT_MAP = {
   101: { name: 'market product', price: '1.68', pay: '1.68', rebate: '0.10', image: '', shop: '' },
@@ -27,6 +29,9 @@ Page({
   data: {
     navTopPadding: 20,
     shopId: 0,
+    navGoodsId: 0,
+    cartBadge: 0,
+    buyPanel: { show: false, type: 'cart', qty: 1 },
     product: {
       name: '',
       price: '',
@@ -153,7 +158,8 @@ Page({
         price: navPrice ? this.normalizeMoney(navPrice) : mockProduct.price,
         pay: navPrice ? this.normalizeMoney(navPrice) : mockProduct.pay
       } : emptyProduct,
-      shopId: optionShopId
+      shopId: optionShopId,
+      navGoodsId: id
     });
 
     if (optionShopId) {
@@ -245,7 +251,8 @@ Page({
         'product.shop': shop.name || shop.shop_name || store.name || store.shop_name || merchant.name || merchant.shop_name || g.shop_name || this.data.product.shop || '',
         shopId,
         shopAppId: g.shop_appid || g.shopAppId || this.data.shopAppId,
-        productId: g.product_id || g.productId || String(g.id || g.goods_id)
+        productId: g.product_id || g.productId || String(g.id || g.goods_id),
+        navGoodsId: Number(g.id || g.goods_id || id) || this.data.navGoodsId
       }, () => {
         if (shopId) {
           this.loadRecommendedGoods(shopId, Number(g.id || g.goods_id || id));
@@ -326,17 +333,77 @@ Page({
     const url = e.currentTarget.dataset.url;
     if (url) wx.navigateTo({ url });
   },
-  handleBuyClick() {
-    if (!this.data.shopAppId || this.data.shopAppId.startsWith('wx0000')) {
-      // 小店组件不可用，回退到标准商品详情购买页
-      wx.navigateTo({
-        url: `/pages/goods-detail/goods-detail?id=${this.data.productId}`
-      });
+  onShow() {
+    this.refreshCartBadge();
+  },
+  getMarketGoodsId() {
+    return Number(this.data.navGoodsId || this.data.productId || 0);
+  },
+  async refreshCartBadge() {
+    const count = await marketCartHelper.fetchCartItemCount();
+    this.setData({ cartBadge: count });
+  },
+  goCart() {
+    if (!marketCartHelper.ensureLogin()) return;
+    wx.navigateTo({ url: '/pages/goods-cart/goods-cart' });
+  },
+  openBuyPanel(e) {
+    const type = (e.currentTarget.dataset.type || 'cart') === 'buy' ? 'buy' : 'cart';
+    if (!this.getMarketGoodsId() || !this.data.shopId) {
+      wx.showToast({ title: '商品信息加载中', icon: 'none' });
       return;
     }
-    this.setData({
-      showStoreProduct: true
+    this.setData({ buyPanel: { show: true, type, qty: 1 } });
+  },
+  closeBuyPanel() {
+    this.setData({ 'buyPanel.show': false });
+  },
+  stepBuyQty(e) {
+    const delta = Number(e.currentTarget.dataset.delta) || 0;
+    const next = Math.max(1, Math.min((this.data.buyPanel.qty || 1) + delta, 999));
+    this.setData({ 'buyPanel.qty': next });
+  },
+  async confirmBuyPanel() {
+    const { type, qty } = this.data.buyPanel;
+    const goodsId = this.getMarketGoodsId();
+    const shopId = Number(this.data.shopId);
+    if (!goodsId || !shopId) {
+      wx.showToast({ title: '商品信息不完整', icon: 'none' });
+      return;
+    }
+    if (type === 'cart') {
+      wx.showLoading({ title: '加入中', mask: true });
+      try {
+        await marketCartHelper.addToCart({ shopId, goodsId, quantity: qty });
+        wx.hideLoading();
+        this.closeBuyPanel();
+        wx.showToast({ title: '已加入购物车', icon: 'success' });
+        this.refreshCartBadge();
+      } catch (e) {
+        wx.hideLoading();
+        wx.showToast({ title: (e && (e.msg || e.errmsg)) || '加入失败', icon: 'none' });
+      }
+      return;
+    }
+    const price = Number(this.data.product.pay || this.data.product.price || 0);
+    checkoutStorage.saveCheckout({
+      goods: [{
+        goodsId,
+        goodsPictureUrl: this.data.product.image || '',
+        goodsName: this.data.product.name || '',
+        goodsBrief: '默认规格',
+        goodsRealPrice: price,
+        goodsNum: qty
+      }],
+      total: (price * qty).toFixed(2),
+      shopId,
+      shopName: this.data.product.shop || ''
     });
+    this.closeBuyPanel();
+    wx.navigateTo({ url: `/pages/goods-confrim/goods-confrim?from=local&shopId=${shopId}` });
+  },
+  handleBuyClick() {
+    this.openBuyPanel({ currentTarget: { dataset: { type: 'buy' } } });
   },
   onStoreProductSuccess(e) {
     console.log('store product order success', e.detail);

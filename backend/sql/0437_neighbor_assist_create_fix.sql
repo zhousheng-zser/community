@@ -11,3 +11,4 @@ ALTER TABLE neighbor_assist_orders
 
 ALTER TABLE neighbor_assist_orders
   ADD COLUMN contact_phone VARCHAR(30) NULL COMMENT '联系电话' AFTER content;
+,.....................................................

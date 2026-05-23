@@ -23,7 +23,8 @@ App({
   globalData: {
     userInfo: null,
     user: null,
-    communityTargetTab: ''
+    communityTargetTab: '',
+    cartRevision: 0
   },
   _applyProfileFromApi(u, callback) {
     if (!u) {

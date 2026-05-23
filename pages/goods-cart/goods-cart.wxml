@@ -1,21 +1,103 @@
-<view class="message-page">
-  <view class="msg-head" style="padding-top: {{navTopPadding}}px;">
-    <text class="title">消息（{{messageCount}}）</text>
-  </view>
-
-  <view class="empty-wrap" wx:if="{{messageCount === 0}}">
-    <view class="bubble-icon">
-      <view class="dot"></view>
-      <view class="dot"></view>
-      <view class="dot"></view>
-    </view>
-    <text class="empty-text">消息列表为空</text>
-  </view>
-
-  <view class="message-list" wx:else>
-    <view class="message-item" wx:for="{{messageList}}" wx:key="id">
-      <text class="item-title">{{item.title}}</text>
-      <text class="item-time">{{item.time}}</text>
-    </view>
-  </view>
-</view>
+<view class="cart-page">
+  <view class="cart-nav" style="padding-top: {{navTop}}px;">
+    <view class="nav-back" bindtap="goBack">‹</view>
+    <text class="nav-title">购物车</text>
+    <text class="nav-clear-all" wx:if="{{!empty}}" bindtap="clearAllCart">清空全部</text>
+    <view class="nav-placeholder" wx:else></view>
+  </view>
+
+  <view class="login-tip" wx:if="{{!loading && !loggedIn}}">
+    <text class="empty-text">请先登录查看购物车</text>
+    <button class="go-market-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <view class="login-tip" wx:elif="{{!loading && empty}}">
+    <image class="empty-icon" src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+    <text class="empty-text">购物车是空的</text>
+    <text class="empty-sub">去集市或直约服务商逛逛吧</text>
+    <button class="go-market-btn" bindtap="goBack">返回</button>
+  </view>
+
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <scroll-view scroll-y class="cart-scroll" wx:if="{{!loading && !empty}}" enhanced show-scrollbar="{{false}}">
+    <view class="cart-summary-bar">
+      <text>共 {{summary.item_count}} 件 · 购物 {{summary.market_count}} · 服务 {{summary.service_count}}</text>
+    </view>
+
+    <view class="section-label" wx:if="{{marketGroups.length}}">集市商品</view>
+    <view class="shop-group" wx:for="{{marketGroups}}" wx:for-item="mGroup" wx:for-index="gindex" wx:key="shop_id">
+      <view class="shop-head">
+        <view class="shop-name-row" bindtap="goMarketShop" data-shop-id="{{mGroup.shop_id}}">
+          <text class="shop-tag">店</text>
+          <text class="shop-name">{{mGroup.shop_name}}</text>
+          <text class="shop-arrow">›</text>
+        </view>
+        <text class="clear-shop" bindtap="clearMarketShop" data-shop-id="{{mGroup.shop_id}}" data-shop-name="{{mGroup.shop_name}}">清空本店</text>
+      </view>
+      <block wx:for="{{mGroup.items}}" wx:for-item="mItem" wx:for-index="iindex" wx:key="cartRowKey">
+        <view class="goods-item {{mItem.invalid ? 'invalid' : ''}}">
+          <image class="goods-img" src="{{mItem.goodsImage || '/img/market_icons/supermarket.png'}}" mode="aspectFill"></image>
+          <view class="goods-info">
+            <text class="goods-name">{{mItem.goodsName}}</text>
+            <text class="invalid-tip" wx:if="{{mItem.invalid}}">商品已下架或售罄</text>
+            <view class="goods-bottom">
+              <text class="goods-price">￥{{mItem.goodsPrice}}</text>
+              <view class="goods-ops">
+                <text class="remove-btn" bindtap="removeMarketItem" data-id="{{mItem.id}}">删除</text>
+                <view class="stepper" wx:if="{{!mItem.invalid}}">
+                  <view class="step-btn" bindtap="changeMarketQty" data-id="{{mItem.id}}" data-delta="-1" data-gindex="{{gindex}}" data-iindex="{{iindex}}">-</view>
+                  <text class="step-num">{{mItem.quantity}}</text>
+                  <view class="step-btn plus" bindtap="changeMarketQty" data-id="{{mItem.id}}" data-delta="1" data-gindex="{{gindex}}" data-iindex="{{iindex}}">+</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <view class="shop-footer">
+        <text class="shop-sub">共 {{mGroup.item_count}} 件，小计 ￥{{mGroup.subtotal}}</text>
+        <view class="settle-btn {{mGroup.canSettle ? 'active' : ''}}" bindtap="goMarketSettle" data-shop-id="{{mGroup.shop_id}}">去结算</view>
+      </view>
+    </view>
+
+    <view class="section-label" wx:if="{{serviceGroups.length}}">直约服务</view>
+    <view class="shop-group service-shop-group" wx:for="{{serviceGroups}}" wx:for-item="sGroup" wx:for-index="sgindex" wx:key="provider_id">
+      <view class="shop-head">
+        <view class="shop-name-row" bindtap="goServiceProvider" data-provider-id="{{sGroup.provider_id}}">
+          <text class="shop-tag service-tag">服</text>
+          <text class="shop-name">{{sGroup.provider_name}}</text>
+          <text class="shop-arrow">›</text>
+        </view>
+        <text class="clear-shop" bindtap="clearServiceProvider" data-provider-id="{{sGroup.provider_id}}" data-provider-name="{{sGroup.provider_name}}">清空</text>
+      </view>
+      <block wx:for="{{sGroup.items}}" wx:for-item="sItem" wx:for-index="siindex" wx:key="cartRowKey">
+        <view class="goods-item {{sItem.invalid ? 'invalid' : ''}}">
+          <image class="goods-img" src="{{sItem.serviceImage || '/img/join_services/service_provider.png'}}" mode="aspectFill"></image>
+          <view class="goods-info">
+            <text class="goods-name">{{sItem.serviceName}}</text>
+            <text class="invalid-tip" wx:if="{{sItem.invalid}}">服务已下架</text>
+            <view class="goods-bottom">
+              <text class="goods-price">￥{{sItem.servicePrice}}</text>
+              <view class="goods-ops">
+                <text class="remove-btn" bindtap="removeServiceItem" data-id="{{sItem.id}}">删除</text>
+                <view class="stepper" wx:if="{{!sItem.invalid}}">
+                  <view class="step-btn" bindtap="changeServiceQty" data-id="{{sItem.id}}" data-delta="-1" data-gindex="{{sgindex}}" data-iindex="{{siindex}}">-</view>
+                  <text class="step-num">{{sItem.quantity}}</text>
+                  <view class="step-btn plus" bindtap="changeServiceQty" data-id="{{sItem.id}}" data-delta="1" data-gindex="{{sgindex}}" data-iindex="{{siindex}}">+</view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+      <view class="shop-footer" wx:if="{{sGroup.items.length}}">
+        <text class="shop-sub">共 {{sGroup.item_count}} 项，小计 ￥{{sGroup.subtotal}}</text>
+        <view class="settle-btn {{sGroup.canSettle ? 'active' : ''}}" bindtap="goServiceSettle" data-provider-id="{{sGroup.provider_id}}">去结算</view>
+      </view>
+      <view class="shop-empty-hint" wx:else>暂无服务项，请返回店铺重新加入</view>
+    </view>
+  </scroll-view>
+</view>

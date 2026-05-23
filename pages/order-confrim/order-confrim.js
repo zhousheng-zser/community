@@ -282,6 +282,10 @@ Page({
         .post('service-orders/bundle', body)
         .then((data) => {
           wx.hideLoading();
+          wx.removeStorageSync('sp_bundle_checkout');
+          if (spProviderId && wx.getStorageSync('token')) {
+            serviceCart.clearProviderCart(spProviderId).catch(() => {});
+          }
           const oid = data && (data.id || (data.order && data.order.id));
           if (oid) {
             wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + oid });

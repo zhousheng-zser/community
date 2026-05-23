@@ -1,6 +1,8 @@
 const util = require('../../utils/util.js');
 const app = getApp();
 const checkoutStorage = require('../../utils/checkoutStorage.js');
+const marketCart = require('../../utils/marketCartHelper.js');
+const serviceCart = require('../../utils/serviceCartHelper.js');
 
 Page({
   data: {
@@ -255,14 +257,18 @@ Page({
         }
       }
 
-      // 提交成功，清理购物车
+      // 提交成功，清理购物车（本地 + 服务端按店清空）
+      const shopId = this.data.shopId;
       if (this.data.fromUrl === 'cart') {
-        wx.removeStorageSync(`cart_${this.data.shopId}`);
+        try { wx.removeStorageSync(`cart_${shopId}`); } catch (e) { /* ignore */ }
       }
       if (this.data.fromUrl === 'local') {
         checkoutStorage.clearCheckout();
       }
       wx.removeStorageSync('temp_checkout_items');
+      if (shopId && wx.getStorageSync('token')) {
+        marketCart.clearShopCart(shopId).catch(() => {});
+      }
 
       wx.hideLoading();
       wx.showToast({ title: '支付成功', icon: 'success' });
