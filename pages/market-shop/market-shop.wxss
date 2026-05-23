@@ -528,15 +528,38 @@
   margin-top: 4rpx;
 }
 
-.settle {
-  width: 180rpx;
+.bar-actions {
+  display: flex;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.add-cart-btn {
+  width: 160rpx;
   height: 100%;
   background: #555;
   color: #999;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 30rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.add-cart-btn.active {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.settle {
+  width: 160rpx;
+  height: 100%;
+  background: #555;
+  color: #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 28rpx;
   font-weight: bold;
   border-radius: 0 50rpx 50rpx 0;
 }

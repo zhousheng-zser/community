@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../../middlewares/authMiddleware');
 const ctrl = require('./controllers/merchant.controller');
+const deliveryCtrl = require('../market/controllers/marketDelivery.controller');
 
 router.use(authMiddleware);
 
@@ -27,6 +28,9 @@ router.post('/orders/:orderNo/accept', (req, res, next) => { req.body = Object.a
 router.post('/orders/:orderNo/cancel', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'reject' }); next(); }, ctrl.orderAction);
 router.post('/orders/:orderNo/ship', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'dispatch' }); next(); }, ctrl.orderAction);
 router.post('/orders/:orderNo/complete-delivery', (req, res, next) => { req.body = Object.assign({}, req.body, { action: 'delivered' }); next(); }, ctrl.orderAction);
+router.get('/orders/:orderNo/delivery/options', deliveryCtrl.merchantOptions);
+router.post('/orders/:orderNo/delivery/launch', deliveryCtrl.merchantLaunch);
+router.get('/orders/:orderNo/delivery/track', deliveryCtrl.merchantTrack);
 router.get('/payments', ctrl.getPayments);
 
 // 7.4 客户管理

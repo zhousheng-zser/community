@@ -47,8 +47,8 @@
   <view class="empty-state" wx:if="{{!loading && roles.length === 0}}">
     <view class="empty-icon">💰</view>
     <view class="empty-text">暂无合伙人角色</view>
-    <view class="empty-desc">分享邀请码邀请好友下单，即可成为推广者赚取佣金</view>
-    <button class="btn-primary" size="mini" bindtap="goPartner">成为推广者</button>
+    <view class="empty-desc">填写资料申请成为合伙人，分享邀请码赚取佣金</view>
+    <button class="btn-primary" size="mini" bindtap="goPartner">申请成为合伙人</button>
   </view>
 
   <!-- 操作按钮 -->

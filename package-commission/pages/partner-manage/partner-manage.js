@@ -1,105 +1,138 @@
-// pages/partner-manage/partner-manage.js
 const app = getApp();
 const api = require('../../../api/index.js');
 
-const ROLE_LABEL = {
-  promoter: '推广者',
-  district_partner: '区县合伙人',
-  market_partner: '市场合伙人'
-};
-
 Page({
   data: {
-    partnerInfo: null,
-    chain: null,
-    downlines: [],
-    downlineCount: 0,
-    loading: true
+    form: {
+      realName: '',
+      phone: '',
+      city: '',
+      remark: ''
+    },
+    inviteCode: '',
+    loadingInvite: false,
+    submitting: false,
+    isPartner: false,
+    application: null
   },
 
   onShow() {
-    this.loadPartnerInfo();
-    this.loadChain();
+    this.prefillFromUser();
+    this.loadInviteCode();
+    this.loadApplicationStatus();
   },
 
-  async loadPartnerInfo() {
+  prefillFromUser() {
+    const user = app.globalData.user || {};
+    const patch = {};
+    if (user.userName && !this.data.form.realName) patch.realName = user.userName;
+    if (user.phone && !this.data.form.phone) patch.phone = user.phone;
+    if (Object.keys(patch).length) {
+      this.setData({ form: { ...this.data.form, ...patch } });
+    }
+  },
+
+  onInput(e) {
+    const key = e.currentTarget.dataset.key;
+    let val = (e.detail && e.detail.value) || '';
+    if (key === 'phone') val = val.replace(/\D/g, '').slice(0, 11);
+    this.setData({ form: { ...this.data.form, [key]: val } });
+  },
+
+  async loadInviteCode() {
     const token = wx.getStorageSync('token');
-    if (!token) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
+    if (!token) return;
+    this.setData({ loadingInvite: true });
+    try {
+      const res = await api.user.getInviteCode();
+      const data = res && res.data ? res.data : res;
+      const code = data.invite_code || data.inviteCode || '';
+      this.setData({ inviteCode: code });
+      if (code && app.globalData.user) {
+        app.globalData.user.inviteCode = code;
+      }
+    } catch (e) {
+      console.error('获取邀请码失败:', e);
+    } finally {
+      this.setData({ loadingInvite: false });
+    }
+  },
+
+  async loadApplicationStatus() {
+    const token = wx.getStorageSync('token');
+    if (!token) return;
+    try {
+      const res = await api.partner.getApplicationMe();
+      const data = res && res.data ? res.data : res;
+      this.setData({
+        isPartner: !!data.is_partner,
+        application: data.application || null
+      });
+      if (data.application) {
+        const a = data.application;
+        this.setData({
+          form: {
+            realName: a.real_name || this.data.form.realName,
+            phone: a.phone || this.data.form.phone,
+            city: a.city || this.data.form.city,
+            remark: a.remark || ''
+          }
+        });
+      }
+    } catch (e) {
+      console.error('获取申请状态失败:', e);
+    }
+  },
+
+  async submitApply() {
+    if (this.data.submitting || this.data.isPartner) return;
+    const { realName, phone, city, remark } = this.data.form;
+    const name = String(realName || '').trim();
+    const mobile = String(phone || '').trim();
+    const cityVal = String(city || '').trim();
+    if (!name) {
+      wx.showToast({ title: '请填写真实姓名', icon: 'none' });
       return;
     }
-
-    this.setData({ loading: true });
+    if (!/^1\d{10}$/.test(mobile)) {
+      wx.showToast({ title: '请输入正确手机号', icon: 'none' });
+      return;
+    }
+    if (!cityVal) {
+      wx.showToast({ title: '请填写所在城市', icon: 'none' });
+      return;
+    }
+    this.setData({ submitting: true });
+    wx.showLoading({ title: '提交中', mask: true });
     try {
-      const res = await api.partner.getMyPartnerInfo();
-      const data = res && res.data ? res.data : res;
-      const roleDetails = (data.role_details || []).map(item => ({
-        ...item,
-        role_name: ROLE_LABEL[item.role] || item.role
-      }));
-      this.setData({
-        partnerInfo: { ...data, role_details: roleDetails },
-        downlineCount: data.downline_count || 0,
-        loading: false
+      await api.partner.applyPartner({
+        role: 'promoter',
+        real_name: name,
+        phone: mobile,
+        city: cityVal,
+        remark: String(remark || '').trim()
       });
-    } catch (e) {
-      console.error('获取合伙人信息失败:', e);
-      this.setData({ loading: false });
-    }
-  },
-
-  async loadChain() {
-    try {
-      const res = await api.commission.getPartnerChain();
-      const data = res && res.data ? res.data : res;
-      this.setData({ chain: data });
-    } catch (e) {
-      console.error('获取合伙人链失败:', e);
-    }
-  },
-
-  async loadDownlines() {
-    try {
-      const res = await api.partner.getMyDownlines({ page: 1, limit: 20 });
-      const data = res && res.data ? res.data : res;
-      this.setData({ downlines: data.list || [] });
-    } catch (e) {
-      console.error('获取下线列表失败:', e);
-    }
-  },
-
-  showDownlines() {
-    this.loadDownlines();
-  },
-
-  async applyPromoter() {
-    try {
-      wx.showLoading({ title: '申请中...' });
-      const res = await api.partner.applyPartner({ role: 'promoter' });
       wx.hideLoading();
       wx.showToast({ title: '申请成功', icon: 'success' });
-      this.loadPartnerInfo();
+      await this.loadApplicationStatus();
+      await this.loadInviteCode();
     } catch (e) {
       wx.hideLoading();
-      const msg = (e && e.msg) || '申请失败';
-      wx.showToast({ title: msg, icon: 'none' });
+      wx.showToast({ title: (e && (e.msg || e.errmsg)) || '申请失败', icon: 'none' });
+    } finally {
+      this.setData({ submitting: false });
     }
   },
 
   copyInviteCode() {
-    const user = app.globalData.user || {};
-    const code = user.inviteCode || '';
-    if (code) {
-      wx.setClipboardData({
-        data: code,
-        success: () => wx.showToast({ title: '邀请码已复制', icon: 'success' })
-      });
-    } else {
-      wx.navigateTo({ url: '/pages/user-code/user-code' });
+    const code = this.data.inviteCode;
+    if (!code) {
+      wx.showToast({ title: '邀请码加载中', icon: 'none' });
+      return;
     }
-  },
-
-  goUserCode() {
-    wx.navigateTo({ url: '/pages/user-code/user-code' });
+    wx.setClipboardData({
+      data: code,
+      success: () => wx.showToast({ title: '已复制', icon: 'success' })
+    });
   }
 });

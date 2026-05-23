@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require('../models');
 const { resolveUserIdFromReq } = require('../utils/resolveUserId');
+const { parseNeighborAppointmentTime } = require('../utils/parseNeighborAppointmentTime');
 const commissionService = require('../modules/commission/services/commission.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
@@ -38,6 +39,31 @@ const NEIGHBOR_ORDER_STATUS_TEXT = {
   closed: '已关闭'
 };
 
+function normalizeProofImages(raw) {
+  if (!raw) return [];
+  const arr = Array.isArray(raw) ? raw : (typeof raw === 'string' ? (() => {
+    try { return JSON.parse(raw); } catch (e) { return []; }
+  })() : []);
+  return arr
+    .map((u) => (u != null ? String(u).trim() : ''))
+    .filter((u) => u && (u.startsWith('http') || u.startsWith('/')));
+}
+
+function parseProofImagesField(row) {
+  const v = row && row.completion_proof_images;
+  if (!v) return [];
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string') {
+    try {
+      const parsed = JSON.parse(v);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+}
+
 async function assertWorker(userId) {
   const app = await WorkerApplication.findOne({ where: { user_id: userId, status: 'approved' } });
   const prof = await WorkerProfile.findOne({ where: { user_id: userId, status: 'active' } });
@@ -54,6 +80,13 @@ async function assertWorkerCanTakeOrder(workerUserId, order) {
   return { ok: true };
 }
 
+function normalizeAssistType(raw) {
+  const t = String(raw || '').trim();
+  if (!t || t.length > 32) return null;
+  if (ASSIST_TYPES.has(t)) return t;
+  return t;
+}
+
 // Create order with amount
 exports.create = async (req, res) => {
   try {
@@ -67,42 +100,73 @@ exports.create = async (req, res) => {
       appointment_time,
       remark,
       amount,
-      reward_amount
+      reward_amount,
+      content,
+      contact_phone
     } = req.body;
-    if (!assist_type || !ASSIST_TYPES.has(String(assist_type))) {
-      return fail(res, 400, '无效 assist_type');
-    }
-    if (!origin_address_snapshot || typeof origin_address_snapshot !== 'object') {
-      return fail(res, 400, '缺少 origin_address_snapshot');
-    }
-    if (!destination_address_snapshot || typeof destination_address_snapshot !== 'object') {
-      return fail(res, 400, '缺少 destination_address_snapshot');
-    }
+
+    const assistType = normalizeAssistType(assist_type);
+    if (!assistType) return fail(res, 400, '请选择或填写服务类型');
+
+    const origin = origin_address_snapshot && typeof origin_address_snapshot === 'object'
+      ? origin_address_snapshot
+      : { address: '', detail: '' };
+    const dest = destination_address_snapshot && typeof destination_address_snapshot === 'object'
+      ? destination_address_snapshot
+      : { address: '', detail: '' };
+
     let commId = community_id != null ? parseInt(community_id, 10) : null;
     if (!commId) {
       const u = await User.findByPk(userId, { attributes: ['community_id'] });
       commId = u && u.community_id != null ? Number(u.community_id) : null;
     }
-    // 支持前端传 reward_amount 或 amount
+    if (!commId || !Number.isFinite(commId) || commId <= 0) {
+      return fail(res, 400, '请先在「我的」绑定小区后再发布');
+    }
+
     const orderAmount = (reward_amount != null ? reward_amount : amount) != null
       ? String(reward_amount != null ? reward_amount : amount) : null;
+    const phone = contact_phone != null ? String(contact_phone).trim() : '';
+    const bodyContent = content != null ? String(content).trim() : '';
+    let finalRemark = remark != null ? String(remark).trim() : '';
+    if (bodyContent && !finalRemark.includes(bodyContent)) {
+      finalRemark = finalRemark ? `${bodyContent}\n${finalRemark}` : bodyContent;
+    }
+    if (phone) {
+      finalRemark = finalRemark ? `${finalRemark}\n联系电话：${phone}` : `联系电话：${phone}`;
+    }
+
+    const appt = parseNeighborAppointmentTime(appointment_time);
+
+    if (!NeighborAssistOrder) return fail(res, 500, 'NeighborAssistOrder 模型未加载');
+
     const row = await NeighborAssistOrder.create({
-      assist_type: String(assist_type),
+      assist_type: assistType,
       user_id: userId,
       community_id: commId,
-      origin_address_snapshot,
-      destination_address_snapshot,
+      origin_address_snapshot: origin,
+      destination_address_snapshot: dest,
       amount: orderAmount,
-      appointment_time: appointment_time || null,
-      content: req.body.content || remark || null,
-      remark: remark || null,
+      appointment_time: appt,
+      content: bodyContent || finalRemark || null,
+      remark: finalRemark || bodyContent || null,
+      contact_phone: phone || null,
       status: 'pending_pay',
       pay_status: 'unpaid'
     });
-    return ok(res, { id: row.id, order_id: row.id, status: row.status, assist_type: row.assist_type, assist_type_label: ASSIST_TYPE_LABELS[row.assist_type] || row.assist_type, amount: orderAmount });
+    return ok(res, {
+      id: row.id,
+      order_id: row.id,
+      status: row.status,
+      assist_type: row.assist_type,
+      assist_type_label: ASSIST_TYPE_LABELS[row.assist_type] || row.assist_type,
+      amount: orderAmount,
+      reward_amount: orderAmount
+    });
   } catch (e) {
     console.error('neighborAssist create', e);
-    return fail(res, 500, '创建失败');
+    const hint = e && e.parent && e.parent.sqlMessage ? e.parent.sqlMessage : (e && e.message);
+    return fail(res, 500, hint && String(hint).length < 120 ? `创建失败：${hint}` : '创建失败');
   }
 };
 
@@ -387,6 +451,59 @@ exports.communityGrab = async (req, res) => {
   }
 };
 
+// POST /neighbor-assist/orders/:id/check-in — 接单方上门定位打卡
+exports.checkIn = async (req, res) => {
+  try {
+    const helperId = resolveUserIdFromReq(req);
+    if (!helperId) return fail(res, 401, '未登录');
+    const id = parseInt(req.params.id, 10);
+    if (!id) return fail(res, 400, '无效订单 id');
+    const body = req.body || {};
+    const latitude = body.latitude != null ? Number(body.latitude) : null;
+    const longitude = body.longitude != null ? Number(body.longitude) : null;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return fail(res, 400, '缺少有效 latitude / longitude');
+    }
+
+    const order = await NeighborAssistOrder.findByPk(id);
+    if (!order) return fail(res, 404, '订单不存在', 404);
+    if (order.assigned_worker_id !== helperId) return fail(res, 403, '无权限操作该订单', 403);
+    if (order.pay_status !== 'paid') return fail(res, 400, '订单未支付');
+    if (!['dispatched', 'in_service'].includes(String(order.status))) {
+      return fail(res, 400, '当前状态不可打卡');
+    }
+
+    const checkInAt = order.check_in_at || new Date();
+    await order.update({
+      status: 'in_service',
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    });
+
+    try {
+      const messageCtrl = require('../modules/message/controllers/message.controller');
+      if (messageCtrl.seedNeighborAssistCheckInMessage) {
+        await messageCtrl.seedNeighborAssistCheckInMessage(id, helperId);
+      }
+    } catch (chatErr) {
+      console.warn('neighborAssist checkIn chat seed', chatErr.message);
+    }
+
+    return ok(res, {
+      id: order.id,
+      status: 'in_service',
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT.in_service,
+      check_in_at: checkInAt,
+      check_in_lat: latitude,
+      check_in_lng: longitude
+    });
+  } catch (e) {
+    console.error('neighborAssist checkIn', e);
+    return fail(res, 500, '打卡失败');
+  }
+};
+
 // Accept (接单方确认开始服务)
 exports.accept = async (req, res) => {
   try {
@@ -408,45 +525,36 @@ exports.accept = async (req, res) => {
   }
 };
 
-// Complete - 接单方完成服务，收入计入可提现佣金余额
+// Complete - 接单方提交服务完成（含凭证照片），待发布人确认后结算
 exports.complete = async (req, res) => {
   try {
     const workerId = resolveUserIdFromReq(req);
     if (!workerId) return fail(res, 401, '未登录');
     const id = parseInt(req.params.id, 10);
     if (!id) return fail(res, 400, '无效订单 id');
+    const body = req.body || {};
+    const proofImages = normalizeProofImages(body.proof_images || body.completion_proof_images);
+    if (!proofImages.length) {
+      return fail(res, 400, '请上传至少 1 张服务完成凭证照片');
+    }
     const order = await NeighborAssistOrder.findByPk(id);
     if (!order) return fail(res, 404, '订单不存在', 404);
     if (order.assigned_worker_id !== workerId) return fail(res, 403, '无权限操作该订单', 403);
-    if (order.status !== 'in_service' && order.status !== 'dispatched') return fail(res, 400, '当前状态不可完成');
+    if (order.status !== 'in_service') return fail(res, 400, '当前状态不可完成');
+    if (!order.check_in_at) return fail(res, 400, '请先完成上门打卡');
 
-    const t = await NeighborAssistOrder.sequelize.transaction();
-    try {
-      const amountNum = Number(order.amount || 0);
-      if (amountNum > 0 && order.assigned_worker_id) {
-        await commissionService.creditAvailableBalance(
-          order.assigned_worker_id,
-          'neighbor_assist',
-          amountNum,
-          t
-        );
-      }
+    order.completion_proof_images = proofImages;
+    order.status = 'pending_confirm';
+    order.completed_at = new Date();
+    await order.save();
 
-      order.status = 'completed';
-      order.completed_at = new Date();
-      await order.save({ transaction: t });
-      await t.commit();
-
-      return ok(res, {
-        id: order.id, status: order.status,
-        status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
-        amount_transferred: amountNum,
-        completed_at: order.completed_at
-      });
-    } catch (e) {
-      await t.rollback();
-      throw e;
-    }
+    return ok(res, {
+      id: order.id,
+      status: order.status,
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
+      completion_proof_images: proofImages,
+      completed_at: order.completed_at
+    });
   } catch (e) {
     console.error('neighborAssist complete', e);
     return fail(res, 500, '操作失败');
@@ -523,12 +631,15 @@ exports.detail = async (req, res) => {
 
     const myRole = isPublisher ? 'publisher' : isHelper ? 'helper' : '';
 
+    const completionProofImages = parseProofImagesField(plain);
+
     const resp = {
       ...plain,
       assist_type_label: ASSIST_TYPE_LABELS[plain.assist_type] || plain.assist_type,
       status_text: NEIGHBOR_ORDER_STATUS_TEXT[plain.status] || plain.status,
       amount: plain.amount != null ? String(plain.amount) : '',
       reward_amount: plain.amount != null ? String(plain.amount) : '',
+      completion_proof_images: completionProofImages,
       publisher: pub ? { id: pub.id, nickname: pub.nickname, phone: pub.phone, avatar_url: pub.avatar_url } : null,
       helper: worker ? { id: worker.id, nickname: worker.nickname, phone: worker.phone, avatar_url: worker.avatar_url } : null,
       my_role: myRole
@@ -547,7 +658,7 @@ exports.detail = async (req, res) => {
   }
 };
 
-// Confirm (发布人确认订单完成)
+// Confirm (发布人确认订单完成，结算给接单方)
 exports.confirm = async (req, res) => {
   try {
     const userId = resolveUserIdFromReq(req);
@@ -556,8 +667,37 @@ exports.confirm = async (req, res) => {
     if (!id) return fail(res, 400, '无效订单 id');
     const order = await NeighborAssistOrder.findOne({ where: { id, user_id: userId } });
     if (!order) return fail(res, 404, '订单不存在');
-    if (order.status !== 'completed') return fail(res, 400, '订单未完成，无法确认');
-    return ok(res, { id: order.id, status: order.status, confirmed: true, status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status });
+    if (order.status === 'completed') {
+      return ok(res, { id: order.id, status: order.status, confirmed: true, status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status });
+    }
+    if (order.status !== 'pending_confirm') return fail(res, 400, '当前状态不可确认');
+
+    const t = await NeighborAssistOrder.sequelize.transaction();
+    try {
+      const amountNum = Number(order.amount || 0);
+      if (amountNum > 0 && order.assigned_worker_id) {
+        await commissionService.creditAvailableBalance(
+          order.assigned_worker_id,
+          'neighbor_assist',
+          amountNum,
+          t
+        );
+      }
+      order.status = 'completed';
+      if (!order.completed_at) order.completed_at = new Date();
+      await order.save({ transaction: t });
+      await t.commit();
+      return ok(res, {
+        id: order.id,
+        status: order.status,
+        confirmed: true,
+        status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
+        amount_transferred: amountNum
+      });
+    } catch (e) {
+      await t.rollback();
+      throw e;
+    }
   } catch (e) {
     console.error('neighborAssist confirm', e);
     return fail(res, 500, '操作失败');

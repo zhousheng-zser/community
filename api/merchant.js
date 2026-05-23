@@ -146,6 +146,15 @@ const completeDelivery = (orderNo, data) => {
     .catch(() => orderAction(orderNo, Object.assign({ action: 'complete_delivery' }, payload)));
 };
 
+/** 可选配送方式 GET /market/merchant/orders/:orderNo/delivery/options */
+const getDeliveryOptions = (orderNo) => get(`/market/merchant/orders/${orderNo}/delivery/options`);
+
+/** 发起配送 POST /market/merchant/orders/:orderNo/delivery/launch */
+const launchDelivery = (orderNo, data) => post(`/market/merchant/orders/${orderNo}/delivery/launch`, data);
+
+/** 配送进度 GET /market/merchant/orders/:orderNo/delivery/track */
+const getDeliveryTrack = (orderNo) => get(`/market/merchant/orders/${orderNo}/delivery/track`);
+
 /**
  * 获取支付记录
  * GET /market/merchant/payments
@@ -281,6 +290,9 @@ module.exports = {
   shipOrder,
   startDelivery,
   completeDelivery,
+  getDeliveryOptions,
+  launchDelivery,
+  getDeliveryTrack,
   getPayments,
   getCustomers,
   getCustomerOrders,

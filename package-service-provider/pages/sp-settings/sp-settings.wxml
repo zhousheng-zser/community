@@ -3,6 +3,14 @@
 
   <block wx:else>
     <view class="section">
+      <view class="section-label">门店封面</view>
+      <view class="cover-pick" bindtap="onChooseCover">
+        <image wx:if="{{coverImage}}" class="cover-pick-img" src="{{coverImage}}" mode="aspectFill" />
+        <text wx:else class="cover-pick-tip">点击上传门店封面</text>
+      </view>
+    </view>
+
+    <view class="section">
       <view class="section-label required">门店名称</view>
       <input class="field-input" placeholder="请输入门店名称" value="{{shopName}}" bindinput="onShopNameInput" maxlength="50" />
     </view>

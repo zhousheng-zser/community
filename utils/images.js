@@ -105,13 +105,21 @@ const images = {
   pushCateStar: base + '/uploads/img/local_goods_icons/star.png',
   pushCateMoney: base + '/uploads/img/local_goods_icons/money.png',
 
-  // ── 惠民卡 · 联盟头图（源：流量联盟/京东联盟.png、拼多多.png，同步至 img/benefit_alliance/）──
+  // ── 惠民卡 · 联盟头图（品牌色渐变，非截图）──
   benefitJdAllianceHero: '/img/benefit_alliance/jd-alliance.png',
   benefitPddAllianceHero: '/img/benefit_alliance/pdd-alliance.png',
-  /** 惠民卡 · 肯德基 / 星巴克 / 百果园（源 kfcdot，同步至 img/benefit_chain/） */
-  benefitChainKfc: '/img/benefit_chain/kfc.jpg',
-  benefitChainXbk: '/img/benefit_chain/xbk.jpg',
-  benefitChainBgy: '/img/benefit_chain/bgy.jpg',
+  benefitMtAllianceHero: '/img/benefit_alliance/mt-alliance.png',
+  benefitTbAllianceHero: '/img/benefit_alliance/tb-alliance.png',
+  benefitSgAllianceHero: '/img/benefit_alliance/sg-alliance.png',
+  benefitSqAllianceHero: '/img/benefit_alliance/sq-alliance.png',
+  benefitTxAllianceHero: '/img/benefit_alliance/tx-alliance.png',
+  /** 惠民卡 · 大牌餐饮头图 + 卡片小图 */
+  benefitChainKfcHero: '/img/benefit_alliance/kfc-hero.png',
+  benefitChainXbkHero: '/img/benefit_alliance/xbk-hero.png',
+  benefitChainBgyHero: '/img/benefit_alliance/bgy-hero.png',
+  benefitChainKfc: '/img/benefit_alliance/kfc-hero.png',
+  benefitChainXbk: '/img/benefit_alliance/xbk-hero.png',
+  benefitChainBgy: '/img/benefit_alliance/bgy-hero.png',
 
   // ── 直播封面 ────────────────────────────────────────────────────────────────
   // ── 便捷方法：根据原始本地路径返回服务器/CDN 地址 ──────────────────────────

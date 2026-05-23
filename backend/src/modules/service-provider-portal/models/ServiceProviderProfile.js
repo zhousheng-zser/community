@@ -63,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       comment: 'Logo'
     },
+    shop_front_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true,
+      comment: '门店封面/门头照'
+    },
     status: {
       type: DataTypes.STRING(20),
       allowNull: false,

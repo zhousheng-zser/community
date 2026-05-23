@@ -1,6 +1,8 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
 const { sensitiveCheck } = require('../../utils/sensitiveWords.js');
+const { getPostCommunityId } = require('../../utils/communityPortal.js');
 
 Page({
     data: {
@@ -79,7 +81,41 @@ Page({
         if (!passed) return;
     },
 
-    doSubmitPost(content, location, images) {
+    async ensureCommunityBeforePost() {
+        const cid = getPostCommunityId(app);
+        if (!cid) {
+            wx.showModal({
+                title: '需要绑定小区',
+                content: '社区帖子按小区展示。请先在首页顶部选点「合川路」等服务站点，或联系客服绑定所属小区后再发布。',
+                showCancel: false,
+                confirmText: '去首页选点'
+            });
+            return null;
+        }
+        const user = (app.globalData && app.globalData.user) || {};
+        const bound = user.communityId ?? user.community_id;
+        if (bound == null || bound === '') {
+            try {
+                await api.user.updateProfileFields({ community_id: cid });
+                app.globalData.user = Object.assign({}, user, {
+                    communityId: cid,
+                    community_id: cid
+                });
+                wx.setStorageSync('user_community_id', String(cid));
+            } catch (e) {
+                console.warn('[publish] sync community_id', e);
+            }
+        }
+        return cid;
+    },
+
+    async doSubmitPost(content, location, images) {
+        const communityId = await this.ensureCommunityBeforePost();
+        if (!communityId) {
+            this.setData({ isSubmitting: false });
+            return;
+        }
+
         this.setData({ isSubmitting: true });
         wx.showLoading({ title: '发布中', mask: true });
 
@@ -91,7 +127,8 @@ Page({
                     content: content,
                     location: location,
                     images: uploadedUrls,
-                    category: this.data.category
+                    category: this.data.category,
+                    community_id: communityId
                 });
             })
             .then(() => {

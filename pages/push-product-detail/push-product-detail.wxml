@@ -40,16 +40,47 @@
   </view>
 
   <view class="bottom-bar">
-    <view class="home-btn" bindtap="goHome">
-      <text class="hb-icon">🏠</text>
-      <text class="hb-t">首页</text>
+    <view class="bar-side">
+      <view class="home-btn" bindtap="goHome">
+        <text class="hb-icon">🏠</text>
+        <text class="hb-t">首页</text>
+      </view>
+      <view class="bottom-favor" bindtap="togglePushFavorite">
+        <text class="bf-icon {{favorited ? 'on' : ''}}">{{favorited ? '★' : '☆'}}</text>
+        <text class="bf-t {{favorited ? 'on' : ''}}">收藏</text>
+      </view>
+      <view class="cart-mini" bindtap="goCart">
+        <text class="cart-mini-icon">🛒</text>
+        <text class="cart-badge" wx:if="{{cartBadge > 0}}">{{cartBadge}}</text>
+      </view>
     </view>
-    <view class="bottom-favor" bindtap="togglePushFavorite">
-      <text class="bf-icon {{favorited ? 'on' : ''}}">{{favorited ? '★' : '☆'}}</text>
-      <text class="bf-t {{favorited ? 'on' : ''}}">收藏</text>
+    <view class="bar-actions">
+      <view class="btn-add-cart" bindtap="openBuyPanel" data-type="cart">加入购物车</view>
+      <view class="btn-buy-now" bindtap="openBuyPanel" data-type="buy">立即购买</view>
     </view>
-    <text class="share">￥{{product.rebate || '0'}} 分享每单赚</text>
-    <text class="buy" bindtap="handleBuyClick">购买每单返</text>
+  </view>
+</view>
+
+<view class="panel-overlay" wx:if="{{buyPanel.show}}" bindtap="closeBuyPanel"></view>
+<view class="buy-panel" wx:if="{{buyPanel.show}}">
+  <view class="bp-close" bindtap="closeBuyPanel">✕</view>
+  <view class="bp-top">
+    <image class="bp-img" src="{{product.image}}" mode="aspectFill"></image>
+    <view class="bp-top-info">
+      <text class="bp-price">￥{{product.pay || product.price || '0'}}</text>
+      <text class="bp-selected">{{product.name}}</text>
+    </view>
+  </view>
+  <view class="bp-qty-row">
+    <text class="bp-qty-label">购买数量</text>
+    <view class="bp-qty-ctrl">
+      <view class="bp-qty-btn" bindtap="stepBuyQty" data-delta="-1">-</view>
+      <text class="bp-qty-num">{{buyPanel.qty}}</text>
+      <view class="bp-qty-btn" bindtap="stepBuyQty" data-delta="1">+</view>
+    </view>
+  </view>
+  <view class="bp-submit-btn" bindtap="confirmBuyPanel">
+    {{buyPanel.type === 'buy' ? '立即购买' : '加入购物车'}}
   </view>
 </view>
 

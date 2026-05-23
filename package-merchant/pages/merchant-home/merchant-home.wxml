@@ -1,13 +1,20 @@
 <view class="portal-page">
   <view class="portal-top merchant-gradient mh-hero">
     <view class="mh-row">
-      <image class="mh-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+      <view class="hero-avatar-wrap" bindtap="onEditAvatar">
+        <image class="mh-avatar hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
+        <text class="avatar-edit-badge">换头像</text>
+      </view>
       <view class="mh-text">
         <text class="mh-greet">{{greeting}}，{{displayName}}</text>
         <text class="portal-sub mh-sub">{{merchantOk ? '直约到家 · 店铺商品与订单' : '完成入驻即可经营店铺与直约服务'}}</text>
       </view>
     </view>
-    <text class="portal-title mh-title">服务商工作台</text>
+    <text class="portal-title mh-title">集市商家工作台</text>
+    <view class="hero-cover-strip" wx:if="{{merchantOk}}" bindtap="onEditCover">
+      <image class="hero-cover-img" src="{{coverImage || userPhoto}}" mode="aspectFill"></image>
+      <text class="cover-edit-badge">换店铺封面</text>
+    </view>
   </view>
 
   <view class="portal-banner {{merchantOk ? 'banner-ok' : 'banner-warn'}}" wx:if="{{bannerText}}">

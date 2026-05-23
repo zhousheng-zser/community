@@ -57,11 +57,24 @@ Page({
     // 超时倒计时
     autoConfirmCountdown: null,
     autoConfirmDeadline: null,
-    countdownTimerId: null
+    countdownTimerId: null,
+
+    delivery: null,
+    deliveryPollTimer: null
   },
 
   onUnload() {
     orderTimeout.clearCountdownTimer(this.data.countdownTimerId);
+    if (this.data.deliveryPollTimer) {
+      clearInterval(this.data.deliveryPollTimer);
+    }
+  },
+
+  onShow() {
+    if (this.data.orderNo && this.data.delivery && this.data.delivery.has_delivery) {
+      this.refreshDeliveryTrack();
+      this._startDeliveryPoll();
+    }
   },
 
   onLoad(options) {
@@ -147,6 +160,45 @@ Page({
       }))
     });
     this.initCountdown(order);
+
+    const delivery = detail.delivery || null;
+    this.setData({ delivery });
+    if (delivery && delivery.has_delivery) {
+      this.refreshDeliveryTrack();
+      this._startDeliveryPoll();
+    }
+  },
+
+  _startDeliveryPoll() {
+    if (this.data.deliveryPollTimer) clearInterval(this.data.deliveryPollTimer);
+    const d = this.data.delivery;
+    if (!d || !d.has_delivery) return;
+    if (d.provider === 'self' && d.job_status === 'delivered') return;
+    if (d.job_status === 'delivered') return;
+    const timer = setInterval(() => this.refreshDeliveryTrack(), 15000);
+    this.setData({ deliveryPollTimer: timer });
+  },
+
+  async refreshDeliveryTrack() {
+    const { orderNo, fromMerchant } = this.data;
+    if (!orderNo) return;
+    try {
+      const res = fromMerchant
+        ? await api.merchant.getDeliveryTrack(orderNo)
+        : await api.market.getDeliveryTrack(orderNo);
+      const view = res.data || res;
+      if (view && view.has_delivery) {
+        this.setData({ delivery: view });
+        if (view.job_status === 'delivered') {
+          if (this.data.deliveryPollTimer) {
+            clearInterval(this.data.deliveryPollTimer);
+            this.setData({ deliveryPollTimer: null });
+          }
+        }
+      }
+    } catch (e) {
+      /* ignore */
+    }
   },
 
   initCountdown(o) {
@@ -372,11 +424,15 @@ Page({
   },
 
   async viewLogistics() {
+    await this.refreshDeliveryTrack();
+    if (this.data.delivery && this.data.delivery.has_delivery) {
+      wx.pageScrollTo({ selector: '#delivery-track-card', duration: 300 });
+      return;
+    }
     try {
       const logisticsRes = await api.market.getOrderLogistics(this.data.orderNo);
       const trackingNo = logisticsRes.tracking_no || logisticsRes.trackingNo;
       const company = logisticsRes.company || logisticsRes.express_company;
-
       wx.navigateTo({
         url: `/pages/order-logistics/order-logistics?orderNo=${this.data.orderNo}&trackingNo=${trackingNo}&company=${company}`
       });

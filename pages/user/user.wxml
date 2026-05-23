@@ -51,7 +51,23 @@
         <text class="hstat-num">{{footprintCount}}</text>
         <text class="hstat-label">足迹</text>
       </navigator>
+      <view class="hstat-divider"></view>
+      <view class="hstat" bindtap="goCart">
+        <view class="hstat-icon-wrap hstat-icon-wrap--cart">
+          <image class="hstat-icon-img hstat-icon-img--cart" src="/img/my_orders/market_order.png" mode="aspectFit"></image>
+        </view>
+        <text class="hstat-num">{{cartCount}}</text>
+        <text class="hstat-label">购物车</text>
+      </view>
     </view>
+  </view>
+
+  <view class="bind-community-card" wx:if="{{loggedIn}}" bindtap="goBindCommunity">
+    <view class="bind-left">
+      <text class="bind-title">绑定小区</text>
+      <text class="bind-sub">{{boundCommunityName || '未绑定，点击选择'}}</text>
+    </view>
+    <text class="bind-arrow">›</text>
   </view>
 
   <navigator class="wallet-card" url="../account/account">

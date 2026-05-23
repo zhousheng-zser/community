@@ -6,6 +6,8 @@ const workerOrderUi = require('../../utils/workerOrderUi.js');
 const workerCtx = require('../../utils/workerContext.js');
 const api = require('../../../api/index.js');
 const balance = require('../../../utils/balance.js');
+const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
+const portalHandlers = createPortalCoverHandlers('worker');
 
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -29,9 +31,13 @@ Page({
     workerIndustry: '',
     workerSubtitle: '',
     userPhoto: DEF_AVATAR,
+    coverImage: '',
     balanceText: '',
     loggedIn: false
   },
+
+  onEditAvatar: portalHandlers.onEditAvatar,
+  onEditCover: portalHandlers.onEditCover,
 
   onShow() {
     this.loadWorkerIdentity();
@@ -148,6 +154,7 @@ Page({
         ? (workerName ? `当前技工身份：${workerName}` : '欢迎使用技工工作台，可在「订单」中处理派单')
         : '完成技工入驻审核后可接单'
     });
+    await portalHandlers.loadPortalCoverImages.call(this, 'worker', workerOk);
   },
 
   async loadStats() {

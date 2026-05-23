@@ -284,9 +284,26 @@ exports.createPost = async (req, res) => {
         const cat = category || req.query.category || '热门话题';
 
         const user = await User.findByPk(userId, { attributes: ['community_id'] });
-        const commId = user && user.community_id != null ? parseInt(user.community_id, 10) : null;
+        let commId = user && user.community_id != null ? parseInt(user.community_id, 10) : null;
+        if (!Number.isFinite(commId) || commId <= 0) commId = null;
+
+        const bodyCid = req.body.community_id != null ? req.body.community_id : req.body.communityId;
+        if (!commId && bodyCid != null && bodyCid !== '') {
+            const parsed = parseInt(bodyCid, 10);
+            if (Number.isFinite(parsed) && parsed > 0) {
+                commId = parsed;
+                if (user) {
+                    user.community_id = parsed;
+                    await user.save();
+                }
+            }
+        }
+
         if (!commId) {
-            return res.status(400).json({ error: '请先绑定所属小区后再发帖' });
+            return res.status(400).json({
+                error: '请先绑定所属小区后再发帖',
+                errmsg: '请先在首页选择合川路等服务站点，或联系管理员绑定小区'
+            });
         }
 
         // 解析通过 multer 上传的图片路径，或者直接使用前端传过来的已上传的图片URL数组

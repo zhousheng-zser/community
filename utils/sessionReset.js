@@ -14,6 +14,7 @@ const USER_SESSION_KEYS = [
   'token',
   'login_channel',
   'user',
+  'login_via_phone',
   'user_community_id',
   'community_id',
   'address_list'

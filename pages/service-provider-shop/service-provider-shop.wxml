@@ -42,10 +42,23 @@
 </view>
 
 <view class="sps-bar">
-  <view class="sps-fav {{favorited ? 'sps-fav-active' : ''}}" bindtap="toggleFavorite">
-    <text class="sps-fav-icon">{{favorited ? '★' : '☆'}}</text>
-    <text class="sps-fav-text">{{favorited ? '已收藏' : '收藏'}}</text>
+  <view class="sps-bar-left">
+    <view class="sps-fav {{favorited ? 'sps-fav-active' : ''}}" bindtap="toggleFavorite">
+      <text class="sps-fav-icon">{{favorited ? '★' : '☆'}}</text>
+      <text class="sps-fav-text">{{favorited ? '已收藏' : '收藏'}}</text>
+    </view>
+    <view class="sps-cart-icon-wrap {{cartCount > 0 ? 'active' : ''}}">
+      <text class="sps-cart-icon">🛒</text>
+      <text class="sps-cart-dot" wx:if="{{cartCount > 0}}">{{cartCount}}</text>
+    </view>
   </view>
-  <view class="sps-total">合计 ￥{{totalText}}</view>
-  <view class="sps-go" bindtap="checkout">去结算</view>
+  <view class="sps-bar-mid">
+    <text class="sps-total" wx:if="{{cartCount > 0}}">￥{{totalText}}</text>
+    <text class="sps-total empty" wx:else>未选购服务</text>
+    <text class="sps-bar-desc">直约到家 · 可打包下单</text>
+  </view>
+  <view class="sps-bar-actions">
+    <view class="sps-add-cart {{cartCount > 0 ? 'active' : ''}}" bindtap="goAddToGlobalCart">加入购物车</view>
+    <view class="sps-go {{cartCount > 0 ? 'active' : ''}}" bindtap="checkout">去结算</view>
+  </view>
 </view>

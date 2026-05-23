@@ -115,6 +115,7 @@ Page({
           sessionReset.clearAllUserSession();
           wx.removeStorageSync('manual_logged_out');
           wx.setStorageSync('login_channel', 'wechat');
+          wx.setStorageSync('login_via_phone', '1');
           wx.setStorageSync('token', data.token || data.data?.token);
           setTimeout(() => {
             wx.reLaunch({ url: '/pages/index/index' });

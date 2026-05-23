@@ -337,6 +337,13 @@
   color: #78716c;
 }
 
+.m-order-carrier {
+  font-size: 22rpx;
+  color: #ff7a00;
+  display: block;
+  margin-top: 4rpx;
+}
+
 .m-order-buyer {
   font-size: 24rpx;
   color: #57534e;

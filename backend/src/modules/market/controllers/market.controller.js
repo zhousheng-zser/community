@@ -248,7 +248,10 @@ exports.getShopDetail = async (req, res) => {
     ok(res, {
       id: shop.id,
       name: shop.name,
-      logo: shop.logo,
+      logo: shop.logo || shop.logo_url || '',
+      logo_url: shop.logo_url || shop.logo || '',
+      cover_url: shop.cover_url || shop.cover || '',
+      cover: shop.cover_url || shop.cover || '',
       contact_name: shop.contact_name,
       contact_phone: shop.contact_phone,
       address: shop.address,
@@ -411,6 +414,64 @@ exports.getShopContact = async (req, res) => {
   }
 };
 
+function mapCartGoods(g) {
+  if (!g) return null;
+  const onSale = g.status === 'on_sale' && g.is_published !== false && g.is_published !== 0;
+  return {
+    id: g.id,
+    name: g.name,
+    title: g.title || g.name,
+    image: g.main_image,
+    main_image: g.main_image,
+    price: String(g.price),
+    stock: g.stock,
+    status: g.status,
+    is_published: g.is_published,
+    invalid: !onSale || Number(g.stock) <= 0
+  };
+}
+
+function mapCartRow(r, goodsMap, shopMap) {
+  const g = goodsMap.get(Number(r.goods_id));
+  const shop = shopMap.get(Number(r.shop_id));
+  const goods = mapCartGoods(g);
+  const price = goods ? Number(goods.price) || 0 : 0;
+  const qty = Number(r.quantity) || 0;
+  return {
+    id: r.id,
+    shop_id: r.shop_id,
+    shop_name: shop ? shop.name : '',
+    goods_id: r.goods_id,
+    quantity: qty,
+    subtotal: (price * qty).toFixed(2),
+    invalid: !goods || goods.invalid,
+    goods
+  };
+}
+
+// GET /market/cart/summary
+exports.getCartSummary = async (req, res) => {
+  try {
+    await ensureMarketTables();
+    const userId = getUserId(req);
+    if (!userId) return fail(res, '未登录', 401);
+    const rows = await MarketCartItem.findAll({
+      where: { user_id: userId },
+      attributes: ['quantity', 'shop_id']
+    });
+    const itemCount = rows.reduce((s, r) => s + Number(r.quantity || 0), 0);
+    const shopIds = [...new Set(rows.map((r) => Number(r.shop_id)).filter(Boolean))];
+    ok(res, {
+      item_count: itemCount,
+      sku_count: rows.length,
+      shop_count: shopIds.length
+    });
+  } catch (err) {
+    console.error('[market/cart/summary]', err);
+    fail(res, '获取购物车数量失败', 500);
+  }
+};
+
 // GET /market/cart
 exports.getCart = async (req, res) => {
   try {
@@ -422,29 +483,50 @@ exports.getCart = async (req, res) => {
     if (shopId) where.shop_id = shopId;
     const rows = await MarketCartItem.findAll({ where, order: [['created_at', 'DESC']] });
     const goodsIds = [...new Set(rows.map((r) => Number(r.goods_id)).filter(Boolean))];
-    const goodsRows = goodsIds.length ? await MerchantGoods.findAll({ where: { id: goodsIds } }) : [];
+    const shopIds = [...new Set(rows.map((r) => Number(r.shop_id)).filter(Boolean))];
+    const [goodsRows, shopRows] = await Promise.all([
+      goodsIds.length ? MerchantGoods.findAll({ where: { id: goodsIds } }) : [],
+      shopIds.length ? MerchantShop.findAll({ where: { id: shopIds } }) : []
+    ]);
     const goodsMap = new Map(goodsRows.map((g) => [Number(g.id), g]));
+    const shopMap = new Map(shopRows.map((s) => [Number(s.id), s]));
+    const list = rows.map((r) => mapCartRow(r, goodsMap, shopMap));
+
+    const itemCount = list.reduce((s, it) => s + Number(it.quantity || 0), 0);
+    let groups = null;
+    if (!shopId) {
+      const byShop = new Map();
+      list.forEach((item) => {
+        const sid = Number(item.shop_id);
+        if (!byShop.has(sid)) {
+          const shop = shopMap.get(sid);
+          byShop.set(sid, {
+            shop_id: sid,
+            shop_name: shop ? shop.name : (item.shop_name || '店铺'),
+            shop_logo: shop && (shop.logo || shop.cover_image) ? (shop.logo || shop.cover_image) : '',
+            items: [],
+            subtotal: '0.00',
+            item_count: 0
+          });
+        }
+        const g = byShop.get(sid);
+        g.items.push(item);
+        if (!item.invalid) {
+          g.item_count += Number(item.quantity || 0);
+          g.subtotal = (Number(g.subtotal) + Number(item.subtotal || 0)).toFixed(2);
+        }
+      });
+      groups = Array.from(byShop.values());
+    }
+
     ok(res, {
-      list: rows.map((r) => {
-        const g = goodsMap.get(Number(r.goods_id));
-        return {
-          id: r.id,
-          shop_id: r.shop_id,
-          goods_id: r.goods_id,
-          quantity: r.quantity,
-          goods: g ? {
-            id: g.id,
-            name: g.name,
-            title: g.title || g.name,
-            image: g.main_image,
-            main_image: g.main_image,
-            price: String(g.price),
-            stock: g.stock,
-            status: g.status,
-            is_published: g.is_published
-          } : null
-        };
-      })
+      list,
+      groups,
+      summary: {
+        item_count: itemCount,
+        sku_count: list.length,
+        shop_count: shopId ? 1 : shopIds.length
+      }
     });
   } catch (err) {
     console.error('[market/cart/get]', err);
@@ -526,8 +608,8 @@ exports.clearCart = async (req, res) => {
     const shopId = Number(req.query.shop_id || req.query.shopId || 0);
     const where = { user_id: userId };
     if (shopId) where.shop_id = shopId;
-    await MarketCartItem.destroy({ where });
-    ok(res, { cleared: true }, '已清空购物车');
+    const deleted = await MarketCartItem.destroy({ where });
+    ok(res, { cleared: true, deleted_count: deleted, shop_id: shopId || null }, shopId ? '已清空该店购物车' : '已清空全部购物车');
   } catch (err) {
     console.error('[market/cart/clear]', err);
     fail(res, '清空购物车失败', 500);
@@ -623,7 +705,19 @@ exports.createOrder = async (req, res) => {
     const addressObj = (body.address && typeof body.address === 'object') ? body.address : {};
     const receiverName = String(body.receiver_name || addressObj.receiver_name || addressObj.name || '').trim() || null;
     const receiverPhone = String(body.receiver_phone || addressObj.receiver_phone || addressObj.phone || '').trim() || null;
-    const receiverAddress = String(body.receiver_address || addressObj.receiver_address || addressObj.address || body.address || '').trim() || null;
+    let receiverAddress = String(
+      body.receiver_address || addressObj.receiver_address || addressObj.address || ''
+    ).trim();
+    if (!receiverAddress && addressObj.detail) {
+      receiverAddress = [addressObj.province, addressObj.city, addressObj.district, addressObj.detail]
+        .filter(Boolean)
+        .join('');
+    }
+    receiverAddress = receiverAddress || null;
+    const receiverLat = addressObj.latitude != null ? Number(addressObj.latitude)
+      : (body.receiver_latitude != null ? Number(body.receiver_latitude) : null);
+    const receiverLng = addressObj.longitude != null ? Number(addressObj.longitude)
+      : (body.receiver_longitude != null ? Number(body.receiver_longitude) : null);
     if (deliveryMode === 'express' && (!receiverPhone || !receiverAddress)) {
       await t.rollback();
       return fail(res, '配送订单请填写收货电话和地址');
@@ -693,6 +787,8 @@ exports.createOrder = async (req, res) => {
       receiver_name: receiverName,
       receiver_phone: receiverPhone,
       receiver_address: receiverAddress,
+      receiver_latitude: Number.isFinite(receiverLat) ? receiverLat : null,
+      receiver_longitude: Number.isFinite(receiverLng) ? receiverLng : null,
       remark: String(body.remark || '').trim() || null,
       expired_at: new Date(Date.now() + 30 * 60 * 1000)
     }, { transaction: t });
@@ -815,7 +911,15 @@ exports.getOrderDetail = async (req, res) => {
         unit_price_snapshot: Number(it.unit_price_snapshot).toFixed(2),
         quantity: it.quantity
       })),
-      fulfillment_events: []
+      fulfillment_events: [],
+      delivery: await (async () => {
+        try {
+          const deliverySvc = require('../../../services/marketDelivery.service');
+          return await deliverySvc.getDeliveryView(orderNo);
+        } catch (e) {
+          return { has_delivery: false, timeline: [] };
+        }
+      })()
     });
   } catch (err) {
     console.error('[market/orders/detail]', err);
@@ -923,12 +1027,16 @@ exports.getLogistics = async (req, res) => {
     const orderNo = String(req.params.orderNo || '').trim();
     const row = await MarketOrder.findOne({ where: { order_no: orderNo, user_id: userId } });
     if (!row) return fail(res, '订单不存在', 404);
+    const delivery = require('../../../services/marketDelivery.service');
+    const view = await delivery.getDeliveryView(orderNo);
+    const brand = view.brand || (view.provider_name || '配送');
     ok(res, {
       order_no: orderNo,
-      company: '社区配送',
-      tracking_no: `LOCAL-${orderNo}`,
+      company: view.has_delivery ? brand : '社区配送',
+      tracking_no: view.external_order_no || `LOCAL-${orderNo}`,
       status: row.order_status,
-      timeline: []
+      delivery: view,
+      timeline: view.timeline || []
     });
   } catch (err) {
     console.error('[market/orders/logistics]', err);

@@ -1,101 +1,43 @@
 <view class="container">
-  <!-- 我的角色 -->
+  <!-- 申请成为合伙人 -->
   <view class="section">
-    <view class="section-title">我的角色</view>
-    <view class="role-list" wx:if="{{partnerInfo && partnerInfo.roles.length > 0}}">
-      <view class="role-badge" wx:for="{{partnerInfo.role_details}}" wx:key="role">
-        <view class="role-icon">
-          <text>{{item.role === 'promoter' ? '📢' : item.role === 'district_partner' ? '🏛️' : '🏢'}}</text>
-        </view>
-        <view class="role-info">
-          <text class="role-name">{{item.role_name}}</text>
-          <text class="role-status" wx:if="{{item.status === 'pending_approval'}}">审核中</text>
-          <text class="role-status active" wx:if="{{item.status === 'active'}}">已生效</text>
-        </view>
+    <view class="section-title">申请成为合伙人</view>
+    <view class="status-tip approved" wx:if="{{isPartner}}">您已是合伙人，可分享邀请码发展好友</view>
+    <view class="status-tip pending" wx:elif="{{application && application.status === 'pending'}}">资料已提交，审核中</view>
+
+    <block wx:if="{{!isPartner && (!application || application.status === 'rejected')}}">
+      <view class="form-row">
+        <text class="form-label required">真实姓名</text>
+        <input class="form-input" placeholder="请输入真实姓名" value="{{form.realName}}" bindinput="onInput" data-key="realName" maxlength="20" />
       </view>
-    </view>
-    <view class="no-role" wx:if="{{partnerInfo && partnerInfo.roles.length === 0}}">
-      <text>暂无合伙人角色</text>
-      <button class="btn-apply" size="mini" bindtap="applyPromoter">申请成为推广者</button>
-    </view>
+      <view class="form-row">
+        <text class="form-label required">手机号</text>
+        <input class="form-input" type="number" placeholder="请输入手机号" value="{{form.phone}}" bindinput="onInput" data-key="phone" maxlength="11" />
+      </view>
+      <view class="form-row">
+        <text class="form-label required">所在城市</text>
+        <input class="form-input" placeholder="如：上海市闵行区" value="{{form.city}}" bindinput="onInput" data-key="city" maxlength="50" />
+      </view>
+      <view class="form-row">
+        <text class="form-label">申请说明</text>
+        <textarea class="form-textarea" placeholder="可简述推广计划或资源（选填）" value="{{form.remark}}" bindinput="onInput" data-key="remark" maxlength="200" />
+      </view>
+      <button class="btn-submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submitApply">提交申请</button>
+    </block>
   </view>
 
-  <!-- 上游关系 -->
+  <!-- 我的邀请码 -->
   <view class="section">
-    <view class="section-title">我的上游</view>
-    <view class="chain-card" wx:if="{{chain}}">
-      <view class="chain-item" wx:if="{{chain.district_partner}}">
-        <view class="chain-avatar">
-          <image src="{{chain.district_partner.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
-        </view>
-        <view class="chain-info">
-          <text class="chain-name">{{chain.district_partner.nickname || '区县合伙人'}}</text>
-          <text class="chain-role">区县合伙人</text>
-        </view>
-      </view>
-      <view class="chain-item" wx:if="{{chain.market_partner}}">
-        <view class="chain-avatar">
-          <image src="{{chain.market_partner.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
-        </view>
-        <view class="chain-info">
-          <text class="chain-name">{{chain.market_partner.nickname || '市场合伙人'}}</text>
-          <text class="chain-role">市场合伙人</text>
-        </view>
-      </view>
-      <view class="chain-empty" wx:if="{{!chain.district_partner && !chain.market_partner}}">
-        <text>暂无上游合伙人</text>
+    <view class="section-title">我的邀请码</view>
+    <view class="invite-card" wx:if="{{inviteCode}}">
+      <text class="invite-code" bindtap="copyInviteCode">{{inviteCode}}</text>
+      <text class="invite-hint">好友注册时填写此邀请码即可绑定</text>
+      <view class="invite-actions">
+        <button class="btn-copy" size="mini" bindtap="copyInviteCode">复制邀请码</button>
       </view>
     </view>
-  </view>
-
-  <!-- 下游 -->
-  <view class="section">
-    <view class="section-header">
-      <view class="section-title">我的下线 ({{downlineCount}})</view>
-    </view>
-    <view class="downline-card" wx:if="{{downlineCount > 0}}">
-      <view class="downline-item" wx:for="{{downlines}}" wx:key="id">
-        <image class="downline-avatar" src="{{item.avatar_url || 'https://jshsp1.eds-tech.cn/uploads/file-1773395942165-45947155.png'}}" mode="aspectFill" />
-        <view class="downline-info">
-          <text class="downline-name">{{item.nickname || '微信用户'}}</text>
-          <text class="downline-time">{{item.created_at}}</text>
-        </view>
-      </view>
-      <view class="downline-more" wx:if="{{downlineCount > 5}}" bindtap="showDownlines">
-        查看全部 {{downlineCount}} 位
-      </view>
-    </view>
-  </view>
-
-  <!-- 推广工具 -->
-  <view class="section">
-    <view class="section-title">推广工具</view>
-    <view class="tool-card">
-      <view class="tool-item" bindtap="goUserCode">
-        <view class="tool-icon">📱</view>
-        <view class="tool-info">
-          <text class="tool-name">邀请码</text>
-          <text class="tool-desc">分享邀请码，好友通过邀请码注册成为你的下线</text>
-        </view>
-      </view>
-      <view class="tool-item" bindtap="copyInviteCode">
-        <view class="tool-icon">📋</view>
-        <view class="tool-info">
-          <text class="tool-name">复制邀请码</text>
-          <text class="tool-desc">快速复制你的专属邀请码</text>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 分佣说明 -->
-  <view class="section">
-    <view class="section-title">分佣说明</view>
-    <view class="notice-card">
-      <view class="notice-item">📢 推广者：发展下线用户，获取其消费佣金</view>
-      <view class="notice-item">🏛️ 区县合伙人：管辖区域内所有推广者佣金分成</view>
-      <view class="notice-item">🏢 市场合伙人：管辖市场内所有推广者佣金分成</view>
-      <view class="notice-item">🏪 总部：平台管理费</view>
+    <view class="invite-loading" wx:else>
+      <text>{{loadingInvite ? '加载中…' : '登录后可查看邀请码'}}</text>
     </view>
   </view>
 </view>

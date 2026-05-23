@@ -7,12 +7,38 @@
     </view>
   </view>
 
-  <!-- 待收货/待评价展示物流缩略 -->
-  <view class="card logistics-preview" wx:if="{{status === 'pending_receipt' || status === 'pending_review'}}" bindtap="viewLogistics">
+  <!-- 配送进度（美团/饿了么/自配送） -->
+  <view class="card delivery-card" id="delivery-track-card" wx:if="{{delivery && delivery.has_delivery}}">
+    <view class="delivery-head">
+      <text class="sectionTitle">配送进度</text>
+      <text class="delivery-brand">{{delivery.provider_name}}</text>
+    </view>
+    <view class="delivery-status-row">
+      <text class="delivery-status">{{delivery.job_status_text}}</text>
+      <text class="delivery-mock" wx:if="{{delivery.mock_mode}}">演示</text>
+    </view>
+    <view class="delivery-meta" wx:if="{{delivery.external_order_no}}">
+      <text>运单号 {{delivery.external_order_no}}</text>
+    </view>
+    <view class="delivery-meta" wx:if="{{delivery.rider_name}}">
+      <text>骑手 {{delivery.rider_name}} {{delivery.rider_phone}}</text>
+    </view>
+    <view class="track-list">
+      <view class="track-item" wx:for="{{delivery.timeline}}" wx:key="status_code">
+        <view class="track-dot"></view>
+        <view class="track-body">
+          <text class="track-title">{{item.status_text}}</text>
+          <text class="track-time" wx:if="{{item.created_at}}">{{item.created_at}}</text>
+          <text class="track-note" wx:if="{{item.note}}">{{item.note}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card logistics-preview" wx:elif="{{status === 'pending_receipt' || status === 'pending_service'}}" bindtap="viewLogistics">
     <view class="log-icon">🚚</view>
     <view class="log-info">
-      <text class="log-desc">您的订单已到达【社区集散中心】</text>
-      <text class="log-time">2026-11-11 12:30:00</text>
+      <text class="log-desc">点击查看配送信息</text>
     </view>
     <text class="arrow">></text>
   </view>

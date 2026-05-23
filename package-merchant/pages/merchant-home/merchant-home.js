@@ -4,6 +4,8 @@ const { unwrapList } = util;
 const rp = require('../../../utils/rolePortals.js');
 const mshop = require('../../utils/merchantShopContext.js');
 const api = require('../../../api/index.js');
+const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
+const portalHandlers = createPortalCoverHandlers('merchant');
 
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -34,10 +36,14 @@ Page({
     greeting: '你好',
     displayName: '商家',
     userPhoto: DEF_AVATAR,
+    coverImage: '',
     orderStats: null,
     goodsCount: 0,
     lowStockCount: 0
   },
+
+  onEditAvatar: portalHandlers.onEditAvatar,
+  onEditCover: portalHandlers.onEditCover,
 
   async onShow() {
     this.refresh();
@@ -45,6 +51,7 @@ Page({
       try { await api.merchant.exchangeMerchantToken(); } catch (e) {}
       this.loadOrderStats();
       this.loadGoodsStats();
+      await portalHandlers.loadPortalCoverImages.call(this, 'merchant', true);
     }
   },
 

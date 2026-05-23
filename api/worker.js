@@ -20,6 +20,11 @@ const getWorkerApplication = () => {
   return get('/worker/application/me');
 };
 
+/** 工作台头像与封面 */
+const getMyProfile = () => get('/worker/profile/me');
+
+const updateMyProfile = (data) => patch('/worker/profile/me', data);
+
 /**
  * 获取订单列表
  * GET /worker/service-orders
@@ -113,6 +118,8 @@ const deleteService = (id) => {
 module.exports = {
   applyWorker,
   getWorkerApplication,
+  getMyProfile,
+  updateMyProfile,
   getOrders,
   getOrderDetail,
   acceptOrder,

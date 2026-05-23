@@ -12,11 +12,14 @@ const { listImageFromHome3, resolveServiceListImage } = require('../../utils/ser
 const { mapWorkerForHomeCard } = require('../../utils/workerApiMap.js');
 const {
   getActiveCommunityId,
+  isManualLocationPick,
+  applyPortalCommunityFromLocation,
   fetchWorkerRows,
   fetchServiceProviderRows,
   mapServiceProviderForHomeCard
 } = require('../../utils/communityPortal.js');
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
+const { pickHeroFromApi, getThemeBannerPath } = require('../../utils/benefitAllianceHero.js');
 const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
 
 /** 惠民卡 · 肯德基/星巴克/百果园：与「京东联盟」区块同一套字段（头图 + 精选网格 + GO） */
@@ -27,14 +30,19 @@ function mapChainBrandToAllianceSection(raw, imgUrlFn) {
   const keyword = (raw.keyword != null ? String(raw.keyword) : '').trim();
   const miniAppId = (raw.miniAppId || raw.mini_app_id || '').trim();
   const miniPath = (raw.miniPath || raw.mini_path || '').trim();
-  const imgByKey = {
+  const heroByKey = {
+    kfc: images.benefitChainKfcHero,
+    xbk: images.benefitChainXbkHero,
+    bgy: images.benefitChainBgyHero
+  };
+  const cardByKey = {
     kfc: images.benefitChainKfc,
     xbk: images.benefitChainXbk,
     bgy: images.benefitChainBgy
   };
-  const imgRaw = (raw.imageUrl || raw.image_url || '').trim() || imgByKey[key] || '';
-  const cardImage = imgRaw ? imgUrlFn(imgRaw) : imgUrlFn(images.benefitJdAllianceHero);
-  const banner = cardImage;
+  const imgRaw = (raw.imageUrl || raw.image_url || '').trim() || cardByKey[key] || '';
+  const cardImage = imgRaw ? imgUrlFn(imgRaw) : imgUrlFn(cardByKey[key] || images.benefitChainKfc);
+  const banner = imgUrlFn(heroByKey[key] || cardByKey[key] || images.benefitJdAllianceHero);
   return {
     key,
     title,
@@ -244,6 +252,24 @@ Page({
       });
     }
     this._maybeRefreshMarketAfterAddressChange();
+    if (isManualLocationPick()) {
+      try {
+        const text =
+          wx.getStorageSync('portal_last_location_text') ||
+          wx.getStorageSync('market_location_label') ||
+          '';
+        if (text) this._applyPortalCommunityFromLocation({ name: text, label: text }, { manual: true });
+      } catch (e) {
+        /* ignore */
+      }
+    } else if (getActiveCommunityId(app) == null) {
+      try {
+        const locLabel = wx.getStorageSync('market_location_label');
+        if (locLabel) this._applyPortalCommunityFromLocation({ label: locLabel }, { manual: false });
+      } catch (e) {
+        /* ignore */
+      }
+    }
     // 节流：30 秒内切换 Tab 不重复刷新，避免图片因 setData 重渲染而闪白
     const PORTAL_REFRESH_COOLDOWN_MS = 30 * 1000;
     const now = Date.now();
@@ -252,6 +278,36 @@ Page({
       this._lastPortalRefreshTime = now;
       this.refreshPortalListsForCommunity();
     }
+  },
+
+  /**
+   * 地图选点 / 地址吸附 → 直约小区；主动选点且不在运营范围时清空直约列表
+   * @returns {boolean} 是否匹配到运营站点
+   */
+  async _applyPortalCommunityFromLocation(loc, options) {
+    const matched = await applyPortalCommunityFromLocation(loc, options);
+    if (matched) {
+      const cid = getActiveCommunityId(getApp());
+      if (cid != null) this._syncUserCommunityId(cid);
+    }
+    this.refreshPortalListsForCommunity();
+    return matched;
+  },
+
+  /** 首页选点匹配到运营站点时，同步写入用户资料，便于社区发帖 */
+  _syncUserCommunityId(communityId) {
+    const cid = Number(communityId);
+    if (!Number.isFinite(cid) || cid <= 0) return;
+    const app = getApp();
+    const user = (app.globalData && app.globalData.user) || {};
+    if (user.communityId === cid || user.community_id === cid) return;
+    api.user.updateProfileFields({ community_id: cid }).then(() => {
+      app.globalData.user = Object.assign({}, user, {
+        communityId: cid,
+        community_id: cid
+      });
+      try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+    }).catch(() => {});
   },
 
   /** 按当前小区刷新「直约技工」「直约服务商」（与查看全部页同源） */
@@ -423,6 +479,7 @@ Page({
           if (snapLabel) {
             util.setMarketLocationLabel(snapLabel);
             this.setData({ currentCity: snapLabel });
+            this._applyPortalCommunityFromLocation({ label: snapLabel }, { manual: false });
           } else {
             util.removeMarketLocationLabel();
             this.setData({ currentCity: '已定位' });
@@ -438,6 +495,10 @@ Page({
               util.setMarketLocationLabel(fallback.label);
               if (fallback.id != null) util.setMarketSnapInfo(fallback.id, fallback.dKm);
               this.setData({ currentCity: fallback.label });
+              this._applyPortalCommunityFromLocation(
+                { label: fallback.label, address: fallback.label },
+                { manual: false }
+              );
               resolve({ hasCoords: true });
               return;
             }
@@ -508,7 +569,7 @@ Page({
   /** 用户主动选点：覆盖自动定位逻辑，本地集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
   handleLocationTap() {
     wx.chooseLocation({
-      success: (res) => {
+      success: async (res) => {
         wx.setStorageSync('market_user_location_manual', 1);
         util.setMarketUserCoords(res.latitude, res.longitude);
         util.removeMarketSnapInfo();
@@ -516,10 +577,19 @@ Page({
         this.setData({ marketShopsCacheByCat: {} });
         const city = res.address ? res.address.replace(/省.*/, '').replace(/市.*/, '').slice(0, 4) : (res.name ? res.name.slice(0, 4) : '已定位');
         this.setData({ currentCity: city || '已定位' });
-        wx.showToast({
-          title: res.name ? "已定位到" + res.name : "定位已更新",
-          icon: "none"
-        });
+        const syncedCommunity = await this._applyPortalCommunityFromLocation(
+          {
+            name: res.name,
+            address: res.address,
+            latitude: res.latitude,
+            longitude: res.longitude
+          },
+          { manual: true }
+        );
+        let toastTitle = res.name ? '已定位到' + res.name : '定位已更新';
+        if (syncedCommunity) toastTitle = '已匹配服务小区';
+        else if (isManualLocationPick()) toastTitle = '当前区域暂无直约服务';
+        wx.showToast({ title: toastTitle, icon: 'none' });
         const cat = this.data.activeMarketCat;
         this.switchMarketCategory({ currentTarget: { dataset: { code: cat } } }, true);
         this.refreshLocalGoodsModulesForLocation();
@@ -1002,8 +1072,10 @@ Page({
     }
     const marketShops = mergedMarketShops.filter(s => s.cat === activeMarketCat);
 
-    let jdBanner = imgUrl(images.benefitJdAllianceHero);
-    let pddBanner = imgUrl(images.benefitPddAllianceHero);
+    let jdHero = pickHeroFromApi('jd', null, imgUrl);
+    let pddHero = pickHeroFromApi('pdd', null, imgUrl);
+    let jdBanner = jdHero.banner;
+    let pddBanner = pddHero.banner;
     let jdHeroTitle = '';
     let jdHeroSubtitle = '';
     let pddHeroTitle = '';
@@ -1036,8 +1108,9 @@ Page({
             image: x.image ? imgUrl(x.image) : ''
           }));
           jdEntry = L.jdEntry;
-          jdHeroTitle = L.jdHeroTitle;
-          jdHeroSubtitle = L.jdHeroSubtitle;
+          jdHeroTitle = L.jdHeroTitle || jdHero.title;
+          jdHeroSubtitle = L.jdHeroSubtitle || jdHero.subtitle;
+          jdBanner = getThemeBannerPath('jd', imgUrl) || jdBanner;
           useLocalJd = true;
         }
         if (L.pddGoods && L.pddGoods.length > 0) {
@@ -1046,8 +1119,9 @@ Page({
             image: x.image ? imgUrl(x.image) : ''
           }));
           pddEntry = L.pddEntry;
-          pddHeroTitle = L.pddHeroTitle;
-          pddHeroSubtitle = L.pddHeroSubtitle;
+          pddHeroTitle = L.pddHeroTitle || pddHero.title;
+          pddHeroSubtitle = L.pddHeroSubtitle || pddHero.subtitle;
+          pddBanner = getThemeBannerPath('pdd', imgUrl) || pddBanner;
           useLocalPdd = true;
         }
       } catch (e) {
@@ -1059,14 +1133,16 @@ Page({
       try {
         const disp = await util.get('benefit-alliance/display', { scene: 'benefit_card' });
         if (!useLocalJd && disp && disp.jd) {
-          if (disp.jd.image) jdBanner = imgUrl(disp.jd.image);
-          jdHeroTitle = disp.jd.title || '';
-          jdHeroSubtitle = disp.jd.subtitle || '';
+          jdHero = pickHeroFromApi('jd', disp.jd, imgUrl);
+          jdBanner = jdHero.banner;
+          jdHeroTitle = disp.jd.title || jdHero.title;
+          jdHeroSubtitle = disp.jd.subtitle || jdHero.subtitle;
         }
         if (!useLocalPdd && disp && disp.pdd) {
-          if (disp.pdd.image) pddBanner = imgUrl(disp.pdd.image);
-          pddHeroTitle = disp.pdd.title || '';
-          pddHeroSubtitle = disp.pdd.subtitle || '';
+          pddHero = pickHeroFromApi('pdd', disp.pdd, imgUrl);
+          pddBanner = pddHero.banner;
+          pddHeroTitle = disp.pdd.title || pddHero.title;
+          pddHeroSubtitle = disp.pdd.subtitle || pddHero.subtitle;
         }
       } catch (e) {
         console.warn('[惠民卡] benefit-alliance/display 失败', e && (e.errmsg || e.message || e));
@@ -1126,11 +1202,16 @@ Page({
 
     // ===== 加载美团 / 淘宝 / 闪购 / 社群 / 推销 数据 =====
     let mtGoods = [], tbGoods = [], sgGoods = [], sqGoods = [], txGoods = [];
-    let mtBanner = imgUrl(images.benefitJdAllianceHero);
-    let tbBanner = imgUrl(images.benefitJdAllianceHero);
-    let sgBanner = imgUrl(images.benefitJdAllianceHero);
-    let sqBanner = imgUrl(images.benefitJdAllianceHero);
-    let txBanner = imgUrl(images.benefitJdAllianceHero);
+    let mtHero = pickHeroFromApi('meituan', null, imgUrl);
+    let tbHero = pickHeroFromApi('taobao', null, imgUrl);
+    let sgHero = pickHeroFromApi('shangou', null, imgUrl);
+    let sqHero = pickHeroFromApi('shequn', null, imgUrl);
+    let txHero = pickHeroFromApi('tuixiao', null, imgUrl);
+    let mtBanner = mtHero.banner;
+    let tbBanner = tbHero.banner;
+    let sgBanner = sgHero.banner;
+    let sqBanner = sqHero.banner;
+    let txBanner = txHero.banner;
     let mtHeroTitle = '', mtHeroSubtitle = '';
     let tbHeroTitle = '', tbHeroSubtitle = '';
     let sgHeroTitle = '', sgHeroSubtitle = '';
@@ -1140,29 +1221,34 @@ Page({
     try {
       const disp5 = await util.get('benefit-alliance/display', { scene: 'benefit_card' });
       if (disp5 && disp5.meituan) {
-        if (disp5.meituan.image) mtBanner = imgUrl(disp5.meituan.image);
-        mtHeroTitle = disp5.meituan.title || '';
-        mtHeroSubtitle = disp5.meituan.subtitle || '';
+        mtHero = pickHeroFromApi('meituan', disp5.meituan, imgUrl);
+        mtBanner = mtHero.banner;
+        mtHeroTitle = disp5.meituan.title || mtHero.title;
+        mtHeroSubtitle = disp5.meituan.subtitle || mtHero.subtitle;
       }
       if (disp5 && disp5.taobao) {
-        if (disp5.taobao.image) tbBanner = imgUrl(disp5.taobao.image);
-        tbHeroTitle = disp5.taobao.title || '';
-        tbHeroSubtitle = disp5.taobao.subtitle || '';
+        tbHero = pickHeroFromApi('taobao', disp5.taobao, imgUrl);
+        tbBanner = tbHero.banner;
+        tbHeroTitle = disp5.taobao.title || tbHero.title;
+        tbHeroSubtitle = disp5.taobao.subtitle || tbHero.subtitle;
       }
       if (disp5 && disp5.shangou) {
-        if (disp5.shangou.image) sgBanner = imgUrl(disp5.shangou.image);
-        sgHeroTitle = disp5.shangou.title || '';
-        sgHeroSubtitle = disp5.shangou.subtitle || '';
+        sgHero = pickHeroFromApi('shangou', disp5.shangou, imgUrl);
+        sgBanner = sgHero.banner;
+        sgHeroTitle = disp5.shangou.title || sgHero.title;
+        sgHeroSubtitle = disp5.shangou.subtitle || sgHero.subtitle;
       }
       if (disp5 && disp5.shequn) {
-        if (disp5.shequn.image) sqBanner = imgUrl(disp5.shequn.image);
-        sqHeroTitle = disp5.shequn.title || '';
-        sqHeroSubtitle = disp5.shequn.subtitle || '';
+        sqHero = pickHeroFromApi('shequn', disp5.shequn, imgUrl);
+        sqBanner = sqHero.banner;
+        sqHeroTitle = disp5.shequn.title || sqHero.title;
+        sqHeroSubtitle = disp5.shequn.subtitle || sqHero.subtitle;
       }
       if (disp5 && disp5.tuixiao) {
-        if (disp5.tuixiao.image) txBanner = imgUrl(disp5.tuixiao.image);
-        txHeroTitle = disp5.tuixiao.title || '';
-        txHeroSubtitle = disp5.tuixiao.subtitle || '';
+        txHero = pickHeroFromApi('tuixiao', disp5.tuixiao, imgUrl);
+        txBanner = txHero.banner;
+        txHeroTitle = disp5.tuixiao.title || txHero.title;
+        txHeroSubtitle = disp5.tuixiao.subtitle || txHero.subtitle;
       }
       if (Array.isArray(disp5.chainBrands) && disp5.chainBrands.length > 0) {
         benefitBrandList = disp5.chainBrands.map((b) => mapChainBrandToAllianceSection(b, imgUrl));

@@ -1,6 +1,8 @@
 const app = getApp();
 const rp = require('../../../utils/rolePortals.js');
 const balance = require('../../../utils/balance.js');
+const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
+const portalHandlers = createPortalCoverHandlers('merchant');
 
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -13,6 +15,8 @@ Page({
     balanceText: '0.00',
     balanceLabel: '商家结算'
   },
+
+  onEditAvatar: portalHandlers.onEditAvatar,
 
   onShow() {
     const user = app.globalData.user || {};

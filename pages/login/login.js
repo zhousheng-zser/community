@@ -5,6 +5,7 @@ const userSession = require('../../utils/userSession.js');
 const browseFootprint = require('../../utils/browseFootprint.js');
 const api = require('../../api/index.js');
 const sessionReset = require('../../utils/sessionReset.js');
+const communityBind = require('../../utils/communityBind.js');
 
 Page({
   data: {
@@ -118,6 +119,11 @@ Page({
     wx.removeStorageSync('manual_logged_out');
     const loginChannel = channel === 'sms' || channel === 'password' || channel === 'wechat' ? channel : 'wechat';
     wx.setStorageSync('login_channel', loginChannel);
+    if (loginChannel === 'sms' || loginChannel === 'password') {
+      wx.setStorageSync('login_via_phone', '1');
+    } else {
+      wx.removeStorageSync('login_via_phone');
+    }
     wx.setStorageSync('token', data.token);
     const u = data.user || {};
     if (u.id != null) userSession.rememberUserId(u.id);
@@ -127,7 +133,7 @@ Page({
       userName: u.nickname || '微信用户',
       userPhoto: u.avatar_url || 'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0',
       realName: u.real_name || u.realName || '',
-      userMobile: u.phone || '13800000000',
+      userMobile: u.phone || '',
       userAddress: u.address || '',
       userBankNum: u.bank_num || '',
       userWxId: u.wx_id || '',
@@ -145,6 +151,8 @@ Page({
       remark2: 2,
       vipFlag: 0
     }, u);
+    const cid = u.community_id != null ? u.community_id : u.communityId;
+    if (cid != null) communityBind.applyBoundCommunityToApp(app, cid, u.community_name || '');
     browseFootprint.syncLocalToServer();
     const isNewUser = !!(data && (data.is_new_user || data.isNewUser));
     wx.showToast({ title: isNewUser ? '注册成功' : '登录成功' });

@@ -151,18 +151,40 @@ exports.updateProfile = async (req, res) => {
         const rawComm = body.community_id != null ? body.community_id : body.communityId;
         if (rawComm != null && rawComm !== '') {
             const cid = parseInt(rawComm, 10);
-            if (Number.isFinite(cid) && cid > 0) user.community_id = cid;
+            if (!Number.isFinite(cid) || cid <= 0) {
+                return res.status(400).json({ code: 1, errno: 400, msg: '无效的小区 ID' });
+            }
+            const db = require('../models');
+            const Community = db.Community;
+            if (Community) {
+                const comm = await Community.findByPk(cid, { attributes: ['id', 'status'] });
+                if (!comm || String(comm.status) !== 'active') {
+                    return res.status(400).json({ code: 1, errno: 400, msg: '小区不存在或已停用' });
+                }
+            }
+            user.community_id = cid;
         }
 
         if (req.file) {
             const baseUrl = req.protocol + '://' + req.get('host');
             user.avatar_url = baseUrl + '/uploads/' + req.file.filename;
+        } else if (body.avatar_url != null && body.avatar_url !== '') {
+            const av = String(body.avatar_url).trim();
+            user.avatar_url = av;
         }
 
         await user.save();
 
         res.json({
+            code: 0,
+            errno: 0,
+            msg: '个人资料更新成功',
             message: '个人资料更新成功',
+            data: {
+                id: user.id,
+                community_id: user.community_id,
+                communityId: user.community_id
+            },
             user: {
                 id: user.id,
                 nickname: user.nickname,
@@ -179,7 +201,7 @@ exports.updateProfile = async (req, res) => {
         });
     } catch (error) {
         console.error('Update Profile Error:', error);
-        res.status(500).json({ error: '服务器内部错误' });
+        res.status(500).json({ code: 1, errno: 500, msg: '服务器内部错误', error: '服务器内部错误' });
     }
 };
 

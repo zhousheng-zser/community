@@ -9,6 +9,10 @@ const browseFootprint = require('../../utils/browseFootprint.js');
 const userSession = require('../../utils/userSession.js');
 const favoritesStore = require('../../utils/favoritesStore.js');
 const serviceFavStore = require('../../utils/serviceFavStore.js');
+const { getBoundCommunityId } = require('../../utils/communityPortal.js');
+const communityBind = require('../../utils/communityBind.js');
+const marketCart = require('../../utils/marketCartHelper.js');
+const serviceCart = require('../../utils/serviceCartHelper.js');
 
 Page({
   data: {
@@ -16,9 +20,11 @@ Page({
     user: {},
     loggedIn: false,
     roleLabel: '普通用户',
+    boundCommunityName: '',
     couponCount: 0,
     footprintCount: 0,
     favoriteCount: 0,
+    cartCount: 0,
     workbenchCollapsed: true,
     orderMenus: [
       { name: "服务订单", icon: "service_order", url: "../market-order-list/market-order-list?type=service" },
@@ -321,7 +327,9 @@ Page({
       roleLabel,
       loggedIn,
       footprintCount: 0,
-      favoriteCount: 0  // 先置 0，异步更新
+      favoriteCount: 0,
+      cartCount: 0,
+      boundCommunityName: loggedIn ? (communityBind.getBoundCommunityName() || '未绑定') : ''
     });
 
     browseFootprint.countAsync().then((c) => {
@@ -331,6 +339,31 @@ Page({
     this.getProfile();
     this.getMyCoupon();
     this.loadFavoriteCount();
+    this.loadCartCount();
+  },
+
+  async loadCartCount() {
+    if (!this.data.loggedIn) {
+      this.setData({ cartCount: 0 });
+      return;
+    }
+    const [marketCount, serviceCount] = await Promise.all([
+      marketCart.fetchCartItemCount(),
+      serviceCart.fetchCartItemCount()
+    ]);
+    this.setData({ cartCount: marketCount + serviceCount });
+    try {
+      const app = getApp();
+      if (app && app.globalData) app.globalData.cartRevision = app.globalData.cartRevision || 0;
+    } catch (e) { /* ignore */ }
+  },
+
+  goCart() {
+    if (!this.data.loggedIn) {
+      wx.navigateTo({ url: '../login/login' });
+      return;
+    }
+    wx.navigateTo({ url: '../goods-cart/goods-cart' });
   },
 
   async loadFavoriteCount() {
@@ -357,7 +390,11 @@ Page({
       if (app.globalData.user) {
         app.globalData.user = rolePortals.mergePortalFlags(app.globalData.user, data);
         if (sid != null) app.globalData.user.id = sid;
-        if (cid != null) app.globalData.user.communityId = cid;
+        if (cid != null) {
+        app.globalData.user.communityId = cid;
+        app.globalData.user.community_id = cid;
+        try { wx.setStorageSync('user_community_id', String(cid)); } catch (e) { /* ignore */ }
+      }
         // 同步头像、昵称等用户信息
         const nickname = data.nickname || data.userName || data.name;
         const avatar = data.avatar_url || data.avatarUrl || data.avatar || data.userPhoto;
@@ -388,6 +425,7 @@ Page({
         user,
         roleLabel: this.computeRoleLabel(user)
       });
+      this._syncBoundCommunityDisplay(user);
       this.loadCommissionBalance();
       browseFootprint.syncLocalToServer();
       serviceFavStore.syncLocalToServer();
@@ -451,6 +489,22 @@ Page({
   onShareAppMessage() {
     const openid = (app.globalData.user || {}).opId || '';
     return app.onShare(openid, {});
+  },
+
+  goBindCommunity() {
+    if (!wx.getStorageSync('token')) {
+      wx.showToast({ title: '请先登录', icon: 'none' });
+      setTimeout(() => wx.navigateTo({ url: '../login/login' }), 500);
+      return;
+    }
+    wx.navigateTo({ url: '../bind-community/bind-community' });
+  },
+
+  _syncBoundCommunityDisplay(user) {
+    const cid = getBoundCommunityId(getApp());
+    let name = communityBind.getBoundCommunityName();
+    if (!name && cid) name = `小区#${cid}`;
+    this.setData({ boundCommunityName: name || '未绑定' });
   },
 
   goAddress() {

@@ -2,6 +2,7 @@ const util = require('../../utils/util.js');
 const { imgUrl, pickMarketShopAvatarPath, flattenMarketShopPayload } = util;
 const browseFootprint = require('../../utils/browseFootprint.js');
 const checkoutStorage = require('../../utils/checkoutStorage.js');
+const marketCart = require('../../utils/marketCartHelper.js');
 
 Page({
   data: {
@@ -339,6 +340,9 @@ Page({
   // ===== 购物车交互 =====
   // 增加数量
   async addCart(e) {
+    if (!wx.getStorageSync('token')) {
+      if (!marketCart.ensureLogin()) return;
+    }
     let item = e.currentTarget.dataset.item;
     // data-item 序列化可能丢 price；从 goodsGroupList 补齐，避免 rebuildCartDerived 算出 0
     if (item && item.id != null) {
@@ -363,11 +367,12 @@ Page({
     totalAmount = (Number(totalAmount) + Number(item.price)).toFixed(2);
 
     this.rebuildCartDerived(cart);
-    if (this.data.useRemoteCart) {
+    if (wx.getStorageSync('token')) {
       try {
         await this.ensureRemoteCartItem(item.id, cart[item.id].quantity, item);
+        this.setData({ useRemoteCart: true });
+        marketCart.markCartDirty();
       } catch (err) {
-        // 服务端失败时降级本地，但不回滚用户交互
         this.setData({ useRemoteCart: false });
       }
     }
@@ -394,7 +399,7 @@ Page({
       }
       
       this.rebuildCartDerived(cart);
-      if (this.data.useRemoteCart) {
+      if (wx.getStorageSync('token')) {
         try {
           const gid = Number(item.id);
           const itemId = this.data.cartItemIdByGoodsId[gid];
@@ -408,10 +413,11 @@ Page({
             } else {
               await util.put(`market/cart/items/${itemId}`, { quantity: nextQty });
             }
+            marketCart.markCartDirty();
           } else {
-            // 没有 itemId 映射时，直接重新同步一次
             await this.syncCartFromApi(this.data.currentShopId);
           }
+          this.setData({ useRemoteCart: true });
         } catch (err) {
           this.setData({ useRemoteCart: false });
         }
@@ -443,7 +449,10 @@ Page({
         };
         if (this.data.useRemoteCart) {
           util.del('market/cart', { shop_id: this.data.currentShopId })
-            .then(() => afterClear())
+            .then(() => {
+              marketCart.markCartDirty();
+              afterClear();
+            })
             .catch(() => {
               this.setData({ useRemoteCart: false });
               afterClear();
@@ -463,6 +472,33 @@ Page({
 
   closeCartPopup() {
     this.setData({ showCartPopup: false });
+  },
+
+  /** 将当前已选商品同步到服务端购物车（我的-购物车可见） */
+  async goAddToGlobalCart() {
+    if (this.data.cartCount === 0) {
+      wx.showToast({ title: '请先选择商品', icon: 'none' });
+      return;
+    }
+    if (!marketCart.ensureLogin()) return;
+
+    wx.showLoading({ title: '加入中', mask: true });
+    const sid = Number(this.data.currentShopId);
+    try {
+      const entries = Object.values(this.data.cart || {});
+      for (let i = 0; i < entries.length; i++) {
+        const row = entries[i];
+        await this.ensureRemoteCartItem(row.id, row.quantity, row);
+      }
+      await this.syncCartFromApi(sid);
+      this.setData({ useRemoteCart: true });
+      marketCart.markCartDirty();
+      wx.hideLoading();
+      wx.showToast({ title: '已加入购物车', icon: 'success' });
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: (e && (e.msg || e.errmsg)) || '加入失败', icon: 'none' });
+    }
   },
 
   // 去结算

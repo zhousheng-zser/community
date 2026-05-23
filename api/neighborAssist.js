@@ -69,6 +69,14 @@ const acceptAssistOrder = (id) => {
 };
 
 /**
+ * 上门定位打卡
+ * POST /neighbor-assist/orders/:id/check-in
+ */
+const checkInAssistOrder = (id, data) => {
+  return post(`/neighbor-assist/orders/${id}/check-in`, data);
+};
+
+/**
  * 完成订单
  * POST /neighbor-assist/orders/:id/complete
  */
@@ -109,6 +117,7 @@ module.exports = {
   grabAssistOrder,
   communityGrabOrder,
   acceptAssistOrder,
+  checkInAssistOrder,
   completeAssistOrder,
   confirmAssistOrder,
   payAssistOrder,

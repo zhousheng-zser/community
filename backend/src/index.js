@@ -82,6 +82,7 @@ app.use('/api/v1/posts', postRoutes);
 app.use('/api/v1/core', coreDataRoutes);
 app.use('/api/v1/geo', require('./routes/geoRoutes'));
 app.use('/api/v1/service-orders', require('./routes/serviceOrderRoutes'));
+app.use('/api/v1/service-cart', require('./routes/serviceCartRoutes'));
 app.use('/api/v1/neighbor-assist', require('./routes/neighborAssistRoutes'));
 app.use('/api/v1/user', userRoutes);
 app.use('/api/v1/messages', require('./routes/messageRoutes'));
@@ -101,6 +102,8 @@ app.use('/api/v1/service-provider-portal/workers', require('./routes/serviceProv
 app.use('/api/v1/service-provider-portal/finance', require('./routes/serviceProviderFinanceRoutes'));
 app.use('/api/v1/market/merchant', merchantPortalRoutes);
 app.use('/api/v1/market/shop', merchantPortalRoutes);
+// 商家订单/配送（modules/merchant）；254 线上由 merchantPortalRoutes 一并提供
+app.use('/api/v1/market/merchant', require('./modules/merchant/routes'));
 app.use('/api/v1/market/merchant/customers', require('./routes/merchantCustomerRoutes'));
 app.use('/api/v1/market/merchant/marketing', require('./routes/merchantMarketingRoutes'));
 app.use('/api/v1/market/merchant/refunds', require('./routes/merchantRefundRoutes'));

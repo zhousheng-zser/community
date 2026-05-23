@@ -11,6 +11,14 @@
   <block wx:else>
     <view class="portal-card settings-card">
       <view class="field">
+        <text class="field-label">店铺封面</text>
+        <view class="cover-pick" bindtap="onChooseCover">
+          <image wx:if="{{coverImage}}" class="cover-pick-img" src="{{coverImage}}" mode="aspectFill" />
+          <text wx:else class="cover-pick-tip">点击上传店铺封面</text>
+        </view>
+      </view>
+
+      <view class="field">
         <text class="field-label">联系人</text>
         <input
           class="field-input"

@@ -53,7 +53,15 @@ const getGoodsDetail = (goodsId) => {
 };
 
 /**
- * 获取购物车 (需传 shop_id)
+ * 购物车数量汇总
+ * GET /market/cart/summary
+ */
+const getCartSummary = () => {
+  return get('/market/cart/summary');
+};
+
+/**
+ * 获取购物车 (shop_id 可选，不传则返回全店分组)
  * GET /market/cart?shop_id=xxx
  */
 const getCart = (shopId) => {
@@ -88,8 +96,8 @@ const deleteCartItem = (itemId) => {
  * 清空购物车
  * DELETE /market/cart
  */
-const clearCart = () => {
-  return del('/market/cart');
+const clearCart = (shopId) => {
+  return del('/market/cart', shopId ? { shop_id: shopId } : null);
 };
 
 /**
@@ -123,6 +131,9 @@ const getMyOrders = (params) => {
 const getOrderDetail = (orderNo) => {
   return get(`/market/orders/${orderNo}`);
 };
+
+/** 配送进度 GET /market/orders/:orderNo/delivery/track */
+const getDeliveryTrack = (orderNo) => get(`/market/orders/${orderNo}/delivery/track`);
 
 /**
  * 取消订单
@@ -169,7 +180,15 @@ const confirmReceipt = (orderNo) => {
  * POST /market/orders/:orderNo/refund
  */
 const applyRefund = (orderNo, data) => {
-  return post(`/market/orders/${orderNo}/refund`, data);
+  let no = orderNo;
+  let body = data;
+  if (orderNo && typeof orderNo === 'object') {
+    body = orderNo;
+    no = body.order_no || body.orderNo || '';
+  }
+  no = String(no || '').trim();
+  if (!no) return Promise.reject({ errmsg: '订单号无效' });
+  return post(`/market/orders/${encodeURIComponent(no)}/refund`, body || {});
 };
 
 /**
@@ -227,6 +246,7 @@ module.exports = {
   getShopDetail,
   getShopGoods,
   getGoodsDetail,
+  getCartSummary,
   getCart,
   addToCart,
   updateCartItem,
@@ -247,5 +267,6 @@ module.exports = {
   deleteOrder,
   buyAgain,
   getShopContact,
-  getOrderLogistics
+  getOrderLogistics,
+  getDeliveryTrack
 };

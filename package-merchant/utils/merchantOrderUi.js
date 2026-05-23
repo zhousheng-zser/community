@@ -64,6 +64,12 @@ function enrichItem(o) {
         : (o.user_id != null ? o.user_id : (o.user && o.user.id != null ? o.user.id : null)));
   const riderUserId = o.rider_user_id != null ? o.rider_user_id : o.delivery_user_id;
   const riderName = o.rider_name || o.delivery_name || '';
+  const deliveryCarrier = o.delivery_carrier || '';
+  const deliveryJobStatus = o.delivery_job_status || '';
+  let carrierLabel = '';
+  if (deliveryCarrier === 'meituan') carrierLabel = '美团配送';
+  else if (deliveryCarrier === 'eleme') carrierLabel = '饿了么配送';
+  else if (deliveryCarrier === 'self') carrierLabel = '自配送';
   return {
     id: rowId,
     orderNo,
@@ -79,6 +85,9 @@ function enrichItem(o) {
     buyerUserId,
     riderUserId,
     riderName,
+    deliveryCarrier,
+    deliveryJobStatus,
+    carrierLabel,
     raw: o
   };
 }
