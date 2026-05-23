@@ -318,7 +318,7 @@ exports.getHotServices = async (req, res) => {
       where,
       limit,
       order: [
-        [sequelize.literal("(CASE WHEN cover_image LIKE '/uploads/%' THEN 0 WHEN id >= 102 THEN 1 ELSE 2 END)"), 'ASC'],
+        [sequelize.literal("(CASE WHEN `Service`.`cover_image` LIKE '/uploads/%' THEN 0 WHEN `Service`.`id` >= 102 THEN 1 ELSE 2 END)"), 'ASC'],
         ['sales_count', 'DESC'],
         ['id', 'DESC']
       ],

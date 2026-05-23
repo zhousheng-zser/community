@@ -782,7 +782,7 @@ exports.getCustomerStats = async (req, res) => {
       where: { shop_id: shop.id, user_id: customerId },
       attributes: [
         [db.Sequelize.fn('COUNT', db.Sequelize.col('id')), 'order_count'],
-        [db.Sequelize.fn('SUM', db.Sequelize.col('payable_amount')), 'total_amount'),
+        [db.Sequelize.fn('SUM', db.Sequelize.col('payable_amount')), 'total_amount'],
         [db.Sequelize.fn('MAX', db.Sequelize.col('created_at')), 'last_order_at']
       ],
       raw: true
@@ -963,7 +963,7 @@ exports.getMarketingStats = async (req, res) => {
       where: { shop_id: shop.id },
       attributes: [
         [db.Sequelize.fn('COUNT', db.Sequelize.col('id')), 'order_count'],
-        [db.Sequelize.fn('SUM', db.Sequelize.col('payable_amount')), 'total_amount'),
+        [db.Sequelize.fn('SUM', db.Sequelize.col('payable_amount')), 'total_amount'],
         [db.Sequelize.fn('SUM', db.Sequelize.col('discount_amount')), 'total_discount']
       ],
       raw: true

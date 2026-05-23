@@ -1,15 +1,30 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const ServiceProviderProfile = sequelize.define('ServiceProviderProfile', {
+  class ServiceProviderProfile extends sequelize.Sequelize.Model {
+    static associate(models) {
+      if (models.User) {
+        ServiceProviderProfile.belongsTo(models.User, {
+          foreignKey: 'user_id',
+          as: 'user'
+        });
+      }
+    }
+  }
+
+  ServiceProviderProfile.init({
     id: {
-      type: DataTypes.BIGINT.UNSIGNED,
+      type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true
     },
+    application_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     user_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
-      allowNull: false,
+      type: DataTypes.BIGINT,
+      allowNull: true,
       comment: '所属用户ID'
     },
     shop_name: {
@@ -20,73 +35,69 @@ module.exports = (sequelize, DataTypes) => {
     },
     contact_name: {
       type: DataTypes.STRING(50),
-      allowNull: true,
+      allowNull: false,
+      defaultValue: '',
       comment: '联系人姓名'
     },
-    contact_phone: {
+    phone: {
       type: DataTypes.STRING(20),
-      allowNull: true,
-      comment: '联系人电话'
+      allowNull: false,
+      defaultValue: '',
+      comment: '联系电话'
     },
-    address: {
+    license_url: {
       type: DataTypes.STRING(255),
-      allowNull: true,
-      comment: '服务地址'
-    },
-    latitude: {
-      type: DataTypes.DECIMAL(10, 7),
-      allowNull: true,
-      comment: '纬度'
-    },
-    longitude: {
-      type: DataTypes.DECIMAL(10, 7),
-      allowNull: true,
-      comment: '经度'
-    },
-    business_hours: {
-      type: DataTypes.STRING(100),
-      allowNull: true,
-      comment: '营业时间'
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      comment: '简介'
-    },
-    category: {
-      type: DataTypes.STRING(50),
-      allowNull: true,
-      comment: '主营分类'
-    },
-    logo: {
-      type: DataTypes.STRING(500),
-      allowNull: true,
-      comment: 'Logo'
+      allowNull: false,
+      defaultValue: ''
     },
     shop_front_url: {
-      type: DataTypes.STRING(500),
+      type: DataTypes.STRING(255),
       allowNull: true,
       comment: '门店封面/门头照'
+    },
+    environment_url: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    id_card_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true
+    },
+    certificate_url: {
+      type: DataTypes.JSON,
+      allowNull: true
     },
     status: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      defaultValue: 'pending',
-      comment: '状态: pending/approved/rejected/inactive/active'
+      defaultValue: 'active'
     },
-    reject_reason: {
-      type: DataTypes.STRING(255),
+    community_id: {
+      type: DataTypes.INTEGER,
       allowNull: true,
-      comment: '驳回原因'
+      comment: '服务小区'
+    },
+    balance: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0
+    },
+    frozen_balance: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: 0
     }
   }, {
+    sequelize,
+    modelName: 'ServiceProviderProfile',
     tableName: 'service_provider_profiles',
     timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     indexes: [
-      { fields: ['user_id'], unique: true },
-      { fields: ['status'] }
+      { fields: ['user_id'] },
+      { fields: ['status'] },
+      { fields: ['community_id'] }
     ]
   });
 

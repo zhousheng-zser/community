@@ -64,19 +64,27 @@ async function ensureWorkerVisibleInCommunity(userId, communityId = DEFAULT_COMM
 async function getHomeDisplayWorkerUserIds(communityId) {
   const { HomeDisplayItem } = db;
   if (!HomeDisplayItem) return [];
-  const where = { kind: 'worker', status: 1 };
-  if (communityId != null) {
-    where[Op.or] = [
-      { community_id: null },
-      { community_id: communityId }
-    ];
-  }
-  const rows = await HomeDisplayItem.findAll({
-    where,
+  const baseWhere = { kind: 'worker', status: 1 };
+  const queryOpts = {
     attributes: ['target_id', 'sort'],
     order: [['sort', 'ASC'], ['id', 'DESC']]
-  });
-  return rows.map((r) => resolveUserId(r.target_id)).filter(Boolean);
+  };
+  try {
+    const where = { ...baseWhere };
+    if (communityId != null) {
+      where[Op.or] = [
+        { community_id: null },
+        { community_id: communityId }
+      ];
+    }
+    const rows = await HomeDisplayItem.findAll({ where, ...queryOpts });
+    return rows.map((r) => resolveUserId(r.target_id)).filter(Boolean);
+  } catch (e) {
+    const msg = (e && (e.message || e.parent && e.parent.sqlMessage)) || '';
+    if (!/community_id/i.test(String(msg))) throw e;
+    const rows = await HomeDisplayItem.findAll({ where: baseWhere, ...queryOpts });
+    return rows.map((r) => resolveUserId(r.target_id)).filter(Boolean);
+  }
 }
 
 module.exports = {
