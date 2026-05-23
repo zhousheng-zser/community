@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const imageSize = require('image-size');
 
-const UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
+/** 入驻/集市图片上传上限（与 nginx client_max_body_size 对齐，建议 ≥10MB） */
+const UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
 const ALLOWED_MIME_SET = new Set([
     'image/jpeg',
     'image/jpg',
@@ -47,20 +48,28 @@ function withUploadHeader(res) {
     res.set('X-Upload-Max-Bytes', String(UPLOAD_MAX_BYTES));
 }
 
-function mapUploadError(err, res) {
+function imageLabelFromReq(req) {
+    const raw = req && req.body && (req.body.image_label || req.body.imageLabel);
+    return raw ? String(raw).trim().slice(0, 80) : '';
+}
+
+function mapUploadError(err, res, req) {
     withUploadHeader(res);
+    const label = imageLabelFromReq(req);
+    const prefix = label ? `「${label}」` : '';
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
             return res.status(413).json({
                 code: 40013,
-                msg: '文件过大，最大允许 2MB',
-                data: { max_bytes: UPLOAD_MAX_BYTES }
+                msg: `${prefix}图片过大，单张最大允许 10MB，请压缩或换一张`,
+                errmsg: `${prefix}图片过大，单张最大允许 10MB，请压缩或换一张`,
+                data: { max_bytes: UPLOAD_MAX_BYTES, image_label: label || null }
             });
         }
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {
             return res.status(400).json({
                 code: 40015,
-                msg: '缺少上传文件',
+                msg: label ? `${prefix}缺少上传文件` : '缺少上传文件',
                 data: null
             });
         }
@@ -69,8 +78,9 @@ function mapUploadError(err, res) {
     if (err && err.code === 'UNSUPPORTED_FILE_TYPE') {
         return res.status(400).json({
             code: 40014,
-            msg: '不支持的文件格式，仅支持 jpg/jpeg/png/webp',
-            data: null
+            msg: `${prefix}格式不支持，仅支持 jpg/jpeg/png/webp`,
+            errmsg: `${prefix}格式不支持，仅支持 jpg/jpeg/png/webp`,
+            data: { image_label: label || null }
         });
     }
 
@@ -83,12 +93,14 @@ function mapUploadError(err, res) {
 
 function uploadMarketImage(req, res, next) {
     marketUploader.single('file')(req, res, (err) => {
-        if (err) return mapUploadError(err, res);
+        if (err) return mapUploadError(err, res, req);
         withUploadHeader(res);
         if (!req.file) {
+            const label = imageLabelFromReq(req);
+            const prefix = label ? `「${label}」` : '';
             return res.status(400).json({
                 code: 40015,
-                msg: '缺少上传文件',
+                msg: `${prefix}缺少上传文件`,
                 data: null
             });
         }
