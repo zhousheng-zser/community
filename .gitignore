@@ -1,8 +1,12 @@
 # 微信开发者工具相关的私有配置（不应当提交到代码仓库）
 project.private.config.json
 project.config.json
+# 后端环境变量（含数据库密码等）
 backend/.env
 .env.deploy
+
+# 数据库迁移脚本（仅在部署机执行，不纳入本仓库版本管理）
+backend/sql/
 
 # 邮件配置（包含敏感信息）
 scripts/email-config.js
