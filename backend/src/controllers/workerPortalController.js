@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { ServiceOrder, Service, User, WorkerApplication, WorkerProfile } = require('../models');
 const { resolveUserId } = require('../utils/resolveUserId');
+const platformFeeService = require('../services/platformFee.service');
 
 function authUserId(req) {
   return resolveUserId(req.user && req.user.id);
@@ -50,8 +51,9 @@ function baseInclude() {
   ];
 }
 
-function serializeOrder(row, { detail = false } = {}) {
+function serializeOrder(row, { detail = false, workerUserId = null } = {}) {
   const j = row.get ? row.get({ plain: true }) : row;
+  const feeView = platformFeeService.displayAmountForRole(j, workerUserId, 'service');
   const buyer = j.buyer || {};
   const svc = j.service || {};
   const out = {
@@ -59,7 +61,10 @@ function serializeOrder(row, { detail = false } = {}) {
     status: j.status,
     status_text: STATUS_TEXT[j.status] || j.status,
     pay_status: j.pay_status,
-    amount: j.amount != null ? String(j.amount) : '',
+    amount: feeView.amount,
+    payable_amount: feeView.payable_amount,
+    settlement_amount: feeView.settlement_amount,
+    platform_fee_amount: feeView.platform_fee_amount,
     appointment_time: j.appointment_time,
     created_at: j.created_at,
     address_snapshot: j.address_snapshot,
@@ -100,7 +105,7 @@ exports.listOrders = async (req, res) => {
       offset
     });
     return ok(res, {
-      list: rows.map((r) => serializeOrder(r)),
+      list: rows.map((r) => serializeOrder(r, { workerUserId: userId })),
       total: count,
       page,
       limit
@@ -123,7 +128,7 @@ exports.getOrder = async (req, res) => {
       include: baseInclude()
     });
     if (!order) return fail(res, 404, '订单不存在', 404);
-    return ok(res, serializeOrder(order, { detail: true }));
+    return ok(res, serializeOrder(order, { detail: true, workerUserId: userId }));
   } catch (e) {
     console.error('workerPortal getOrder', e);
     return fail(res, 500, '查询失败', 500);
