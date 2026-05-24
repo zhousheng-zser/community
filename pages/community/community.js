@@ -227,21 +227,17 @@ Page({
     });
   },
 
-  handleLocationTap() {
-    wx.chooseLocation({
-      success: (res) => {
-        wx.showToast({
-          title: res.name ? "已定位到" + res.name : "定位已更新",
-          icon: "none"
-        });
-      },
-      fail: () => {
-        wx.showToast({
-          title: "未获取到定位",
-          icon: "none"
-        });
+  async handleLocationTap() {
+    const locationPermission = require('../../utils/locationPermission.js');
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      const authorized = await locationPermission.checkLocationAuthorized();
+      if (!authorized) {
+        await locationPermission.showLocationAuthModal();
+        return;
       }
-    });
+    }
+    wx.navigateTo({ url: '/pages/bind-community/bind-community' });
   },
   onCommunitySearchInput(e) {
     this.setData({ communitySearchKeyword: e.detail.value });

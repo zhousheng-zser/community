@@ -154,6 +154,8 @@ Page({
     const cid = u.community_id != null ? u.community_id : u.communityId;
     if (cid != null) communityBind.applyBoundCommunityToApp(app, cid, u.community_name || '');
     browseFootprint.syncLocalToServer();
+    const communityBind = require('../../utils/communityBind.js');
+    communityBind.fetchBindings().catch(() => {});
     const isNewUser = !!(data && (data.is_new_user || data.isNewUser));
     wx.showToast({ title: isNewUser ? '注册成功' : '登录成功' });
     setTimeout(() => {

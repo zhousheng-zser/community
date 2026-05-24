@@ -9,6 +9,7 @@
     "pages/goods-cart/goods-cart",
     "pages/user/user",
     "pages/bind-community/bind-community",
+    "pages/community-search/community-search",
     "pages/browse-footprint/browse-footprint",
     "pages/favorites-list/favorites-list",
     "pages/gorder-list/gorder-list",

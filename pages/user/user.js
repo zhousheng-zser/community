@@ -491,11 +491,15 @@ Page({
     return app.onShare(openid, {});
   },
 
-  goBindCommunity() {
-    if (!wx.getStorageSync('token')) {
-      wx.showToast({ title: '请先登录', icon: 'none' });
-      setTimeout(() => wx.navigateTo({ url: '../login/login' }), 500);
-      return;
+  async goBindCommunity() {
+    const locationPermission = require('../../utils/locationPermission.js');
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      const authorized = await locationPermission.checkLocationAuthorized();
+      if (!authorized) {
+        await locationPermission.showLocationAuthModal();
+        return;
+      }
     }
     wx.navigateTo({ url: '../bind-community/bind-community' });
   },

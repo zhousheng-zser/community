@@ -83,7 +83,7 @@ const getServiceProviderList = (params) => {
 };
 
 /** 可绑定小区列表 GET /core/communities */
-const getCommunities = () => get('/core/communities');
+const getCommunities = (params) => get('/core/communities', params);
 
 /** 坐标/选点解析小区 POST /core/communities/resolve */
 const resolveCommunity = (data) => post('/core/communities/resolve', data);

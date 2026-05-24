@@ -22,11 +22,13 @@ const partner = require('./partner.js');
 const chat = require('./chat.js');
 const chatOrder = require('./chat-order.js');
 const miniProgram = require('./miniProgram.js');
+const communityBinding = require('./communityBinding.js');
 
 module.exports = {
   auth,
   user,
   core,
+  communityBinding,
   order,
   serviceOrder,
   neighborAssist,

@@ -1,0 +1,60 @@
+<view class="page">
+  <view class="toolbar">
+    <picker mode="selector" range="{{cities}}" value="{{cityIndex}}" bindchange="onCityChange">
+      <view class="city-pill">
+        <text class="pin">📍</text>
+        <text>{{currentCity}}</text>
+        <text class="arrow">▼</text>
+      </view>
+    </picker>
+    <view class="search-input-wrap">
+      <input
+        class="search-input"
+        placeholder="请输入小区名称"
+        value="{{keyword}}"
+        bindinput="onKeywordInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+    </view>
+  </view>
+
+  <view class="map-wrap">
+    <map
+      id="communityMap"
+      class="map"
+      latitude="{{mapCenter.latitude}}"
+      longitude="{{mapCenter.longitude}}"
+      scale="{{mapScale}}"
+      markers="{{markers}}"
+      circles="{{circles}}"
+      show-location
+      enable-scroll
+      enable-zoom
+      bindmarkertap="onMarkerTap"
+    />
+    <view class="map-locate-btn" bindtap="onLocateMe">
+      <text class="locate-icon">◎</text>
+    </view>
+  </view>
+
+  <scroll-view class="list" scroll-y scroll-into-view="{{scrollIntoView}}">
+    <view wx:if="{{loading}}" class="list-hint">加载中…</view>
+    <view wx:elif="{{list.length === 0}}" class="list-hint">没有搜索结果</view>
+    <view
+      class="list-item {{focusedId == item.id ? 'focused' : ''}}"
+      wx:for="{{list}}"
+      wx:key="id"
+      id="comm-{{item.id}}"
+    >
+      <view class="item-main" bindtap="onItemTap" data-id="{{item.id}}">
+        <view class="title-row">
+          <text class="name">{{item.name}}</text>
+          <text class="tag">小区</text>
+        </view>
+        <text class="region">{{item.regionPath}}</text>
+      </view>
+      <view class="select-btn" catchtap="onSelect" data-id="{{item.id}}">选择</view>
+    </view>
+  </scroll-view>
+</view>

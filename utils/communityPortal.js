@@ -114,6 +114,15 @@ function getBoundCommunityId(app) {
  * 3. 兜底：上次选点缓存 portal_location_community_id
  */
 function getActiveCommunityId(app) {
+  if (!isManualLocationPick()) {
+    try {
+      const activeId = Number(wx.getStorageSync('active_community_id'));
+      if (Number.isFinite(activeId) && activeId > 0) return activeId;
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
   if (isManualLocationPick()) {
     let locCid;
     try {

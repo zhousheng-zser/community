@@ -21,6 +21,8 @@ const {
 const { getLocalBenefitCardPayload } = require('../../utils/benefitAllianceLocal.js');
 const { pickHeroFromApi, getThemeBannerPath } = require('../../utils/benefitAllianceHero.js');
 const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
+const locationPermission = require('../../utils/locationPermission.js');
+const communityBind = require('../../utils/communityBind.js');
 
 /** 惠民卡 · 肯德基/星巴克/百果园：与「京东联盟」区块同一套字段（头图 + 精选网格 + GO） */
 function mapChainBrandToAllianceSection(raw, imgUrlFn) {
@@ -236,7 +238,16 @@ Page({
     runInit();
     app.save(parentOpId, runInit);
   },
+  _refreshLocationPill() {
+    const name = communityBind.getActiveCommunityDisplayName();
+    if (name) {
+      const short = name.length > 4 ? name.slice(0, 4) : name;
+      this.setData({ currentCity: short });
+    }
+  },
+
   onShow: function () {
+    this._refreshLocationPill();
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 });
     }
@@ -566,41 +577,17 @@ Page({
       url: `/pages/shopping-search/shopping-search?kw=${encodeURIComponent(kw)}&isMall=${isMall}`
     });
   },
-  /** 用户主动选点：覆盖自动定位逻辑，本地集市后续请求以本次坐标为准，直至地址变更等场景清空 manual */
-  handleLocationTap() {
-    wx.chooseLocation({
-      success: async (res) => {
-        wx.setStorageSync('market_user_location_manual', 1);
-        util.setMarketUserCoords(res.latitude, res.longitude);
-        util.removeMarketSnapInfo();
-        util.removeMarketLocationLabel();
-        this.setData({ marketShopsCacheByCat: {} });
-        const city = res.address ? res.address.replace(/省.*/, '').replace(/市.*/, '').slice(0, 4) : (res.name ? res.name.slice(0, 4) : '已定位');
-        this.setData({ currentCity: city || '已定位' });
-        const syncedCommunity = await this._applyPortalCommunityFromLocation(
-          {
-            name: res.name,
-            address: res.address,
-            latitude: res.latitude,
-            longitude: res.longitude
-          },
-          { manual: true }
-        );
-        let toastTitle = res.name ? '已定位到' + res.name : '定位已更新';
-        if (syncedCommunity) toastTitle = '已匹配服务小区';
-        else if (isManualLocationPick()) toastTitle = '当前区域暂无直约服务';
-        wx.showToast({ title: toastTitle, icon: 'none' });
-        const cat = this.data.activeMarketCat;
-        this.switchMarketCategory({ currentTarget: { dataset: { code: cat } } }, true);
-        this.refreshLocalGoodsModulesForLocation();
-      },
-      fail: () => {
-        wx.showToast({
-          title: "未获取到定位",
-          icon: "none"
-        });
+  /** 进入选择小区页（图1）；未登录且无定位权限时弹窗引导授权 */
+  async handleLocationTap() {
+    const token = wx.getStorageSync('token');
+    if (!token) {
+      const authorized = await locationPermission.checkLocationAuthorized();
+      if (!authorized) {
+        await locationPermission.showLocationAuthModal();
+        return;
       }
-    });
+    }
+    wx.navigateTo({ url: '/pages/bind-community/bind-community' });
   },
   goPublish() {
     wx.navigateTo({ url: '../order-publish/order-publish' });
