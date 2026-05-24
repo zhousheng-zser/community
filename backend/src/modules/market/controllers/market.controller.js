@@ -3,6 +3,8 @@ const { MerchantShop, MerchantGoods, MarketShopCategory, MarketCartItem, MarketO
 const couponService = require('../../coupon/services/coupon.service');
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
+const orderSettlement = require('../../../services/orderSettlement.service');
+const platformFeeService = require('../../../services/platformFee.service');
 const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
 const ok = (res, data, msg = 'ok') => res.json({ code: 0, msg, data });
@@ -656,7 +658,9 @@ exports.previewOrder = async (req, res) => {
         const applied = await couponService.validateCouponForOrder(
           userId,
           couponIssueId,
-          goodsAmount
+          goodsAmount,
+          null,
+          'market'
         );
         discountAmount = applied.discount;
       } catch (couponErr) {
@@ -664,12 +668,16 @@ exports.previewOrder = async (req, res) => {
       }
     }
     const payableAmount = Number((goodsAmount + deliveryFee - discountAmount).toFixed(2));
+    const feeFields = await platformFeeService.calcPlatformFee(payableAmount, 'market');
     ok(res, {
       shop_id: shopId,
       goods_amount: goodsAmount.toFixed(2),
       delivery_fee: deliveryFee.toFixed(2),
       discount_amount: discountAmount.toFixed(2),
       payable_amount: payableAmount.toFixed(2),
+      platform_fee_rate: feeFields.platform_fee_rate,
+      platform_fee_amount: feeFields.platform_fee_amount,
+      settlement_amount: feeFields.settlement_amount,
       coupon_issue_id: couponIssueId || null,
       lines
     });
@@ -765,7 +773,7 @@ exports.createOrder = async (req, res) => {
     let couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
     if (couponIssueId > 0) {
       try {
-        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmount, t);
+        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmount, t, 'market');
         discountAmount = applied.discount;
       } catch (couponErr) {
         await t.rollback();
@@ -773,6 +781,7 @@ exports.createOrder = async (req, res) => {
       }
     }
     const payableAmount = Number((goodsAmount + deliveryFee - discountAmount).toFixed(2));
+    const feeFields = await platformFeeService.calcPlatformFee(payableAmount, 'market');
     const row = await MarketOrder.create({
       order_no: orderNo,
       user_id: userId,
@@ -784,6 +793,9 @@ exports.createOrder = async (req, res) => {
       delivery_fee: deliveryFee,
       discount_amount: discountAmount,
       payable_amount: payableAmount,
+      platform_fee_rate: feeFields.platform_fee_rate,
+      platform_fee_amount: feeFields.platform_fee_amount,
+      settlement_amount: feeFields.settlement_amount,
       receiver_name: receiverName,
       receiver_phone: receiverPhone,
       receiver_address: receiverAddress,
@@ -1103,7 +1115,10 @@ exports.mockPaymentSuccess = async (req, res) => {
     await orderPoints.grantPointsOnOrderPaid(MarketOrder, row, null);
     try {
       const payAmount = Number(row.payable_amount || row.pay_amount || row.total_amount || row.amount || 0);
-      if (payAmount > 0) {
+      const pool = Number(row.platform_fee_amount || 0);
+      if (payAmount > 0 && pool > 0) {
+        await commissionService.distributeCommission(row.order_no, 'market', payAmount, userId, pool);
+      } else if (payAmount > 0) {
         await commissionService.distributeCommission(row.order_no, 'market', payAmount, userId);
       }
     } catch (ce) { console.warn('[market/commission]', ce.message); }
@@ -1125,6 +1140,12 @@ exports.confirmReceipt = async (req, res) => {
     if (!row) return fail(res, '订单不存在', 404);
     if (row.order_status !== 'pending_receipt') return fail(res, '当前状态不可确认收货');
     await row.update({ order_status: 'completed', completed_at: new Date() });
+  await row.reload();
+  try {
+    await orderSettlement.settleMarketOrder(row);
+  } catch (se) {
+    console.warn('[market/confirm-receipt/settlement]', se.message);
+  }
     ok(res, { order_no: orderNo, order_status: row.order_status }, '确认收货成功');
   } catch (err) {
     console.error('[market/orders/confirm-receipt]', err);

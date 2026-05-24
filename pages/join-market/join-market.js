@@ -1,6 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
-const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+const joinUpload = require('../../utils/joinImageUpload.js');
 
 const CATEGORY_CODE_MAP = {
   '食品生鲜': 'AAAA',
@@ -124,7 +124,7 @@ Page({
       sizeType: ['compressed'],
       success: async (r) => {
         const path = r.tempFiles[0].tempFilePath;
-        const compressed = await this.ensureUploadableImage(path);
+        const compressed = await joinUpload.ensureUploadable(path, joinUpload.labelOf('market', 'signboard'));
         this.setData({ 'form.signboard': compressed });
       }
     });
@@ -137,7 +137,7 @@ Page({
       sizeType: ['compressed'],
       success: async (r) => {
         const path = r.tempFiles[0].tempFilePath;
-        const compressed = await this.ensureUploadableImage(path);
+        const compressed = await joinUpload.ensureUploadable(path, joinUpload.labelOf('market', 'indoor'));
         this.setData({ 'form.indoor': compressed });
       }
     });
@@ -150,7 +150,7 @@ Page({
       sizeType: ['compressed'],
       success: async (r) => {
         const path = r.tempFiles[0].tempFilePath;
-        const compressed = await this.ensureUploadableImage(path);
+        const compressed = await joinUpload.ensureUploadable(path, joinUpload.labelOf('market', 'bizLicense'));
         this.setData({ 'form.bizLicense': compressed });
       }
     });
@@ -172,9 +172,15 @@ Page({
         const compressedList = [];
         for (let i = 0; i < files.length; i++) {
           try {
-            compressedList.push(await this.ensureUploadableImage(files[i]));
+            compressedList.push(
+              await joinUpload.ensureUploadable(
+                files[i],
+                joinUpload.labelOf('market', 'placePhoto', current.length + i)
+              )
+            );
           } catch (e) {
-            console.log('compress place photo failed', e);
+            const tip = joinUpload.formatUploadError(e, e && e.image_label);
+            wx.showToast({ title: tip, icon: 'none', duration: 3500 });
           }
         }
         const merged = current.concat(compressedList).slice(0, 5);
@@ -195,53 +201,6 @@ Page({
     this.setData({ ['form.' + e.currentTarget.dataset.key]: '' });
   },
 
-  getFileSize(path) {
-    return new Promise((resolve) => {
-      if (!path) {
-        resolve(Number.MAX_SAFE_INTEGER);
-        return;
-      }
-      wx.getFileInfo({
-        filePath: path,
-        success: (res) => resolve(Number(res.size || 0)),
-        fail: () => resolve(Number.MAX_SAFE_INTEGER)
-      });
-    });
-  },
-
-  compressImage(path, quality) {
-    return new Promise((resolve, reject) => {
-      wx.compressImage({
-        src: path,
-        quality,
-        success: (res) => resolve(res.tempFilePath || path),
-        fail: reject
-      });
-    });
-  },
-
-  async ensureUploadableImage(path) {
-    if (!path || /^https?:\/\//i.test(path) || path.includes('/uploads/')) return path;
-    let current = path;
-    let size = await this.getFileSize(current);
-    if (size <= MAX_UPLOAD_BYTES) return current;
-
-    const qualities = [85, 75, 65, 55, 45, 35];
-    for (let i = 0; i < qualities.length; i++) {
-      try {
-        current = await this.compressImage(current, qualities[i]);
-        size = await this.getFileSize(current);
-        if (size <= MAX_UPLOAD_BYTES) return current;
-      } catch (e) {
-        console.log('compress image failed', e);
-        break;
-      }
-    }
-    const finalSize = await this.getFileSize(current);
-    if (finalSize > MAX_UPLOAD_BYTES) throw new Error('IMAGE_TOO_LARGE');
-    return current;
-  },
-
   async submit() {
     const { form, agreed, submitting } = this.data;
     if (submitting) return;
@@ -258,43 +217,16 @@ Page({
     this.setData({ submitting: true });
     wx.showLoading({ title: '图片上传中...', mask: true });
     try {
-      const uploadIfNeeded = async (path) => {
-        if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
-        if (path.includes('/uploads/')) return path;
-        let finalPath = await this.ensureUploadableImage(path);
-
-        // 上传失败时自动再压缩重试（最多2次）
-        for (let attempt = 0; attempt < 3; attempt++) {
-          try {
-            const res = await util.uploadFile('upload', finalPath, 'file');
-            return (res && res.url) ? res.url : res;
-          } catch (uploadErr) {
-            const code = Number(uploadErr && uploadErr.code);
-            const msg = String((uploadErr && (uploadErr.msg || uploadErr.errmsg)) || '');
-            const raw = String((uploadErr && uploadErr.raw) || '');
-            const isTooLarge = code === 40013 || /File too large|文件过大/i.test(msg) || /MulterError:\s*File too large/i.test(raw);
-            if (!isTooLarge || attempt >= 2) throw uploadErr;
-            try {
-              finalPath = await this.compressImage(finalPath, 25 - attempt * 5);
-              finalPath = await this.ensureUploadableImage(finalPath);
-            } catch (compressErr) {
-              console.log('retry compress failed', compressErr);
-              throw uploadErr;
-            }
-          }
-        }
-        throw new Error('UPLOAD_RETRY_FAILED');
-      };
-
-      const logoUrl = await uploadIfNeeded(form.signboard);
-      wx.showLoading({ title: '上传背景图...', mask: true });
-      const backgroundUrl = await uploadIfNeeded(form.indoor);
-      wx.showLoading({ title: '上传执照...', mask: true });
-      const licenseUrl = await uploadIfNeeded(form.bizLicense);
+      wx.showLoading({ title: '上传品牌Logo...', mask: true });
+      const logoUrl = await joinUpload.upload('market', 'signboard', form.signboard);
+      wx.showLoading({ title: '上传商家背景图...', mask: true });
+      const backgroundUrl = await joinUpload.upload('market', 'indoor', form.indoor);
+      wx.showLoading({ title: '上传执照照片...', mask: true });
+      const licenseUrl = await joinUpload.upload('market', 'bizLicense', form.bizLicense);
       wx.showLoading({ title: '上传实地照...', mask: true });
       const placePhotoUrl = [];
       for (let i = 0; i < form.placePhotos.length; i++) {
-        placePhotoUrl.push(await uploadIfNeeded(form.placePhotos[i]));
+        placePhotoUrl.push(await joinUpload.upload('market', 'placePhoto', form.placePhotos[i], { index: i }));
       }
 
       wx.showLoading({ title: '提交数据中...', mask: true });
@@ -335,17 +267,8 @@ Page({
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
       wx.hideLoading();
-      const code = Number(err && err.code);
-      const msg = (err && (err.msg || err.errmsg)) || '';
-      if (code === 40013 || err.message === 'IMAGE_TOO_LARGE') {
-        wx.showToast({ title: '图片超过2MB，请更换后重试', icon: 'none' });
-      } else if (code === 40014) {
-        wx.showToast({ title: '仅支持 jpg/jpeg/png/webp', icon: 'none' });
-      } else if (code === 40015) {
-        wx.showToast({ title: '上传文件字段异常，请重试', icon: 'none' });
-      } else {
-        wx.showToast({ title: msg || '提交失败，请重试', icon: 'none' });
-      }
+      const tip = joinUpload.formatUploadError(err, err && err.image_label);
+      wx.showToast({ title: tip || '提交失败，请重试', icon: 'none', duration: 3500 });
       this.setData({ submitting: false });
     }
   }

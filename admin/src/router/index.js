@@ -77,7 +77,25 @@ const routes = [
                 path: 'home-display-config',
                 name: 'HomeDisplayConfig',
                 component: () => import('../views/HomeDisplayConfig.vue'),
-                meta: { title: '首页管理', icon: 'HomeFilled' }
+                meta: { title: '首页展示管理', icon: 'HomeFilled' }
+            },
+            {
+                path: 'home-coupon-manage',
+                name: 'HomeCouponManage',
+                component: () => import('../views/HomeCouponManage.vue'),
+                meta: { title: '优惠券管理', icon: 'Ticket' }
+            },
+            {
+                path: 'platform-fee-config',
+                name: 'PlatformFeeConfig',
+                component: () => import('../views/PlatformFeeConfig.vue'),
+                meta: { title: '平台抽成配置', icon: 'Money' }
+            },
+            {
+                path: 'commission-orders',
+                name: 'CommissionOrderManage',
+                component: () => import('../views/CommissionOrderManage.vue'),
+                meta: { title: '推广分佣订单', icon: 'Coin' }
             }
         ]
     }

@@ -3,6 +3,8 @@ const { NeighborAssistOrder, User, WorkerApplication, WorkerProfile } = require(
 const { resolveUserIdFromReq } = require('../utils/resolveUserId');
 const { parseNeighborAppointmentTime } = require('../utils/parseNeighborAppointmentTime');
 const commissionService = require('../modules/commission/services/commission.service');
+const platformFeeService = require('../services/platformFee.service');
+const couponService = require('../modules/coupon/services/coupon.service');
 
 const ok = (res, data) => res.json({ errno: 0, data });
 const fail = (res, errno, errmsg, http = 200) => res.status(http).json({ errno, errmsg });
@@ -87,6 +89,23 @@ function normalizeAssistType(raw) {
   return t;
 }
 
+function mapNeighborOrderFields(plain, viewerUserId) {
+  const fee = platformFeeService.displayAmountForRole(
+    { ...plain, amount: plain.amount, payable_amount: plain.amount },
+    viewerUserId,
+    'neighbor_assist'
+  );
+  return {
+    payable_amount: fee.payable_amount,
+    settlement_amount: fee.settlement_amount,
+    platform_fee_amount: fee.platform_fee_amount,
+    platform_fee_rate: fee.platform_fee_rate,
+    amount: fee.amount,
+    reward_amount: fee.reward_amount,
+    display_amount: fee.display_amount
+  };
+}
+
 // Create order with amount
 exports.create = async (req, res) => {
   try {
@@ -140,13 +159,41 @@ exports.create = async (req, res) => {
 
     if (!NeighborAssistOrder) return fail(res, 500, 'NeighborAssistOrder 模型未加载');
 
+    const goodsAmountBeforeCoupon = orderAmount != null ? Number(orderAmount) : 0;
+    let couponDiscount = 0;
+    let couponIssueId = Number(req.body.coupon_issue_id || req.body.couponIssueId || 0) || 0;
+    let payableNum = goodsAmountBeforeCoupon;
+    if (couponIssueId > 0 && payableNum > 0) {
+      try {
+        const applied = await couponService.validateCouponForOrder(
+          userId, couponIssueId, goodsAmountBeforeCoupon, null, 'neighbor_assist'
+        );
+        couponDiscount = applied.discount;
+        payableNum = applied.payableAmount;
+      } catch (couponErr) {
+        return fail(res, couponErr.statusCode || 400, couponErr.message || '优惠券不可用');
+      }
+    }
+
+    const feeFields = payableNum > 0
+      ? await platformFeeService.calcPlatformFee(payableNum, 'neighbor_assist')
+      : {
+        platform_fee_rate: 0,
+        platform_fee_amount: 0,
+        settlement_amount: 0,
+        payable_amount: 0
+      };
+
     const row = await NeighborAssistOrder.create({
       assist_type: assistType,
       user_id: userId,
       community_id: commId,
       origin_address_snapshot: origin,
       destination_address_snapshot: dest,
-      amount: orderAmount,
+      amount: payableNum > 0 ? payableNum : null,
+      platform_fee_rate: feeFields.platform_fee_rate,
+      platform_fee_amount: feeFields.platform_fee_amount,
+      settlement_amount: feeFields.settlement_amount,
       appointment_time: appt,
       content: bodyContent || finalRemark || null,
       remark: finalRemark || bodyContent || null,
@@ -154,14 +201,22 @@ exports.create = async (req, res) => {
       status: 'pending_pay',
       pay_status: 'unpaid'
     });
+    if (couponIssueId > 0) {
+      await couponService.markCouponUsed(couponIssueId, 'neighbor_assist', String(row.id));
+    }
     return ok(res, {
       id: row.id,
       order_id: row.id,
       status: row.status,
       assist_type: row.assist_type,
       assist_type_label: ASSIST_TYPE_LABELS[row.assist_type] || row.assist_type,
-      amount: orderAmount,
-      reward_amount: orderAmount
+      amount: String(payableNum > 0 ? payableNum : ''),
+      reward_amount: String(payableNum > 0 ? payableNum : ''),
+      discount_amount: couponDiscount.toFixed(2),
+      goods_amount_before_coupon: goodsAmountBeforeCoupon > 0 ? goodsAmountBeforeCoupon.toFixed(2) : '0.00',
+      settlement_amount: feeFields.settlement_amount,
+      platform_fee_amount: feeFields.platform_fee_amount,
+      platform_fee_rate: feeFields.platform_fee_rate
     });
   } catch (e) {
     console.error('neighborAssist create', e);
@@ -205,6 +260,7 @@ exports.myList = async (req, res) => {
       const pub = plain.buyer;
       const worker = plain.assignedWorker;
       const amt = plain.amount != null ? String(plain.amount) : '';
+      const feeView = mapNeighborOrderFields(plain, userId);
       return {
         id: plain.id,
         assist_type: plain.assist_type,
@@ -212,8 +268,10 @@ exports.myList = async (req, res) => {
         status: plain.status,
         status_text: NEIGHBOR_ORDER_STATUS_TEXT[plain.status] || plain.status,
         pay_status: plain.pay_status,
-        amount: amt,
-        reward_amount: amt,
+        amount: feeView.amount,
+        reward_amount: feeView.reward_amount,
+        payable_amount: feeView.payable_amount,
+        settlement_amount: feeView.settlement_amount,
         created_at: plain.created_at,
         appointment_time: plain.appointment_time,
         community_id: plain.community_id,
@@ -249,6 +307,24 @@ exports.mockPay = async (req, res) => {
     order.pay_status = 'paid';
     order.status = 'paid_pending_dispatch';
     await order.save();
+    try {
+      const payAmount = Number(order.amount || 0);
+      let pool = Number(order.platform_fee_amount || 0);
+      if (payAmount > 0 && pool <= 0) {
+        pool = Number((payAmount * 0.10).toFixed(2));
+      }
+      if (payAmount > 0 && pool > 0) {
+        await commissionService.distributeCommission(
+          String(order.id),
+          'neighbor_assist',
+          payAmount,
+          order.user_id || userId,
+          pool
+        );
+      }
+    } catch (ce) {
+      console.warn('[neighborAssist/commission]', ce.message);
+    }
     return ok(res, order.get({ plain: true }));
   } catch (e) {
     console.error('neighborAssist mockPay', e);
@@ -349,13 +425,15 @@ exports.communityPool = async (req, res) => {
     const list = rows.map((row) => {
       const plain = row.get({ plain: true });
       const b = plain.buyer;
+      const feeView = mapNeighborOrderFields(plain, userId);
       return {
         id: plain.id,
         assist_type: plain.assist_type,
         assist_type_label: ASSIST_TYPE_LABELS[plain.assist_type] || plain.assist_type,
         status: plain.status,
-        amount: plain.amount != null ? String(plain.amount) : '',
-        reward_amount: plain.amount != null ? String(plain.amount) : '',
+        amount: feeView.amount,
+        reward_amount: feeView.reward_amount,
+        settlement_amount: feeView.settlement_amount,
         community_id: plain.community_id,
         created_at: plain.created_at,
         appointment_time: plain.appointment_time,
@@ -637,8 +715,7 @@ exports.detail = async (req, res) => {
       ...plain,
       assist_type_label: ASSIST_TYPE_LABELS[plain.assist_type] || plain.assist_type,
       status_text: NEIGHBOR_ORDER_STATUS_TEXT[plain.status] || plain.status,
-      amount: plain.amount != null ? String(plain.amount) : '',
-      reward_amount: plain.amount != null ? String(plain.amount) : '',
+      ...mapNeighborOrderFields(plain, userId),
       completion_proof_images: completionProofImages,
       publisher: pub ? { id: pub.id, nickname: pub.nickname, phone: pub.phone, avatar_url: pub.avatar_url } : null,
       helper: worker ? { id: worker.id, nickname: worker.nickname, phone: worker.phone, avatar_url: worker.avatar_url } : null,
@@ -672,32 +749,31 @@ exports.confirm = async (req, res) => {
     }
     if (order.status !== 'pending_confirm') return fail(res, 400, '当前状态不可确认');
 
-    const t = await NeighborAssistOrder.sequelize.transaction();
+    order.status = 'completed';
+    if (!order.completed_at) order.completed_at = new Date();
+    await order.save();
+
+    const orderSettlement = require('../services/orderSettlement.service');
+    const settleNum = orderSettlement.calcSettlementAmount(order);
     try {
-      const amountNum = Number(order.amount || 0);
-      if (amountNum > 0 && order.assigned_worker_id) {
-        await commissionService.creditAvailableBalance(
-          order.assigned_worker_id,
-          'neighbor_assist',
-          amountNum,
-          t
-        );
-      }
-      order.status = 'completed';
-      if (!order.completed_at) order.completed_at = new Date();
-      await order.save({ transaction: t });
-      await t.commit();
-      return ok(res, {
-        id: order.id,
-        status: order.status,
-        confirmed: true,
-        status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
-        amount_transferred: amountNum
+      await orderSettlement.settleOrderComplete({
+        orderId: order.id,
+        orderType: 'neighbor_assist',
+        earnerUserId: order.assigned_worker_id,
+        earnerRole: 'neighbor_assist',
+        settlementAmount: settleNum
       });
-    } catch (e) {
-      await t.rollback();
-      throw e;
+    } catch (se) {
+      console.warn('[neighborAssist/confirm/settlement]', se.message);
     }
+
+    return ok(res, {
+      id: order.id,
+      status: order.status,
+      confirmed: true,
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
+      amount_transferred: settleNum
+    });
   } catch (e) {
     console.error('neighborAssist confirm', e);
     return fail(res, 500, '操作失败');

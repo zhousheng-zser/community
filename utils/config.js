@@ -2,7 +2,7 @@
  * 小程序全局配置文件
  */
 const config = {
-    // 后端在 120.27.239.244（见 doc/项目开发参考.md）
+    // 对外 API 域名；实际后端节点 8.140.204.254（见 doc/项目开发参考.md）
     baseUrl: 'https://jshsp1.eds-tech.cn/api/v1',
 
     // 静态资源（图片）基础地址，与 baseUrl 同机

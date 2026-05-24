@@ -93,6 +93,26 @@ Page({
     wx.showToast({ title: '敬请期待', icon: 'none' });
   },
 
+  _joinSubByStatus(status, fallback) {
+    if (status === 'pending' || status === 'reviewing') return '审核中，请耐心等待';
+    if (status === 'approved') return '已通过，可进入技工工作台';
+    if (status === 'rejected') return '未通过，点击重新提交';
+    return fallback;
+  },
+
+  buildJoinMenus(user) {
+    const u = user || {};
+    const workerSt = u.worker_status != null ? u.worker_status : u.workerStatus;
+    const merchantSt = u.merchant_status != null ? u.merchant_status : u.merchantStatus;
+    const spSt = u.service_provider_status != null ? u.service_provider_status : u.serviceProviderStatus;
+    return [
+      { name: '技工入驻', sub: this._joinSubByStatus(workerSt, '用技能闲置赚钱'), icon: 'worker_join', url: '../join-worker/join-worker' },
+      { name: '集市商家', sub: this._joinSubByStatus(merchantSt, '附近商家入驻申请'), icon: 'market_merchant', url: '../join-market/join-market' },
+      { name: '服务商入驻', sub: this._joinSubByStatus(spSt, '提供专业到家服务'), icon: 'service_provider', url: '../join-service/join-service' },
+      { name: '小区管家入驻', sub: '社区便民服务管家', icon: 'community_manager', iconDir: 'other_services', tap: 'steward' }
+    ];
+  },
+
   computeRoleLabel(user) {
     if (!user) return '普通用户';
     const roleMap = {
@@ -326,6 +346,7 @@ Page({
       user,
       roleLabel,
       loggedIn,
+      joinMenus: this.buildJoinMenus(user),
       footprintCount: 0,
       favoriteCount: 0,
       cartCount: 0,
@@ -423,7 +444,8 @@ Page({
       this.setData({
         balance: balanceValue,
         user,
-        roleLabel: this.computeRoleLabel(user)
+        roleLabel: this.computeRoleLabel(user),
+        joinMenus: this.buildJoinMenus(user)
       });
       this._syncBoundCommunityDisplay(user);
       this.loadCommissionBalance();

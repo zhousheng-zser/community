@@ -8,6 +8,7 @@ const adminRefundController = require('../controllers/adminRefundController');
 const adminSettlementController = require('../controllers/adminSettlementController');
 const adminMerchantAccountController = require('../controllers/adminMerchantAccountController');
 const adminRiskController = require('../controllers/adminRiskController');
+const adminCouponController = require('../controllers/adminCouponController');
 const adminOpsController = require('../controllers/adminOpsController');
 const adminDispatchController = require('../controllers/adminDispatchController');
 const adminCommunityOpsController = require('../controllers/adminCommunityOpsController');
@@ -19,6 +20,8 @@ const adminLocalGoodsHomeController = require('../controllers/adminLocalGoodsHom
 const adminAuthMiddleware = require('../middlewares/adminAuthMiddleware');
 const adminHomeDisplayController = require('../controllers/adminHomeDisplayController');
 const adminServiceHomeController = require('../controllers/adminServiceHomeController');
+const adminPlatformFeeController = require('../controllers/adminPlatformFeeController');
+const adminCommissionController = require('../controllers/adminCommissionController');
 
 
 router.use(adminAuthMiddleware);
@@ -78,10 +81,13 @@ router.post('/complaint-tickets', adminRiskController.createComplaint);
 router.put('/complaint-tickets/:id', adminRiskController.resolveComplaint);
 router.get('/approval-records', adminRiskController.listApprovalRecords);
 router.get('/operation-logs', adminRiskController.listOperationLogs);
-router.get('/coupon-templates', adminOpsController.listCouponTemplates);
-router.post('/coupon-templates', adminOpsController.createCouponTemplate);
-router.post('/coupon-issues/issue', adminOpsController.issueCoupon);
-router.get('/coupon-issues', adminOpsController.listCouponIssues);
+router.get('/coupon-templates', adminCouponController.listCouponTemplates);
+router.post('/coupon-templates', adminCouponController.createCouponTemplate);
+router.put('/coupon-templates/:id', adminCouponController.updateCouponTemplate);
+router.post('/coupon-issues/issue', adminCouponController.issueCoupon);
+router.post('/coupon-issues/batch-all', adminCouponController.batchIssueAll);
+router.post('/coupon-issues/batch-users', adminCouponController.batchIssueUsers);
+router.get('/coupon-issues', adminCouponController.listCouponIssues);
 router.get('/activities', adminOpsController.listActivities);
 router.post('/activities', adminOpsController.createActivity);
 router.get('/reports', adminOpsController.dataReport);
@@ -146,5 +152,12 @@ router.get('/service-home/services', adminServiceHomeController.listServices);
 router.post('/service-home/services', adminServiceHomeController.createService);
 router.put('/service-home/services/:id', adminServiceHomeController.updateService);
 router.delete('/service-home/services/:id', adminServiceHomeController.deleteService);
+
+router.get('/platform-fee-config', adminPlatformFeeController.getPlatformFeeConfig);
+router.put('/platform-fee-config', adminPlatformFeeController.updatePlatformFeeConfig);
+router.get('/commission/summary', adminCommissionController.getSummary);
+router.get('/commission/distributions', adminCommissionController.listDistributions);
+router.get('/commission/orders/:orderId/breakdown', adminCommissionController.getOrderBreakdown);
+router.get('/commission/rates', adminCommissionController.getRates);
 
 module.exports = router;

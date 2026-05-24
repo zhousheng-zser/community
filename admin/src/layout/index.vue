@@ -38,6 +38,14 @@
           <el-icon><Money /></el-icon>
           <span>佣金提现审核</span>
         </el-menu-item>
+        <el-menu-item index="/platform-fee-config">
+          <el-icon><Setting /></el-icon>
+          <span>平台抽成配置</span>
+        </el-menu-item>
+        <el-menu-item index="/commission-orders">
+          <el-icon><Coin /></el-icon>
+          <span>推广分佣订单</span>
+        </el-menu-item>
         <el-menu-item index="/worker-applications">
           <el-icon><User /></el-icon>
           <span>技工入驻审核</span>
@@ -54,6 +62,14 @@
           <el-icon><Operation /></el-icon>
           <span>到家服务派单台</span>
         </el-menu-item>
+        <el-sub-menu index="/home-manage">
+          <template #title>
+            <el-icon><HomeFilled /></el-icon>
+            <span>首页管理</span>
+          </template>
+          <el-menu-item index="/home-display-config">首页展示</el-menu-item>
+          <el-menu-item index="/home-coupon-manage">优惠券管理</el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/service-home-manage">
           <el-icon><Grid /></el-icon>
           <span>服务管理</span>
@@ -92,7 +108,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop, Operation, HomeFilled, Grid } from '@element-plus/icons-vue'
+import { Odometer, Goods, Money, ArrowDown, ShoppingBag, Discount, User, Shop, Operation, HomeFilled, Grid, Setting, Coin } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()

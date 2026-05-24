@@ -1,5 +1,18 @@
 <view class="form-page">
 
+  <view wx:if="{{applyStatus==='pending'}}" class="status-banner pending">
+    <text class="status-title">审核中</text>
+    <text class="status-desc">您的技工入驻申请已提交，请耐心等待运营审核。</text>
+  </view>
+  <view wx:elif="{{applyStatus==='approved'}}" class="status-banner approved">
+    <text class="status-title">已通过</text>
+    <text class="status-desc">您已是认证技工，可在「我的」进入技工工作台。</text>
+  </view>
+  <view wx:elif="{{applyStatus==='rejected'}}" class="status-banner rejected">
+    <text class="status-title">审核未通过</text>
+    <text class="status-desc">{{applyRejectReason || '请修改资料后重新提交'}}</text>
+  </view>
+
   <!-- 个人基础信息 -->
   <view class="form-section">
     <text class="section-title">个人基础信息</text>
@@ -224,8 +237,8 @@
       </view>
       <text class="agree-text">已阅读同意 <text class="agree-link">《九州社区技工入驻协议》</text></text>
     </view>
-    <view class="submit-btn {{submitting?'disabled':''}}" bindtap="submit">
-      {{submitting ? '提交中...' : '发布审核'}}
+    <view class="submit-btn {{submitting || formLocked ? 'disabled' : ''}}" bindtap="submit">
+      {{applyStatus==='pending' ? '审核中' : (submitting ? '提交中...' : '发布审核')}}
     </view>
   </view>
 </view>

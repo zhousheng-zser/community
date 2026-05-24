@@ -168,7 +168,7 @@ const request = (method, url, data, contentType = 'application/json') => {
           reject({
             errno: res.statusCode,
             errmsg: (body && (body.msg || body.message || body.errmsg || body.error)) || '请求失败',
-            msg: body && (body.msg || body.message || body.errmsg)
+            msg: body && (body.msg || body.message || body.errmsg || body.error)
           });
           return;
         }
@@ -270,10 +270,32 @@ const uploadFile = (url, filePath, name = 'file', formData = {}) => {
           });
           return;
         }
+        const hasCode = data != null && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'code');
+        if (hasCode && Number(data.code) !== 0) {
+          reject({
+            errno: data.code,
+            errmsg: data.msg || data.message || data.errmsg || data.error || '上传失败',
+            msg: data.msg || data.message || data.errmsg
+          });
+          return;
+        }
+        if (res.statusCode === 413) {
+          const label = data && (data.data && data.data.image_label) || (data && data.image_label);
+          const serverMsg = (data && (data.msg || data.message || data.errmsg)) || '';
+          reject({
+            statusCode: 413,
+            code: data && data.code,
+            image_label: label || null,
+            errmsg: serverMsg || (label ? `「${label}」图片过大，请压缩或换一张` : '图片过大，请换一张或重新拍摄'),
+            msg: serverMsg
+          });
+          return;
+        }
         if (res.statusCode === 200 || res.statusCode === 201) {
           resolve(data.data !== undefined ? data.data : data)
         } else {
-          reject(Object.assign({ statusCode: res.statusCode }, data))
+          const errmsg = (data && (data.msg || data.message || data.errmsg || data.error)) || '上传失败';
+          reject(Object.assign({ statusCode: res.statusCode, errmsg }, data))
         }
       },
       fail: (res) => {

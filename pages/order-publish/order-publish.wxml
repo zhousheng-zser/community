@@ -83,6 +83,7 @@
           confirm-type="done"
         />
       </view>
+      <view wx:if="{{feeHint}}" class="fee-hint">{{feeHint}}</view>
       <!-- 联系方式 -->
       <view class="remark-row">
         <text class="field-icon">📞</text>
@@ -170,6 +171,7 @@
           confirm-type="done"
         />
       </view>
+      <view wx:if="{{feeHint}}" class="fee-hint">{{feeHint}}</view>
 
       <!-- 联系方式 -->
       <view class="form-row">

@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const platformFee = require('../../utils/platformFee.js');
 const { getActiveCommunityId, ensureCommunityForPublish } = require('../../utils/communityPortal.js');
 
 function syncToCommunityPost(content, category, address, price, communityId, imageUrls) {
@@ -61,7 +62,8 @@ Page({
     canSubmit: false,
     timeRanges: [[], [], [], []],
     timeIndexes: [0, 0, 0, 8],
-    recentList: []
+    recentList: [],
+    feeHint: ''
   },
 
   onLoad(options) {
@@ -182,10 +184,28 @@ Page({
     const val = e.detail.value;
     if (field === 'helperPrice') {
       this.setData({ 'helperForm.price': val });
+      this.updateFeeHint(val);
     } else {
       this.setData({ 'form.price': val });
       this.updateCanSubmit();
+      this.updateFeeHint(val);
     }
+  },
+
+  updateFeeHint(priceStr) {
+    const p = parseFloat(priceStr);
+    if (!Number.isFinite(p) || p <= 0) {
+      this.setData({ feeHint: '' });
+      return;
+    }
+    platformFee.estimateSettlement(util, p, 'neighbor_assist').then((fee) => {
+      const ratePct = ((fee.platform_fee_rate || 0) * 100).toFixed(0);
+      this.setData({
+        feeHint: `您支付 ¥${p.toFixed(2)}，接单方预计净收 ¥${fee.settlement_amount.toFixed(2)}（平台抽成 ${ratePct}%）`
+      });
+    }).catch(() => {
+      this.setData({ feeHint: '' });
+    });
   },
 
   onContactPhoneInput(e) {

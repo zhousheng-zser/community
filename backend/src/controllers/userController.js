@@ -6,6 +6,12 @@ const {
     CommunityStewardApplication
 } = require('../models');
 const { resolveUserId, resolveUserIdFromReq } = require('../utils/resolveUserId');
+const commissionService = require('../modules/commission/services/commission.service');
+
+function pickRoleBalance(roles, roleName) {
+    const r = (roles || []).find((x) => x.role === roleName);
+    return r ? Number(r.available_amount || 0) : 0;
+}
 
 exports.getProfile = async (req, res) => {
     try {
@@ -103,8 +109,23 @@ exports.getProfile = async (req, res) => {
             roles.push('steward');
         }
 
+        const balanceSummary = await commissionService.getUserBalance(userId);
+        const merchantAvailable = pickRoleBalance(balanceSummary.roles, 'merchant');
+        const workerAvailable = pickRoleBalance(balanceSummary.roles, 'neighbor_assist')
+            + pickRoleBalance(balanceSummary.roles, 'worker');
+        const providerAvailable = pickRoleBalance(balanceSummary.roles, 'service_provider');
+
         res.json({
             ...profile,
+            balance: Number(balanceSummary.available_amount.toFixed(2)),
+            market_merchant_balance: Number(merchantAvailable.toFixed(2)),
+            worker_balance: Number(workerAvailable.toFixed(2)),
+            provider_balance: Number(providerAvailable.toFixed(2)),
+            commission_available: balanceSummary.available_amount,
+            commission_pending: balanceSummary.pending_amount,
+            commission_withdrawn: balanceSummary.withdrawn_amount,
+            commission_total: balanceSummary.total_earned,
+            commission_roles: balanceSummary.roles,
             role: roles.join(','),
             roles,
             communityId: profile.community_id != null ? profile.community_id : null,

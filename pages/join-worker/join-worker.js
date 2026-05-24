@@ -1,5 +1,7 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const api = require('../../api/index.js');
+const joinUpload = require('../../utils/joinImageUpload.js');
 
 Page({
   data: {
@@ -16,6 +18,9 @@ Page({
     editingServiceIdx: -1,
     serviceForm: { name: '', price: '', desc: '' },
     services: [],
+    applyStatus: '',
+    applyRejectReason: '',
+    formLocked: false,
     form: {
       avatar: '', realName: '', gender: '男', phone: '', hometown: '',
       idCard: '', address: '', inviteCode: '', education: '', workExp: '',
@@ -58,7 +63,56 @@ Page({
   },
 
   onShow() {
-    // 去掉自动跳转，允许未入驻用户查看入驻页面
+    if (!wx.getStorageSync('token')) return;
+    this.loadApplicationStatus();
+  },
+
+  flattenCerts(v) {
+    const out = [];
+    const walk = (x) => {
+      if (x == null || x === '') return;
+      if (Array.isArray(x)) return x.forEach(walk);
+      out.push(String(x));
+    };
+    walk(v);
+    return out;
+  },
+
+  async loadApplicationStatus() {
+    try {
+      const row = await util.get('worker/application/me');
+      if (!row || !row.status) return;
+      const status = row.status;
+      const certs = this.flattenCerts(row.certificate_url);
+      const patch = {
+        applyStatus: status,
+        applyRejectReason: row.reject_reason || '',
+        formLocked: status === 'pending' || status === 'approved'
+      };
+      const services = Array.isArray(row.services) ? row.services : [];
+      const industryIdx = this.data.industryList.indexOf(row.industry);
+      const educationIdx = row.education ? this.data.educationList.indexOf(row.education) : -1;
+      const communityIdx = row.city ? this.data.communityList.indexOf(row.city) : -1;
+      Object.assign(patch, {
+        services,
+        industryIndex: industryIdx >= 0 ? industryIdx : this.data.industryIndex,
+        educationIndex: educationIdx >= 0 ? educationIdx : this.data.educationIndex,
+        communityIndex: communityIdx >= 0 ? communityIdx : this.data.communityIndex,
+        'form.realName': row.name || this.data.form.realName,
+        'form.phone': row.phone || this.data.form.phone,
+        'form.industry': row.industry || this.data.form.industry,
+        'form.education': row.education || this.data.form.education,
+        'form.hometown': row.city || this.data.form.hometown,
+        'form.resume': row.resume || this.data.form.resume,
+        'form.idFront': row.id_card_url || this.data.form.idFront,
+        'form.workPhoto': row.work_photo_url || this.data.form.workPhoto,
+        'form.cert': certs[0] || this.data.form.cert,
+        'form.community': communityIdx >= 0 ? this.data.communityList[communityIdx] : this.data.form.community
+      });
+      this.setData(patch);
+    } catch (e) {
+      console.log('loadApplicationStatus', e);
+    }
   },
 
   onInput(e) {
@@ -86,29 +140,37 @@ Page({
     this.setData({ educationIndex: idx, 'form.education': this.data.educationList[idx] });
   },
 
-  chooseAvatar() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.avatar': r.tempFiles[0].tempFilePath });
-    }});
+  compressImagePath(filePath) {
+    return new Promise((resolve) => {
+      if (!filePath) return resolve('');
+      wx.compressImage({
+        src: filePath,
+        quality: 80,
+        success: (r) => resolve(r.tempFilePath || filePath),
+        fail: () => resolve(filePath)
+      });
+    });
   },
 
-  chooseIdCard() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.idFront': r.tempFiles[0].tempFilePath });
-    }});
+  pickImage(field) {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: async (r) => {
+        const raw = r.tempFiles && r.tempFiles[0] && r.tempFiles[0].tempFilePath;
+        if (!raw) return;
+        const path = await this.compressImagePath(raw);
+        this.setData({ ['form.' + field]: path });
+      }
+    });
   },
 
-  chooseWorkPhoto() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.workPhoto': r.tempFiles[0].tempFilePath });
-    }});
-  },
-
-  chooseCert() {
-    wx.chooseMedia({ count: 1, mediaType: ['image'], success: (r) => {
-      this.setData({ 'form.cert': r.tempFiles[0].tempFilePath });
-    }});
-  },
+  chooseAvatar() { this.pickImage('avatar'); },
+  chooseIdCard() { this.pickImage('idFront'); },
+  chooseWorkPhoto() { this.pickImage('workPhoto'); },
+  chooseCert() { this.pickImage('cert'); },
 
   delField(e) {
     this.setData({ ['form.' + e.currentTarget.dataset.key]: '' });
@@ -174,8 +236,16 @@ Page({
 
 
   async submit() {
-    const { form, agreed, submitting } = this.data;
+    const { form, agreed, submitting, formLocked, applyStatus } = this.data;
     if (submitting) return;
+    if (formLocked || applyStatus === 'pending') {
+      wx.showToast({ title: '申请审核中，请耐心等待', icon: 'none' });
+      return;
+    }
+    if (applyStatus === 'approved') {
+      wx.showToast({ title: '您已是认证技工', icon: 'none' });
+      return;
+    }
     if (!form.realName) return wx.showToast({ title: '请填写真实姓名', icon: 'none' });
     if (!form.phone) return wx.showToast({ title: '系统未能获取到手机号', icon: 'none' });
     if (!form.idCard) return wx.showToast({ title: '请填写身份证号', icon: 'none' });
@@ -186,24 +256,24 @@ Page({
     this.setData({ submitting: true });
     wx.showLoading({ title: '图片上传中...', mask: true });
     try {
-      let idCardUrl = form.idFront;
-      let workPhotoUrl = form.workPhoto;
-      let certUrl = form.cert;
+      wx.showLoading({ title: '上传身份证照...', mask: true });
+      const idCardUrl = await joinUpload.upload('worker', 'idFront', form.idFront);
+      if (!idCardUrl) throw { errmsg: '「身份证人像面」上传失败，请重试' };
 
-      // 将本地临时图片上传换取服务器相对路径
-      const uploadIfNeeded = async (path) => {
-        if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
-        if (path.includes('/uploads/')) return path; // 已经是服务器路径
-        const res = await util.uploadFile('upload', path, 'file');
-        // 兼容后端返回结构：{ url: '/xx' } 或者是直接的字符串
-        return (res && res.url) ? res.url : res;
-      };
+      if (form.workPhoto) {
+        wx.showLoading({ title: '上传工作生活照...', mask: true });
+      }
+      const workPhotoUrl = form.workPhoto
+        ? await joinUpload.upload('worker', 'workPhoto', form.workPhoto)
+        : '';
 
-      idCardUrl = await uploadIfNeeded(idCardUrl);
-      
+      let certUrl = '';
+      if (form.cert) {
+        wx.showLoading({ title: '上传专业证书...', mask: true });
+        certUrl = await joinUpload.upload('worker', 'cert', form.cert);
+      }
+
       wx.showLoading({ title: '提交数据中...', mask: true });
-      workPhotoUrl = await uploadIfNeeded(workPhotoUrl);
-      certUrl = await uploadIfNeeded(certUrl);
 
       const certArr = certUrl ? [certUrl] : [];
       const { services } = this.data;
@@ -227,19 +297,34 @@ Page({
         }
       });
 
-      const res = await util.post('worker/apply', payload);
+      const applyRes = await util.post('worker/apply', payload);
       wx.hideLoading();
-      // 提交成功后立即更新本地状态，避免用户返回"我的"页面后状态不同步
-      const app = getApp();
+      if (applyRes && applyRes.status === 'approved') {
+        wx.showToast({ title: '您已是认证技工，无需重复申请', icon: 'none' });
+        this.setData({ applyStatus: 'approved', formLocked: true, submitting: false });
+        return;
+      }
       if (app.globalData.user) {
         app.globalData.user.worker_status = 'pending';
         app.globalData.user.workerStatus = 'pending';
       }
+      try {
+        const profile = await api.user.getUserProfile();
+        if (app.globalData.user && profile) {
+          Object.assign(app.globalData.user, profile);
+          if (profile.worker_status != null) {
+            app.globalData.user.worker_status = profile.worker_status;
+            app.globalData.user.workerStatus = profile.worker_status;
+          }
+        }
+      } catch (e) { /* ignore */ }
+      this.setData({ applyStatus: 'pending', formLocked: true, submitting: false });
       wx.showToast({ title: '提交成功，等待审核', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
       wx.hideLoading();
-      wx.showToast({ title: (err && err.errmsg) || '提交失败，请重试', icon: 'none' });
+      const tip = joinUpload.formatUploadError(err, err && err.image_label);
+      wx.showToast({ title: tip || '提交失败，请重试', icon: 'none', duration: 3500 });
       this.setData({ submitting: false });
     }
   }

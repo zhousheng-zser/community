@@ -32,6 +32,8 @@ router.get('/orders/:orderNo/delivery/options', deliveryCtrl.merchantOptions);
 router.post('/orders/:orderNo/delivery/launch', deliveryCtrl.merchantLaunch);
 router.get('/orders/:orderNo/delivery/track', deliveryCtrl.merchantTrack);
 router.get('/payments', ctrl.getPayments);
+router.get('/balance', ctrl.getBalance);
+router.post('/withdraw', ctrl.withdraw);
 
 // 7.4 客户管理
 router.get('/customers/list', ctrl.getCustomers);

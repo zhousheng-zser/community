@@ -1,6 +1,7 @@
 /* pages/order-publish/order-publish.wxss */
 page { background: #fdf3ef; }
 .pub-page { min-height: 100vh; padding-bottom: 60rpx; }
+.fee-hint { padding: 8rpx 32rpx 0; font-size: 24rpx; color: #888; line-height: 1.5; }
 
 /* ===== 顶部双 Tab ===== */
 .top-tabs {

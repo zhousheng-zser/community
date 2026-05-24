@@ -5,6 +5,7 @@ const couponController = require('./controllers/coupon.controller');
 
 router.use(authMiddleware);
 
+router.get('/home', couponController.getHomeCoupons);
 router.get('/list', couponController.getCouponList);
 router.post('/receive', couponController.receiveCoupon);
 router.get('/my', couponController.getMyCoupons);

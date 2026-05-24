@@ -2,6 +2,7 @@ const db = require('../../../models');
 const { ServiceOrder, ServiceItem, ServiceProviderProfile, WorkerApplication, User } = db;
 const orderPoints = require('../../../services/orderPoints.service');
 const commissionService = require('../../commission/services/commission.service');
+const orderSettlement = require('../../../services/orderSettlement.service');
 const couponService = require('../../coupon/services/coupon.service');
 const { resolveUserIdFromReq } = require('../../../utils/resolveUserId');
 
@@ -223,7 +224,7 @@ exports.create = async (req, res) => {
     let couponIssueId = Number(body.coupon_issue_id || body.couponIssueId || 0) || 0;
     if (couponIssueId > 0) {
       try {
-        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmountBeforeCoupon);
+        const applied = await couponService.validateCouponForOrder(userId, couponIssueId, goodsAmountBeforeCoupon, null, 'service');
         couponDiscount = applied.discount;
         total = applied.payableAmount;
       } catch (couponErr) {
@@ -404,6 +405,23 @@ exports.confirm = async (req, res) => {
     if (!row) return fail(res, '订单不存在', 404);
     if (row.status !== 'pending_user_confirm') return fail(res, '当前订单不可确认完成');
     await row.update({ status: 'completed' });
+    await row.reload();
+    const amt = orderSettlement.calcSettlementAmount(row);
+    const spUserId = row.provider_user_id || null;
+    if (amt > 0 && row.provider_id) {
+      try {
+        await ServiceProviderProfile.increment('balance', { by: amt, where: { id: row.provider_id } });
+      } catch (e) { console.warn('[service-order/confirm/sp-balance]', e.message); }
+    }
+    try {
+      await orderSettlement.settleOrderComplete({
+        orderId: row.id,
+        orderType: 'service',
+        earnerUserId: spUserId,
+        earnerRole: 'service_provider',
+        settlementAmount: amt
+      });
+    } catch (e) { console.warn('[service-order/confirm/settlement]', e.message); }
     ok(res, { id: row.id, status: row.status }, '确认完成');
   } catch (err) {
     console.error('[service-order/confirm]', err);

@@ -1,5 +1,6 @@
 const app = getApp();
 const util = require('../../utils/util.js');
+const joinUpload = require('../../utils/joinImageUpload.js');
 
 Page({
   data: {
@@ -132,25 +133,32 @@ Page({
     this.setData({ submitting: true });
     wx.showLoading({ title: '图片上传中...', mask: true });
     try {
-      const uploadIfNeeded = async (path) => {
-        if (!path || path.startsWith('http') && !path.startsWith('http://tmp')) return path;
-        if (path.includes('/uploads/')) return path;
-        const res = await util.uploadFile('upload', path, 'file');
-        return (res && res.url) ? res.url : res;
-      };
+      wx.showLoading({ title: '上传营业执照...', mask: true });
+      const licenseUrl = await joinUpload.upload('service', 'license', form.license);
+      wx.showLoading({ title: '上传法人身份证...', mask: true });
+      const idCardUrl = await joinUpload.upload('service', 'idCard', form.idCard);
 
-      let licenseUrl = await uploadIfNeeded(form.license);
-      let idCardUrl = await uploadIfNeeded(form.idCard);
-      
-      wx.showLoading({ title: '稍等...', mask: true });
-      let shopFrontUrl = await uploadIfNeeded(form.shopFront);
-      
-      let environmentUrl = [];
-      if (form.envPhoto) environmentUrl.push(await uploadIfNeeded(form.envPhoto));
+      let shopFrontUrl = '';
+      if (form.shopFront) {
+        wx.showLoading({ title: '上传门店门头照...', mask: true });
+        shopFrontUrl = await joinUpload.upload('service', 'shopFront', form.shopFront);
+      }
 
-      let certificateUrl = [];
-      if (form.cert) certificateUrl.push(await uploadIfNeeded(form.cert));
-      if (form.specialCert) certificateUrl.push(await uploadIfNeeded(form.specialCert));
+      const environmentUrl = [];
+      if (form.envPhoto) {
+        wx.showLoading({ title: '上传店内环境照...', mask: true });
+        environmentUrl.push(await joinUpload.upload('service', 'envPhoto', form.envPhoto));
+      }
+
+      const certificateUrl = [];
+      if (form.cert) {
+        wx.showLoading({ title: '上传资质证书...', mask: true });
+        certificateUrl.push(await joinUpload.upload('service', 'cert', form.cert));
+      }
+      if (form.specialCert) {
+        wx.showLoading({ title: '上传特殊行业资质...', mask: true });
+        certificateUrl.push(await joinUpload.upload('service', 'specialCert', form.specialCert));
+      }
 
       wx.showLoading({ title: '提交数据中...', mask: true });
       let payload = {
@@ -187,7 +195,8 @@ Page({
       setTimeout(() => wx.navigateBack(), 1500);
     } catch (err) {
       wx.hideLoading();
-      wx.showToast({ title: (err && err.errmsg) || '提交失败，请重试', icon: 'none' });
+      const tip = joinUpload.formatUploadError(err, err && err.image_label);
+      wx.showToast({ title: tip || '提交失败，请重试', icon: 'none', duration: 3500 });
       this.setData({ submitting: false });
     }
   },

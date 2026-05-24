@@ -26,6 +26,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: true
     },
+    platform_fee_rate: {
+      type: DataTypes.DECIMAL(5, 4),
+      allowNull: false,
+      defaultValue: 0.1
+    },
+    platform_fee_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0
+    },
+    settlement_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0
+    },
     appointment_time: {
       type: DataTypes.DATE,
       allowNull: true
