@@ -683,33 +683,31 @@ exports.confirm = async (req, res) => {
     }
     if (order.status !== 'pending_confirm') return fail(res, 400, '当前状态不可确认');
 
-    const t = await db.sequelize.transaction();
-    try {
-      const amountNum = Number(order.amount || 0);
-      if (amountNum > 0 && order.assigned_worker_id) {
-        await commissionService.creditAvailableBalance(
-          order.assigned_worker_id,
-          'neighbor_assist',
-          amountNum,
-          t
-        );
-      }
-      order.status = 'completed';
-      if (!order.completed_at) order.completed_at = new Date();
-      await order.save({ transaction: t });
-      await t.commit();
+    order.status = 'completed';
+    if (!order.completed_at) order.completed_at = new Date();
+    await order.save();
 
-      return ok(res, {
-        id: order.id,
-        status: order.status,
-        confirmed: true,
-        status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
-        amount_transferred: amountNum
+    const orderSettlement = require('../../../services/orderSettlement.service');
+    const settleNum = orderSettlement.calcSettlementAmount(order);
+    try {
+      await orderSettlement.settleOrderComplete({
+        orderId: order.id,
+        orderType: 'neighbor_assist',
+        earnerUserId: order.assigned_worker_id,
+        earnerRole: 'neighbor_assist',
+        settlementAmount: settleNum
       });
-    } catch (e) {
-      await t.rollback();
-      throw e;
+    } catch (se) {
+      console.warn('[neighbor-assist/confirm/settlement]', se.message);
     }
+
+    return ok(res, {
+      id: order.id,
+      status: order.status,
+      confirmed: true,
+      status_text: NEIGHBOR_ORDER_STATUS_TEXT[order.status] || order.status,
+      amount_transferred: settleNum
+    });
   } catch (e) {
     console.error('neighborAssist confirm', e);
     return fail(res, 500, '操作失败');

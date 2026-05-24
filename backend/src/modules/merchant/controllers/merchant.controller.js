@@ -612,6 +612,13 @@ exports.orderAction = async (req, res) => {
     } else if (action === 'complete_delivery') {
       if (!['pending_receipt', 'pending_service'].includes(String(row.order_status))) return fail(res, '当前状态不可完成配送');
       await row.update({ order_status: 'completed', completed_at: new Date() });
+      await row.reload();
+      try {
+        const orderSettlement = require('../../../services/orderSettlement.service');
+        await orderSettlement.settleMarketOrder(row);
+      } catch (se) {
+        console.warn('[merchant/complete_delivery/settlement]', se.message);
+      }
     } else if (action === 'delivered') {
       if (!['pending_receipt', 'pending_service'].includes(String(row.order_status))) return fail(res, '当前状态不可标记送达');
       const deliverySvc = require('../../../services/marketDelivery.service');
@@ -1224,5 +1231,64 @@ exports.getRefundStats = async (req, res) => {
   } catch (err) {
     console.error('[merchant/refund/stats]', err);
     fail(res, '获取退款统计失败', 500);
+  }
+};
+
+// GET /market/merchant/balance — 集市商家个人余额（净收入入账）
+exports.getBalance = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return fail(res, '未登录', 401);
+    const commissionService = require('../../commission/services/commission.service');
+    const summary = await commissionService.getUserBalance(userId);
+    const merchant = summary.roles.find((r) => r.role === 'merchant') || {
+      total_earned: 0,
+      available_amount: 0,
+      withdrawn_amount: 0,
+      pending_amount: 0
+    };
+    ok(res, {
+      balance: merchant.available_amount,
+      market_merchant_balance: merchant.available_amount,
+      available_amount: merchant.available_amount,
+      pending_amount: merchant.pending_amount,
+      withdrawn_amount: merchant.withdrawn_amount,
+      total_earned: merchant.total_earned,
+      commission_summary: summary
+    });
+  } catch (err) {
+    console.error('[merchant/balance]', err);
+    fail(res, '获取余额失败', 500);
+  }
+};
+
+// POST /market/merchant/withdraw
+exports.withdraw = async (req, res) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId) return fail(res, '未登录', 401);
+    const amount = Number(req.body && req.body.amount);
+    if (!(amount > 0)) return fail(res, '提现金额需大于0');
+
+    const commissionService = require('../../commission/services/commission.service');
+    const { PromoterWithdrawal } = require('../../../models');
+
+    const summary = await commissionService.getUserBalance(userId);
+    const merchant = summary.roles.find((r) => r.role === 'merchant');
+    const available = merchant ? Number(merchant.available_amount) : 0;
+    if (amount > available) return fail(res, '可提现金额不足');
+
+    const withdrawal = await PromoterWithdrawal.create({
+      user_id: userId,
+      amount,
+      status: 'pending',
+      remark: 'market_merchant'
+    });
+    await commissionService.withdrawFromRole(userId, 'merchant', amount);
+
+    ok(res, { id: withdrawal.id, amount, status: withdrawal.status }, '提现申请已提交');
+  } catch (err) {
+    console.error('[merchant/withdraw]', err);
+    fail(res, err.message || '提现失败', 500);
   }
 };
