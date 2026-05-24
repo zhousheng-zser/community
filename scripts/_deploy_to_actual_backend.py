@@ -1,13 +1,14 @@
 """
 Deploy latest backend code and run migrations on the actual production server.
-Server: 120.27.239.244  user: cw  password: cW23456
+DEPRECATED — 请使用 8.140.204.254，见 scripts/_deploy_may23_sync_254.py
+Server (old): 120.27.239.244
 Backend path: /home/cw/a/community-backend/backend
 """
 import paramiko
 import sys
 import time
 
-HOST = '120.27.239.244'
+HOST = '8.140.204.254'  # 2026-05-23 更正为实际后端
 PORT = 22
 USER = 'cw'
 PASSWORD = 'cW23456'
