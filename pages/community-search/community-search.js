@@ -1,9 +1,12 @@
+const util = require('../../utils/util.js');
 const {
   DEFAULT_CITIES,
   searchCommunities,
   collectCitiesFromList,
   normalizeCommunityRow,
-  getCityMapCenter
+  getCityMapCenter,
+  inferDefaultCityFromCoords,
+  formatCityQuery
 } = require('../../utils/communitySearch.js');
 
 Page({
@@ -28,15 +31,22 @@ Page({
   _sortByGps: false,
 
   onLoad(options) {
-    const city = options.city ? decodeURIComponent(options.city) : DEFAULT_CITIES[0];
+    let city = options.city ? decodeURIComponent(options.city) : DEFAULT_CITIES[0];
     let cities = DEFAULT_CITIES.slice();
-    if (city && !cities.includes(city)) cities = [city].concat(cities);
-    const cityIndex = Math.max(0, cities.indexOf(city));
     const lat = options.latitude != null ? Number(options.latitude) : NaN;
     const lng = options.longitude != null ? Number(options.longitude) : NaN;
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
       this._gps = { latitude: lat, longitude: lng };
+      const inferred = inferDefaultCityFromCoords(lat, lng);
+      // 当前开通小区主要在上海/成都；GPS 在广州时默认仍展示上海市列表
+      if (inferred === '广州市' && !options.city) {
+        city = DEFAULT_CITIES[0];
+      } else if (inferred && !options.city) {
+        city = inferred;
+      }
     }
+    if (city && !cities.includes(city)) cities = [city].concat(cities);
+    const cityIndex = Math.max(0, cities.indexOf(city));
     const currentCity = cities[cityIndex];
     this.setData({
       cities,
@@ -128,6 +138,19 @@ Page({
     try {
       const { city, keyword, focusedId } = this.data;
       const gps = this._sortByGps && this._gps ? this._gps : {};
+      const cityQ = formatCityQuery(city);
+      const query = {
+        page: 1,
+        page_size: 100,
+        ...(cityQ ? { city: cityQ } : {}),
+        ...(keyword && String(keyword).trim() ? { keyword: String(keyword).trim() } : {}),
+        ...(gps.latitude != null && gps.longitude != null
+          ? { latitude: gps.latitude, longitude: gps.longitude }
+          : {})
+      };
+      console.log('[community-search] GET /core/communities', query);
+      await util.get('core/communities', query);
+
       const { list } = await searchCommunities({
         city,
         keyword,
@@ -168,8 +191,16 @@ Page({
         focusedId: fid
       });
     } catch (e) {
+      console.warn('[community-search] loadList', e);
       this.setData({ list: [], loading: false, markers: [], circles: [], focusedId: null });
-      wx.showToast({ title: '加载失败', icon: 'none' });
+      const msg =
+        (e && (e.errmsg || e.message)) ||
+        (e && e.errMsg) ||
+        '加载失败';
+      wx.showToast({
+        title: String(msg).indexOf('domain') >= 0 ? '请配置合法域名' : '加载失败',
+        icon: 'none'
+      });
     }
   },
 

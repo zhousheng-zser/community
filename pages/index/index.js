@@ -23,6 +23,7 @@ const { pickHeroFromApi, getThemeBannerPath } = require('../../utils/benefitAlli
 const { mapRawModulesToCategoryRows, HOME_CATEGORY_ICON_BY_KEY } = require('../../utils/homeModulesMap.js');
 const locationPermission = require('../../utils/locationPermission.js');
 const communityBind = require('../../utils/communityBind.js');
+const boundCommunityLocation = require('../../utils/boundCommunityLocation.js');
 
 /** 惠民卡 · 肯德基/星巴克/百果园：与「京东联盟」区块同一套字段（头图 + 精选网格 + GO） */
 function mapChainBrandToAllianceSection(raw, imgUrlFn) {
@@ -363,6 +364,9 @@ Page({
   switchTopTab(e) {
     const tab = e.currentTarget.dataset.tab;
     this.setData({ activeTab: tab });
+    if (tab === '本地商城') {
+      this.refreshLocalGoodsModulesForLocation();
+    }
   },
   /** Banner：link_type none | service | h5 | page */
   onHomeBannerTap(e) {
@@ -389,11 +393,17 @@ Page({
       });
     }
   },
-  /** 本地集市：定位缓存键（与 radius 联动时避免错误命中旧缓存） */
+  /** 本地集市：按绑定小区缓存店铺列表 */
   getMarketLocationCacheKey() {
-    const coords = util.getMarketUserCoords();
-    if (!coords) return 'noloc';
-    return `${coords.lat.toFixed(3)}_${coords.lng.toFixed(3)}`;
+    const c = this._boundCommunityCoords;
+    if (!c) return 'unbound';
+    return `c${c.communityId}_${c.lat.toFixed(3)}_${c.lng.toFixed(3)}`;
+  },
+  /** 解析绑定小区坐标，供集市/商城列表查询 */
+  async ensureBoundCommunityCoordsForList() {
+    const coords = await boundCommunityLocation.resolveBoundCommunityCoords();
+    this._boundCommunityCoords = coords;
+    return { hasCoords: !!coords, coords };
   },
   cacheKeyForMarketCat(cat) {
     const sort = this.data.activeMarketSort || 'distance';
@@ -402,30 +412,20 @@ Page({
     return `${MAP_VER}::${this.getMarketLocationCacheKey()}::${cat}::${sort}`;
   },
   buildMarketShopsQuery(extra = {}) {
-    const q = { ...extra };
-    if (!q.page) q.page = 1;
-    if (!q.page_size) q.page_size = 30;
-    const coords = util.getMarketUserCoords();
-    const hasCoords = !!coords;
-    if (hasCoords) {
-      q.user_lat = coords.lat;
-      q.user_lng = Number(coords.lng);
-      q.radius_km = config.marketShopRadiusKm != null ? config.marketShopRadiusKm : 5;
-      const sortMode = this.data.activeMarketSort || 'distance';
-      q.sort = sortMode === 'comprehensive' ? 'comprehensive' : 'distance';
-    } else {
-      // 无定位且无可用坐标回退时：不按距离，固定综合排序
-      q.sort = 'comprehensive';
-    }
-    return q;
+    const coords = this._boundCommunityCoords;
+    if (!coords) return null;
+    return boundCommunityLocation.buildMarketShopsQueryFromCoords(
+      coords,
+      extra,
+      this.data.activeMarketSort
+    );
   },
   /** 切换「综合排序 / 距离优先」，重新拉取当前分类店铺列表 */
   async switchMarketSort(e) {
     const key = e.currentTarget.dataset.key;
     if (!key || key === this.data.activeMarketSort) return;
-    const hasCoords = !!util.getMarketUserCoords();
-    if (key === 'distance' && !hasCoords) {
-      wx.showToast({ title: '需定位或默认地址坐标后可用距离排序', icon: 'none' });
+    if (key === 'distance' && !this._boundCommunityCoords) {
+      wx.showToast({ title: '请先绑定小区', icon: 'none' });
       return;
     }
     this.setData({ activeMarketSort: key, marketShopsCacheByCat: {} });
@@ -531,18 +531,30 @@ Page({
 
     wx.showLoading({ title: '加载中...', mask: true });
     try {
-      const locRes = await this.ensureMarketUserCoordsForList();
-      if (locRes && locRes.hasCoords === false) {
-        this.setData({ activeMarketSort: 'comprehensive' });
-      }
+      const locRes = await this.ensureBoundCommunityCoordsForList();
       const cache = this.data.marketShopsCacheByCat || {};
       const ck = this.cacheKeyForMarketCat(cat);
+      if (!locRes.hasCoords) {
+        wx.hideLoading();
+        const marketShops = [];
+        this.setData({
+          marketShops,
+          marketShopsCacheByCat: { ...cache, [ck]: marketShops },
+          activeMarketSort: 'comprehensive'
+        });
+        return;
+      }
       if (!force && cache[ck] && Array.isArray(cache[ck])) {
         wx.hideLoading();
         this.setData({ marketShops: cache[ck] });
         return;
       }
       const query = this.buildMarketShopsQuery({ category: cat, page: 1, page_size: 30 });
+      if (!query) {
+        wx.hideLoading();
+        this.setData({ marketShops: [], marketShopsCacheByCat: { ...cache, [ck]: [] } });
+        return;
+      }
       const marketRes = await api.market.getShopList(query);
       wx.hideLoading();
       const list = Array.isArray(marketRes)
@@ -577,7 +589,7 @@ Page({
       url: `/pages/shopping-search/shopping-search?kw=${encodeURIComponent(kw)}&isMall=${isMall}`
     });
   },
-  /** 进入选择小区页（图1）；未登录且无定位权限时弹窗引导授权 */
+  /** 进入选择小区页；未登录且无定位权限时不跳转 */
   async handleLocationTap() {
     const token = wx.getStorageSync('token');
     if (!token) {
@@ -1037,18 +1049,22 @@ Page({
     let activeMarketCat = this.data.activeMarketCat;
     let locRes = null;
     try {
-      // 仅使用接口返回的店铺；无数据则为空列表
-      locRes = await this.ensureMarketUserCoordsForList();
-      const marketRes = await util.get('market/shops', this.buildMarketShopsQuery({ page: 1, page_size: 50 }));
-      const marketData = Array.isArray(marketRes)
-        ? marketRes
-        : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
-      if (Array.isArray(marketData) && marketData.length > 0) {
-        const mapped = marketData.map(indexHelper.normalizeMarketShop).filter(s => !!s.id);
-        if (mapped.length > 0) {
-          mergedMarketShops = mapped;
-          if (!mapped.some(s => s.cat === activeMarketCat)) {
-            activeMarketCat = mapped[0].cat;
+      locRes = await this.ensureBoundCommunityCoordsForList();
+      if (locRes.hasCoords) {
+        const marketQuery = this.buildMarketShopsQuery({ page: 1, page_size: 50 });
+        if (marketQuery) {
+          const marketRes = await util.get('market/shops', marketQuery);
+          const marketData = Array.isArray(marketRes)
+            ? marketRes
+            : (marketRes.list || (marketRes.data && marketRes.data.list) || marketRes.data || []);
+          if (Array.isArray(marketData) && marketData.length > 0) {
+            const mapped = marketData.map(indexHelper.normalizeMarketShop).filter(s => !!s.id);
+            if (mapped.length > 0) {
+              mergedMarketShops = mapped;
+              if (!mapped.some(s => s.cat === activeMarketCat)) {
+                activeMarketCat = mapped[0].cat;
+              }
+            }
           }
         }
       }
@@ -1646,8 +1662,12 @@ Page({
     })
   },
   async loadLocalGoodsModules() {
-    await this.ensureMarketUserCoordsForList();
-    const res = await util.get('local-goods-home/modules', indexHelper.buildLocalGoodsQuery());
+    await this.ensureBoundCommunityCoordsForList();
+    const q = await indexHelper.buildLocalGoodsQueryWithCoords();
+    if (!q) {
+      return boundCommunityLocation.emptyLocalGoodsModulesResult();
+    }
+    const res = await util.get('local-goods-home/modules', q);
     const payload = indexHelper.unwrapLocalGoodsPayload(res);
 
     const rawDaily = payload.daily_news || payload.dailyNews || [];
@@ -1687,6 +1707,7 @@ Page({
     const pushFeedGoods = activeFeedTab ? [...(pushFeedGoodsDict[activeFeedTab] || [])] : [];
 
     console.log('local-goods-home/modules parsed', {
+      query: { user_lat: q.user_lat, user_lng: q.user_lng, distance_km: q.distance_km },
       daily: pushDailyNews.length,
       top: pushTopSales.length,
       periodicTabs: pushPeriodicTabs,
@@ -1712,6 +1733,8 @@ Page({
   },
   async refreshLocalGoodsModulesForLocation() {
     try {
+      this._boundCommunityCoords = null;
+      this.setData({ marketShopsCacheByCat: {} });
       const moduleGoods = await this.loadLocalGoodsModules();
       this.setData({
         pushDailyNews: moduleGoods.pushDailyNews,
@@ -1728,6 +1751,12 @@ Page({
         feedHasMoreByTab: moduleGoods.feedHasMoreByTab,
         isLoadingMore: false
       });
+      if (this.data.activeTab === '本地集市') {
+        await this.switchMarketCategory(
+          { currentTarget: { dataset: { code: this.data.activeMarketCat } } },
+          true
+        );
+      }
     } catch (e) {
       console.log('local-goods-home/modules refresh after location failed', e);
     }
@@ -1735,11 +1764,14 @@ Page({
   async loadMoreFeedGoods(tabName) {
     const currentPage = Number((this.data.feedPageByTab || {})[tabName] || 1);
     const nextPage = currentPage + 1;
-    const q = indexHelper.buildLocalGoodsQuery({
+    const q = await indexHelper.buildLocalGoodsQueryWithCoords({
       module_name: tabName,
       page: nextPage,
       page_size: this.data.pageSize || 10
     });
+    if (!q) {
+      return { list: [], hasMore: false, page: nextPage };
+    }
     const res = await util.get('local-goods-home/feed-products', q);
     const payload = res && typeof res === 'object' ? (res.data || res) : {};
     const list = indexHelper.normalizeModuleList(payload.list || payload.items || payload.goods_list || [], { module: tabName });

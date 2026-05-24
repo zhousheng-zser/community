@@ -95,12 +95,13 @@ function formatRequestFailToast(errMsg) {
   return '网络错误';
 }
 
+const { getAuthToken } = require('./authToken.js');
+
 const request = (method, url, data, contentType = 'application/json') => {
   const finalUrl = buildUrl(url);
 
   return new Promise((resolve, reject) => {
-      const token = wx.getStorageSync('token');
-      let finalToken = token;
+      let finalToken = getAuthToken();
       
       // 独立工作台令牌路由（排除 token/exchange 本身，它需要用主用户 token 来换取）
       if (url.indexOf('token/exchange') === -1) {
@@ -112,8 +113,13 @@ const request = (method, url, data, contentType = 'application/json') => {
       }
 
       // DEBUG: 打印请求信息
-      if (url.includes('service-orders') || url.includes('service-order')) {
-        console.log('[DEBUG request]', method, url, 'data=', JSON.stringify(data));
+      if (
+        url.includes('service-orders') ||
+        url.includes('service-order') ||
+        url.includes('community-bindings') ||
+        url.includes('/communities')
+      ) {
+        console.log('[wx.request]', method, finalUrl, data);
       }
       wx.request({
         url: finalUrl,
@@ -121,10 +127,18 @@ const request = (method, url, data, contentType = 'application/json') => {
         data,
         header: {
           'content-type': contentType,
-          'Authorization': finalToken ? 'Bearer ' + finalToken : ''
+          'Authorization': finalToken ? 'Bearer ' + finalToken : '',
+          ...(method === 'GET' ? { 'Cache-Control': 'no-cache', Pragma: 'no-cache' } : {})
         },
       success: (res) => {
-        const body = res.data;
+        let body = res.data;
+        if (typeof body === 'string' && body.trim()) {
+          try {
+            body = JSON.parse(body);
+          } catch (e) {
+            /* 保持原样 */
+          }
+        }
         if (res.statusCode === 401) {
           try {
             wx.removeStorageSync('token');
@@ -160,10 +174,11 @@ const request = (method, url, data, contentType = 'application/json') => {
           });
           return;
         }
+        const httpOk = res.statusCode >= 200 && res.statusCode < 300;
         const ok =
           (hasCode && codeNum === 0) ||
           (hasErrno && errnoNum === 0) ||
-          (!hasCode && !hasErrno && (res.statusCode === 200 || res.statusCode === 201));
+          (!hasCode && !hasErrno && httpOk);
         if (!ok) {
           reject({
             errno: res.statusCode,
@@ -703,41 +718,36 @@ const normalizeShopProductRow = (item, idx = 0) => {
   };
 };
 
+function boundCommunityLocationModule() {
+  return require('./boundCommunityLocation.js');
+}
+
 /**
- * 列表页请求公共参数：与首页本地商城一致，带 5km 半径语义。
+ * 列表页请求参数：仅绑定小区坐标；未绑定返回 null
  */
 const buildShopGoodsQuery = (extra = {}) => {
-  const q = { ...extra };
-  const lat = wx.getStorageSync('market_user_lat');
-  const lng = wx.getStorageSync('market_user_lng');
-  if (lat != null && lng != null && lat !== '' && lng !== '') {
-    q.user_lat = Number(lat);
-    q.user_lng = Number(lng);
+  const coords = extra._boundCoords;
+  if (!coords || !Number.isFinite(coords.lat) || !Number.isFinite(coords.lng)) {
+    return null;
   }
-  q.distance_km = q.distance_km != null ? q.distance_km : (config.marketShopRadiusKm != null ? config.marketShopRadiusKm : 10);
-  return q;
+  const { _boundCoords, ...rest } = extra;
+  return boundCommunityLocationModule().buildShopGoodsQueryFromCoords(coords, rest);
+};
+
+/** @returns {Promise<object|null>} */
+const buildShopGoodsQueryAsync = async (extra = {}) => {
+  const coords = await boundCommunityLocationModule().resolveBoundCommunityCoords();
+  if (!coords) return null;
+  return boundCommunityLocationModule().buildShopGoodsQueryFromCoords(coords, extra);
 };
 
 /**
- * 子页进入时尽量拿到坐标（复用本地集市 storage 键，与首页一致）
+ * 子页列表：是否已绑定且能解析到小区坐标
  */
-const ensureUserCoordsForShop = () => new Promise((resolve) => {
-  const lat0 = wx.getStorageSync('market_user_lat');
-  const lng0 = wx.getStorageSync('market_user_lng');
-  if (lat0 != null && lng0 != null && lat0 !== '' && lng0 !== '') {
-    resolve({ hasCoords: true });
-    return;
-  }
-  wx.getLocation({
-    type: 'gcj02',
-    success: (res) => {
-      wx.setStorageSync('market_user_lat', res.latitude);
-      wx.setStorageSync('market_user_lng', res.longitude);
-      resolve({ hasCoords: true });
-    },
-    fail: () => resolve({ hasCoords: false })
-  });
-});
+const ensureUserCoordsForShop = async () => {
+  const coords = await boundCommunityLocationModule().resolveBoundCommunityCoords();
+  return { hasCoords: !!coords, coords };
+};
 
 /** 解析 { list } 或裸数组（core/workers、service-orders/my、goods/featured 等） */
 const unwrapList = (res) => {
@@ -833,8 +843,14 @@ module.exports = {
   filterShopProductsByDistance,
   normalizeShopProductRow,
   buildShopGoodsQuery,
+  buildShopGoodsQueryAsync,
   ensureUserCoordsForShop,
+  get boundCommunityLocation() {
+    return boundCommunityLocationModule();
+  },
   unwrapList,
+  getAuthToken: () => require('./authToken.js').getAuthToken(),
+  hasAuthToken: () => require('./authToken.js').hasAuthToken(),
   getMarketUserCoords,
   setMarketUserCoords,
   removeMarketUserCoords,

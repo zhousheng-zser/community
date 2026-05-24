@@ -58,13 +58,16 @@ Page({
   async loadZoneProducts(zoneId, extra = {}) {
     this.setData({ loading: true });
     try {
-      await util.ensureUserCoordsForShop();
-      const q = util.buildShopGoodsQuery({
+      const q = await util.buildShopGoodsQueryAsync({
         zone_id: Number(zoneId),
         page: extra.page || 1,
         page_size: extra.page_size || 50,
         ...extra
       });
+      if (!q) {
+        this.setData({ goods: [], loading: false });
+        return;
+      }
       const res = await util.get("local-goods-home/zone-products", q);
       const payload = res && typeof res === "object" ? (res.data || res) : {};
       const rawList = payload.list || payload.items || payload.goods_list || [];

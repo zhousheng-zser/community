@@ -40,7 +40,7 @@
 
   <scroll-view class="list" scroll-y scroll-into-view="{{scrollIntoView}}">
     <view wx:if="{{loading}}" class="list-hint">加载中…</view>
-    <view wx:elif="{{list.length === 0}}" class="list-hint">没有搜索结果</view>
+    <view wx:elif="{{list.length === 0}}" class="list-hint">当前城市暂无开通小区，请切换「上海市」或输入小区名称搜索</view>
     <view
       class="list-item {{focusedId == item.id ? 'focused' : ''}}"
       wx:for="{{list}}"

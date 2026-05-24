@@ -38,8 +38,11 @@ Page({
 
     async loadGoods(type) {
         try {
-            await util.ensureUserCoordsForShop();
-            const q = util.buildShopGoodsQuery({ distance_km: 10 });
+            const q = await util.buildShopGoodsQueryAsync({ distance_km: 10 });
+            if (!q) {
+                this.setData({ goodsList: [], loading: false });
+                return;
+            }
             const res = await util.get('local-goods-home/modules', q);
             const payload = res && typeof res === 'object' ? (res.data || res) : {};
 

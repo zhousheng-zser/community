@@ -46,12 +46,15 @@ Page({
   },
   async loadChannel(channelKey) {
     try {
-      await util.ensureUserCoordsForShop();
-      const q = util.buildShopGoodsQuery({
+      const q = await util.buildShopGoodsQueryAsync({
         channel_key: channelKey,
         page: 1,
         page_size: 80
       });
+      if (!q) {
+        this.setData({ categories: [], allGoods: [], goods: [] });
+        return;
+      }
       const res = await util.get("local-goods-home/channel-products", q);
       const payload = res && typeof res === "object" ? (res.data || res) : {};
 
@@ -91,10 +94,10 @@ Page({
     }
   },
   async loadAllJiuzhouChannels() {
-    try {
-      await util.ensureUserCoordsForShop();
-    } catch (e) {
-      console.log("定位失败，继续加载", e);
+    const baseQ = await util.buildShopGoodsQueryAsync({ page: 1, page_size: 80 });
+    if (!baseQ) {
+      this.setData({ categories: JIUZHOU_TABS.map((t) => t.title), allGoods: [[], [], []], goods: [] });
+      return;
     }
 
     wx.showLoading({ title: "加载中...", mask: true });
@@ -104,11 +107,7 @@ Page({
     try {
       const results = await Promise.all(
         JIUZHOU_TABS.map((tab) => {
-          const q = util.buildShopGoodsQuery({
-            channel_key: tab.key,
-            page: 1,
-            page_size: 80
-          });
+          const q = { ...baseQ, channel_key: tab.key };
           return util.get("local-goods-home/channel-products", q).then((res) => {
             const payload = res && typeof res === "object" ? (res.data || res) : {};
             const rawList = payload.list || payload.items || payload.goods_list || [];

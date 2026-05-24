@@ -3,6 +3,7 @@
  */
 const api = require('../api/index.js');
 const { withTimeout } = require('./asyncTimeout.js');
+const { getAuthToken } = require('./authToken.js');
 const {
   normalizeCommunityRow,
   findCommunityById,
@@ -10,6 +11,22 @@ const {
 } = require('./communitySearch.js');
 
 const BINDINGS_FETCH_TIMEOUT_MS = 12000;
+
+/** 首页点击定位时预拉绑定列表，避免跳转后 Network 里看不到请求 */
+let _bindingsPrefetchPromise = null;
+
+function prefetchBindings() {
+  const token = getAuthToken();
+  if (!token) return null;
+  _bindingsPrefetchPromise = fetchBindings();
+  return _bindingsPrefetchPromise;
+}
+
+function takePrefetchBindings() {
+  const p = _bindingsPrefetchPromise;
+  _bindingsPrefetchPromise = null;
+  return p;
+}
 
 const MAX_BINDINGS = 3;
 const STORAGE_ACTIVE_ID = 'active_community_id';
@@ -197,11 +214,39 @@ async function enrichBindingsWithCatalog(bindings) {
   return out;
 }
 
+/** 将 GET /user/community-bindings 的响应转为绑定列表（页面已拉过接口时复用） */
+async function buildBindingsFromApiResponse(res) {
+  let payload = parseBindingsPayload(res);
+  if (!payload.list.length && res && typeof res === 'object') {
+    payload = parseBindingsPayload(res.data || res);
+  }
+  const { list, active_community_id: activeFromApi } = payload;
+  const activeId =
+    activeFromApi != null
+      ? Number(activeFromApi)
+      : list.find((x) => x.is_active)?.community_id;
+
+  let normalized = list
+    .map((row) => normalizeBindingRow(row, activeId))
+    .filter(Boolean);
+  normalized = await enrichBindingsWithCatalog(normalized);
+  writeLocalBindings(normalized);
+
+  if (activeId != null && Number.isFinite(activeId) && activeId > 0) {
+    const hit = normalized.find((x) => x.community_id === activeId);
+    if (hit && hit.name) {
+      applyBoundCommunityToApp(getApp(), activeId, hit.name);
+    }
+  }
+
+  return { list: normalized, bindingsApiAvailable: true };
+}
+
 /**
  * @returns {Promise<{ list: Array, bindingsApiAvailable: boolean }>}
  */
 async function fetchBindings() {
-  const token = wx.getStorageSync('token');
+  const token = getAuthToken();
   if (!token) {
     const local = readLocalBindings()
       .map((b) => normalizeBindingRow(b, getStoredActiveId()))
@@ -216,26 +261,7 @@ async function fetchBindings() {
       BINDINGS_FETCH_TIMEOUT_MS,
       '绑定列表'
     );
-    const { list, active_community_id: activeFromApi } = parseBindingsPayload(res);
-    const activeId =
-      activeFromApi != null
-        ? Number(activeFromApi)
-        : list.find((x) => x.is_active)?.community_id;
-
-    let normalized = list
-      .map((row) => normalizeBindingRow(row, activeId))
-      .filter(Boolean);
-    normalized = await enrichBindingsWithCatalog(normalized);
-    writeLocalBindings(normalized);
-
-    if (activeId != null && Number.isFinite(activeId) && activeId > 0) {
-      const hit = normalized.find((x) => x.community_id === activeId);
-      if (hit && hit.name) {
-        applyBoundCommunityToApp(getApp(), activeId, hit.name);
-      }
-    }
-
-    return { list: normalized, bindingsApiAvailable: true };
+    return await buildBindingsFromApiResponse(res);
   } catch (e) {
     const code = e && (e.errno || e.statusCode);
     const bindingsApiAvailable = code !== 404;
@@ -264,35 +290,41 @@ async function fetchBindings() {
         profile.community_id != null ? profile.community_id : profile.communityId;
       const n = Number(cid);
       if (Number.isFinite(n) && n > 0) {
-        const resolved = await findCommunityById(n);
-        if (!resolved) {
+        const resolved = await findCommunityById(n, true);
+        const profileName =
+          profile.community_name ||
+          profile.communityName ||
+          profile.community_title ||
+          '';
+        const displayName =
+          (resolved && resolved.name) ||
+          (profileName && !isPlaceholderCommunityName(profileName) ? profileName : '');
+        if (!displayName) {
           console.warn(
-            '[communityBind] user.profile.community_id=',
+            '[communityBind] profile.community_id=',
             n,
-            '在小区主数据中不存在，已清除本地展示'
+            '无法解析小区名称，请搜索后重新绑定'
           );
-          clearStaleCommunityState();
           return { list: [], bindingsApiAvailable: false };
         }
         const one = [
           {
             community_id: n,
-            name: resolved.name,
-            address: resolved.address || '',
-            city: resolved.city || '',
-            district: resolved.district || '',
+            name: displayName,
+            address: (resolved && resolved.address) || '',
+            city: (resolved && resolved.city) || '',
+            district: (resolved && resolved.district) || '',
             is_active: true
           }
         ];
         writeLocalBindings(one);
-        applyBoundCommunityToApp(getApp(), n, resolved.name);
+        applyBoundCommunityToApp(getApp(), n, displayName);
         return { list: one, bindingsApiAvailable: false };
       }
     } catch (e2) {
       /* ignore */
     }
 
-    clearStaleCommunityState();
     return { list: [], bindingsApiAvailable: false };
   }
 }
@@ -306,7 +338,7 @@ async function setActiveCommunity(communityId, communityName) {
     if (!hit) throw new Error('小区不存在或已停用');
     name = hit.name;
   }
-  const token = wx.getStorageSync('token');
+  const token = getAuthToken();
 
   if (token) {
     try {
@@ -344,7 +376,7 @@ async function bindCommunity(communityId, communityMeta) {
     if (!hit) throw new Error(BIND_ERROR_MSG[1002]);
     name = hit.name;
   }
-  const token = wx.getStorageSync('token');
+  const token = getAuthToken();
   if (!token) {
     throw new Error('请先登录');
   }
@@ -375,7 +407,7 @@ async function bindCommunity(communityId, communityMeta) {
 async function unbindCommunity(communityId) {
   const cid = Number(communityId);
   if (!Number.isFinite(cid) || cid <= 0) throw new Error('无效的小区');
-  const token = wx.getStorageSync('token');
+  const token = getAuthToken();
   if (!token) throw new Error('请先登录');
 
   try {
@@ -420,6 +452,9 @@ module.exports = {
   getBoundCommunityName,
   getStoredActiveId,
   fetchBindings,
+  buildBindingsFromApiResponse,
+  prefetchBindings,
+  takePrefetchBindings,
   setActiveCommunity,
   bindCommunity,
   unbindCommunity,

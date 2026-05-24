@@ -1,4 +1,6 @@
 const communityBind = require('../../utils/communityBind.js');
+const util = require('../../utils/util.js');
+const { getAuthToken, hasAuthToken } = require('../../utils/authToken.js');
 
 function notifyIndexCommunityChanged() {
   const pages = getCurrentPages();
@@ -7,6 +9,9 @@ function notifyIndexCommunityChanged() {
   if (typeof indexPage._refreshLocationPill === 'function') indexPage._refreshLocationPill();
   if (typeof indexPage.refreshPortalListsForCommunity === 'function') {
     indexPage.refreshPortalListsForCommunity();
+  }
+  if (typeof indexPage.refreshLocalGoodsModulesForLocation === 'function') {
+    indexPage.refreshLocalGoodsModulesForLocation();
   }
 }
 
@@ -25,6 +30,8 @@ Page({
 
   onLoad() {
     this._bindingsLoadSeq = 0;
+    this._bindingsLoading = false;
+    communityBind.takePrefetchBindings();
     this.refreshActive();
     this.loadBindings();
     this.loadGpsAddress();
@@ -45,45 +52,78 @@ Page({
     });
   },
 
-  async loadBindings() {
-    if (this._bindingsLoading) return;
-    this._bindingsLoading = true;
+  loadBindings() {
+    const self = this;
     const seq = (this._bindingsLoadSeq = (this._bindingsLoadSeq || 0) + 1);
     this.setData({ loading: true });
-    try {
-      const { list, bindingsApiAvailable } = await communityBind.fetchBindings();
-      if (seq !== this._bindingsLoadSeq) return;
+
+    const token = getAuthToken();
+    console.log('[bind-community] loadBindings token=', !!token);
+
+    const applyResult = (result) => {
+      if (seq !== self._bindingsLoadSeq) return;
       const activeId = communityBind.getStoredActiveId();
-      const bindings = (list || [])
+      const list = (result && result.list) || [];
+      const bindingsApiAvailable = !!(result && result.bindingsApiAvailable);
+      const bindings = list
         .filter((b) => b.name)
         .map((b) => ({
           ...b,
           is_active: Number(b.community_id) === Number(activeId)
         }));
-      const bindingsApiHint = bindingsApiAvailable
-        ? ''
-        : '绑定列表接口未上线，仅显示资料/本地缓存；请搜索小区后绑定';
-      this.setData({
+      let bindingsApiHint = '';
+      if (!hasAuthToken()) {
+        bindingsApiHint = '未检测到登录状态，请先在「我的」页登录';
+      } else if (!bindingsApiAvailable) {
+        bindingsApiHint =
+          bindings.length > 0
+            ? '绑定列表接口未上线，以下为资料/本地缓存'
+            : '绑定列表接口未上线，请搜索小区后绑定';
+      }
+      self.setData({
         bindings,
         bindingsApiAvailable,
-        bindingsApiHint
+        bindingsApiHint,
+        loading: false
       });
-      this.refreshActive();
-      this._bindingsLoadedOnce = true;
-    } catch (e) {
-      if (seq !== this._bindingsLoadSeq) return;
-      this.setData({
+      self.refreshActive();
+      self._bindingsLoadedOnce = true;
+    };
+
+    const onFail = () => {
+      if (seq !== self._bindingsLoadSeq) return;
+      self.setData({
         bindings: [],
         bindingsApiAvailable: false,
-        bindingsApiHint: '加载绑定失败'
+        bindingsApiHint: '加载绑定失败',
+        loading: false
       });
-      this._bindingsLoadedOnce = true;
-    } finally {
-      this._bindingsLoading = false;
-      if (seq === this._bindingsLoadSeq) {
-        this.setData({ loading: false });
+      self._bindingsLoadedOnce = true;
+    };
+
+    const bust = Date.now();
+    const loadBindingList = () => {
+      if (!token) {
+        return communityBind.fetchBindings();
       }
-    }
+      return util
+        .get('user/community-bindings', { _t: bust })
+        .then((res) => communityBind.buildBindingsFromApiResponse(res))
+        .catch((e) => {
+          console.warn('[bind-community] GET user/community-bindings', e);
+          return communityBind.fetchBindings();
+        });
+    };
+
+    return util
+      .get('core/communities', { page: 1, page_size: 500, _t: bust })
+      .catch((e) => {
+        console.warn('[bind-community] GET core/communities', e);
+        return null;
+      })
+      .then(loadBindingList)
+      .then(applyResult)
+      .catch(onFail);
   },
 
   loadGpsAddress() {
@@ -154,7 +194,7 @@ Page({
           const row = communityBind.setPendingSelectionLocally(item);
           if (!row) return;
           this.setData({ pendingCommunity: row });
-          if (!wx.getStorageSync('token')) {
+          if (!hasAuthToken()) {
             communityBind.setActiveCommunity(row.id, row.name).then(() => {
               this.refreshActive();
               notifyIndexCommunityChanged();
@@ -178,7 +218,7 @@ Page({
   async onBindPending() {
     const item = this.data.pendingCommunity;
     if (!item || !item.id) return;
-    if (!wx.getStorageSync('token')) {
+    if (!hasAuthToken()) {
       wx.showToast({ title: '请先登录', icon: 'none' });
       setTimeout(() => wx.navigateTo({ url: '../login/login' }), 500);
       return;
@@ -198,8 +238,7 @@ Page({
       wx.hideLoading();
       wx.showToast({ title: '绑定成功', icon: 'success' });
       this.setData({ pendingCommunity: null });
-      await this.loadBindings();
-      notifyIndexCommunityChanged();
+      return this.loadBindings().then(() => notifyIndexCommunityChanged());
     } catch (err) {
       wx.hideLoading();
       const communityBindUtil = require('../../utils/communityBind.js');
@@ -220,8 +259,7 @@ Page({
       await communityBind.setActiveCommunity(id, name);
       wx.hideLoading();
       wx.showToast({ title: '已切换', icon: 'success' });
-      await this.loadBindings();
-      notifyIndexCommunityChanged();
+      return this.loadBindings().then(() => notifyIndexCommunityChanged());
     } catch (err) {
       wx.hideLoading();
       wx.showToast({
@@ -244,7 +282,7 @@ Page({
           await communityBind.unbindCommunity(id);
           wx.hideLoading();
           wx.showToast({ title: '已解绑', icon: 'success' });
-          await this.loadBindings();
+          return this.loadBindings();
         } catch (err) {
           wx.hideLoading();
           const communityBindUtil = require('../../utils/communityBind.js');

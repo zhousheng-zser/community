@@ -291,7 +291,12 @@ Page({
   },
   async loadFallbackRecommendedGoods(currentId) {
     try {
-      const res = await util.get('local-goods-home/modules', util.buildShopGoodsQuery({ distance_km: 10 }));
+      const q = await util.buildShopGoodsQueryAsync({ distance_km: 10 });
+      if (!q) {
+        this.setData({ recommendedGoods: [], recommendTitle: '相关推荐' });
+        return;
+      }
+      const res = await util.get('local-goods-home/modules', q);
       const payload = this.unwrapLocalGoodsPayload(res);
       const candidates = [];
       this.collectGoodsFromPayload(payload, candidates);

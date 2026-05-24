@@ -491,7 +491,7 @@
     </view>
 
     <view class="market-empty" wx:if="{{marketShops.length === 0}}">
-      <text class="market-empty-text">附近暂无商家</text>
+      <text class="market-empty-text">请先绑定小区后查看附近商家</text>
     </view>
     <view class="market-shop-list">
       <view class="card market-shop-card" wx:for="{{marketShops}}" wx:for-item="shop" wx:key="id" bindtap="goMarketShop" data-id="{{shop.id}}">

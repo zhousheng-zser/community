@@ -4,7 +4,15 @@
  */
 
 const util = require('./util.js');
-const { imgUrl, pickMarketShopAvatarPath, normalizeShopProductRow, extractDistanceKmFromProduct, filterShopProductsByDistance, buildShopGoodsQuery, unwrapList } = util;
+const boundCommunityLocation = require('./boundCommunityLocation.js');
+const {
+  imgUrl,
+  pickMarketShopAvatarPath,
+  normalizeShopProductRow,
+  extractDistanceKmFromProduct,
+  filterShopProductsByDistance,
+  unwrapList
+} = util;
 
 const CATEGORY_MAP = {
   '食品生鲜': 'AAAA',
@@ -147,12 +155,15 @@ const normalizeModuleList = (list, extra = {}) => {
   return filterShopProductsByDistance(arr, 10).map((item, idx) => normalizeModuleGoods(item, idx, extra));
 };
 
-/**
- * 构建本地商品查询参数
- */
-const buildLocalGoodsQuery = (extra = {}) => {
-  return buildShopGoodsQuery({ distance_km: 10, ...extra });
-};
+/** 本地商城请求参数：仅绑定小区坐标；未绑定返回 null */
+async function buildLocalGoodsQueryWithCoords(extra = {}) {
+  const coords = await boundCommunityLocation.resolveBoundCommunityCoords();
+  if (!coords) return null;
+  return boundCommunityLocation.buildShopGoodsQueryFromCoords(coords, {
+    distance_km: 10,
+    ...extra
+  });
+}
 
 /**
  * 从横幅/导航项构建跳转 URL
@@ -174,6 +185,6 @@ module.exports = {
   unwrapLocalGoodsPayload,
   normalizeModuleGoods,
   normalizeModuleList,
-  buildLocalGoodsQuery,
+  buildLocalGoodsQueryWithCoords,
   buildBannerUrl
 };

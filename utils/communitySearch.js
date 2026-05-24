@@ -93,6 +93,24 @@ function getCityMapCenter(city) {
   return CITY_MAP_CENTERS['上海'];
 }
 
+/** 根据 GPS 粗估默认城市（仅用于搜索页默认选中） */
+function inferDefaultCityFromCoords(latitude, longitude) {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return '';
+  if (lat >= 22 && lat <= 24.5 && lng >= 112.5 && lng <= 114.5) return '广州市';
+  if (lat >= 30 && lat <= 32 && lng >= 120 && lng <= 122.5) return '上海市';
+  if (lat >= 39 && lat <= 41 && lng >= 115.5 && lng <= 117.5) return '北京市';
+  if (lat >= 30 && lat <= 31.5 && lng >= 103.5 && lng <= 105) return '成都市';
+  return '';
+}
+
+function invalidateCommunitiesCatalogCache() {
+  _catalogCache = null;
+  _catalogCacheAt = 0;
+  _catalogInflight = null;
+}
+
 /**
  * @param {{ city?: string, keyword?: string, page?: number, page_size?: number, latitude?: number, longitude?: number }} params
  */
@@ -115,12 +133,34 @@ async function searchCommunities(params) {
     query.longitude = longitude;
   }
 
-  const res = await api.core.getCommunities(query);
+  const res = await withTimeout(
+    api.core.getCommunities(query),
+    12000,
+    '小区搜索'
+  );
   const raw = unwrapCommunityList(res);
   let list = raw.map(normalizeCommunityRow).filter(Boolean);
-  if (cityQ) {
+
+  // 后端已按 city/keyword 筛选；仅在后端未筛且结果过多时做兜底（避免 city 字段格式不一致误杀）
+  if (cityQ && list.length > 50) {
     list = filterCommunitiesByCity(list, city);
   }
+
+  // 按城市查询为空时，若有关键词则去掉城市再试一次
+  if (cityQ && list.length === 0 && keyword && String(keyword).trim()) {
+    const retry = await withTimeout(
+      api.core.getCommunities({
+        page,
+        page_size,
+        keyword: String(keyword).trim(),
+        ...(latitude != null && longitude != null ? { latitude, longitude } : {})
+      }),
+      12000,
+      '小区搜索'
+    );
+    list = unwrapCommunityList(retry).map(normalizeCommunityRow).filter(Boolean);
+  }
+
   const total = list.length;
   return { list, total, page, page_size };
 }
@@ -140,9 +180,14 @@ let _catalogInflight = null;
 const CATALOG_CACHE_MS = 60 * 1000;
 
 /** 拉取小区主数据（用于校验 community_id、补全名称） */
-async function fetchCommunitiesCatalog() {
+async function fetchCommunitiesCatalog(force) {
   const now = Date.now();
-  if (_catalogCache && now - _catalogCacheAt < CATALOG_CACHE_MS) {
+  if (
+    !force &&
+    _catalogCache &&
+    _catalogCache.length > 0 &&
+    now - _catalogCacheAt < CATALOG_CACHE_MS
+  ) {
     return _catalogCache;
   }
   if (_catalogInflight) return _catalogInflight;
@@ -150,17 +195,20 @@ async function fetchCommunitiesCatalog() {
   _catalogInflight = (async () => {
     try {
       const res = await withTimeout(
-        api.core.getCommunities({ page: 1, page_size: 100 }),
+        api.core.getCommunities({ page: 1, page_size: 500 }),
         12000,
         '小区列表'
       );
       const raw = unwrapCommunityList(res);
-      _catalogCache = raw.map(normalizeCommunityRow).filter(Boolean);
-      _catalogCacheAt = Date.now();
-      return _catalogCache;
+      const rows = raw.map(normalizeCommunityRow).filter(Boolean);
+      if (rows.length > 0) {
+        _catalogCache = rows;
+        _catalogCacheAt = Date.now();
+      }
+      return rows.length > 0 ? rows : _catalogCache || [];
     } catch (e) {
-      if (_catalogCache) return _catalogCache;
-      return [];
+      console.warn('[communitySearch] fetchCommunitiesCatalog', e);
+      return _catalogCache && _catalogCache.length > 0 ? _catalogCache : [];
     } finally {
       _catalogInflight = null;
     }
@@ -169,11 +217,14 @@ async function fetchCommunitiesCatalog() {
   return _catalogInflight;
 }
 
-async function findCommunityById(communityId) {
+async function findCommunityById(communityId, force) {
   const id = Number(communityId);
   if (!Number.isFinite(id) || id <= 0) return null;
-  const list = await fetchCommunitiesCatalog();
-  return list.find((c) => Number(c.id) === id) || null;
+  const list = await fetchCommunitiesCatalog(!!force);
+  let hit = list.find((c) => Number(c.id) === id);
+  if (hit) return hit;
+  if (!force) return findCommunityById(id, true);
+  return null;
 }
 
 function isPlaceholderCommunityName(name) {
@@ -193,5 +244,7 @@ module.exports = {
   unwrapCommunityList,
   fetchCommunitiesCatalog,
   findCommunityById,
-  isPlaceholderCommunityName
+  isPlaceholderCommunityName,
+  inferDefaultCityFromCoords,
+  invalidateCommunitiesCatalogCache
 };
