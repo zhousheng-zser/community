@@ -28,7 +28,12 @@ module.exports = (sequelize, DataTypes) => {
     issued_at: { type: DataTypes.DATE, allowNull: true },
     used_at: { type: DataTypes.DATE, allowNull: true },
     order_type: { type: DataTypes.STRING(32), allowNull: true },
-    order_ref: { type: DataTypes.STRING(64), allowNull: true }
+    order_ref: { type: DataTypes.STRING(64), allowNull: true },
+    issue_source: {
+      type: DataTypes.STRING(32),
+      allowNull: false,
+      defaultValue: 'claim'
+    }
   }, {
     tableName: 'coupon_issues',
     underscored: true,

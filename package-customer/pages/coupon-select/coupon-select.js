@@ -23,7 +23,8 @@ Page({
     this.setData({ loading: true });
     try {
       const res = await api.coupon.getAvailableCouponsForOrder({
-        order_amount: this.data.orderAmount
+        order_amount: this.data.orderAmount,
+        from: this.data.from
       });
       const raw = (res && res.list) || (res && res.data && res.data.list) || [];
       const list = raw.map((item) => {

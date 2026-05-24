@@ -5,6 +5,14 @@
 const { get, post } = require('../utils/util.js');
 
 /**
+ * 首页领券区
+ * GET /coupons/home
+ */
+const getHomeCoupons = (params) => {
+  return get('/coupons/home', params);
+};
+
+/**
  * 获取可领取优惠券列表
  * GET /coupons/list
  */
@@ -45,6 +53,7 @@ const getAvailableCouponsForOrder = (params) => {
 };
 
 module.exports = {
+  getHomeCoupons,
   getCouponList,
   receiveCoupon,
   getMyCoupons,

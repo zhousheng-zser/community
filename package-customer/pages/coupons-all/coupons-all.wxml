@@ -1,18 +1,42 @@
 <!--pages/coupons-all/coupons-all.wxml-->
-<view wx:for="{{coupons}}">
+<view wx:if="{{loading}}" class="loading-tip">加载中…</view>
+<view wx:elif="{{loadError}}" class="empty-tip">{{loadError}}</view>
+<view wx:elif="{{!coupons.length}}" class="empty-tip">暂无可领取优惠券</view>
+
+<view wx:for="{{coupons}}" wx:key="id">
   <view class='item {{item.sendType==2?"yellow":"red"}}'>
     <view class='left'>
       <view class='row1'>
-      <view class='icon'>券</view>
+        <view class='icon'>券</view>
         <text class='money'>{{item.couponMoney}}</text>
       </view>
       <view class='name'>{{item.couponName}}</view>
       <view class='time'>
         <text>截止时间：{{item.time}}</text>
       </view>
+      <view wx:if="{{item.remainCount != null}}" class='time'>
+        <text>剩余：{{item.remainCount}} 张</text>
+      </view>
     </view>
     <view class='right'>
-      <view class='btn' bindtap='getCoupon' data-id='{{item.id}}'>
+      <view
+        wx:if="{{item.received}}"
+        class='btn disabled'
+      >
+        <text class='btn-inner'>已领取</text>
+      </view>
+      <view
+        wx:elif="{{!item.canReceive}}"
+        class='btn disabled'
+      >
+        <text class='btn-inner'>已领完</text>
+      </view>
+      <view
+        wx:else
+        class='btn'
+        bindtap='getCoupon'
+        data-id='{{item.id}}'
+      >
         <text class='btn-inner'>立即领取</text>
       </view>
     </view>

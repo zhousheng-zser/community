@@ -48,6 +48,43 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(20),
       allowNull: false,
       defaultValue: 'active'
+    },
+    issue_mode: {
+      type: DataTypes.STRING(32),
+      allowNull: false,
+      defaultValue: 'claim'
+    },
+    per_user_limit: {
+      type: DataTypes.INTEGER.UNSIGNED,
+      allowNull: false,
+      defaultValue: 1
+    },
+    receive_from: { type: DataTypes.DATE, allowNull: true },
+    receive_to: { type: DataTypes.DATE, allowNull: true },
+    apply_scope: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: 'all'
+    },
+    show_on_home: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    home_sort: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    description: {
+      type: DataTypes.STRING(500),
+      allowNull: false,
+      defaultValue: ''
+    },
+    is_new_user: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {
     tableName: 'coupon_templates',

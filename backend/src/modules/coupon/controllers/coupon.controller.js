@@ -1,34 +1,78 @@
+const { Op } = require('sequelize');
 const { CouponTemplate, CouponIssue } = require('../../../models');
 const couponService = require('../services/coupon.service');
 const { resolveUserId, resolveUserIdFromReq } = require('../../../utils/resolveUserId');
+
+async function attachReceiveStatus(userId, templates) {
+  if (!userId || !templates.length) {
+    return templates.map((t) => couponService.mapTemplateRow(t, { received: false }));
+  }
+  const ids = templates.map((t) => t.id);
+  const issues = await CouponIssue.findAll({
+    where: { user_id: userId, template_id: { [Op.in]: ids }, status: 'unused' },
+    attributes: ['template_id']
+  });
+  const receivedSet = new Set(issues.map((i) => String(i.template_id)));
+  return templates.map((t) => {
+    const limit = Number(t.per_user_limit) || 1;
+    const received = receivedSet.has(String(t.id));
+    const remain = couponService.remainCount(t);
+    const canReceive = !received
+      && (remain == null || remain > 0)
+      && couponService.isReceiveWindowOpen(t)
+      && couponService.isValidPeriod(t);
+    return couponService.mapTemplateRow(t, { received, can_receive: canReceive });
+  });
+}
+
+function buildClaimableWhere() {
+  const now = new Date();
+  return {
+    status: 'active',
+    issue_mode: 'claim',
+    [Op.and]: [
+      { [Op.or]: [{ receive_from: null }, { receive_from: { [Op.lte]: now } }] },
+      { [Op.or]: [{ receive_to: null }, { receive_to: { [Op.gte]: now } }] }
+    ]
+  };
+}
+
+// GET /coupons/home
+exports.getHomeCoupons = async (req, res) => {
+  try {
+    await couponService.ensureCouponTables();
+    const userId = resolveUserIdFromReq(req);
+    const rows = await CouponTemplate.findAll({
+      where: {
+        ...buildClaimableWhere(),
+        show_on_home: 1
+      },
+      order: [['home_sort', 'ASC'], ['created_at', 'DESC']],
+      limit: 20
+    });
+    const list = await attachReceiveStatus(userId, rows);
+    res.json({ code: 0, msg: 'ok', data: { list } });
+  } catch (error) {
+    console.error('[coupons/home]', error);
+    res.status(500).json({ code: 1, msg: '获取首页优惠券失败' });
+  }
+};
 
 // GET /coupons/list
 exports.getCouponList = async (req, res) => {
   try {
     await couponService.ensureCouponTables();
+    const userId = resolveUserIdFromReq(req);
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.page_size, 10) || 50;
     const offset = (page - 1) * pageSize;
     const result = await CouponTemplate.findAndCountAll({
-      where: { status: 'active' },
+      where: buildClaimableWhere(),
       order: [['created_at', 'DESC']],
       limit: pageSize,
       offset
     });
-    const list = result.rows.map((t) => ({
-      id: t.id,
-      name: t.name,
-      coupon_name: t.name,
-      type: t.type,
-      coupon_money: t.discount_amount,
-      discount_amount: t.discount_amount,
-      threshold_amount: t.threshold_amount,
-      total_count: t.total_count,
-      issued_count: t.issued_count,
-      end_time: t.valid_to,
-      endTime: t.valid_to,
-      status: t.status
-    }));
+    const list = await attachReceiveStatus(userId, result.rows);
     res.json({ code: 0, msg: 'ok', data: { list, total: result.count, page, page_size: pageSize } });
   } catch (error) {
     console.error('[coupons/list]', error);
@@ -48,30 +92,25 @@ exports.receiveCoupon = async (req, res) => {
     if (!template || template.status !== 'active') {
       return res.status(404).json({ code: 1, msg: '优惠券不存在或已过期' });
     }
-    const now = new Date();
-    if (template.valid_from && now < template.valid_from) {
-      return res.status(400).json({ code: 1, msg: '优惠券未开始发放' });
+    if (template.issue_mode !== 'claim') {
+      return res.status(400).json({ code: 1, msg: '该优惠券不可主动领取' });
     }
-    if (template.valid_to && now > template.valid_to) {
+    if (!couponService.isReceiveWindowOpen(template)) {
+      return res.status(400).json({ code: 1, msg: '不在领取时间范围内' });
+    }
+    if (!couponService.isValidPeriod(template)) {
       return res.status(400).json({ code: 1, msg: '优惠券已过期' });
     }
     const already = await CouponIssue.findOne({
       where: { template_id: coupon_id, user_id: userId, status: 'unused' }
     });
     if (already) return res.status(400).json({ code: 1, msg: '您已领取该优惠券' });
-    const code = 'CPN' + Date.now() + Math.random().toString(36).substring(2, 8).toUpperCase();
-    const issue = await CouponIssue.create({
-      template_id: coupon_id,
-      user_id: userId,
-      code,
-      status: 'unused',
-      issued_at: now
-    });
-    await template.increment('issued_count');
+    const issue = await couponService.issueToUser(userId, coupon_id, { source: 'claim' });
     res.json({ code: 0, msg: '领取成功', data: { ...issue.toJSON(), coupon_id } });
   } catch (error) {
     console.error('[coupons/receive]', error);
-    res.status(500).json({ code: 1, msg: '领取优惠券失败' });
+    const status = error.statusCode || 500;
+    res.status(status).json({ code: 1, msg: error.message || '领取优惠券失败' });
   }
 };
 
@@ -92,7 +131,7 @@ exports.getMyCoupons = async (req, res) => {
       include: [{
         model: CouponTemplate,
         as: 'CouponTemplate',
-        attributes: ['id', 'name', 'type', 'discount_amount', 'threshold_amount', 'valid_to', 'valid_from', 'status']
+        attributes: ['id', 'name', 'type', 'discount_amount', 'threshold_amount', 'valid_to', 'valid_from', 'status', 'apply_scope']
       }],
       order: [['created_at', 'DESC']],
       limit: pageSize,
@@ -128,7 +167,7 @@ exports.getMyCouponsLegacy = async (req, res) => {
       include: [{
         model: CouponTemplate,
         as: 'CouponTemplate',
-        attributes: ['id', 'name', 'type', 'discount_amount', 'threshold_amount', 'valid_to']
+        attributes: ['id', 'name', 'type', 'discount_amount', 'threshold_amount', 'valid_to', 'apply_scope']
       }],
       order: [['created_at', 'DESC']],
       limit: 100
@@ -149,18 +188,7 @@ exports.getCouponDetail = async (req, res) => {
     res.json({
       code: 0,
       msg: 'ok',
-      data: {
-        id: template.id,
-        name: template.name,
-        type: template.type,
-        discount_amount: template.discount_amount,
-        threshold_amount: template.threshold_amount,
-        total_count: template.total_count,
-        issued_count: template.issued_count,
-        valid_from: template.valid_from,
-        valid_to: template.valid_to,
-        status: template.status
-      }
+      data: couponService.mapTemplateRow(template)
     });
   } catch (error) {
     console.error('[coupons/detail]', error);
@@ -168,13 +196,14 @@ exports.getCouponDetail = async (req, res) => {
   }
 };
 
-// GET /coupons/available-for-order?order_amount=100
+// GET /coupons/available-for-order?order_amount=100&from=service
 exports.getAvailableCouponsForOrder = async (req, res) => {
   try {
     const userId = resolveUserIdFromReq(req);
     if (!userId) return res.status(401).json({ code: 1, msg: '未登录' });
     await couponService.ensureWelcomeCoupon(userId);
     const amount = parseFloat(req.query.order_amount) || 0;
+    const orderType = String(req.query.from || req.query.order_type || '').toLowerCase();
     const issues = await CouponIssue.findAll({
       where: { user_id: userId, status: 'unused' },
       include: [{
@@ -189,9 +218,9 @@ exports.getAvailableCouponsForOrder = async (req, res) => {
     const list = issues
       .filter((i) => {
         const tpl = i.CouponTemplate;
-        if (tpl.valid_to && new Date(tpl.valid_to) < now) return false;
-        if (tpl.valid_from && new Date(tpl.valid_from) > now) return false;
+        if (!couponService.isValidPeriod(tpl, now)) return false;
         if (Number(tpl.threshold_amount) > amount) return false;
+        if (orderType && !couponService.matchesApplyScope(tpl, orderType)) return false;
         return true;
       })
       .map((i) => {
