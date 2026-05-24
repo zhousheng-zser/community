@@ -145,12 +145,21 @@ async function upsertBalance(userId, role) {
  * Creates up to 4 commission_distribution records and updates balances.
  * Runs in a transaction for atomicity.
  */
-async function distributeCommission(orderId, orderType, orderAmount, buyerUserId) {
+async function distributeCommission(orderId, orderType, orderAmount, buyerUserId, platformFeeAmount) {
   const sequelize = SystemConfig.sequelize;
 
   return sequelize.transaction(async (t) => {
     const rates = await getCommissionRates();
-    const pool = Number((orderAmount * rates.globalRate).toFixed(2));
+    let pool;
+    if (platformFeeAmount != null && Number(platformFeeAmount) > 0) {
+      pool = Number(Number(platformFeeAmount).toFixed(2));
+    } else {
+      pool = Number((Number(orderAmount) * rates.globalRate).toFixed(2));
+    }
+    if (pool <= 0) {
+      console.log(`[Commission] Zero pool for order ${orderId}, skip`);
+      return [];
+    }
 
     // Find the promoter (user who referred the buyer)
     const buyer = await User.findByPk(buyerUserId, {
@@ -203,6 +212,8 @@ async function distributeCommission(orderId, orderType, orderAmount, buyerUserId
     const distributions = [];
 
     for (const item of distributionPlan) {
+      if (item.role !== 'headquarters' && !item.userId) continue;
+
       const commissionAmount = Number((pool * item.pct).toFixed(2));
 
       if (commissionAmount <= 0) continue;
@@ -443,6 +454,27 @@ async function assignPromoterRole(userId) {
   return role;
 }
 
+/**
+ * 从指定角色余额提现
+ */
+async function withdrawFromRole(userId, role, amount) {
+  const uid = resolveUserId(userId);
+  const amt = Number(amount);
+  if (!uid || !role || !(amt > 0)) throw new Error('无效提现参数');
+
+  await ensurePartnerBalanceTable();
+  const balance = await PartnerCommissionBalance.findOne({ where: { user_id: uid, role } });
+  if (!balance || Number(balance.available_amount) < amt) {
+    throw new Error('可提现金额不足');
+  }
+
+  const sequelize = PartnerCommissionBalance.sequelize;
+  await sequelize.transaction(async (t) => {
+    await balance.increment({ available_amount: -amt, withdrawn_amount: amt }, { transaction: t });
+  });
+  return balance;
+}
+
 module.exports = {
   getCommissionRates,
   resolvePartnerChain,
@@ -451,5 +483,6 @@ module.exports = {
   confirmCommission,
   creditAvailableBalance,
   getUserBalance,
-  assignPromoterRole
+  assignPromoterRole,
+  withdrawFromRole
 };
