@@ -125,6 +125,7 @@ const authMiddleware = require('./middlewares/authMiddleware');
 app.get('/api/v1/wx/user/coupon/:id', authMiddleware, couponCtrl.getMyCouponsLegacy);
 app.use('/api/v1/benefit-coin', require('./routes/benefitCoinRoutes'));
 app.use('/api/v1/promoter', require('./routes/promoterRoutes'));
+app.use('/api/v1/platform', require('./routes/platformRoutes'));
 app.use('/api/v1/commission', require('./modules/commission/commission.routes'));
 app.use('/api/v1/partner', require('./modules/commission/partner.routes'));
 app.use('/api/v1/mini-programs', require('./routes/miniProgramRoutes'));
@@ -139,8 +140,8 @@ const userController = require('./controllers/userController');
 app.get('/api/v1/acount/info', userController.getAccountInfo);
 // wx/user/coupon 已在上方注册 getMyCouponsLegacy（带鉴权），勿重复注册空 stub
 
-// 本地集市商家入驻图片上传接口（统一 JSON 返回）
-const { uploadMarketImage, getImageMeta } = require('./utils/marketUpload');
+// 图片上传：入驻单图 ≤200KB；通用 /upload 可达 10MB
+const { uploadMarketImage, uploadApplicationImage, getImageMeta } = require('./utils/marketUpload');
 function handleUpload(req, res) {
     const { width, height } = getImageMeta(req.file.path);
     return res.json({
@@ -151,13 +152,14 @@ function handleUpload(req, res) {
             size: req.file.size,
             mime_type: req.file.mimetype,
             width,
-            height
+            height,
+            max_bytes: Number(res.getHeader('X-Upload-Max-Bytes')) || null
         }
     });
 }
-// 新路径
+app.post('/api/v1/upload/application', uploadApplicationImage, handleUpload);
+app.post('/upload/application', uploadApplicationImage, handleUpload);
 app.post('/api/v1/upload', uploadMarketImage, handleUpload);
-// 兼容小程序历史路径，避免前端命中非 JSON 响应
 app.post('/upload', uploadMarketImage, handleUpload);
 
 

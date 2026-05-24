@@ -3,8 +3,10 @@ const path = require('path');
 const fs = require('fs');
 const imageSize = require('image-size');
 
-/** 入驻/集市图片上传上限（与 nginx client_max_body_size 对齐，建议 ≥10MB） */
+/** 入驻单图上限（与 nginx 对齐；超限请压缩） */
 const UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+/** 小程序入驻专用路径 /upload/application */
+const APPLICATION_MAX_BYTES = 200 * 1024;
 const ALLOWED_MIME_SET = new Set([
     'image/jpeg',
     'image/jpg',
@@ -44,8 +46,14 @@ const marketUploader = multer({
     limits: { fileSize: UPLOAD_MAX_BYTES }
 });
 
-function withUploadHeader(res) {
-    res.set('X-Upload-Max-Bytes', String(UPLOAD_MAX_BYTES));
+const applicationUploader = multer({
+    storage,
+    fileFilter: marketFileFilter,
+    limits: { fileSize: APPLICATION_MAX_BYTES }
+});
+
+function withUploadHeader(res, maxBytes) {
+    res.set('X-Upload-Max-Bytes', String(maxBytes != null ? maxBytes : UPLOAD_MAX_BYTES));
 }
 
 function imageLabelFromReq(req) {
@@ -53,17 +61,21 @@ function imageLabelFromReq(req) {
     return raw ? String(raw).trim().slice(0, 80) : '';
 }
 
-function mapUploadError(err, res, req) {
-    withUploadHeader(res);
+function mapUploadError(err, res, req, maxBytes) {
+    withUploadHeader(res, maxBytes);
     const label = imageLabelFromReq(req);
     const prefix = label ? `「${label}」` : '';
     if (err instanceof multer.MulterError) {
         if (err.code === 'LIMIT_FILE_SIZE') {
+            const maxMb = ((maxBytes != null ? maxBytes : UPLOAD_MAX_BYTES) / 1024 / 1024).toFixed(maxBytes <= APPLICATION_MAX_BYTES ? 0 : 0);
+            const limitText = maxBytes <= APPLICATION_MAX_BYTES
+                ? `${Math.round((maxBytes || APPLICATION_MAX_BYTES) / 1024)}KB`
+                : `${maxMb}MB`;
             return res.status(413).json({
                 code: 40013,
-                msg: `${prefix}图片过大，单张最大允许 10MB，请压缩或换一张`,
-                errmsg: `${prefix}图片过大，单张最大允许 10MB，请压缩或换一张`,
-                data: { max_bytes: UPLOAD_MAX_BYTES, image_label: label || null }
+                msg: `${prefix}图片过大，单张最大允许 ${limitText}，请压缩或换一张`,
+                errmsg: `${prefix}图片过大，单张最大允许 ${limitText}，请压缩或换一张`,
+                data: { max_bytes: maxBytes != null ? maxBytes : UPLOAD_MAX_BYTES, image_label: label || null }
             });
         }
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {
@@ -91,22 +103,27 @@ function mapUploadError(err, res, req) {
     });
 }
 
-function uploadMarketImage(req, res, next) {
-    marketUploader.single('file')(req, res, (err) => {
-        if (err) return mapUploadError(err, res, req);
-        withUploadHeader(res);
-        if (!req.file) {
-            const label = imageLabelFromReq(req);
-            const prefix = label ? `「${label}」` : '';
-            return res.status(400).json({
-                code: 40015,
-                msg: `${prefix}缺少上传文件`,
-                data: null
-            });
-        }
-        return next();
-    });
+function makeUploadHandler(uploader, maxBytes) {
+    return function uploadMiddleware(req, res, next) {
+        uploader.single('file')(req, res, (err) => {
+            if (err) return mapUploadError(err, res, req, maxBytes);
+            withUploadHeader(res, maxBytes);
+            if (!req.file) {
+                const label = imageLabelFromReq(req);
+                const prefix = label ? `「${label}」` : '';
+                return res.status(400).json({
+                    code: 40015,
+                    msg: `${prefix}缺少上传文件`,
+                    data: null
+                });
+            }
+            return next();
+        });
+    };
 }
+
+const uploadMarketImage = makeUploadHandler(marketUploader, UPLOAD_MAX_BYTES);
+const uploadApplicationImage = makeUploadHandler(applicationUploader, APPLICATION_MAX_BYTES);
 
 function getImageMeta(filePath) {
     try {
@@ -122,6 +139,8 @@ function getImageMeta(filePath) {
 
 module.exports = {
     uploadMarketImage,
+    uploadApplicationImage,
     UPLOAD_MAX_BYTES,
+    APPLICATION_MAX_BYTES,
     getImageMeta
 };
