@@ -1,8 +1,7 @@
 <view class="portal-page">
   <view class="wm-profile worker-gradient">
-    <view class="wm-avatar-wrap" bindtap="onEditAvatar">
+    <view class="wm-avatar-wrap">
       <image class="wm-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
-      <text class="wm-avatar-badge">换头像</text>
     </view>
     <text class="wm-name">{{displayName}}</text>
     <text class="wm-sub">{{workerSubtitle}}</text>

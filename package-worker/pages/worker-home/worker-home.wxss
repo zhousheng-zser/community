@@ -26,17 +26,6 @@
   display: block;
 }
 
-.avatar-edit-badge {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: 20rpx;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.45);
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
-}
-
 .hero-cover-strip {
   position: relative;
   z-index: 1;

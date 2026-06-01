@@ -2,9 +2,6 @@ const app = getApp();
 const rp = require('../../../utils/rolePortals.js');
 const workerCtx = require('../../utils/workerContext.js');
 const api = require('../../../api/index.js');
-const { createPortalCoverHandlers } = require('../../../utils/portalCoverPageMixin.js');
-const portalHandlers = createPortalCoverHandlers('worker');
-
 const STORAGE_ACCEPT = 'worker_accept_orders';
 const DEF_AVATAR =
   'https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0';
@@ -19,8 +16,6 @@ Page({
     workerSubtitle: '',
     userPhoto: DEF_AVATAR
   },
-
-  onEditAvatar: portalHandlers.onEditAvatar,
 
   onShow() {
     this.loadWorkerIdentity();

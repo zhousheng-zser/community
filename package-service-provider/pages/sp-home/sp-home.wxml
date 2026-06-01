@@ -1,9 +1,8 @@
 <view class="portal-page">
   <view class="portal-top merchant-gradient sph-hero">
     <view class="sph-row">
-      <view class="hero-avatar-wrap" bindtap="onEditAvatar">
+      <view class="hero-avatar-wrap">
         <image class="sph-avatar hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
-        <text class="avatar-edit-badge">换头像</text>
       </view>
       <view class="sph-text">
         <text class="sph-greet">{{greeting}}，{{displayName}}</text>

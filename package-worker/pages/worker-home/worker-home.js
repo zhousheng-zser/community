@@ -36,7 +36,6 @@ Page({
     loggedIn: false
   },
 
-  onEditAvatar: portalHandlers.onEditAvatar,
   onEditCover: portalHandlers.onEditCover,
 
   onShow() {

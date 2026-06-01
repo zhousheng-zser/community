@@ -1,9 +1,8 @@
 <view class="portal-page">
   <view class="portal-top worker-gradient hero-worker">
     <view class="hero-row">
-      <view class="hero-avatar-wrap" bindtap="onEditAvatar">
+      <view class="hero-avatar-wrap">
         <image class="hero-avatar" src="{{userPhoto}}" mode="aspectFill"></image>
-        <text class="avatar-edit-badge">换头像</text>
       </view>
       <view class="hero-text">
         <text class="hero-greet">{{greeting}}，{{displayName}}</text>

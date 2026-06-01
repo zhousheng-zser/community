@@ -24,17 +24,6 @@
   display: block;
 }
 
-.wm-avatar-badge {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-size: 22rpx;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.45);
-  padding: 6rpx 14rpx;
-  border-radius: 8rpx;
-}
-
 .wm-name {
   font-size: 40rpx;
   font-weight: 800;
