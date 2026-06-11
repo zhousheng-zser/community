@@ -2,6 +2,7 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 const { asId } = require('../../utils/snowflakeId.js');
+const servicePay = require('../../utils/servicePay.js');
 
 const GROUP_LABELS = {
   tidy: '整理收纳',
@@ -100,6 +101,7 @@ Page({
     }
     this._id = id ? String(id) : '';
     this._orderNo = orderNo;
+    this._autoPay = options.autoPay === '1';
     this.load();
   },
 
@@ -141,6 +143,10 @@ Page({
       }
       this._id = String(order.id);
       this.setData({ order, loading: false });
+      if (this._autoPay && order.pendingPay) {
+        this._autoPay = false;
+        setTimeout(() => this.payOrder(), 400);
+      }
     } catch (e) {
       this.setData({ loading: false });
       wx.showToast({ title: (e && e.errmsg) || '加载失败', icon: 'none' });
@@ -214,31 +220,16 @@ Page({
   },
 
   async payOrder() {
-    const id = this._id;
-    if (!id) return;
-    wx.showLoading({ title: '支付中', mask: true });
-    try {
-      await api.serviceOrder.mockPay(id);
-      wx.hideLoading();
-      wx.showToast({ title: '支付成功', icon: 'success' });
-      this.load();
-    } catch (e) {
-      wx.hideLoading();
-      wx.showModal({
-        title: '提示',
-        content: (e && e.errmsg) || (e && e.msg) || '支付失败，是否模拟支付？',
-        success: async (res) => {
-          if (!res.confirm) return;
-          try {
-            await api.serviceOrder.mockPay(id);
-            wx.showToast({ title: '支付成功', icon: 'success' });
-            this.load();
-          } catch (e2) {
-            wx.showToast({ title: (e2 && e2.errmsg) || '支付失败', icon: 'none' });
-          }
-        }
-      });
+    const order = this.data.order || {};
+    const orderNo = order.orderNo || this._orderNo;
+    if (!orderNo) {
+      wx.showToast({ title: '缺少订单号', icon: 'none' });
+      return;
     }
+    await servicePay.startServicePaymentFlow(orderNo, {
+      redirectToDetail: false,
+      onPaid: () => this.load()
+    });
   },
 
   async confirmOrderComplete() {

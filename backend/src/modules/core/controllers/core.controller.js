@@ -1,3 +1,8 @@
+// GET /core/home-modules
+exports.getHomeModules = async (req, res) => {
+  res.status(501).json({ code: 1, msg: '由主后端实现' });
+};
+
 // GET /core/banners
 exports.getBanners = async (req, res) => {
   res.status(501).json({ code: 1, msg: '由主后端实现' });

@@ -2,6 +2,7 @@ const app = getApp();
 const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 const config = require('../../utils/config.js');
+const marketPay = require('../../utils/marketPay.js');
 const { asId } = require('../../utils/snowflakeId.js');
 
 const MARKET_STATUS_MAP = {
@@ -349,39 +350,10 @@ Page({
 
   async _payMarketOrder(e) {
     const orderNo = e.currentTarget.dataset.id;
-    try {
-      const payRes = await api.market.createPayment({ order_no: orderNo, pay_type: 'wechat' });
-      wx.requestPayment({
-        timeStamp: payRes.timeStamp,
-        nonceStr: payRes.nonceStr,
-        package: payRes.package,
-        signType: payRes.signType || 'MD5',
-        paySign: payRes.paySign,
-        success: () => {
-          wx.showToast({ title: '支付成功', icon: 'success' });
-          this.loadOrders();
-        },
-        fail: () => {
-          wx.showToast({ title: '支付取消', icon: 'none' });
-        }
-      });
-    } catch (err) {
-      wx.showModal({
-        title: '提示',
-        content: '支付功能暂未接入，是否模拟支付成功？',
-        success: async (modalRes) => {
-          if (modalRes.confirm) {
-            try {
-              await api.market.mockPaymentSuccess({ order_no: orderNo });
-              wx.showToast({ title: '支付成功', icon: 'success' });
-              this.loadOrders();
-            } catch (e) {
-              wx.showToast({ title: '模拟支付失败', icon: 'none' });
-            }
-          }
-        }
-      });
-    }
+    await marketPay.startMarketPaymentFlow(orderNo, {
+      redirectToDetail: false,
+      onPaid: () => this.loadOrders()
+    });
   },
 
   async _contactShop(e) {

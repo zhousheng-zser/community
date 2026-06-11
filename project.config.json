@@ -28,7 +28,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.14.2",
-  "appid": "wx988faca566529d28",
+  "appid": "wx563a4fb90c87e40d",
   "projectname": "%E9%83%91%E5%B7%9E%E4%BF%9D%E6%B4%81",
   "condition": {
     "search": {
@@ -51,324 +51,324 @@
   "packOptions": {
     "ignore": [
       {
-        "type": "folder",
-        "value": "node_modules"
+        "value": "node_modules",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "admin"
+        "value": "admin",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "backend"
+        "value": "backend",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "素材"
+        "value": "素材",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "doc"
+        "value": "doc",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "img/undraw"
+        "value": "img/undraw",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "img/icons"
+        "value": "img/icons",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "frontend"
+        "value": "frontend",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "errorpic"
+        "value": "errorpic",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "question"
+        "value": "question",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": ".claude"
+        "value": ".claude",
+        "type": "folder"
       },
       {
-        "type": "file",
-        "value": "README.md"
+        "value": "README.md",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "install.cmd"
+        "value": "install.cmd",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test_community.js"
+        "value": "test_community.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "download_images.ps1"
+        "value": "download_images.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_final.ps1"
+        "value": "check_final.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_img.ps1"
+        "value": "check_img.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_miniprogram.ps1"
+        "value": "check_miniprogram.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_size.ps1"
+        "value": "check_size.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_size2.ps1"
+        "value": "check_size2.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "add_icon_effects.py"
+        "value": "add_icon_effects.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "add_icon_effects_v2.py"
+        "value": "add_icon_effects_v2.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "generate_icons.py"
+        "value": "generate_icons.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "process_images.py"
+        "value": "process_images.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "fuka.jpg"
+        "value": "fuka.jpg",
+        "type": "file"
       },
       {
-        "type": "folder",
-        "value": "scripts"
+        "value": "scripts",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "tests"
+        "value": "tests",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "docs"
+        "value": "docs",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": ".git"
+        "value": ".git",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "前端对接文档包"
+        "value": "前端对接文档包",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "流量联盟"
+        "value": "流量联盟",
+        "type": "folder"
       },
       {
-        "type": "file",
-        "value": "cleanup_img.js"
+        "value": "cleanup_img.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "compare-frontend-api-doc.js"
+        "value": "compare-frontend-api-doc.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "create-test-accounts-server.js"
+        "value": "create-test-accounts-server.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "create-test-data-sql.js"
+        "value": "create-test-data-sql.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "create-test-data.js"
+        "value": "create-test-data.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "create-worker-account.js"
+        "value": "create-worker-account.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "deploy_img.js"
+        "value": "deploy_img.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "fix-model.js"
+        "value": "fix-model.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "fix-neighbor-model.js"
+        "value": "fix-neighbor-model.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "fix_missing_images.js"
+        "value": "fix_missing_images.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "generate-api-list.js"
+        "value": "generate-api-list.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "replace_urls.js"
+        "value": "replace_urls.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "seed-all-test-data.js"
+        "value": "seed-all-test-data.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "seed-test-accounts.js"
+        "value": "seed-test-accounts.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "seed-test-data.js"
+        "value": "seed-test-data.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-all-chains.js"
+        "value": "test-all-chains.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-api-doc-endpoints.js"
+        "value": "test-api-doc-endpoints.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-assist-api.js"
+        "value": "test-assist-api.js",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "content.md"
+        "value": "content.md",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "功能对比分析报告.md"
+        "value": "功能对比分析报告.md",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "features.json"
+        "value": "features.json",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "feature_comparison_report.json"
+        "value": "feature_comparison_report.json",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "惠民社区功能清单.xlsx"
+        "value": "惠民社区功能清单.xlsx",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "check_features.py"
+        "value": "check_features.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "compare_features.py"
+        "value": "compare_features.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "analyze_features.py"
+        "value": "analyze_features.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "compress_images.py"
+        "value": "compress_images.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "generate_icons_server.py"
+        "value": "generate_icons_server.py",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-business-flow.ps1"
+        "value": "test-business-flow.ps1",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-neighbor-full-suite.sh"
+        "value": "test-neighbor-full-suite.sh",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-neighbor-full.sh"
+        "value": "test-neighbor-full.sh",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test-neighbor-smoke.sh"
+        "value": "test-neighbor-smoke.sh",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "generator.html"
+        "value": "generator.html",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "test.html"
+        "value": "test.html",
+        "type": "file"
       },
       {
-        "type": "file",
-        "value": "package-lock.json"
+        "value": "package-lock.json",
+        "type": "file"
       },
       {
-        "type": "folder",
-        "value": "preview-output"
+        "value": "preview-output",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "market-portal"
+        "value": "market-portal",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "service-portal"
+        "value": "service-portal",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-channel"
+        "value": "pages/push-channel",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-goods-list"
+        "value": "pages/push-goods-list",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-product-detail"
+        "value": "pages/push-product-detail",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-video-list"
+        "value": "pages/push-video-list",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-video-category"
+        "value": "pages/push-video-category",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-daily-news"
+        "value": "pages/push-daily-news",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-top-sales"
+        "value": "pages/push-top-sales",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-hot-video-list"
+        "value": "pages/push-hot-video-list",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "pages/push-periodic-list"
+        "value": "pages/push-periodic-list",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "kfcdot"
+        "value": "kfcdot",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "src"
+        "value": "src",
+        "type": "folder"
       }
     ],
     "include": []

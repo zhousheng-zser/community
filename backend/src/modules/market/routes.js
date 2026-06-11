@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../../middlewares/authMiddleware');
 const ctrl = require('./controllers/market.controller');
 const deliveryCtrl = require('./controllers/marketDelivery.controller');
+const marketPaymentCtrl = require('../../controllers/marketPaymentController');
 
 // 6.1 商家入驻
 router.post('/apply', authMiddleware, ctrl.apply);
@@ -41,9 +42,11 @@ router.post('/delivery/webhook/meituan', deliveryCtrl.webhookMeituan);
 router.post('/delivery/webhook/eleme', deliveryCtrl.webhookEleme);
 
 // 6.5 支付
-router.post('/payments/create', authMiddleware, ctrl.createPayment);
-router.get('/payments/status', authMiddleware, ctrl.getPaymentStatus);
-router.post('/payments/mock-success', authMiddleware, ctrl.mockPaymentSuccess);
+router.post('/payments/create', authMiddleware, marketPaymentCtrl.createPayment);
+router.get('/payments/create', marketPaymentCtrl.createPaymentGetNotAllowed);
+router.get('/payments/status', authMiddleware, marketPaymentCtrl.getPaymentStatus);
+router.post('/payments/mock-success', authMiddleware, marketPaymentCtrl.mockSuccess);
+router.post('/pay/callback', marketPaymentCtrl.payCallback);
 
 // 6.6 收货与退款
 router.post('/orders/:orderNo/confirm-receipt', authMiddleware, ctrl.confirmReceipt);

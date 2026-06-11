@@ -233,7 +233,7 @@ async function main() {
     process.exit(1);
   }
 
-  const appId = wxCfg.appId || 'wx988faca566529d28';
+  const appId = wxCfg.appId || 'wx563a4fb90c87e40d';
   log('正在获取体验版二维码（若后台尚未「选为体验版」可能失败）…');
 
   try {

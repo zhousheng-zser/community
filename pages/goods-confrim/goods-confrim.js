@@ -3,6 +3,7 @@ const app = getApp();
 const checkoutStorage = require('../../utils/checkoutStorage.js');
 const marketCart = require('../../utils/marketCartHelper.js');
 const serviceCart = require('../../utils/serviceCartHelper.js');
+const marketPay = require('../../utils/marketPay.js');
 
 Page({
   data: {
@@ -246,37 +247,27 @@ Page({
       if (!orderNo) throw new Error('创建订单失败，未返回单号');
       wx.removeStorageSync('checkout_selected_coupon');
 
-      // 联调：create 在无微信配置时会虚拟记已支付；失败再试 mock-success
-      try {
-        await util.post('market/payments/create', { order_no: orderNo });
-      } catch (payErr) {
-        try {
-          await util.post('market/payments/mock-success', { order_no: orderNo });
-        } catch (mockErr) {
-          console.warn('[goods-confrim] pay skipped', payErr, mockErr);
-        }
-      }
-
-      // 提交成功，清理购物车（本地 + 服务端按店清空）
       const shopId = this.data.shopId;
-      if (this.data.fromUrl === 'cart') {
-        try { wx.removeStorageSync(`cart_${shopId}`); } catch (e) { /* ignore */ }
-      }
-      if (this.data.fromUrl === 'local') {
-        checkoutStorage.clearCheckout();
-      }
-      wx.removeStorageSync('temp_checkout_items');
-      if (shopId && wx.getStorageSync('token')) {
-        marketCart.clearShopCart(shopId).catch(() => {});
-      }
+      const clearCartAfterPaid = () => {
+        if (this.data.fromUrl === 'cart') {
+          try { wx.removeStorageSync(`cart_${shopId}`); } catch (e) { /* ignore */ }
+        }
+        if (this.data.fromUrl === 'local') {
+          checkoutStorage.clearCheckout();
+        }
+        wx.removeStorageSync('temp_checkout_items');
+        if (shopId && wx.getStorageSync('token')) {
+          marketCart.clearShopCart(shopId).catch(() => {});
+        }
+      };
 
       wx.hideLoading();
-      wx.showToast({ title: '支付成功', icon: 'success' });
-      
-      // 下单并支付成功后跳转订单详情
-      setTimeout(() => {
-        wx.redirectTo({ url: `/pages/market-order-detail/market-order-detail?orderNo=${orderNo}` });
-      }, 1500);
+      this.setData({ submitting: false });
+
+      await marketPay.startMarketPaymentFlow(orderNo, {
+        redirectToDetail: true,
+        onPaid: clearCartAfterPaid
+      });
 
     } catch (e) {
       wx.hideLoading();

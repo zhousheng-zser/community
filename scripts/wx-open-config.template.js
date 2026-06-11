@@ -4,6 +4,6 @@
  * 获取：mp.weixin.qq.com → 开发 → 开发管理 → 开发设置 → AppSecret
  */
 module.exports = {
-  appId: 'wx988faca566529d28',
+  appId: 'wx563a4fb90c87e40d',
   appSecret: 'YOUR_APP_SECRET'
 };

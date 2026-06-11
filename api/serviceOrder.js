@@ -32,11 +32,35 @@ const getMyOrders = (params) => {
 const getMyList = getMyOrders;
 
 /**
- * 模拟支付
+ * 模拟支付（仅 enableMockPay 时前端可走 mock；后端 dev 亦保留接口）
  * POST /service-orders/:id/pay
  */
 const mockPay = (id) => {
   return post(`/service-orders/${id}/pay`);
+};
+
+/**
+ * 创建微信支付
+ * POST /service-orders/payments/create
+ */
+const createPayment = (orderNo) => {
+  return post('/service-orders/payments/create', { order_no: orderNo });
+};
+
+/**
+ * 查询支付状态
+ * GET /service-orders/payments/status
+ */
+const getPaymentStatus = (orderNo) => {
+  return get('/service-orders/payments/status', { order_no: orderNo });
+};
+
+/**
+ * 模拟支付成功（开发）
+ * POST /service-orders/payments/mock-success
+ */
+const mockPaymentSuccess = (orderNo) => {
+  return post('/service-orders/payments/mock-success', { order_no: orderNo });
 };
 
 /**
@@ -53,5 +77,8 @@ module.exports = {
   getMyOrders,
   getMyList,
   mockPay,
+  createPayment,
+  getPaymentStatus,
+  mockPaymentSuccess,
   confirmOrder
 };

@@ -3,6 +3,7 @@ const util = require('../../utils/util.js');
 const api = require('../../api/index.js');
 const orderTimeout = require('../../utils/orderTimeout.js');
 const env = require('../../utils/env.js');
+const marketPay = require('../../utils/marketPay.js');
 
 const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
@@ -71,6 +72,10 @@ Page({
   },
 
   onShow() {
+    const lastPayOrderNo = wx.getStorageSync('last_market_order_no');
+    if (lastPayOrderNo && lastPayOrderNo === this.data.orderNo && this.data.status === 'pending_payment') {
+      this.loadOrderDetail();
+    }
     if (this.data.orderNo && this.data.delivery && this.data.delivery.has_delivery) {
       this.refreshDeliveryTrack();
       this._startDeliveryPoll();
@@ -291,42 +296,12 @@ Page({
   },
 
   async payNow() {
-    try {
-      const payRes = await api.market.createPayment({ order_no: this.data.orderNo, pay_type: 'wechat' });
-
-      wx.requestPayment({
-        timeStamp: payRes.timeStamp,
-        nonceStr: payRes.nonceStr,
-        package: payRes.package,
-        signType: payRes.signType || 'MD5',
-        paySign: payRes.paySign,
-        success: () => {
-          wx.showToast({ title: '支付成功', icon: 'success' });
-          this.loadOrderDetail();
-        },
-        fail: (err) => {
-          console.log('支付失败', err);
-          wx.showToast({ title: '支付取消', icon: 'none' });
-        }
-      });
-    } catch (err) {
-      console.log('创建支付订单失败', err);
-      wx.showModal({
-        title: '提示',
-        content: '支付功能暂未接入，是否模拟支付成功？',
-        success: async (modalRes) => {
-          if (modalRes.confirm) {
-            try {
-              await api.market.mockPaymentSuccess({ order_no: this.data.orderNo });
-              wx.showToast({ title: '支付成功', icon: 'success' });
-              this.loadOrderDetail();
-            } catch (e) {
-              wx.showToast({ title: '模拟支付失败', icon: 'none' });
-            }
-          }
-        }
-      });
-    }
+    const orderNo = this.data.orderNo;
+    if (!orderNo) return;
+    await marketPay.startMarketPaymentFlow(orderNo, {
+      redirectToDetail: false,
+      onPaid: () => this.loadOrderDetail()
+    });
   },
 
   applyRefund(e) {

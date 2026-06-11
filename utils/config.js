@@ -50,6 +50,9 @@ const config = {
          */
         pddMiniAppId: 'wx32540bd863b27570'
     },
+
+    /** 开发联调：允许虚拟/mock 支付 UI；生产须为 false */
+    enableMockPay: false,
 };
 
 module.exports = config;

@@ -336,8 +336,14 @@ Page({
       wx.removeStorageSync('checkout_selected_coupon');
       wx.hideLoading();
       const oid = data && (data.id || data.order_id);
+      const orderNo = data && (data.order_no || data.orderNo);
+      const status = data && (data.status || '');
       if (oid) {
-        wx.redirectTo({ url: '../service-order-detail/service-order-detail?id=' + oid });
+        let url = '../service-order-detail/service-order-detail?id=' + oid;
+        if (orderNo && (status === 'pending_pay' || data.pay_status === 'unpaid')) {
+          url += '&autoPay=1';
+        }
+        wx.redirectTo({ url });
       } else {
         wx.showToast({ title: '下单成功', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 1500);
