@@ -1,9 +1,6 @@
 const util = require('../../utils/util.js');
 const app = getApp();
 const checkoutStorage = require('../../utils/checkoutStorage.js');
-const marketCart = require('../../utils/marketCartHelper.js');
-const serviceCart = require('../../utils/serviceCartHelper.js');
-const marketPay = require('../../utils/marketPay.js');
 
 Page({
   data: {
@@ -93,6 +90,7 @@ Page({
   },
 
   onShow() {
+    if (this._paymentRedirecting) return;
     const cached = wx.getStorageSync('checkout_selected_coupon');
     if (cached && cached.id) {
       this.setData({ selectedCoupon: cached });
@@ -248,25 +246,17 @@ Page({
       wx.removeStorageSync('checkout_selected_coupon');
 
       const shopId = this.data.shopId;
-      const clearCartAfterPaid = () => {
-        if (this.data.fromUrl === 'cart') {
-          try { wx.removeStorageSync(`cart_${shopId}`); } catch (e) { /* ignore */ }
-        }
-        if (this.data.fromUrl === 'local') {
-          checkoutStorage.clearCheckout();
-        }
-        wx.removeStorageSync('temp_checkout_items');
-        if (shopId && wx.getStorageSync('token')) {
-          marketCart.clearShopCart(shopId).catch(() => {});
-        }
-      };
+      wx.setStorageSync('market_checkout_clear_ctx', {
+        shopId: shopId || '',
+        fromUrl: this.data.fromUrl || 'cart'
+      });
 
+      this._paymentRedirecting = true;
       wx.hideLoading();
       this.setData({ submitting: false });
 
-      await marketPay.startMarketPaymentFlow(orderNo, {
-        redirectToDetail: true,
-        onPaid: clearCartAfterPaid
+      wx.redirectTo({
+        url: `../market-order-detail/market-order-detail?orderNo=${encodeURIComponent(orderNo)}&autoPay=1`
       });
 
     } catch (e) {

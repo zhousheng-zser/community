@@ -260,11 +260,19 @@ exports.getPaymentStatus = async (req, res) => {
     const order = await MarketOrder.findOne({ where: { order_no: orderNo, user_id: userId } });
     if (!order) return fail(res, '订单不存在', 404);
 
+    const tx = await MarketPayTransaction.findOne({
+      where: { order_no: orderNo },
+      order: [['created_at', 'DESC']]
+    });
+
     return res.json(
       ok({
         order_no: orderNo,
         pay_status: order.pay_status,
-        order_status: order.order_status
+        order_status: order.order_status,
+        tx_pay_status: tx ? tx.pay_status : null,
+        out_trade_no: tx ? tx.out_trade_no : null,
+        paid_at: order.paid_at || null
       })
     );
   } catch (e) {

@@ -4,6 +4,8 @@ const api = require('../../api/index.js');
 const orderTimeout = require('../../utils/orderTimeout.js');
 const env = require('../../utils/env.js');
 const marketPay = require('../../utils/marketPay.js');
+const checkoutStorage = require('../../utils/checkoutStorage.js');
+const marketCart = require('../../utils/marketCartHelper.js');
 
 const STATUS_MAP = {
   pending_payment: { text: '待付款', class: 'primary' },
@@ -69,12 +71,14 @@ Page({
     if (this.data.deliveryPollTimer) {
       clearInterval(this.data.deliveryPollTimer);
     }
+    this._payStatusPolling = false;
   },
 
   onShow() {
     const lastPayOrderNo = wx.getStorageSync('last_market_order_no');
     if (lastPayOrderNo && lastPayOrderNo === this.data.orderNo && this.data.status === 'pending_payment') {
-      this.loadOrderDetail();
+      this.loadOrderDetail({ silent: true });
+      this._pollPendingPaymentStatus();
     }
     if (this.data.orderNo && this.data.delivery && this.data.delivery.has_delivery) {
       this.refreshDeliveryTrack();
@@ -84,6 +88,7 @@ Page({
 
   onLoad(options) {
     const fromMerchant = options.from === 'merchant';
+    this._autoPay = options.autoPay === '1';
     this.setData({
       fromMerchant,
       contactRoleText: fromMerchant ? '联系买家' : '联系商家'
@@ -94,19 +99,60 @@ Page({
     }
   },
 
-  async loadOrderDetail() {
-    wx.showLoading({ title: '加载中...' });
+  _clearCheckoutCartAfterPaid() {
+    const ctx = wx.getStorageSync('market_checkout_clear_ctx');
+    if (!ctx || typeof ctx !== 'object') return;
+    const shopId = ctx.shopId || '';
+    const fromUrl = ctx.fromUrl || 'cart';
+    if (fromUrl === 'cart' && shopId) {
+      try { wx.removeStorageSync(`cart_${shopId}`); } catch (e) { /* ignore */ }
+    }
+    if (fromUrl === 'local') {
+      checkoutStorage.clearCheckout();
+    }
+    wx.removeStorageSync('temp_checkout_items');
+    if (shopId && wx.getStorageSync('token')) {
+      marketCart.clearShopCart(shopId).catch(() => {});
+    }
+    wx.removeStorageSync('market_checkout_clear_ctx');
+  },
+
+  _pollPendingPaymentStatus() {
+    if (this._payStatusPolling || !this.data.orderNo) return;
+    if (this.data.status !== 'pending_payment') return;
+    this._payStatusPolling = true;
+    marketPay.pollMarketPayStatus(this.data.orderNo, {
+      quiet: true,
+      redirectToDetail: false,
+      tryTimes: 10,
+      intervalMs: 2000,
+      onPaid: () => {
+        this._clearCheckoutCartAfterPaid();
+        this.loadOrderDetail({ silent: true });
+      }
+    }).finally(() => {
+      this._payStatusPolling = false;
+    });
+  },
+
+  async loadOrderDetail(opts = {}) {
+    const silent = opts && opts.silent === true;
+    if (!silent) wx.showLoading({ title: '加载中...' });
     try {
       const res = await api.market.getOrderDetail(this.data.orderNo);
-      wx.hideLoading();
+      if (!silent) wx.hideLoading();
       this.normalizeDetail(res.data || res);
+      if (this._autoPay && this.data.status === 'pending_payment') {
+        this._autoPay = false;
+        setTimeout(() => this.payNow(), 400);
+      }
     } catch (e) {
-      wx.hideLoading();
+      if (!silent) wx.hideLoading();
       console.log('订单详情加载失败', e);
       if (env.shouldUseMockData()) {
         console.log('开发环境：使用模拟数据');
         this.mockLoad();
-      } else {
+      } else if (!silent) {
         wx.showToast({ title: '订单加载失败', icon: 'none' });
         setTimeout(() => wx.navigateBack(), 1500);
       }
@@ -300,7 +346,10 @@ Page({
     if (!orderNo) return;
     await marketPay.startMarketPaymentFlow(orderNo, {
       redirectToDetail: false,
-      onPaid: () => this.loadOrderDetail()
+      onPaid: () => {
+        this._clearCheckoutCartAfterPaid();
+        this.loadOrderDetail({ silent: true });
+      }
     });
   },
 

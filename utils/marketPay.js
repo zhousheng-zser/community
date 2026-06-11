@@ -5,6 +5,8 @@ const util = require('./util.js');
 const config = require('./config.js');
 
 const PAID_STATUSES = new Set(['paid', 'success', 'paid_success']);
+const POLL_TRY_TIMES = 30;
+const POLL_INTERVAL_MS = 2000;
 
 const WX_PAY_ERROR_MESSAGES = {
   20031: '订单状态已变化，请刷新后重试',
@@ -84,6 +86,12 @@ function isPaidStatus(payStatus) {
   return PAID_STATUSES.has(String(payStatus || '').toLowerCase());
 }
 
+function isStatusOrderNoMismatch(orderNo, statusData) {
+  const respOrderNo = statusData && (statusData.order_no || statusData.orderNo);
+  if (!respOrderNo) return false;
+  return String(respOrderNo) !== String(orderNo);
+}
+
 /** 是否应调起真实微信收银台（与后端文档一致） */
 function isRealWxPayParams(payData) {
   if (!payData || typeof payData !== 'object') return false;
@@ -112,20 +120,41 @@ function pollPayStatus(orderNo, statusPath, options = {}) {
   const {
     redirectToDetail = false,
     onPaid,
-    detailUrl
+    detailUrl,
+    tryTimes = POLL_TRY_TIMES,
+    intervalMs = POLL_INTERVAL_MS
   } = options;
-  const tryTimes = 20;
-  const intervalMs = 1500;
   let count = 0;
   const detailPage = detailUrl || `../market-order-detail/market-order-detail?orderNo=${orderNo}`;
 
   return new Promise((resolve) => {
+    const finishUnpaid = (quiet) => {
+      if (!quiet) {
+        wx.showToast({ title: '支付处理中，请稍后在订单详情查看', icon: 'none', duration: 2800 });
+      }
+      if (redirectToDetail) {
+        wx.redirectTo({ url: detailPage });
+      }
+      resolve(false);
+    };
+
     const tick = async () => {
       count += 1;
       const quiet = options.quiet === true;
       try {
         const statusRes = await util.get(statusPath, { order_no: orderNo });
         const statusData = statusRes && statusRes.data ? statusRes.data : statusRes;
+
+        if (isStatusOrderNoMismatch(orderNo, statusData)) {
+          console.warn('[pollPayStatus] order_no mismatch', orderNo, statusData.order_no || statusData.orderNo);
+          if (count >= tryTimes) {
+            finishUnpaid(quiet);
+            return;
+          }
+          setTimeout(tick, intervalMs);
+          return;
+        }
+
         const payStatus = statusData && (statusData.pay_status || statusData.payStatus);
         if (!quiet && count >= tryTimes - 1) {
           wx.showToast({ title: `支付状态：${payStatus || 'unknown'}`, icon: 'none' });
@@ -142,13 +171,7 @@ function pollPayStatus(orderNo, statusPath, options = {}) {
           return;
         }
         if (count >= tryTimes) {
-          if (!quiet) {
-            wx.showToast({ title: `支付结束但未确认（状态：${payStatus || 'unknown'}）`, icon: 'none' });
-          }
-          if (redirectToDetail) {
-            wx.redirectTo({ url: detailPage });
-          }
-          resolve(false);
+          finishUnpaid(quiet);
           return;
         }
         setTimeout(tick, intervalMs);
@@ -178,6 +201,8 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
     detailUrl
   } = options;
 
+  const detailPage = detailUrl || `../market-order-detail/market-order-detail?orderNo=${orderNo}`;
+
   try {
     wx.showLoading({ title: '拉起支付中...', mask: true });
     const payData = await util.post(createPath, { order_no: orderNo });
@@ -190,7 +215,7 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
     if (payData && payData.virtual_pay === true) {
       if (config.enableMockPay) {
         wx.showToast({ title: '开发联调：虚拟支付', icon: 'none', duration: 2200 });
-        await pollPayStatus(orderNo, statusPath, { quiet: false, redirectToDetail, onPaid, detailUrl });
+        await pollPayStatus(orderNo, statusPath, { quiet: false, redirectToDetail, onPaid, detailUrl: detailPage });
         return;
       }
       wx.showToast({ title: '未获取到微信支付参数', icon: 'none' });
@@ -200,8 +225,8 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
     if (!isRealWxPayParams(payData)) {
       console.warn('[wxPay] 非真实支付参数:', summarizePayDataKeys(payData));
       wx.showToast({ title: '未获取到微信支付参数', icon: 'none' });
-      if (redirectToDetail !== false && detailUrl) {
-        wx.redirectTo({ url: detailUrl });
+      if (redirectToDetail !== false && detailPage) {
+        wx.redirectTo({ url: detailPage });
       }
       return;
     }
@@ -213,13 +238,20 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
     }
 
     setTimeout(() => {
+      let redirected = false;
+      const maybeRedirect = () => {
+        if (redirected || !redirectToDetail) return;
+        redirected = true;
+        wx.redirectTo({ url: detailPage });
+      };
+
       const pollOptions = {
         quiet: false,
         redirectToDetail,
         onPaid,
-        detailUrl
+        detailUrl: detailPage
       };
-      // 开发者工具扫码支付时 success 回调可能不触发，须与收银台并行轮询
+      // 开发者工具/真机：success 可能延迟，须与收银台并行轮询
       pollPayStatus(orderNo, statusPath, pollOptions);
 
       wx.requestPayment({
@@ -228,7 +260,9 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
         package: payParams.package,
         signType: payParams.signType,
         paySign: payParams.paySign,
-        success: () => {},
+        success: () => {
+          maybeRedirect();
+        },
         fail: () => {
           wx.showToast({ title: '取消支付或支付失败', icon: 'none' });
           pollOptions.quiet = true;
@@ -238,8 +272,8 @@ async function startPaymentFlow(orderNo, createPath, statusPath, options = {}) {
   } catch (e) {
     wx.hideLoading();
     wx.showToast({ title: mapWxPayError(e), icon: 'none', duration: 2800 });
-    if (redirectToDetail !== false && detailUrl) {
-      setTimeout(() => wx.redirectTo({ url: detailUrl }), 800);
+    if (redirectToDetail !== false && detailPage) {
+      setTimeout(() => wx.redirectTo({ url: detailPage }), 800);
     }
   }
 }
